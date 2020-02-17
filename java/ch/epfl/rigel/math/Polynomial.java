@@ -48,18 +48,21 @@ public final class Polynomial {
 
 
     /**
-     *
      * @return formatted polynomial
      */
     @Override
     public String toString() {
         String s = "";
 
-        for (int i = 0; i <= coefficients.length; ++i)
-            s = s.concat("%fx^" + i + " +");
+        for (int i = 0; i <= coefficients.length - 1; ++i) {
+            if (coefficients[i] != 0 && coefficients[i] != 1)
+                s = s.concat(coefficients[i] + "x^" + (coefficients.length - 1 - i) + "+");
+            else if (coefficients[i] != 1)
+                s = s.concat( "x^" + (coefficients.length - 1 - i) + "+");
 
-        //noinspection PrimitiveArrayArgumentToVarargsMethod
-        return String.format(Locale.ROOT, s.substring(0, s.length() - 1), coefficients);
+        }
+
+        return s.substring(0, s.length() - 1);
     }
 
     @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
