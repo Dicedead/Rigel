@@ -36,16 +36,16 @@ public class Angle
     }
 
     /**
-     * DMS --> deg
+     * DMS --> Rad
      * @param deg Degrees
      * @param min Minutes
      * @param sec Seconds
-     * @return Angle in degrees
+     * @return Angle in radians
      */
     static public double ofDMS(int deg, int min, double sec)
     {
         //TODO: Ajouter les méthodes de vérification des bornes
-        return deg + min * RATIO_MIN_RAD + sec * RATIO_SEC_RAD;
+        return deg*RATIO_DEG_RAD + min * RATIO_MIN_RAD + sec * RATIO_SEC_RAD;
     }
 
     /**
@@ -77,6 +77,12 @@ public class Angle
     {
         return hr*DEGREE_IN_HOUR*RATIO_DEG_RAD;
     }
+
+    /**
+     * Rad --> Degrees --> Hours
+     * @param rad angle to convert
+     * @return Hours converted
+     */
     static public double toHr(double rad)
     {
         return rad *RATIO_RAD_DEG *HOUR_IN_DEGREE;
