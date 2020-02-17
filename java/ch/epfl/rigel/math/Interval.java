@@ -40,7 +40,7 @@ public abstract class Interval {
         return sup - inf;
     }
 
-    abstract boolean contains(double v);
+    abstract public boolean contains(double v);
 
     @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
     @Override

@@ -21,6 +21,6 @@ class PolynomialTest {
 
     @org.junit.jupiter.api.Test
     void testToString() {
-        assertEquals("4.0x^15-5.0x^14+6.0x^13+x^12+4.0x^10-5.0x^9+6.0x^8+3.0x^7+7.0x^6-5.0x^2+6.0x+7.0", polynomial.toString());
+        assertEquals("4x^15-5x^14+6x^13+x^12+4x^10-5x^9+6x^8+3x^7+7x^6-5x^2+6x+7", polynomial.toString());
     }
 }

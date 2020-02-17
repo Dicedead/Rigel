@@ -60,7 +60,7 @@ public class RightOpenInterval extends Interval {
      * @return whether it is or not in the interval
      */
     @Override
-    boolean contains(double v) {
+    public boolean contains(double v) {
         return this.low() <= v && v < this.high();
     }
 
