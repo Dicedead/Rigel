@@ -1,4 +1,4 @@
-package ch.epfl.rigel.math;
+package ch.epfl.rigelTest.math;
 
 import org.junit.jupiter.api.Test;
 

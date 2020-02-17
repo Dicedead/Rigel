@@ -1,4 +1,6 @@
-package ch.epfl.rigel.math;
+package ch.epfl.rigelTest.math;
+
+import ch.epfl.rigel.math.Polynomial;
 
 import static org.junit.jupiter.api.Assertions.*;
 
