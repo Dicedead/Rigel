@@ -2,17 +2,20 @@ package ch.epfl.rigel.math;
 
 import ch.epfl.rigel.Preconditions;
 
+import java.text.DecimalFormat;
+import java.util.Arrays;
 import java.util.Locale;
+import java.util.function.Function;
 
 public final class Polynomial {
 
     private final double[] coefficients;
-    private final static double EPSILON = 1e-6;
-    private final static int NBR_DECIMALS = 3;
+    private static int degree;
 
     private Polynomial(double coefficientN, double... coefficients) {
         this.coefficients = new double[coefficients.length + 1];
         this.coefficients[0] = coefficientN;
+        degree = this.coefficients.length - 1;
 
         System.arraycopy(coefficients, 0, this.coefficients, 1, coefficients.length);
 
@@ -46,68 +49,25 @@ public final class Polynomial {
         return result;
     }
 
-
     /**
      * @return formatted polynomial
      */
     @Override
-    public String toString() {
-        StringBuilder s = new StringBuilder();
+    public String toString()
+    {
+        StringBuilder format = new StringBuilder();
+        Function<Integer, String> f  = (Integer i) -> ((coefficients[i] == 1 || coefficients[i] == 0) ? "":
+                                            new DecimalFormat("##.##").format(Math.abs(coefficients[i])));
 
-        for (int i = 0; i <= coefficients.length - 1; ++i) {
-
-            if (valuesAreEqual(coefficients[i], Math.round(coefficients[i]))) {
-                formatPolynomialTerm(s, String.format(Locale.ROOT, "%.0f",
-                        Math.abs(coefficients[i])), coefficients[i], i);
-            } else {
-                formatPolynomialTerm(s, String.format(Locale.ROOT, "%." +
-                        NBR_DECIMALS + "f", Math.abs(coefficients[i])), coefficients[i], i);
-            }
+        for (int i = 0; i <= degree - 1; ++i)
+        {
+            format.append(f.apply(i)).append(coefficients[i] == 0 ? "": "x")
+                    .append((i == degree - 1 || coefficients[i] == 0) ? "" : "^" + (degree - i))
+                    .append(coefficients[i + 1] == 0 ? "" : (0>coefficients[i + 1]) ? "-":"+");
 
         }
 
-        if (s.substring(s.length() - 1).equals("0")) {
-            s.delete(s.length() - 3, s.length());
-        }
-
-        return s.substring(0);
-    }
-
-    /**
-     * Auxiliary string building method taking care of fine cosmetic details
-     *
-     * @param processedString StringBuilder that's being worked on
-     * @param numberStr       String representation of the coefficient's absolute value
-     * @param numberValue     the coefficient's numerical value
-     * @param i               current iteration
-     */
-    private void formatPolynomialTerm(StringBuilder processedString, String numberStr, double numberValue, int i) {
-
-        String powerStr = (coefficients.length - 1 - i == 1) ? "" : "^" + (coefficients.length - 1 - i);
-
-        if (!valuesAreEqual(numberValue, 0) && !valuesAreEqual(numberValue, 1)) {
-            processedString.append(numberStr).append("x").append(powerStr);
-        } else if (valuesAreEqual(numberValue, 1)) {
-            processedString.append("x").append(powerStr);
-        }
-
-        String nextSign;
-        if (i + 1 == coefficients.length || valuesAreEqual(coefficients[i + 1], 0)) {
-            nextSign = "";
-        } else {
-            nextSign = (coefficients[i + 1] > 0) ? "+" : "-";
-        }
-        processedString.append(nextSign);
-    }
-
-    /**
-     * Double comparator
-     *
-     * @param value1 First double
-     * @param value2 Second double
-     */
-    private boolean valuesAreEqual(double value1, double value2) {
-        return (Math.abs(value1 - value2) < EPSILON);
+        return format.append(f.apply(degree)).toString();
     }
 
     @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")

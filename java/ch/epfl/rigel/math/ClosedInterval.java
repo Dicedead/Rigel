@@ -27,7 +27,7 @@ public class ClosedInterval extends Interval {
     public static ClosedInterval symmetric(double size)
     {
         Preconditions.checkArgument(size > 0);
-        return new ClosedInterval(0, size);
+        return new ClosedInterval(-size, size);
     }
 
     /**

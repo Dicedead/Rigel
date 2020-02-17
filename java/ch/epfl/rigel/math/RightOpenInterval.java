@@ -26,7 +26,7 @@ public class RightOpenInterval extends Interval {
     public static RightOpenInterval symmetric(double size)
     {
         Preconditions.checkArgument(size > 0);
-        return new RightOpenInterval(0, size);
+        return new RightOpenInterval(-size, size);
     }
 
     /**
