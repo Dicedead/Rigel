@@ -14,29 +14,28 @@ public class ClosedInterval extends Interval {
         super(inf, sup);
     }
 
-    public static ClosedInterval of(double low, double high)
-    {
+    public static ClosedInterval of(double low, double high) {
         return new ClosedInterval(low, high);
     }
 
     /**
      * Returns a closed interval starting at zero, stopping at size if size is positive
+     *
      * @param size is un unsigned double specifying the size of the interval
      * @return IllegalArgumentException if size is negative, the desired interval in the other case
      */
-    public static ClosedInterval symmetric(double size)
-    {
+    public static ClosedInterval symmetric(double size) {
         Preconditions.checkArgument(size > 0);
         return new ClosedInterval(0, size);
     }
 
     /**
      * Clipping sends number to itsellf if it is in the interval, and else at the nearest bound
+     *
      * @param v the number to clip
      * @return the clipped number
      */
-    public double clip(double v)
-    {
+    public double clip(double v) {
         /*This can be understood in this way : if v is smaller than the upper bound it may be in the interval so we
         choose it, then we compare it with the actual lower bound.
         If this is not the case we simply take the upper bound as it is superior to the lower bound.
@@ -50,13 +49,14 @@ public class ClosedInterval extends Interval {
     @Override
     public String toString() {
         return String.format(Locale.ROOT,
-                                "[ %.2f, %.2f ]",
-                                this.low(),
-                                this.high());
+                "[ %.2f, %.2f ]",
+                this.low(),
+                this.high());
     }
 
     /**
      * Checks whether a number is in the current interval
+     *
      * @param v number to be checked
      * @return whether it is or not in the interval
      */
