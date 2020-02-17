@@ -1,10 +1,13 @@
 package ch.epfl.rigel.math;
 
-import java.util.Objects;
-
 public abstract class Interval {
 
-    protected Interval(double inf, double sup)
+    /**
+     *
+     * @param inf lower bound of the interval
+     * @param sup higher bound of the interval
+     */
+    protected Interval(final double inf, final double sup)
     {
         this.inf = inf;
         this.sup = sup;
@@ -12,16 +15,26 @@ public abstract class Interval {
 
     final private double inf, sup;
 
+    /**
+     * Getter for lower bound
+     * @return value of the lower bound of the interval
+     */
     public double low()
     {
         return inf;
     }
-
+    /**
+     * Getter for higher bound
+     * @return value of the higher bound of the interval
+     */
     public double high()
     {
         return sup;
     }
-
+    /**
+     * Getter for size
+     * @return size of the interval
+     */
     public double size()
     {
         return sup - inf;
