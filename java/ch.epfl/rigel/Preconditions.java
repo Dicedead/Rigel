@@ -13,7 +13,10 @@ public final class Preconditions {
     }
 
     public static double checkInInterval(Interval interval, double value) {
-        if (interval.contains)
+        if (!interval.contains(value)) {
+            throw new IllegalArgumentException();
+        }
+        return value;
     }
 
 }
