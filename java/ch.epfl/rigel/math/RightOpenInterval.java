@@ -1,5 +1,7 @@
 package ch.epfl.rigel.math;
 
+import ch.epfl.rigel.Preconditions;
+
 import java.util.Locale;
 
 public class RightOpenInterval extends Interval {
@@ -23,7 +25,7 @@ public class RightOpenInterval extends Interval {
      */
     public static RightOpenInterval symmetric(double size)
     {
-        //TODO : Inserer un test de positivité avec les preconditions
+        Preconditions.checkArgument(size > 0);
         return new RightOpenInterval(0, size);
     }
 

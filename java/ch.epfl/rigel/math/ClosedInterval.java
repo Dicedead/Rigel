@@ -1,6 +1,8 @@
 package ch.epfl.rigel.math;
 
 
+import ch.epfl.rigel.Preconditions;
+
 import java.util.Locale;
 
 public class ClosedInterval extends Interval {
@@ -24,7 +26,7 @@ public class ClosedInterval extends Interval {
      */
     public static ClosedInterval symmetric(double size)
     {
-        //TODO : Inserer un test de positivité avec les preconditions
+        Preconditions.checkArgument(size > 0);
         return new ClosedInterval(0, size);
     }
 

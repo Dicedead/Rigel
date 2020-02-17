@@ -1,4 +1,7 @@
 package ch.epfl.rigel.math;
+
+import ch.epfl.rigel.Preconditions;
+
 public class Angle
 {
     static final public double TAU = 2 * Math.PI;
@@ -44,7 +47,7 @@ public class Angle
      */
     static public double ofDMS(int deg, int min, double sec)
     {
-        //TODO: Ajouter les méthodes de vérification des bornes
+        Preconditions.checkArgument(min >= 0 && sec >= 0);
         return deg*RATIO_DEG_RAD + min * RATIO_MIN_RAD + sec * RATIO_SEC_RAD;
     }
 
