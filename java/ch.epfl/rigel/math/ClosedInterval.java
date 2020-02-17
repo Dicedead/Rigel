@@ -12,7 +12,7 @@ public class ClosedInterval extends Interval {
         super(inf, sup);
     }
 
-    public ClosedInterval of(double low, double high)
+    public static ClosedInterval of(double low, double high)
     {
         return new ClosedInterval(low, high);
     }
@@ -22,7 +22,7 @@ public class ClosedInterval extends Interval {
      * @param size is un unsigned double specifying the size of the interval
      * @return IllegalArgumentException if size is negative, the desired interval in the other case
      */
-    public ClosedInterval symmetric(double size)
+    public static ClosedInterval symmetric(double size)
     {
         //TODO : Inserer un test de positivité avec les preconditions
         return new ClosedInterval(0, size);

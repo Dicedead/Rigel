@@ -11,7 +11,7 @@ public class RightOpenInterval extends Interval {
         super(inf, sup);
     }
 
-    public RightOpenInterval of(double low, double high)
+    public static RightOpenInterval of(double low, double high)
     {
         return new RightOpenInterval(low, high);
     }
@@ -21,7 +21,7 @@ public class RightOpenInterval extends Interval {
      * @param size is un unsigned double specifying the size of the interval
      * @return IllegalArgumentException if size is negative, the desired interval in the other case
      */
-    public RightOpenInterval symmetric(double size)
+    public static RightOpenInterval symmetric(double size)
     {
         //TODO : Inserer un test de positivité avec les preconditions
         return new RightOpenInterval(0, size);
@@ -60,5 +60,16 @@ public class RightOpenInterval extends Interval {
     @Override
     boolean contains(double v) {
         return this.low() <= v && v < this.high();
+    }
+
+    /**
+     * Reduces an value v to a semi open interval
+     * @param v number to be reduced
+     * @return reduced number
+     */
+    public double reduce (double v)
+    {
+        double a = v-this.low(), b = this.size();
+        return this.low() + (a - b*Math.floor(a/b));
     }
 }
