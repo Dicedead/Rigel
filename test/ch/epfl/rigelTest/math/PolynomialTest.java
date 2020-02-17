@@ -16,13 +16,11 @@ class PolynomialTest {
 
     @org.junit.jupiter.api.Test
     void at() {
-
         assertEquals(43766953, polynomial.at(3) );
     }
 
     @org.junit.jupiter.api.Test
     void testToString() {
         assertEquals("4.0x^15-5.0x^14+6.0x^13+x^12+4.0x^10-5.0x^9+6.0x^8+3.0x^7+7.0x^6-5.0x^2+6.0x+7.0", polynomial.toString());
-
     }
 }
