@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ClosedIntervalTest {
+class ClosedIntervalTest{
 
     private static ClosedInterval closedInterval;
 
