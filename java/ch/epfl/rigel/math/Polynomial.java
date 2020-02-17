@@ -13,7 +13,7 @@ public final class Polynomial {
         this.coefficients       = new double[coefficients.length + 1];
         this.coefficients[0]    = coefficientN;
 
-        System.arraycopy( coefficients, 1, this.coefficients, 0, coefficients.length );
+        System.arraycopy( coefficients, 0, this.coefficients, 1, coefficients.length );
 
     }
 
@@ -55,8 +55,8 @@ public final class Polynomial {
     public String toString() {
         String s = "";
 
-        for (double elements : coefficients)
-            s = s.concat("%fx +");
+        for (int i = 0; i <= coefficients.length; ++i)
+            s = s.concat("%fx^" + i + " +");
 
         //noinspection PrimitiveArrayArgumentToVarargsMethod
         return String.format(Locale.ROOT, s.substring(0, s.length() - 1), coefficients);
