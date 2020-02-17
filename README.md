@@ -1,0 +1,1 @@
+Rigel is a sky visualisation tool.

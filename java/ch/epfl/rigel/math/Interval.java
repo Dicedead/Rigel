@@ -42,6 +42,7 @@ public abstract class Interval {
 
     abstract boolean contains(double v);
 
+    @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
     @Override
     public boolean equals(Object o)
     {

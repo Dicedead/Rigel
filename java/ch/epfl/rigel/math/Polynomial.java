@@ -1,8 +1,6 @@
 package ch.epfl.rigel.math;
 import ch.epfl.rigel.Preconditions;
 
-import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.Locale;
 
 public final class Polynomial {
