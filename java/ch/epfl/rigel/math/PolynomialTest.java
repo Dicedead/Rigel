@@ -4,8 +4,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class PolynomialTest {
 
-    private Polynomial polynomial;
-    private void setUp ()
+    private static Polynomial polynomial;
+
+    @org.junit.jupiter.api.BeforeAll
+    private static void setUp ()
     {
         polynomial = Polynomial.of(4, -5, 6, 1, 0, 4, -5, 6, 3, 7, 0, 0, 0, -5, 6, 7);
     }

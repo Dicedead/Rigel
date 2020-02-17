@@ -38,7 +38,7 @@ public final class Polynomial {
     {
         double result = coefficients[0];
 
-        for (int i = 1; i<= coefficients.length; ++i)
+        for (int i = 1; i<= coefficients.length - 1; ++i)
         {
             result = result * x + coefficients[i];
         }
