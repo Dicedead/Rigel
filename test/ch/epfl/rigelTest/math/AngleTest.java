@@ -14,7 +14,7 @@ class AngleTest {
 
     @Test
     void ofArcsec() {
-        assertEquals(Math.PI, Angle.ofArcsec(3600*180));
+        assertEquals(16.758985999089518, Angle.ofArcsec(3456789));
     }
 
     @Test
@@ -40,6 +40,6 @@ class AngleTest {
 
     @Test
     void toHr() {
-        assertEquals(6, Angle.ofHr(Math.PI));
+        assertEquals(12, Angle.toHr(Math.PI));
     }
 }

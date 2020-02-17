@@ -12,10 +12,10 @@ public class Angle
     static final public double HOUR_IN_DEGREE       = 1./15;
     static final public double DEGREE_IN_HOUR       = 15.;
 
-    static final public double RATIO_SEC_RAD        = TAU / (MINUTES_IN_HOURS * SECONDS_IN_MINUTES);
-    static final public double RATIO_MIN_RAD        = TAU / (MINUTES_IN_HOURS);
-    static final public double RATIO_RAD_DEG        = 360. / TAU;
+    static final public double RATIO_MIN_RAD        = TAU / (360 * MINUTES_IN_HOURS);
+    static final public double RATIO_RAD_DEG        = 360./ TAU;
     static final public double RATIO_DEG_RAD        = TAU /360.;
+    static final public double RATIO_SEC_RAD        = TAU / (360 * MINUTES_IN_HOURS * SECONDS_IN_MINUTES);
 
 
 
@@ -88,6 +88,6 @@ public class Angle
      */
     static public double toHr(double rad)
     {
-        return rad *RATIO_RAD_DEG *HOUR_IN_DEGREE;
+        return toDeg(rad) *HOUR_IN_DEGREE;
     }
 }
