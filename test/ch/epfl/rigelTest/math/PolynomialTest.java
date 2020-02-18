@@ -1,12 +1,14 @@
 package ch.epfl.rigelTest.math;
 
 import ch.epfl.rigel.math.Polynomial;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class PolynomialTest {
 
     private static Polynomial polynomial;
+    private static Polynomial polynomial2;
 
     @org.junit.jupiter.api.BeforeAll
     private static void setUp ()
@@ -17,6 +19,11 @@ class PolynomialTest {
     @org.junit.jupiter.api.Test
     void at() {
         assertEquals(43766953, polynomial.at(3) );
+    }
+
+    @org.junit.jupiter.api.Test
+    void atNonInstanciatedPolynomial() {
+        polynomial2.at(1);
     }
 
     @org.junit.jupiter.api.Test
