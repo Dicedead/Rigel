@@ -11,6 +11,7 @@ public final class Polynomial {
 
     private final double[] coefficients;
     private static int degree;
+    private final static double EPSILON = 1e-6;
 
     private Polynomial(double coefficientN, double... coefficients) {
         this.coefficients = new double[coefficients.length + 1];
@@ -55,21 +56,24 @@ public final class Polynomial {
      * @return formatted polynomial
      */
     @Override
-    public String toString()
-    {
+    public String toString() {
         StringBuilder format = new StringBuilder();
-        Function<Integer, String> f  = (Integer i) -> ((coefficients[i] == 1 || coefficients[i] == 0) ? "":
-                                            new DecimalFormat("##.##").format(Math.abs(coefficients[i])));
+        Function<Integer, String> f = (Integer i) -> ((isEqual(Math.abs(coefficients[i]), 1) || isEqual(coefficients[i], 0)) ? "" :
+                new DecimalFormat("##.########").format(Math.abs(coefficients[i])));
+        if (coefficients[0] < 0) { format.append("-"); }
 
-        for (int i = 0; i <= degree - 1; ++i)
-        {
-            format.append(f.apply(i)).append(coefficients[i] == 0 ? "": "x")
-                    .append((i == degree - 1 || coefficients[i] == 0) ? "" : "^" + (degree - i))
-                    .append(coefficients[i + 1] == 0 ? "" : (0>coefficients[i + 1]) ? "-":"+");
+        for (int i = 0; i <= degree - 1; ++i) {
+            format.append(f.apply(i)).append(isEqual(coefficients[i], 0) ? "" : "x")
+                    .append((i == degree - 1 || isEqual(coefficients[i], 0)) ? "" : "^" + (degree - i))
+                    .append(isEqual(coefficients[i + 1], 0) ? "" : (0 > coefficients[i + 1]) ? "-" : "+");
 
         }
 
         return format.append(f.apply(degree)).toString();
+    }
+
+    private boolean isEqual(double value1, double value2) {
+        return (Math.abs(value1 - value2)) <= EPSILON;
     }
 
     @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
