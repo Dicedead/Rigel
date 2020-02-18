@@ -3,8 +3,6 @@ package ch.epfl.rigel.math;
 import ch.epfl.rigel.Preconditions;
 
 import java.text.DecimalFormat;
-import java.util.Arrays;
-import java.util.Locale;
 import java.util.function.Function;
 
 public final class Polynomial {
