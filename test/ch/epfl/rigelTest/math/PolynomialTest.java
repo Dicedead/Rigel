@@ -23,7 +23,7 @@ class PolynomialTest {
 
     @org.junit.jupiter.api.Test
     void atNonInstanciatedPolynomial() {
-        polynomial2.at(1);
+        assertThrows(NullPointerException.class, () -> {polynomial2.at(1);});
     }
 
     @org.junit.jupiter.api.Test

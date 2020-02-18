@@ -38,8 +38,10 @@ public final class Polynomial {
      *
      * @param x point to interpret
      * @return result
+     * @throws NullPointerException if Polynomial is declared but has not been created with Polynomial.of
      */
     public double at(double x) {
+
         double result = coefficients[0];
 
         for (int i = 1; i <= coefficients.length - 1; ++i) {

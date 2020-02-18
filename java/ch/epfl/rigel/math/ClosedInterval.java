@@ -9,12 +9,14 @@ public class ClosedInterval extends Interval {
     /**
      * @param inf lower bound of the interval
      * @param sup higher bound of the interval
+     * @throws IllegalArgumentException if interval is empty
      */
     private ClosedInterval(double inf, double sup) {
         super(inf, sup);
     }
 
     public static ClosedInterval of(double low, double high) {
+        Preconditions.checkArgument(high > low);
         return new ClosedInterval(low, high);
     }
 
@@ -26,7 +28,7 @@ public class ClosedInterval extends Interval {
      */
     public static ClosedInterval symmetric(double size) {
         Preconditions.checkArgument(size > 0);
-        return new ClosedInterval(-size, size);
+        return new ClosedInterval(-size/2.0, size/2.0);
     }
 
     /**
