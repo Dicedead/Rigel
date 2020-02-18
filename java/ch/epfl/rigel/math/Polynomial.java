@@ -11,7 +11,9 @@ public final class Polynomial {
     private static int degree;
     private final static double EPSILON = 1e-6;
 
-    private Polynomial(double coefficientN, double... coefficients) {
+    private Polynomial(double coefficientN, double... coefficients)
+    {
+
         this.coefficients = new double[coefficients.length + 1];
         this.coefficients[0] = coefficientN;
         degree = this.coefficients.length - 1;
@@ -55,12 +57,14 @@ public final class Polynomial {
      */
     @Override
     public String toString() {
-        StringBuilder format = new StringBuilder();
+
+        StringBuilder format = new StringBuilder((coefficients[0] < 0) ? "-" : "");
+
         Function<Integer, String> f = (Integer i) -> ((isEqual(Math.abs(coefficients[i]), 1) || isEqual(coefficients[i], 0)) ? "" :
                 new DecimalFormat("##.########").format(Math.abs(coefficients[i])));
-        if (coefficients[0] < 0) { format.append("-"); }
 
-        for (int i = 0; i <= degree - 1; ++i) {
+        for (int i = 0; i <= degree - 1; ++i)
+        {
             format.append(f.apply(i)).append(isEqual(coefficients[i], 0) ? "" : "x")
                     .append((i == degree - 1 || isEqual(coefficients[i], 0)) ? "" : "^" + (degree - i))
                     .append(isEqual(coefficients[i + 1], 0) ? "" : (0 > coefficients[i + 1]) ? "-" : "+");
