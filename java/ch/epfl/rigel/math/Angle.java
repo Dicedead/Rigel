@@ -26,7 +26,7 @@ public class Angle
      */
     static public double normalizePositive(double rad)
     {
-       return RightOpenInterval.symmetric(TAU).reduce(rad);
+       return RightOpenInterval.of(0,TAU).reduce(rad);
     }
 
     /**
@@ -47,7 +47,7 @@ public class Angle
      */
     static public double ofDMS(int deg, int min, double sec)
     {
-        Preconditions.checkArgument(min >= 0 && sec >= 0);
+        Preconditions.checkArgument(min >= 0 && sec >= 0 && min < 60 && sec < 60);
         return deg*RATIO_DEG_RAD + min * RATIO_MIN_RAD + sec * RATIO_SEC_RAD;
     }
 
