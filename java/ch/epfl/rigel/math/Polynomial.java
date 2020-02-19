@@ -60,7 +60,8 @@ public final class Polynomial {
 
         StringBuilder format = new StringBuilder((coefficients[0] < 0) ? "-" : "");
 
-        Function<Integer, String> f = (Integer i) -> ((isEqual(Math.abs(coefficients[i]), 1) || isEqual(coefficients[i], 0)) ? "" :
+        Function<Integer, String> f = (Integer i) ->
+                ((isEqual(Math.abs(coefficients[i]), 1) || isEqual(coefficients[i], 0)) ? "" :
                 new DecimalFormat("##.########").format(Math.abs(coefficients[i])));
 
         for (int i = 0; i <= degree - 1; ++i)

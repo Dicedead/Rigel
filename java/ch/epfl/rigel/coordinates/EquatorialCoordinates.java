@@ -2,6 +2,7 @@ package ch.epfl.rigel.coordinates;
 
 import ch.epfl.rigel.Preconditions;
 import ch.epfl.rigel.math.Angle;
+import ch.epfl.rigel.math.ClosedInterval;
 import ch.epfl.rigel.math.RightOpenInterval;
 
 import java.util.Locale;
@@ -10,24 +11,23 @@ public final class EquatorialCoordinates extends SphericalCoordinates{
     /**
      * Constructor of EquatorialCoordinates
      * @param ra input in radians for longitude
-     * @param deg input in radians for latitude
+     * @param dec input in radians for latitude
      */
-    private EquatorialCoordinates(double ra, double deg){
-        super(ra,  deg);
+    private EquatorialCoordinates(double ra, double dec){
+        super(ra,  dec);
     }
 
     /**
      * Constructs a EquatorialCoordinates
      * @param ra input in degrees for longitude
-     * @param deg input in degrees for latitude
+     * @param dec input in degrees for latitude
      */
-    public static EquatorialCoordinates ofDeg(double ra, double deg)
+    public static EquatorialCoordinates of(double ra, double dec)
     {
 
         return new EquatorialCoordinates(
                 Angle.ofHr(Preconditions.checkInInterval(RightOpenInterval.of(0, 24), ra)),
-                Angle.ofDeg(Preconditions.checkInInterval(RightOpenInterval.symmetric(180), deg)
-                ));
+                Angle.ofDeg(Preconditions.checkInInterval(ClosedInterval.symmetric(180), dec)));
 
     }
 
@@ -64,8 +64,8 @@ public final class EquatorialCoordinates extends SphericalCoordinates{
     @Override
     public String toString() {
         return String.format(Locale.ROOT,
-                "(ra=%.4fh, dec=%4f°)",
-                lonDeg(),
-                latDeg());
+                "(ra=%.4fh, dec=%.4f°)",
+                raHr(),
+                decDeg());
     }
 }

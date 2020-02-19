@@ -2,6 +2,7 @@ package ch.epfl.rigel.coordinates;
 
 import ch.epfl.rigel.Preconditions;
 import ch.epfl.rigel.math.Angle;
+import ch.epfl.rigel.math.ClosedInterval;
 import ch.epfl.rigel.math.RightOpenInterval;
 
 import java.util.Locale;
@@ -19,15 +20,15 @@ public final class EclipticCoordinates extends SphericalCoordinates{
 
     /**
      * Constructs a EclipticCoordinates
-     * @param lonDeg input in degrees for longitude
-     * @param latDeg input in degrees for latitude
+     * @param lon input in rad for longitude
+     * @param lat input in rad for latitude
      */
-    public static EclipticCoordinates ofDeg(double lonDeg, double latDeg)
+    public static EclipticCoordinates of(double lon, double lat)
     {
 
         return new EclipticCoordinates(
-                Angle.ofDeg(Preconditions.checkInInterval(RightOpenInterval.symmetric(360), lonDeg)),
-                Angle.ofDeg(Preconditions.checkInInterval(RightOpenInterval.symmetric(360), latDeg)
+                (Preconditions.checkInInterval(RightOpenInterval.symmetric(Angle.TAU), lon)),
+                (Preconditions.checkInInterval(ClosedInterval.symmetric(Math.PI), lat)
                 ));
 
     }
@@ -55,10 +56,15 @@ public final class EclipticCoordinates extends SphericalCoordinates{
      */
     public double latDeg(){return super.latDeg();}
 
+    /**
+     * toString override for EclipticCoordinates
+     *
+     * @return (String) 4 decimal precision of longitude and latitude in degrees
+     */
     @Override
     public String toString() {
         return String.format(Locale.ROOT,
-                "(λ=%.4f°, β=%4f°)",
+                "(λ=%.4f°, β=%.4f°)",
                 lonDeg(),
                 latDeg());
     }

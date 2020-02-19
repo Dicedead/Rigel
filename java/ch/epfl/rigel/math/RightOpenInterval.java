@@ -67,7 +67,7 @@ public class RightOpenInterval extends Interval {
     }
 
     /**
-     * Reduces an value v to a semi open interval
+     * Reduces a value v to a semi open interval
      *
      * @param v number to be reduced
      * @return reduced number
