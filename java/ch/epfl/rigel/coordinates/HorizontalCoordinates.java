@@ -5,12 +5,14 @@ import ch.epfl.rigel.math.Angle;
 import ch.epfl.rigel.math.ClosedInterval;
 import ch.epfl.rigel.math.RightOpenInterval;
 
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 public final class HorizontalCoordinates extends SphericalCoordinates {
 
     /**
-     * Constructor for SphericalCoordinates
+     * Constructor for HorizontalCoordinates
      *
      * @param az input in radians for longitude
      * @param alt  input in radians for latitude
@@ -19,19 +21,20 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
         super(az, alt);
     }
 
-    public static HorizontalCoordinates of(double az, double alt) {
+    public static HorizontalCoordinates of(double az, double alt)
+    {
         Preconditions.checkInInterval(RightOpenInterval.of(0,360),az);
         Preconditions.checkInInterval(ClosedInterval.of(-90,90),alt);
 
         return new HorizontalCoordinates(az,alt);
     }
 
-    public static HorizontalCoordinates ofDeg(double azDeg, double altDeg) {
+    public static HorizontalCoordinates ofDeg(double azDeg, double altDeg)
+    {
         Preconditions.checkInInterval(RightOpenInterval.symmetric(360), azDeg);
         Preconditions.checkInInterval(RightOpenInterval.symmetric(360), altDeg);
 
         return new HorizontalCoordinates(Angle.ofDeg(azDeg), Angle.ofDeg(altDeg));
-
     }
 
     public double az() {
@@ -42,9 +45,16 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
         return lonDeg();
     }
 
-    public String azOctantName(String n, String e, String s, String w) {
+    public String azOctantName(String n, String e, String s, String w)
+    {
 
-        return n;
+        int current = 0;
+        String[] tab = {n, n+e, e, s+e, s, s+w, w, n+w};
+
+        while(!RightOpenInterval.of(current, current + Math.PI/4).contains(az()))
+            ++current;
+
+        return tab[current];
     }
 
     public double alt() {
@@ -55,9 +65,13 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
         return latDeg();
     }
 
-    public double angularDistanceTo(HorizontalCoordinates that) {
-        return Math.acos(Math.sin(this.alt())*Math.sin(that.alt()) +
-                Math.cos(this.alt())*Math.cos(that.alt())*Math.cos(this.az() - that.az()));
+    public double angularDistanceTo(HorizontalCoordinates that)
+    {
+        return Math.acos(Math.sin(this.alt())
+                *Math.sin(that.alt())
+                + Math.cos(this.alt())
+                *Math.cos(that.alt())
+                *Math.cos(this.az() - that.az()));
     }
 
     @Override
