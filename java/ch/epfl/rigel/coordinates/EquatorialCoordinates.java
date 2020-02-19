@@ -8,7 +8,7 @@ import java.util.Locale;
 
 public final class EquatorialCoordinates extends SphericalCoordinates{
     /**
-     * Constructor of GeographicCoordinates
+     * Constructor of EquatorialCoordinates
      * @param ra input in radians for longitude
      * @param deg input in radians for latitude
      */
@@ -17,7 +17,7 @@ public final class EquatorialCoordinates extends SphericalCoordinates{
     }
 
     /**
-     * Constructs a GeographicCoordinates
+     * Constructs a EquatorialCoordinates
      * @param ra input in degrees for longitude
      * @param deg input in degrees for latitude
      */
