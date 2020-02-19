@@ -11,7 +11,7 @@ class EclipticCoordinatesTest {
 
     EclipticCoordinates eclipticCoordinates = EclipticCoordinates.ofDeg(23, 45);
 
-
+/*
     @Test
     void ofDeg() {
 
@@ -19,12 +19,12 @@ class EclipticCoordinatesTest {
         EclipticCoordinates eclipticCoordinates1 = EclipticCoordinates.ofDeg(0, 100);
         EclipticCoordinates eclipticCoordinates2 = EclipticCoordinates.ofDeg(-300, 2);
 
-    }
+    }*/
     @Test
     void lon() { assertEquals(Angle.ofDeg(23) , eclipticCoordinates.lon()); }
 
     @Test
-    void lonDeg() { assertEquals((23) , eclipticCoordinates.lon()); }
+    void lonDeg() { assertEquals((23) , eclipticCoordinates.lonDeg()); }
 
     @Test
     void lat() { assertEquals(Angle.ofDeg(45) , eclipticCoordinates.lat()); }
@@ -34,6 +34,6 @@ class EclipticCoordinatesTest {
 
     @Test
     void testToString() {
-        assertEquals("(λ=23.000°, β=45.0000°)", eclipticCoordinates.toString());
+        assertEquals("(λ=23.0000°, β=45.0000°)", eclipticCoordinates.toString());
     }
 }

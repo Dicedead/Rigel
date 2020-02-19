@@ -20,7 +20,7 @@ class HorizontalCoordinatesTest {
 
     @Test
     void azDef() {
-        assertEquals(Angle.ofDeg(23), horizontalCoordinates.azDef());
+        assertEquals((23), horizontalCoordinates.azDef());
 
     }
 
@@ -36,13 +36,13 @@ class HorizontalCoordinatesTest {
 
     @Test
     void altDeg() {
-        assertEquals(23, horizontalCoordinates.altDeg());
+        assertEquals(45, horizontalCoordinates.altDeg());
 
     }
 
     @Test
     void angularDistanceTo() {
-        assertEquals(0.0279,
+        assertEquals(0.027935461189288496,
                 HorizontalCoordinates.ofDeg(6.5682, 46.5183)
                         .angularDistanceTo(HorizontalCoordinates.ofDeg(8.5476, 47.3763)));
     }

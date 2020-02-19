@@ -8,31 +8,31 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class EquatorialCoordinatesTest {
 
-    EquatorialCoordinates equatorialCoordinates = EquatorialCoordinates.ofDeg(23, 45);
+    EquatorialCoordinates equatorialCoordinates = EquatorialCoordinates.ofDeg(1.5333, 45);
 
 
 
     @Test
     void ra() {
-        assertEquals(Angle.ofDeg(23), equatorialCoordinates.ra());
+        assertEquals(0.40141700131243585, equatorialCoordinates.ra());
 
     }
 
     @Test
     void raDeg() {
-        assertEquals((23), equatorialCoordinates.raDeg());
+        assertTrue(Math.abs(((23) - equatorialCoordinates.raDeg())) <= 0.001);
 
     }
 
     @Test
     void raHr() {
-        assertEquals(Angle.toHr(Angle.ofDeg(23)), equatorialCoordinates.raHr());
+        assertTrue(Math.abs(Angle.toHr(Angle.ofDeg(23)) - equatorialCoordinates.raHr()) <= 0.001 );
 
     }
 
     @Test
     void dec() {
-        assertEquals(Angle.ofDeg(23), equatorialCoordinates.dec());
+        assertEquals(Angle.ofDeg(45), equatorialCoordinates.dec());
 
     }
 
@@ -44,6 +44,6 @@ class EquatorialCoordinatesTest {
 
     @Test
     void testToString() {
-            assertEquals("(λ=23.0000°, β=45.0000°)", equatorialCoordinates.toString());
+            assertEquals("(ra=1.5333h, dec=45.0000°)", equatorialCoordinates.toString());
     }
 }
