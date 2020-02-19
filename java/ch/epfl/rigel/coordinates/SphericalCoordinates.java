@@ -2,7 +2,7 @@ package ch.epfl.rigel.coordinates;
 
 import static ch.epfl.rigel.math.Angle.toDeg;
 
-class SphericalCoordinates
+abstract class SphericalCoordinates
 {
 
     final private double longitude;

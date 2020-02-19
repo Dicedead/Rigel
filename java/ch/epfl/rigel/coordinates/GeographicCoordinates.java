@@ -5,9 +5,6 @@ import ch.epfl.rigel.math.RightOpenInterval;
 
 import java.util.Locale;
 
-import static ch.epfl.rigel.math.Angle.toDeg;
-
-
 public final class GeographicCoordinates extends SphericalCoordinates
 {
     /**
