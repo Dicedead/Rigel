@@ -43,7 +43,7 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
     }
 
     public String azOctantName(String n, String e, String s, String w) {
-
+        
     }
 
     public double alt() {
