@@ -1,4 +1,4 @@
-package ch.epfl.rigel.coordinates;
+package ch.epfl.rigelTest.coordinates;
 
 import org.junit.jupiter.api.Test;
 
