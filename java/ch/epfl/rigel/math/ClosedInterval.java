@@ -32,7 +32,7 @@ public class ClosedInterval extends Interval {
     }
 
     /**
-     * Clipping sends number to itsellf if it is in the interval, and else at the nearest bound
+     * Clipping sends number to itself if it is in the interval, and else at the nearest bound
      *
      * @param v the number to clip
      * @return the clipped number

@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class EquatorialCoordinatesTest {
 
-    EquatorialCoordinates equatorialCoordinates = EquatorialCoordinates.ofDeg(1.5333, 45);
+    EquatorialCoordinates equatorialCoordinates = EquatorialCoordinates.of(1.5333, 45);
 
 
 

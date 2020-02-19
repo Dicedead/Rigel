@@ -10,14 +10,20 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class GeographicCoordinatesTest {
     GeographicCoordinates geographicCoordinates = GeographicCoordinates.ofDeg(23, 45);
-/*
+
     @Test
     void ofDeg() {
-        GeographicCoordinates geographicCoordinates = GeographicCoordinates.ofDeg(23, 180);
-        GeographicCoordinates geographicCoordinates1 = GeographicCoordinates.ofDeg(0, 100);
-        GeographicCoordinates geographicCoordinates2 = GeographicCoordinates.ofDeg(-300, 2);
+        assertThrows(IllegalArgumentException.class, () -> {
+            GeographicCoordinates geographicCoordinates = GeographicCoordinates.ofDeg(23, 180);
+        });
+        assertThrows(IllegalArgumentException.class, () -> {
+            GeographicCoordinates geographicCoordinates1 = GeographicCoordinates.ofDeg(0, 100);
+        });
+        assertThrows(IllegalArgumentException.class, () -> {
+            GeographicCoordinates geographicCoordinates2 = GeographicCoordinates.ofDeg(-300, 2);
+        });
 
-    }*/
+    }
 
     @Test
     void isValidLonDeg() {
@@ -36,22 +42,30 @@ class GeographicCoordinatesTest {
 
         assertTrue(GeographicCoordinates.isValidLatDeg(23));
         assertTrue(GeographicCoordinates.isValidLatDeg(0));
-        assertTrue(GeographicCoordinates.isValidLatDeg(-180));
+        assertFalse(GeographicCoordinates.isValidLatDeg(-180));
         assertFalse(GeographicCoordinates.isValidLatDeg(180));
         assertFalse(GeographicCoordinates.isValidLatDeg(-400));
     }
 
     @Test
-    void lon() { assertEquals(Angle.ofDeg(23) , geographicCoordinates.lon()); }
+    void lon() {
+        assertEquals(Angle.ofDeg(23), geographicCoordinates.lon());
+    }
 
     @Test
-    void lonDeg() { assertEquals(23 , geographicCoordinates.lonDeg()); }
+    void lonDeg() {
+        assertEquals(23, geographicCoordinates.lonDeg());
+    }
 
     @Test
-    void lat() { assertEquals(Angle.ofDeg(45) , geographicCoordinates.lat()); }
+    void lat() {
+        assertEquals(Angle.ofDeg(45), geographicCoordinates.lat());
+    }
 
     @Test
-    void latDeg() { assertEquals(45 , geographicCoordinates.latDeg()); }
+    void latDeg() {
+        assertEquals(45, geographicCoordinates.latDeg());
+    }
 
 
     @Test

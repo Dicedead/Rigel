@@ -19,7 +19,7 @@ class AngleTest {
 
     @Test
     void ofDMS() {
-        assertEquals(2 * Angle.RATIO_DEG_RAD, Angle.ofDMS(1, 60, 0));
+        assertThrows(IllegalArgumentException.class, () -> { Angle.ofDMS(1, 60, 0);});
 
     }
 

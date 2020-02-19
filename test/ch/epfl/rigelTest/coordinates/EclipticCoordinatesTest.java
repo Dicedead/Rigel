@@ -9,17 +9,19 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class EclipticCoordinatesTest {
 
-    EclipticCoordinates eclipticCoordinates = EclipticCoordinates.ofDeg(23, 45);
+    EclipticCoordinates eclipticCoordinates = EclipticCoordinates.of(Angle.ofDeg(23), Angle.ofDeg(45));
 
-/*
+
     @Test
     void ofDeg() {
+        assertThrows(IllegalArgumentException.class, () -> {EclipticCoordinates eclipticCoordinates1 =
+                EclipticCoordinates.of(23, 180);});
+        assertThrows(IllegalArgumentException.class, () -> {EclipticCoordinates eclipticCoordinates2 =
+                EclipticCoordinates.of(23, 180);});
+        assertThrows(IllegalArgumentException.class, () -> {EclipticCoordinates eclipticCoordinates3 =
+                EclipticCoordinates.of(-300, 2);});
 
-        EclipticCoordinates eclipticCoordinates = EclipticCoordinates.ofDeg(23, 180);
-        EclipticCoordinates eclipticCoordinates1 = EclipticCoordinates.ofDeg(0, 100);
-        EclipticCoordinates eclipticCoordinates2 = EclipticCoordinates.ofDeg(-300, 2);
-
-    }*/
+    }
     @Test
     void lon() { assertEquals(Angle.ofDeg(23) , eclipticCoordinates.lon()); }
 

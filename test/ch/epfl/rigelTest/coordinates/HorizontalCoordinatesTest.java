@@ -1,9 +1,7 @@
 package ch.epfl.rigelTest.coordinates;
 
-import ch.epfl.rigel.coordinates.EclipticCoordinates;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.math.Angle;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -19,8 +17,8 @@ class HorizontalCoordinatesTest {
     }
 
     @Test
-    void azDef() {
-        assertEquals((23), horizontalCoordinates.azDef());
+    void azDeg() {
+        assertEquals((23), horizontalCoordinates.azDeg());
 
     }
 
