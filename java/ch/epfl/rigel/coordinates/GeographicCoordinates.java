@@ -24,7 +24,7 @@ public final class GeographicCoordinates extends SphericalCoordinates
      * @param lonDeg input in degrees for longitude
      * @param latDeg input in degrees for latitude
      */
-    GeographicCoordinates ofDeg(double lonDeg, double latDeg)
+    public static GeographicCoordinates ofDeg(double lonDeg, double latDeg)
     {
 
         return new GeographicCoordinates(
