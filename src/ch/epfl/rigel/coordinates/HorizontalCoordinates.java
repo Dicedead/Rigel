@@ -116,12 +116,12 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
      */
     public double angularDistanceTo(HorizontalCoordinates that) {
         return Math.acos(
-               Math.sin(this.alt())
-             * Math.sin(that.alt())
+               Math.sin(this.altDeg())
+             * Math.sin(that.altDeg())
              +
-               Math.cos(this.alt())
-             * Math.cos(that.alt())
-             * Math.cos(this.az() - that.az()));
+               Math.cos(this.altDeg())
+             * Math.cos(that.altDeg())
+             * Math.cos(this.azDeg() - that.azDeg()));
     }
 
     /**
