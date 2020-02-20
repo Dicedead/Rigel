@@ -8,6 +8,10 @@ import ch.epfl.rigel.math.RightOpenInterval;
 import java.util.Locale;
 
 public final class EquatorialCoordinates extends SphericalCoordinates{
+
+    private final static RightOpenInterval LON_INTERVAL_HR_0to24 = RightOpenInterval.of(0, 24);
+    private final static ClosedInterval LAT_INTERVAL_DEG_SYM_180 = ClosedInterval.symmetric(180);
+
     /**
      * Constructor of EquatorialCoordinates
      * @param ra input in radians for longitude
@@ -26,8 +30,8 @@ public final class EquatorialCoordinates extends SphericalCoordinates{
     {
 
         return new EquatorialCoordinates(
-                Angle.ofHr(Preconditions.checkInInterval(RightOpenInterval.of(0, 24), ra)),
-                Angle.ofDeg(Preconditions.checkInInterval(ClosedInterval.symmetric(180), dec)));
+                Angle.ofHr(Preconditions.checkInInterval(LON_INTERVAL_HR_0to24, ra)),
+                Angle.ofDeg(Preconditions.checkInInterval(LAT_INTERVAL_DEG_SYM_180, dec)));
 
     }
 

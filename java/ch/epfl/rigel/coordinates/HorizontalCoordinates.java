@@ -11,6 +11,12 @@ import java.util.Map;
 
 public final class HorizontalCoordinates extends SphericalCoordinates {
 
+    private final static RightOpenInterval LON_INTERVAL_RAD_0toTAU = RightOpenInterval.of(0,Angle.TAU);
+    private final static ClosedInterval LAT_INTERVAL_RAD_SYM_PI = ClosedInterval.symmetric(Math.PI);
+
+    private final static RightOpenInterval LON_INTERVAL_DEG_SYM_360 = RightOpenInterval.symmetric(360);
+    private final static ClosedInterval LAT_INTERVAL_DEG_SYM_180 = ClosedInterval.symmetric(180);
+
     /**
      * Constructor for HorizontalCoordinates
      *
@@ -31,8 +37,8 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
 
         return new HorizontalCoordinates(
 
-                Preconditions.checkInInterval(RightOpenInterval.of(0, Angle.TAU), az),
-                Preconditions.checkInInterval(ClosedInterval.symmetric(Math.PI), alt));
+                Preconditions.checkInInterval(LON_INTERVAL_RAD_0toTAU, az),
+                Preconditions.checkInInterval(LAT_INTERVAL_RAD_SYM_PI, alt));
     }
 
     /**
@@ -42,8 +48,8 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
      * @param altDeg input in degrees for altitude
      */
     public static HorizontalCoordinates ofDeg(double azDeg, double altDeg) {
-        Preconditions.checkInInterval(RightOpenInterval.symmetric(360), azDeg);
-        Preconditions.checkInInterval(ClosedInterval.symmetric(180), altDeg);
+        Preconditions.checkInInterval(LON_INTERVAL_DEG_SYM_360, azDeg);
+        Preconditions.checkInInterval(LAT_INTERVAL_DEG_SYM_180, altDeg);
 
         return new HorizontalCoordinates(Angle.ofDeg(azDeg), Angle.ofDeg(altDeg));
     }

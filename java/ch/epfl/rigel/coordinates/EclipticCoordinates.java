@@ -8,6 +8,10 @@ import ch.epfl.rigel.math.RightOpenInterval;
 import java.util.Locale;
 
 public final class EclipticCoordinates extends SphericalCoordinates{
+
+    private final static RightOpenInterval LON_INTERVAL_RAD_SYM_TAU = RightOpenInterval.symmetric(Angle.TAU);
+    private final static ClosedInterval LAT_INTERVAL_RAD_SYM_PI = ClosedInterval.symmetric(Math.PI);
+
     /**
      * Constructor of EclipticCoordinates
      * @param ra input in radians for longitude
@@ -27,8 +31,8 @@ public final class EclipticCoordinates extends SphericalCoordinates{
     {
 
         return new EclipticCoordinates(
-                (Preconditions.checkInInterval(RightOpenInterval.symmetric(Angle.TAU), lon)),
-                (Preconditions.checkInInterval(ClosedInterval.symmetric(Math.PI), lat)
+                (Preconditions.checkInInterval(LON_INTERVAL_RAD_SYM_TAU, lon)),
+                (Preconditions.checkInInterval(LAT_INTERVAL_RAD_SYM_PI, lat)
                 ));
 
     }

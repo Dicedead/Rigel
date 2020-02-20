@@ -9,6 +9,9 @@ import java.util.Locale;
 
 public final class GeographicCoordinates extends SphericalCoordinates {
 
+    private final static RightOpenInterval LON_INTERVAL_DEG_SYM_360 = RightOpenInterval.symmetric(360);
+    private final static ClosedInterval LAT_INTERVAL_DEG_SYM_180 = ClosedInterval.symmetric(180);
+
     /**
      * Constructor of GeographicCoordinates
      *
@@ -28,8 +31,8 @@ public final class GeographicCoordinates extends SphericalCoordinates {
     public static GeographicCoordinates ofDeg(double lonDeg, double latDeg) {
 
         return new GeographicCoordinates(
-                Angle.ofDeg(Preconditions.checkInInterval(RightOpenInterval.symmetric(360), lonDeg)),
-                Angle.ofDeg(Preconditions.checkInInterval(ClosedInterval.symmetric(180), latDeg)
+                Angle.ofDeg(Preconditions.checkInInterval(LON_INTERVAL_DEG_SYM_360, lonDeg)),
+                Angle.ofDeg(Preconditions.checkInInterval(LAT_INTERVAL_DEG_SYM_180, latDeg)
                 ));
 
     }
