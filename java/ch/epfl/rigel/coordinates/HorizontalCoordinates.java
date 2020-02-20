@@ -5,9 +5,7 @@ import ch.epfl.rigel.math.Angle;
 import ch.epfl.rigel.math.ClosedInterval;
 import ch.epfl.rigel.math.RightOpenInterval;
 
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 
 public final class HorizontalCoordinates extends SphericalCoordinates {
 
