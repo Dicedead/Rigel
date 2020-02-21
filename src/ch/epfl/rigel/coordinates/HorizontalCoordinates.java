@@ -58,7 +58,7 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
      * @return azimuth in radians
      */
     public double az() {
-        return lon();
+        return super.lon();
     }
 
     /**
@@ -67,7 +67,7 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
      * @return azimuth in degrees
      */
     public double azDeg() {
-        return lonDeg();
+        return super.lonDeg();
     }
 
     /**
@@ -97,7 +97,7 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
      * @return altitude in radians
      */
     public double alt() {
-        return lat();
+        return super.lat();
     }
 
     /**
@@ -105,7 +105,7 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
      * @return altitude in degrees
      */
     public double altDeg() {
-        return latDeg();
+        return super.latDeg();
     }
 
     /**

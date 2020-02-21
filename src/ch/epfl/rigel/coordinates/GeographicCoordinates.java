@@ -43,9 +43,7 @@ public final class GeographicCoordinates extends SphericalCoordinates {
      * @param lonDeg angle input in degrees
      * @return true if it is between -180° and 180°
      */
-    static public boolean isValidLonDeg(double lonDeg) {
-        return RightOpenInterval.symmetric(360).contains(lonDeg);
-    }
+    static public boolean isValidLonDeg(double lonDeg) { return LON_INTERVAL_DEG_SYM_360.contains(lonDeg); }
 
     /**
      * Checks that the passed angle is a valid latitude in degrees
@@ -54,7 +52,7 @@ public final class GeographicCoordinates extends SphericalCoordinates {
      * @return true if it is between -90° and 90°
      */
     static public boolean isValidLatDeg(double latDeg) {
-        return ClosedInterval.symmetric(180).contains(latDeg);
+        return LAT_INTERVAL_DEG_SYM_180.contains(latDeg);
     }
 
 

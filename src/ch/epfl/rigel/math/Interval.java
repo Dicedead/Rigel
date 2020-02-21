@@ -45,15 +45,15 @@ public abstract class Interval {
     @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
     @Override
     public final boolean equals(Object o) {
-        System.err.println("Fatal error : tried to test equality between intervals but double precision does not \n" +
-                "allows it.");
+        //System.err.println("Fatal error : tried to test equality between intervals but double precision does not \n" +
+        //        "allows it.");
         throw new UnsupportedOperationException();
     }
 
     @Override
     public final int hashCode() {
-        System.err.println("Fatal error : tried to test equality between intervals but double precision does not \n" +
-                "allows it.");
+        //System.err.println("Fatal error : tried to test equality between intervals but double precision does not \n" +
+        //        "allows it.");
         throw new UnsupportedOperationException();
     }
 }

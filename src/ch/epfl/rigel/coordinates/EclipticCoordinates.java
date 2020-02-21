@@ -9,16 +9,16 @@ import java.util.Locale;
 
 public final class EclipticCoordinates extends SphericalCoordinates{
 
-    private final static RightOpenInterval LON_INTERVAL_RAD_SYM_TAU = RightOpenInterval.symmetric(Angle.TAU);
+    private final static RightOpenInterval LON_INTERVAL_RAD_0toTAU = RightOpenInterval.of(0,Angle.TAU);
     private final static ClosedInterval LAT_INTERVAL_RAD_SYM_PI = ClosedInterval.symmetric(Math.PI);
 
     /**
      * Constructor of EclipticCoordinates
-     * @param ra input in radians for longitude
-     * @param deg input in radians for latitude
+     * @param lon input in radians for longitude
+     * @param lat input in radians for latitude
      */
-    private EclipticCoordinates(double ra, double deg){
-        super(ra,  deg);
+    private EclipticCoordinates(double lon, double lat){
+        super(lon,  lat);
     }
 
 
@@ -31,7 +31,7 @@ public final class EclipticCoordinates extends SphericalCoordinates{
     {
 
         return new EclipticCoordinates(
-                (Preconditions.checkInInterval(LON_INTERVAL_RAD_SYM_TAU, lon)),
+                (Preconditions.checkInInterval(LON_INTERVAL_RAD_0toTAU, lon)),
                 (Preconditions.checkInInterval(LAT_INTERVAL_RAD_SYM_PI, lat)
                 ));
 

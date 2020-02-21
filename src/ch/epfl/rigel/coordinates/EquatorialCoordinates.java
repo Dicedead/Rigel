@@ -23,7 +23,7 @@ public final class EquatorialCoordinates extends SphericalCoordinates{
 
     /**
      * Constructs a EquatorialCoordinates
-     * @param ra input in degrees for longitude
+     * @param ra input in hours for longitude
      * @param dec input in degrees for latitude
      */
     public static EquatorialCoordinates of(double ra, double dec)
