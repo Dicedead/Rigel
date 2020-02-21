@@ -74,17 +74,17 @@ class PolynomialTestOfficial {
         var polynomial2 = Polynomial.of(-3.14);
         assertEquals("-3.14", polynomial2.toString());
         var polynomial3 = Polynomial.of(2, 5);
-        assertEquals("2.0x+5.0", polynomial3.toString());
+        assertEquals("2x+5", polynomial3.toString());
         var polynomial4 = Polynomial.of(3, -2.5);
-        assertEquals("3.0x-2.5", polynomial4.toString());
+        assertEquals("3x-2.5", polynomial4.toString());
         var polynomial5 = Polynomial.of(-1, -7, 10);
-        assertEquals("-x^2-7.0x+10.0", polynomial5.toString());
+        assertEquals("-x^2-7x+10", polynomial5.toString());
         var polynomial6 = Polynomial.of(-2, 4, 6);
-        assertEquals("-2.0x^2+4.0x+6.0", polynomial6.toString());
+        assertEquals("-2x^2+4x+6", polynomial6.toString());
         var polynomial7 = Polynomial.of(1, -6, 0, -10);
-        assertEquals("x^3-6.0x^2-10.0", polynomial7.toString());
+        assertEquals("x^3-6x^2-10", polynomial7.toString());
         var polynomial8 = Polynomial.of(-2, 6, 2, -6);
-        assertEquals("-2.0x^3+6.0x^2+2.0x-6.0", polynomial8.toString());
+        assertEquals("-2x^3+6x^2+2x-6", polynomial8.toString());
     }
 
     @Test

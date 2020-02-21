@@ -18,7 +18,7 @@ public final class EquatorialCoordinates extends SphericalCoordinates{
      * @param dec input in radians for latitude
      */
     private EquatorialCoordinates(double ra, double dec){
-        super(ra,  dec);
+        super(ra, dec);
     }
 
     /**
