@@ -12,18 +12,14 @@ class EclipticCoordinatesTest {
     EclipticCoordinates eclipticCoordinates2 = EclipticCoordinates.of(Angle.ofDeg(350), Angle.ofDeg(80));
 
     @Test
-    void ofDeg() {
+    void of() {
         assertThrows(IllegalArgumentException.class, () -> {
             EclipticCoordinates eclipticCoordinates1 =
-                    EclipticCoordinates.of(23, 180);
+                    EclipticCoordinates.of(Angle.ofDeg(23), Angle.ofDeg(180));
         });
         assertThrows(IllegalArgumentException.class, () -> {
             EclipticCoordinates eclipticCoordinates2 =
-                    EclipticCoordinates.of(23, 180);
-        });
-        assertThrows(IllegalArgumentException.class, () -> {
-            EclipticCoordinates eclipticCoordinates3 =
-                    EclipticCoordinates.of(-300, 2);
+                    EclipticCoordinates.of(Angle.ofDeg(-300), Angle.ofDeg(2));
         });
 
     }

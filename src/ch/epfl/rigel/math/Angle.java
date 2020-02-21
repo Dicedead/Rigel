@@ -2,6 +2,12 @@ package ch.epfl.rigel.math;
 
 import ch.epfl.rigel.Preconditions;
 
+/**
+ * Angle utilities
+ *
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public class Angle {
     static final public double TAU = 2 * Math.PI;
 

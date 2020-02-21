@@ -1,5 +1,11 @@
 package ch.epfl.rigel.math;
 
+/**
+ * Abstraction of a general interval
+ *
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public abstract class Interval {
 
     /**

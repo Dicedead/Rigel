@@ -7,6 +7,12 @@ import ch.epfl.rigel.math.RightOpenInterval;
 
 import java.util.Locale;
 
+/**
+ * Ecliptic coordinates system
+ *
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public final class EclipticCoordinates extends SphericalCoordinates{
 
     private final static RightOpenInterval LON_INTERVAL_RAD_0toTAU = RightOpenInterval.of(0,Angle.TAU);

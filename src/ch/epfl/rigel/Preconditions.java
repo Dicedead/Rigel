@@ -2,6 +2,12 @@ package ch.epfl.rigel;
 
 import ch.epfl.rigel.math.Interval;
 
+/**
+ * Utility class for value validity checking
+ *
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public final class Preconditions {
 
     private Preconditions(){}

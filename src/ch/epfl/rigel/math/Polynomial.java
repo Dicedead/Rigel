@@ -5,6 +5,12 @@ import ch.epfl.rigel.Preconditions;
 import java.text.DecimalFormat;
 import java.util.function.Function;
 
+/**
+ * Polynomial object definition and associated tools
+ *
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public final class Polynomial {
 
     private final double[] coefficients;

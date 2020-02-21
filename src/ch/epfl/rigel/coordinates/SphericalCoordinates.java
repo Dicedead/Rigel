@@ -1,11 +1,13 @@
 package ch.epfl.rigel.coordinates;
 
-import ch.epfl.rigel.math.Angle;
-import ch.epfl.rigel.math.ClosedInterval;
-import ch.epfl.rigel.math.RightOpenInterval;
-
 import static ch.epfl.rigel.math.Angle.toDeg;
 
+/**
+ * General spherical coordinates system
+ *
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 abstract class SphericalCoordinates
 {
     final private double longitude;

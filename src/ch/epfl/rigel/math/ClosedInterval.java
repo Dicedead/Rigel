@@ -1,10 +1,14 @@
 package ch.epfl.rigel.math;
 
-
 import ch.epfl.rigel.Preconditions;
-
 import java.util.Locale;
 
+/**
+ * Closed interval representation and methods
+ *
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public class ClosedInterval extends Interval {
     /**
      * @param inf lower bound of the interval
