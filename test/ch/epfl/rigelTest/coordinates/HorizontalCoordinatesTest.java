@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class HorizontalCoordinatesTest {
 
+    private static final double EPSILON = 1e-4;
+
     HorizontalCoordinates horizontalCoordinates = HorizontalCoordinates.ofDeg(23, 45);
 
 
@@ -40,9 +42,9 @@ class HorizontalCoordinatesTest {
 
     @Test
     void angularDistanceTo() {
-        assertEquals(0.027935461189288496,
+        assertEquals(0.02793,
                 HorizontalCoordinates.ofDeg(6.5682, 46.5183)
-                        .angularDistanceTo(HorizontalCoordinates.ofDeg(8.5476, 47.3763)));
+                        .angularDistanceTo(HorizontalCoordinates.ofDeg(8.5476, 47.3763)),EPSILON);
     }
 
     @Test
