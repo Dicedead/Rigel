@@ -9,8 +9,8 @@ import java.util.Locale;
 
 public final class EquatorialCoordinates extends SphericalCoordinates{
 
-    private final static RightOpenInterval LON_INTERVAL_HR_0to24 = RightOpenInterval.of(0, 24);
-    private final static ClosedInterval LAT_INTERVAL_DEG_SYM_180 = ClosedInterval.symmetric(180);
+    private final static RightOpenInterval LON_INTERVAL_RAD_0toTAU = RightOpenInterval.of(0, Angle.TAU);
+    private final static ClosedInterval LAT_INTERVAL_RAD_SYM_PI = ClosedInterval.symmetric(Math.PI);
 
     /**
      * Constructor of EquatorialCoordinates
@@ -23,15 +23,15 @@ public final class EquatorialCoordinates extends SphericalCoordinates{
 
     /**
      * Constructs a EquatorialCoordinates
-     * @param ra input in hours for longitude
-     * @param dec input in degrees for latitude
+     * @param ra input in radians for longitude
+     * @param dec input in radians for latitude
      */
     public static EquatorialCoordinates of(double ra, double dec)
     {
 
         return new EquatorialCoordinates(
-                Angle.ofHr(Preconditions.checkInInterval(LON_INTERVAL_HR_0to24, ra)),
-                Angle.ofDeg(Preconditions.checkInInterval(LAT_INTERVAL_DEG_SYM_180, dec)));
+                Preconditions.checkInInterval(LON_INTERVAL_RAD_0toTAU, ra),
+                Preconditions.checkInInterval(LAT_INTERVAL_RAD_SYM_PI, dec));
 
     }
 
