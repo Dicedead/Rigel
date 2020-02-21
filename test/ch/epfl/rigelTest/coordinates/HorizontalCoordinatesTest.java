@@ -54,7 +54,7 @@ class HorizontalCoordinatesTest {
                 .azOctantName("N", "E", "S", "O"));
         assertEquals("N", HorizontalCoordinates.ofDeg(337.5, 0)
                 .azOctantName("N", "E", "S", "O"));
-        assertEquals("NE", HorizontalCoordinates.ofDeg(27.5, 0)
+        assertEquals("NE", HorizontalCoordinates.ofDeg(22.5, 0)
                 .azOctantName("N", "E", "S", "O"));
         assertEquals("SO", HorizontalCoordinates.ofDeg(202.5, 0)
                 .azOctantName("N", "E", "S", "O"));

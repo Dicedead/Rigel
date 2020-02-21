@@ -58,20 +58,32 @@ public final class Polynomial {
     @Override
     public String toString() {
 
+        //Highest degree term's sign initialization
         StringBuilder format = new StringBuilder((coefficients[0] < 0) ? "-" : "");
 
+        //Template for coefficient formatting
         Function<Integer, String> f = (Integer i) ->
                 ((isEqual(Math.abs(coefficients[i]), 1) || isEqual(coefficients[i], 0)) ? "" :
                 new DecimalFormat("##.########").format(Math.abs(coefficients[i])));
 
+        //Main loop: constructing the string
         for (int i = 0; i <= degree - 1; ++i)
         {
+            /*
+            Concatenation of the coefficient, its associated x to the power of degree-i, and the next coefficient's sign.
+            Steps:
+               -Formatting using Function f
+               -Checking whether the coefficient != 0 (0 -> x is skipped)
+               -Appending the '^' sign and the degree if degree != 0 ^ degree != 1
+               -Appending the next coefficient's sign (if it exists ^ is != 0)
+             */
             format.append(f.apply(i)).append(isEqual(coefficients[i], 0) ? "" : "x")
                     .append((i == degree - 1 || isEqual(coefficients[i], 0)) ? "" : "^" + (degree - i))
                     .append(isEqual(coefficients[i + 1], 0) ? "" : (0 > coefficients[i + 1]) ? "-" : "+");
 
         }
 
+        //Treatment of the (eventual) constant term
         return format.append(f.apply(degree)).toString();
     }
 
