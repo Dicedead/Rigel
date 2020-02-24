@@ -1,6 +1,5 @@
 package ch.epfl.rigel.coordinates;
 
-import ch.epfl.rigel.astronomy.Epoch;
 import ch.epfl.rigel.math.Angle;
 import ch.epfl.rigel.math.Polynomial;
 
@@ -11,12 +10,18 @@ import static ch.epfl.rigel.astronomy.Epoch.J2000;
 import static ch.epfl.rigel.math.Angle.ofArcsec;
 import static java.lang.Math.*;
 
+/**
+ * Conversion class from ecliptic to equatorial coordinates
+ *
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public final class EclipticToEquatorialConversion implements Function<EclipticCoordinates, EquatorialCoordinates>
 {
 
-    double epsilon;
-    double sinEpsilon;
-    double cosEpsilon;
+    private final double epsilon;
+    private final double sinEpsilon;
+    private final double cosEpsilon;
 
     /**
      * Initialize epsilon for calculations
@@ -48,7 +53,6 @@ public final class EclipticToEquatorialConversion implements Function<EclipticCo
 
         double ra       = atan2(term2 - term1, 2*cos(lambda)*cos(beta));
         double dec      = asin(0.5* term1 + term2);
-
 
         return EquatorialCoordinates.of(ra, dec);
     }

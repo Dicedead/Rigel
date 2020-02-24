@@ -1,6 +1,6 @@
 package ch.epfl.rigel.coordinates;
 
-import ch.epfl.rigel.astronomy.SideralTime;
+import ch.epfl.rigel.astronomy.SiderealTime;
 import ch.epfl.rigel.math.Angle;
 import ch.epfl.rigel.math.Polynomial;
 
@@ -11,15 +11,21 @@ import static ch.epfl.rigel.astronomy.Epoch.J2000;
 import static ch.epfl.rigel.math.Angle.ofArcsec;
 import static java.lang.Math.*;
 
+/**
+ * Conversion class from equatorial to horizontal coordinates
+ *
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public final class EquatorialToHorizontalConversion implements Function<EquatorialCoordinates, HorizontalCoordinates>
 {
 
-    double epsilon;
-    double sinEpsilon;
-    double cosEpsilon;
-    double phi, sinPhi, cosPhi;
-    GeographicCoordinates geographicCoordinates;
-    ZonedDateTime now;
+    private final double epsilon;
+    private final double sinEpsilon;
+    private final double cosEpsilon;
+    private final double phi, sinPhi, cosPhi;
+    private final GeographicCoordinates geographicCoordinates;
+    private final ZonedDateTime now;
 
     /**
      * Initialize epsilon for calculations
@@ -59,7 +65,7 @@ public final class EquatorialToHorizontalConversion implements Function<Equatori
         double ra       = atan2(term2 - term1, 2*cos(lambda)*cos(beta));
 
         double A        = acos((term3 - sinPhi*sin(ra))/cos(ra));
-        double h        = asin(term3*sinPhi + cosPhi*Math.sqrt(1 - term3*term3)*cos(SideralTime.local(now, geographicCoordinates) - ra));
+        double h        = asin(term3*sinPhi + cosPhi*Math.sqrt(1 - term3*term3)*cos(SiderealTime.local(now, geographicCoordinates) - ra));
 
 
         return HorizontalCoordinates.of(A, h);
