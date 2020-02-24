@@ -1,18 +1,23 @@
 package ch.epfl.rigel.coordinates;
 
+import ch.epfl.rigel.astronomy.Epoch;
+
 import java.time.ZonedDateTime;
 import java.util.function.Function;
 
 public final class EclipticToEquatorialConversion implements Function<EclipticCoordinates, EquatorialCoordinates>
 {
 
-
+    double epsilon;
+    double sinEpsilon;
+    double cosEpsilon;
     public EclipticToEquatorialConversion (ZonedDateTime  when)
     {
-
     }
     @Override
     public EquatorialCoordinates apply(EclipticCoordinates eclipticCoordinates) {
+        double dec = atan2();
+        double ra;
         return null;
     }
 
