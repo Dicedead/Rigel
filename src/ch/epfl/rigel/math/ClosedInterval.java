@@ -9,7 +9,7 @@ import java.util.Locale;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-public class ClosedInterval extends Interval {
+public final class ClosedInterval extends Interval {
     /**
      * @param inf lower bound of the interval
      * @param sup higher bound of the interval
