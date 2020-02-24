@@ -1,6 +1,6 @@
 package ch.epfl.rigel.coordinates;
 
-import ch.epfl.rigel.astronomy.Epoch;
+import ch.epfl.rigel.astronomy.SideralTime;
 import ch.epfl.rigel.math.Angle;
 import ch.epfl.rigel.math.Polynomial;
 
@@ -11,18 +11,21 @@ import static ch.epfl.rigel.astronomy.Epoch.J2000;
 import static ch.epfl.rigel.math.Angle.ofArcsec;
 import static java.lang.Math.*;
 
-public final class EclipticToEquatorialConversion implements Function<EclipticCoordinates, EquatorialCoordinates>
+public final class EquatorialToHorizontalConversion implements Function<EquatorialCoordinates, HorizontalCoordinates>
 {
 
     double epsilon;
     double sinEpsilon;
     double cosEpsilon;
+    double phi, sinPhi, cosPhi;
+    GeographicCoordinates geographicCoordinates;
+    ZonedDateTime now;
 
     /**
      * Initialize epsilon for calculations
      * @param when time to convert
      */
-    public EclipticToEquatorialConversion (ZonedDateTime  when)
+    public EquatorialToHorizontalConversion(ZonedDateTime  when, GeographicCoordinates where)
     {
         double T    = J2000.julianCenturiesUntil(when);
         epsilon     = Polynomial.of(
@@ -30,27 +33,36 @@ public final class EclipticToEquatorialConversion implements Function<EclipticCo
                 .at(T);
         sinEpsilon  = sin(epsilon);
         cosEpsilon  = cos(epsilon);
+        phi         = where.lat();
+        sinPhi      = sin(phi);
+        cosPhi      = cos(phi);
+        now = when;
+        geographicCoordinates = where;
+
     }
 
     /**
      *
-     * @param eclipticCoordinates coordinates to convert
-     * @return Equatorials coordinates coresponding to the input
+     * @param equatorialCoordinates coordinates to convert
+     * @return Horizontal coordinates corresponding to the input
      */
     @Override
-    public EquatorialCoordinates apply(EclipticCoordinates eclipticCoordinates) {
+    public HorizontalCoordinates apply(EquatorialCoordinates equatorialCoordinates) {
 
-        double lambda   = eclipticCoordinates.lon();
-        double beta     = eclipticCoordinates.lat();
+        double lambda   = equatorialCoordinates.lon();
+
+        double beta     = equatorialCoordinates.lat();
 
         double term1    = 2*sinEpsilon*sin(beta);
         double term2    = cosEpsilon*(sin(lambda - beta) + sin(lambda + beta));
-
+        double term3    = 0.5* term1 + term2;
         double ra       = atan2(term2 - term1, 2*cos(lambda)*cos(beta));
-        double dec      = asin(0.5* term1 + term2);
+
+        double A        = acos((term3 - sinPhi*sin(ra))/cos(ra));
+        double h        = asin(term3*sinPhi + cosPhi*Math.sqrt(1 - term3*term3)*cos(SideralTime.local(now, geographicCoordinates) - ra));
 
 
-        return EquatorialCoordinates.of(ra, dec);
+        return HorizontalCoordinates.of(A, h);
     }
 
     @Override

@@ -16,7 +16,7 @@ public final class SideralTime {
         return 0;
     }
 
-    public double local (ZonedDateTime when, GeographicCoordinates where)
+    public static double local (ZonedDateTime when, GeographicCoordinates where)
     {
         return 0;
     }
