@@ -11,18 +11,18 @@ import java.time.temporal.ChronoUnit;
  */
 public enum Epoch {
 
-    J2000(LocalDate.of(2000, Month.JANUARY, 1)),
-    J2010(LocalDate.of(2010, Month.JANUARY, 1).minusDays(1));
+    J2000(ZonedDateTime.of(LocalDateTime.of(2000, Month.JANUARY,1,12,0),ZoneOffset.UTC)),
+    J2010(ZonedDateTime.of(LocalDate.of(2010, Month.JANUARY, 1).minusDays(1),LocalTime.of(0,0),
+            ZoneOffset.UTC));
 
 
-    private ZonedDateTime epoch;
+    private final ZonedDateTime epoch;
 
-    private Epoch(LocalDate date) {
-        epoch = date.atStartOfDay(ZoneOffset.UTC);
+    private Epoch(ZonedDateTime date) {
+        this.epoch = date;
     }
 
     /**
-     *
      * @param when the time we want to know the distance of
      * @return the distance in days from our epoch to when
      */
@@ -32,7 +32,6 @@ public enum Epoch {
     }
 
     /**
-     *
      * @param when the time we want to know the distance of
      * @return the distance in julian years from our epoch to when
      */

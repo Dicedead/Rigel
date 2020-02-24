@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class SiderealTimeTest {
 
-    private final static double EPSILON = 1e-2;
+    private final static double EPSILON = 1e-3;
 
     @Test
     void greenwich() {

@@ -4,7 +4,9 @@ import ch.epfl.rigel.coordinates.GeographicCoordinates;
 import ch.epfl.rigel.math.Angle;
 import ch.epfl.rigel.math.Polynomial;
 
+import java.time.DayOfWeek;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 
 import static ch.epfl.rigel.astronomy.Epoch.J2000;
 import static ch.epfl.rigel.math.Angle.normalizePositive;
@@ -31,7 +33,7 @@ public final class SiderealTime {
      * @return (double) Greenwich's sidereal time normalized to [0,TAU[ interval
      */
     public static double greenwich(ZonedDateTime when) {
-        ZonedDateTime dayOfWhen = when.withHour(0).withMinute(0).withSecond(0).withNano(0);
+        ZonedDateTime dayOfWhen = when.truncatedTo(ChronoUnit.DAYS);
         double T = J2000.julianCenturiesUntil(dayOfWhen);
         double t = when.getHour() + when.getMinute()/Angle.MINUTES_IN_HOURS + when.getSecond()/
                 (Angle.SECONDS_IN_MINUTES*Angle.MINUTES_IN_HOURS);
