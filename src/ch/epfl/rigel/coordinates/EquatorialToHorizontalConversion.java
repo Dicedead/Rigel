@@ -52,12 +52,15 @@ public final class EquatorialToHorizontalConversion implements Function<Equatori
         double ra       = equatorialCoordinates.ra();
         double dec      = equatorialCoordinates.dec();
         double sinDec   = sin(dec);
+        double H        = SiderealTime.local(now, geographicCoordinates) - ra;
 
-        double term1    = sinDec*sinPhi + cosPhi*cos(dec)*cos(SiderealTime.local(now, geographicCoordinates) - ra);
+        double term1    = sinDec*sinPhi + cosPhi*cos(dec)*cos(H);
         double h        = asin(term1);
-        double A        = acos((sinDec - sinPhi*term1)/(cos(h)*cosPhi));
+        double A        = atan2(-cosPhi*cos(dec)*sin(H),sinDec - sinPhi * term1);
 
-        return HorizontalCoordinates.of(A, h);
+        //double A        = acos((sinDec - sinPhi*term1)/(cos(h)*cosPhi));
+
+        return HorizontalCoordinates.of(normalizePositive(A), h);
     }
 
     @Override
