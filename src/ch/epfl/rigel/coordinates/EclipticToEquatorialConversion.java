@@ -19,7 +19,6 @@ import static java.lang.Math.*;
 public final class EclipticToEquatorialConversion implements Function<EclipticCoordinates, EquatorialCoordinates>
 {
 
-    private final double epsilon;
     private final double sinEpsilon;
     private final double cosEpsilon;
 
@@ -30,9 +29,11 @@ public final class EclipticToEquatorialConversion implements Function<EclipticCo
     public EclipticToEquatorialConversion (ZonedDateTime  when)
     {
         double T    = J2000.julianCenturiesUntil(when);
-        epsilon     = Polynomial.of(
-                ofArcsec(0.00181), ofArcsec(-0.0006), ofArcsec(-46.815), Angle.ofDMS(23, 26,21.45))
+
+        double epsilon = Polynomial.of(
+                ofArcsec(0.00181), ofArcsec(-0.0006), ofArcsec(-46.815), Angle.ofDMS(23, 26, 21.45))
                 .at(T);
+
         sinEpsilon  = sin(epsilon);
         cosEpsilon  = cos(epsilon);
     }
@@ -40,7 +41,7 @@ public final class EclipticToEquatorialConversion implements Function<EclipticCo
     /**
      *
      * @param eclipticCoordinates coordinates to convert
-     * @return Equatorials coordinates coresponding to the input
+     * @return Equatorial coordinates corresponding to the input
      */
     @Override
     public EquatorialCoordinates apply(EclipticCoordinates eclipticCoordinates) {
@@ -48,8 +49,8 @@ public final class EclipticToEquatorialConversion implements Function<EclipticCo
         double lambda   = eclipticCoordinates.lon();
         double beta     = eclipticCoordinates.lat();
 
-        double term1    = 2*sinEpsilon*sin(beta);
-        double term2    = cosEpsilon*(sin(lambda - beta) + sin(lambda + beta));
+        double term1    = 2* sinEpsilon* sin(beta);
+        double term2    = cosEpsilon* (sin(lambda - beta) + sin(lambda + beta));
 
         double ra       = atan2(term2 - term1, 2*cos(lambda)*cos(beta));
         double dec      = asin(0.5* term1 + term2);

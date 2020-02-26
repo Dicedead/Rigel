@@ -4,7 +4,6 @@ import ch.epfl.rigel.coordinates.GeographicCoordinates;
 import ch.epfl.rigel.math.Angle;
 import ch.epfl.rigel.math.Polynomial;
 
-import java.time.DayOfWeek;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -22,7 +21,7 @@ public final class SiderealTime {
 
     private SiderealTime() {}
 
-    private final static double S_ZERO_COEFF0 = 0.000025862;
+    private final static double S_ZERO_COEFF_0 = 0.000025862;
     private final static double[] S_ZERO_COEFFS = {2400.051336, 6.697374558};
     private final static double S_ONE_COEFF = 1.002737909;
 
@@ -38,7 +37,7 @@ public final class SiderealTime {
         double t = when.getHour() + when.getMinute()/Angle.MINUTES_IN_HOURS + when.getSecond()/
                 (Angle.SECONDS_IN_MINUTES*Angle.MINUTES_IN_HOURS);
 
-        return normalizePositive(ofHr(Polynomial.of(S_ZERO_COEFF0, S_ZERO_COEFFS).at(T)
+        return normalizePositive(ofHr(Polynomial.of(S_ZERO_COEFF_0, S_ZERO_COEFFS).at(T)
              + S_ONE_COEFF*t));
     }
 
