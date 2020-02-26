@@ -8,6 +8,7 @@ import java.time.ZonedDateTime;
 import java.util.function.Function;
 
 import static ch.epfl.rigel.astronomy.Epoch.J2000;
+import static ch.epfl.rigel.math.Angle.normalizePositive;
 import static ch.epfl.rigel.math.Angle.ofArcsec;
 import static java.lang.Math.*;
 
@@ -20,8 +21,6 @@ import static java.lang.Math.*;
 public final class EquatorialToHorizontalConversion implements Function<EquatorialCoordinates, HorizontalCoordinates>
 {
 
-    private final double sinEpsilon;
-    private final double cosEpsilon;
     private final double sinPhi;
     private final double cosPhi;
     private final GeographicCoordinates geographicCoordinates;
@@ -33,14 +32,6 @@ public final class EquatorialToHorizontalConversion implements Function<Equatori
      */
     public EquatorialToHorizontalConversion(ZonedDateTime  when, GeographicCoordinates where)
     {
-        double T    = J2000.julianCenturiesUntil(when);
-
-        double epsilon = Polynomial.of(
-                ofArcsec(0.00181), ofArcsec(-0.0006), ofArcsec(-46.815), Angle.ofDMS(23, 26, 21.45))
-                .at(T);
-
-        sinEpsilon  = sin(epsilon);
-        cosEpsilon  = cos(epsilon);
         geographicCoordinates = where;
 
 
@@ -61,10 +52,11 @@ public final class EquatorialToHorizontalConversion implements Function<Equatori
         double ra       = equatorialCoordinates.ra();
         double dec      = equatorialCoordinates.dec();
         double sinDec   = sin(dec);
-        double A        = acos((sinDec - sinPhi*sin(ra))/cos(ra));
-        double h        = asin(sinDec*sinPhi + cosPhi*cos(dec)*cos(SiderealTime.local(now, geographicCoordinates) - ra));
+        double term1    = sinDec*sinPhi + cosPhi*cos(dec)*cos(SiderealTime.local(now, geographicCoordinates) - ra);
+        double h        = asin(term1);
+        double A        = acos((sinDec - sinPhi*term1)/(cos(h)*cosPhi));
 
-        return HorizontalCoordinates.of(A, h);
+        return HorizontalCoordinates.of(normalizePositive(A), h);
     }
 
     @Override
