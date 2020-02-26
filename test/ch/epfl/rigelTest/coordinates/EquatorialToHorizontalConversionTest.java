@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class EquatorialToHorizontalConversionTest {
 
-    EquatorialCoordinates equatorialCoordinates = EquatorialCoordinates.of();
+
     @Test
     void apply() {
 
