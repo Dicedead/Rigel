@@ -1,7 +1,5 @@
 package ch.epfl.rigelTest.coordinates;
 
-import ch.epfl.rigel.astronomy.SiderealTime;
-import ch.epfl.rigel.coordinates.EquatorialCoordinates;
 import org.junit.jupiter.api.Test;
 
 import static ch.epfl.rigel.math.Angle.ofDeg;

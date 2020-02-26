@@ -7,6 +7,7 @@ import java.time.ZonedDateTime;
 import java.util.function.Function;
 
 import static ch.epfl.rigel.astronomy.Epoch.J2000;
+import static ch.epfl.rigel.math.Angle.normalizePositive;
 import static ch.epfl.rigel.math.Angle.ofArcsec;
 import static java.lang.Math.*;
 
@@ -49,11 +50,12 @@ public final class EclipticToEquatorialConversion implements Function<EclipticCo
         double lambda   = eclipticCoordinates.lon();
         double beta     = eclipticCoordinates.lat();
 
-        double term1    = 2* sinEpsilon* sin(beta);
-        double term2    = cosEpsilon* (sin(lambda - beta) + sin(lambda + beta));
+        double term1    = 2*sin(beta);
+        double term2    = sin(lambda - beta) + sin(lambda + beta);
 
-        double ra       = atan2(term2 - term1, 2*cos(lambda)*cos(beta));
-        double dec      = asin(0.5* term1 + term2);
+        double ra       = atan2(term2*cosEpsilon - term1*sinEpsilon, 2*cos(lambda)*cos(beta));
+
+        double dec      = asin(0.5*(term1*cosEpsilon + term2*sinEpsilon));//asin(sin(beta)*cosEpsilon + cos(beta)*sinEpsilon*sin(lambda));//
 
         return EquatorialCoordinates.of(ra, dec);
     }

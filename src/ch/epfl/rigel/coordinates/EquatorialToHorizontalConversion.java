@@ -57,7 +57,7 @@ public final class EquatorialToHorizontalConversion implements Function<Equatori
         double h        = asin(term1);
         double A        = acos((sinDec - sinPhi*term1)/(cos(h)*cosPhi));
 
-        return HorizontalCoordinates.of(normalizePositive(A), h);
+        return HorizontalCoordinates.of(A, h);
     }
 
     @Override
