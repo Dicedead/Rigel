@@ -21,7 +21,7 @@ public final class Angle {
     static final private double RATIO_RAD_DEG = 360. / TAU;
     static final private double RATIO_DEG_RAD = TAU / 360.;
     static final private double RATIO_SEC_RAD = TAU / (360 * MINUTES_IN_HOURS * SECONDS_IN_MINUTES);
-
+    static final private RightOpenInterval NORMALIZING_INTERVAL = RightOpenInterval.of(0,TAU);
 
     /**
      * Normalize a value on the right open interval [0, TAU[
@@ -30,7 +30,7 @@ public final class Angle {
      * @return Reduced value of the angle
      */
     static public double normalizePositive(double rad) {
-        return RightOpenInterval.of(0, TAU).reduce(rad);
+        return NORMALIZING_INTERVAL.reduce(rad);
     }
 
     /**
