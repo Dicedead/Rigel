@@ -24,7 +24,7 @@ public final class Angle {
 
 
     /**
-     * Normalise a value on the right open interval [0, TAU[
+     * Normalize a value on the right open interval [0, TAU[
      *
      * @param rad Angle to be reduced
      * @return Reduced value of the angle
