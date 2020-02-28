@@ -26,6 +26,7 @@ public final class SiderealTime {
     private final static double[] S_ZERO_COEFFS = {2400.051336, 6.697374558};
     private final static double S_ONE_COEFF = 1.002737909;
     private final static Polynomial POLYNOM = Polynomial.of(S_ZERO_COEFF_0, S_ZERO_COEFFS);
+    private final static double COEFF_TO_HOURS = 36e5;
 
     /**
      * Computes sidereal Greenwich time
@@ -36,7 +37,7 @@ public final class SiderealTime {
     public static double greenwich(ZonedDateTime when) {
         ZonedDateTime dayOfWhen = when.truncatedTo(ChronoUnit.DAYS).withZoneSameInstant(ZoneOffset.UTC);
         double T = J2000.julianCenturiesUntil(dayOfWhen);
-        double t = when.getHour() + when.getMinute() / 60.0 + when.getSecond() / 3600.0;
+        double t = when.truncatedTo(ChronoUnit.DAYS).until(when,ChronoUnit.MILLIS) / COEFF_TO_HOURS;
 
         return normalizePositive(ofHr(POLYNOM.at(T) + S_ONE_COEFF * t));
     }
