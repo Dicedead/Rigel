@@ -34,8 +34,8 @@ class EquatorialToHorizontalConversionTest {
         } else if (numA < 0) {
             A_ += Angle.TAU;
         }*/
-        assertEquals(A, A_, 0.0000001);
-        assertEquals(h, h_, 0.0000001);
+        assertEquals(A, A_, 1e-6);
+        assertEquals(h, h_, 1e-6);
 
     }
 }

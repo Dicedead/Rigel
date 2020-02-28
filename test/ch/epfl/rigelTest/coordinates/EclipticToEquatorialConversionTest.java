@@ -20,7 +20,7 @@ import static java.lang.Math.sin;
 import static org.junit.jupiter.api.Assertions.*;
 
 class EclipticToEquatorialConversionTest {
-    private final static double EPSILON = 1e-4;
+    private final static double EPSILON = 1e-6;
 
     @Test
     void epsilon() {

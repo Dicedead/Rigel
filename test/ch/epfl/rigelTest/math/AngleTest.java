@@ -20,7 +20,6 @@ class AngleTest {
     @Test
     void ofDMS() {
         assertThrows(IllegalArgumentException.class, () -> { Angle.ofDMS(1, 60, 0);});
-
     }
 
     @Test

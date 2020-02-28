@@ -13,8 +13,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class EpochTest {
 
-    private final static double EPSILON   = 1e-2;
-    private final static double EPSILON_2 = 1;
+    private final static double EPSILON   = 1e-6;
+
 
     @Test
     void daysUntil() {
@@ -25,7 +25,7 @@ class EpochTest {
                 LocalTime.of(18, 0),
                 ZoneOffset.UTC);
         assertEquals(2.25,Epoch.J2000.daysUntil(d));
-        assertEquals(-7193.5, Epoch.J2000.daysUntil(date),EPSILON_2);
+        assertEquals(-7192.891076377315, Epoch.J2000.daysUntil(date),EPSILON);
     }
 
     @Test
