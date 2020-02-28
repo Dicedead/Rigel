@@ -39,7 +39,7 @@ public final class EclipticToEquatorialConversion implements Function<EclipticCo
     }
 
     /**
-     *
+     * An algebraic modification has been applied  to the function to maje iit more efficient
      * @param eclipticCoordinates coordinates to convert
      * @return Equatorial coordinates corresponding to the input
      */
