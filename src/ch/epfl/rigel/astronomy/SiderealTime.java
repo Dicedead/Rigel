@@ -1,9 +1,9 @@
 package ch.epfl.rigel.astronomy;
 
 import ch.epfl.rigel.coordinates.GeographicCoordinates;
-import ch.epfl.rigel.math.Angle;
 import ch.epfl.rigel.math.Polynomial;
 
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -19,11 +19,13 @@ import static ch.epfl.rigel.math.Angle.ofHr;
  */
 public final class SiderealTime {
 
-    private SiderealTime() {}
+    private SiderealTime() {
+    }
 
     private final static double S_ZERO_COEFF_0 = 0.000025862;
     private final static double[] S_ZERO_COEFFS = {2400.051336, 6.697374558};
     private final static double S_ONE_COEFF = 1.002737909;
+    private final static Polynomial POLYNOM = Polynomial.of(S_ZERO_COEFF_0, S_ZERO_COEFFS);
 
     /**
      * Computes sidereal Greenwich time
@@ -32,19 +34,17 @@ public final class SiderealTime {
      * @return (double) Greenwich's sidereal time normalized to [0,TAU[ interval
      */
     public static double greenwich(ZonedDateTime when) {
-        ZonedDateTime dayOfWhen = when.truncatedTo(ChronoUnit.DAYS);
+        ZonedDateTime dayOfWhen = when.truncatedTo(ChronoUnit.DAYS).withZoneSameInstant(ZoneOffset.UTC);
         double T = J2000.julianCenturiesUntil(dayOfWhen);
-        double t = when.getHour() + when.getMinute()/Angle.MINUTES_IN_HOURS + when.getSecond()/
-                (Angle.SECONDS_IN_MINUTES*Angle.MINUTES_IN_HOURS);
+        double t = when.getHour() + when.getMinute() / 60.0 + when.getSecond() / 3600.0;
 
-        return normalizePositive(ofHr(Polynomial.of(S_ZERO_COEFF_0, S_ZERO_COEFFS).at(T)
-             + S_ONE_COEFF*t));
+        return normalizePositive(ofHr(POLYNOM.at(T) + S_ONE_COEFF * t));
     }
 
     /**
      * Computes local sidereal time normalized to [0,TAU[ interval
      *
-     * @param when (ZonedDateTime) time of point of interest
+     * @param when  (ZonedDateTime) time of point of interest
      * @param where (GeographicCoordinates) geographic coordinates of point of interest
      * @return (double) local sidereal time normalized to [0,TAU[ interval
      */

@@ -1,9 +1,9 @@
 package ch.epfl.rigelTest.coordinates;
 
-import ch.epfl.rigel.astronomy.SiderealTime;
-import ch.epfl.rigel.coordinates.EquatorialCoordinates;
+import ch.epfl.rigel.math.Angle;
 import org.junit.jupiter.api.Test;
 
+import static ch.epfl.rigel.math.Angle.normalizePositive;
 import static ch.epfl.rigel.math.Angle.ofDeg;
 import static java.lang.Math.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -12,7 +12,7 @@ class EquatorialToHorizontalConversionTest {
 
     @Test
     void apply() {
-        double A    = ofDeg(76.728973);
+        double A    = ofDeg(283.271027);
         double h    = ofDeg(19.334345);
         double H    = ofDeg(87.933333);
         double phi  = ofDeg(52);
@@ -22,12 +22,20 @@ class EquatorialToHorizontalConversionTest {
         double cosPhi       = cos(phi);
         double sinDec       = sin(dec);
 
-        double term1        = sinDec*sinPhi + cosPhi*cos(dec)*cos((H));
+        double term1        = sinDec*sinPhi + cosPhi*cos(dec)*cos(H);
         double h_           = asin(term1);
-        double A_           = acos((sinDec - sinPhi*term1)/(cos(h_)*cosPhi));
+        double denomA   = sinDec - sinPhi * term1;
+        double numA     = -cosPhi*cos(dec)*sin(H);
+        double A_        = atan2(numA,denomA);
 
-        assertEquals(A, A_, 0.0000001);
-        assertEquals(h, h_, 0.0000001);
+        A_ = normalizePositive(A_);
+        /*if(denomA < 0) {
+            A_ += Math.PI;
+        } else if (numA < 0) {
+            A_ += Angle.TAU;
+        }*/
+        assertEquals(A, A_, 1e-6);
+        assertEquals(h, h_, 1e-6);
 
     }
 }

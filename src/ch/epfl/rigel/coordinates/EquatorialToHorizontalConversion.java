@@ -42,7 +42,6 @@ public final class EquatorialToHorizontalConversion implements Function<Equatori
     }
 
     /**
-     * An algebraic modification has been applied  to the function to maje iit more efficient
      * @param equatorialCoordinates coordinates to convert
      * @return Horizontal coordinates corresponding to the input
      */
@@ -52,10 +51,16 @@ public final class EquatorialToHorizontalConversion implements Function<Equatori
         double ra       = equatorialCoordinates.ra();
         double dec      = equatorialCoordinates.dec();
         double sinDec   = sin(dec);
+        double H        = SiderealTime.local(now, geographicCoordinates) - ra;
 
-        double term1    = sinDec*sinPhi + cosPhi*cos(dec)*cos(SiderealTime.local(now, geographicCoordinates) - ra);
+        double term1    = sinDec*sinPhi + cosPhi*cos(dec)*cos(H);
+          /*Same playing around with trigonometry as for EclipticToEquatorialConversion in order to perform less
+            computation.*/
+
         double h        = asin(term1);
-        double A        = acos((sinDec - sinPhi*term1)/(cos(h)*cosPhi));
+        double A        = atan2(-cosPhi*cos(dec)*sin(H),sinDec - sinPhi * term1);
+
+        //double A        = acos((sinDec - sinPhi*term1)/(cos(h)*cosPhi)); first formula
 
         return HorizontalCoordinates.of(normalizePositive(A), h);
     }

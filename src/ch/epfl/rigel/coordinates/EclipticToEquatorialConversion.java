@@ -39,7 +39,6 @@ public final class EclipticToEquatorialConversion implements Function<EclipticCo
     }
 
     /**
-     * An algebraic modification has been applied  to the function to maje iit more efficient
      * @param eclipticCoordinates coordinates to convert
      * @return Equatorial coordinates corresponding to the input
      */
@@ -49,13 +48,15 @@ public final class EclipticToEquatorialConversion implements Function<EclipticCo
         double lambda   = eclipticCoordinates.lon();
         double beta     = eclipticCoordinates.lat();
 
-        double term1    = 2* sinEpsilon* sin(beta);
-        double term2    = cosEpsilon* (sin(lambda - beta) + sin(lambda + beta));
+        double term1    = 2*sin(beta);
+        double term2    = sin(lambda - beta) + sin(lambda + beta);
+            /*Playing around with some trigonometry, one can isolate these 2 common terms so there's no need to compute
+              them twice.*/
 
-        double ra       = atan2(term2 - term1, 2*cos(lambda)*cos(beta));
-        double dec      = asin(0.5* term1 + term2);
-
-        return EquatorialCoordinates.of(ra, dec);
+        double ra       = atan2(term2*cosEpsilon - term1*sinEpsilon, 2*cos(lambda)*cos(beta));
+        double dec      = asin(0.5*(term1*cosEpsilon + term2*sinEpsilon));
+        
+        return EquatorialCoordinates.of(Angle.normalizePositive(ra), dec);
     }
 
     @Override

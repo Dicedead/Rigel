@@ -1,9 +1,7 @@
 package ch.epfl.rigelTest.coordinates;
 
-import ch.epfl.rigel.coordinates.EclipticCoordinates;
 import ch.epfl.rigel.coordinates.GeographicCoordinates;
 import ch.epfl.rigel.math.Angle;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

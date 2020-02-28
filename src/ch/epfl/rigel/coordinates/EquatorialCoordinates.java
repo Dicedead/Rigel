@@ -15,7 +15,7 @@ import java.util.Locale;
  */
 public final class EquatorialCoordinates extends SphericalCoordinates{
 
-    private final static RightOpenInterval LON_INTERVAL_RAD_0toTAU = RightOpenInterval.of(0, Angle.TAU);
+    private final static RightOpenInterval LON_INTERVAL_RAD_0toTAU = RightOpenInterval.of(0, 2*Math.PI);
     private final static ClosedInterval LAT_INTERVAL_RAD_SYM_PI = ClosedInterval.symmetric(Math.PI);
 
     /**
@@ -55,7 +55,7 @@ public final class EquatorialCoordinates extends SphericalCoordinates{
 
     /**
      * Getter for right ascension in hours
-     * @return latitude in radians
+     * @return right ascension in hours
      */
     public double raHr() { return Angle.toHr(super.lon()); }
 
