@@ -6,6 +6,7 @@ import ch.epfl.rigel.math.Angle;
 import org.junit.jupiter.api.Test;
 
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -17,8 +18,11 @@ class SiderealTimeTest {
     @Test
     void greenwich() {
         ZonedDateTime date = ZonedDateTime.of(1980,4,22,14,36,51,27
-                , ZoneId.of("GMT"));
+                , ZoneOffset.UTC);
         assertEquals(Angle.normalizePositive(Angle.ofHr(4+40/60.0+5.23/3600.0)), SiderealTime.greenwich(date),EPSILON);
+
+        assertEquals( 1.9883078130455532,SiderealTime.greenwich(ZonedDateTime.of(2001,9,11,8,14,0,0, ZoneId.of("UTC"))),EPSILON);
+
     }
 
     @Test
