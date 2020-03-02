@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class EpochTest {
 
-    private final static double EPSILON   = 1e-6;
+    private final static double EPSILON   = 1e-60;
 
 
     @Test
@@ -36,6 +36,10 @@ class EpochTest {
                 LocalTime.of(18, 0),
                 ZoneOffset.UTC);
 
+        ZonedDateTime d2 = ZonedDateTime.of(LocalDate.of(1980,Month.APRIL,22),
+                LocalTime.of(14,36,51,(int)67e7),ZoneOffset.UTC);
+
         assertEquals(2.25 /36525.0 ,Epoch.J2000.julianCenturiesUntil(d));
+        //assertEquals(-0.196947296,Epoch.J2000.julianCenturiesUntil(d2));
     }
 }

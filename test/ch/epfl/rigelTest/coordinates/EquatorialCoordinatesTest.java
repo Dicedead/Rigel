@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class EquatorialCoordinatesTest {
 
-    private static final double EPSILON = 1e-6;
+    private static final double EPSILON = 1e-150;
     EquatorialCoordinates equatorialCoordinates = EquatorialCoordinates.of(ofDeg(23), ofDeg(45));
 
     @Test

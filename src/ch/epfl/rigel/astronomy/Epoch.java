@@ -15,7 +15,7 @@ public enum Epoch {
     J2010(ZonedDateTime.of(LocalDate.of(2010, Month.JANUARY, 1).minusDays(1),LocalTime.of(0,0),
             ZoneOffset.UTC));
 
-
+    private final static double COEFF_TO_DAYS = 24*3600*1000;
     private final ZonedDateTime epoch;
 
     private Epoch(ZonedDateTime date) {
@@ -28,7 +28,6 @@ public enum Epoch {
      */
     public double daysUntil(ZonedDateTime when)
     {
-        double COEFF_TO_DAYS = 24 * 3600 * 1000;
         return (epoch.until(when, ChronoUnit.MILLIS))/ COEFF_TO_DAYS;
     }
 
