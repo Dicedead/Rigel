@@ -18,6 +18,16 @@ public abstract class CelestialObject {
     private final float angularSize;
     private final float magnitude;
 
+    /**
+     * Celestial Object constructor
+     *
+     * @param name (String) object's identification
+     * @param equatorialPos (EquatorialCoordinates) object's coordinates
+     * @param angularSize (float) object's angular size
+     * @param magnitude (float) object's apparent magnitude
+     * @throws IllegalArgumentException if angularSize < 0
+     * @throws NullPointerException if name or equatorialPos are null
+     */
     CelestialObject(String name, EquatorialCoordinates equatorialPos, float angularSize, float magnitude){
         Preconditions.checkArgument(angularSize >= 0);
 
@@ -27,14 +37,30 @@ public abstract class CelestialObject {
         this.magnitude = magnitude;
     }
 
+    /**
+     * @return (String) Object's name
+     */
     public String name(){ return name; }
 
+    /**
+     * @return (double) Object's angular size
+     */
     public double angularSize(){ return angularSize; }
 
+    /**
+     * @return (double) Object's apparent magnitude
+     */
     public double magnitude(){ return magnitude; }
 
+    /**
+     * @return (EquatorialCoordinates) Object's equatorial coordinates
+     */
     public EquatorialCoordinates equatorialPos() { return equatorialPos; }
+    //No need to make a defensive copy of equatorialPos as it is immutable.
 
+    /**
+     * @return (String) Information on the object (by default: its name)
+     */
     public String info(){ return name(); }
 
     @Override

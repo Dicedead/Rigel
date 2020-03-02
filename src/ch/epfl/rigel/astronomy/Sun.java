@@ -13,11 +13,22 @@ import java.util.Objects;
  */
 public final class Sun extends CelestialObject {
 
+
     private final static String NAME = "Soleil";
     private final static float magnitude = -26.7f;
     private final EclipticCoordinates eclipticPos;
     private final float meanAnomaly;
 
+    /**
+     * Constructor for the Sun at a given time
+     *
+     * @param eclipticPos (EclipticCoordinates) object's ecliptic coordinates
+     * @param equatorialPos (EquatorialCoordinates) object's equatorial coordinates
+     * @param angularSize (float) object's angular size
+     * @param meanAnomaly (float) object's mean anomaly
+     * @throws IllegalArgumentException if angularSize < 0
+     * @throws NullPointerException if name, eclipticPos or equatorialPos are null
+     */
     public Sun(EclipticCoordinates eclipticPos, EquatorialCoordinates equatorialPos, float angularSize, float meanAnomaly) {
         super(NAME, equatorialPos, angularSize, magnitude);
 
@@ -25,7 +36,13 @@ public final class Sun extends CelestialObject {
         this.meanAnomaly = meanAnomaly;
     }
 
+    /**
+     * @return Sun's ecliptic coordinates
+     */
     public EclipticCoordinates eclipticPos(){ return eclipticPos; }
 
+    /**
+     * @return Sun's current mean anomaly
+     */
     public double meanAnomaly(){ return meanAnomaly; }
 }
