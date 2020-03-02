@@ -14,11 +14,11 @@ import java.util.Objects;
 public final class Sun extends CelestialObject {
 
     private final static String NAME = "Soleil";
-    private final static float magnitude = 26.7f;
+    private final static float magnitude = -26.7f;
     private final EclipticCoordinates eclipticPos;
     private final float meanAnomaly;
 
-    Sun(EclipticCoordinates eclipticPos, EquatorialCoordinates equatorialPos, float angularSize, float meanAnomaly) {
+    public Sun(EclipticCoordinates eclipticPos, EquatorialCoordinates equatorialPos, float angularSize, float meanAnomaly) {
         super(NAME, equatorialPos, angularSize, magnitude);
 
         this.eclipticPos = Objects.requireNonNull(eclipticPos);
