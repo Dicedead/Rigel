@@ -18,7 +18,8 @@ public final class CartesianCoordinates {
     }
 
     /**
-     * Allows to construct a cartesian system
+     * Constructs a cartesian system
+     *
      * @param x coordinate
      * @param y coordinate
      * @return a cartesian coordinates
@@ -29,7 +30,6 @@ public final class CartesianCoordinates {
     }
 
     /**
-     *
      * @return x coordinate
      */
     public double x() {
@@ -37,7 +37,6 @@ public final class CartesianCoordinates {
     }
 
     /**
-     *
      * @return y coordinates
      */
     public double y() {

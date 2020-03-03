@@ -37,7 +37,7 @@ public final class Moon extends CelestialObject {
         this.phase = phase;
     }
 
-    
+
     /**
      * @return Moon's name and its phase percentage
      */
