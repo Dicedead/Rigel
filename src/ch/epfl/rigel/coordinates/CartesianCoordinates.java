@@ -46,7 +46,7 @@ public final class CartesianCoordinates {
     @Override
     public String toString() {
         return String.format(Locale.ROOT,
-                "CartesianCoordinates: x= %.4f; y= %.4f",x,y);
+                "CartesianCoordinates: x=%.4f; y=%.4f",x,y);
     }
 
     @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")

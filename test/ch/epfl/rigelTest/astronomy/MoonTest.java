@@ -1,5 +1,6 @@
-package ch.epfl.rigel.astronomy;
+package ch.epfl.rigelTest.astronomy;
 
+import ch.epfl.rigel.astronomy.Moon;
 import ch.epfl.rigel.coordinates.EquatorialCoordinates;
 import org.junit.jupiter.api.Test;
 
@@ -11,7 +12,7 @@ class MoonTest {
 
     @Test
     void info() {
-        assertEquals("Lune 23.4%",testMoon.info());
+        assertEquals("Lune (23.5%)",testMoon.info());
     }
 
     @Test

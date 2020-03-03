@@ -1,5 +1,6 @@
-package ch.epfl.rigel.astronomy;
+package ch.epfl.rigelTest.astronomy;
 
+import ch.epfl.rigel.astronomy.Planet;
 import ch.epfl.rigel.coordinates.EquatorialCoordinates;
 import org.junit.jupiter.api.Test;
 
@@ -9,7 +10,7 @@ class CelestialObjectTest {
 
     private final static Planet validPlanet = new Planet("lul", EquatorialCoordinates.of(0,0),4f,5f);
     private final static Planet validPlanet2 = new Planet("lul", EquatorialCoordinates.of(0,0),4.52f,5.56f);
-
+    private final static double EPSILON = 1e-7;
 
     @Test
     void constructorThrows() {
@@ -41,8 +42,8 @@ class CelestialObjectTest {
         assertEquals(4, validPlanet.angularSize());
 
         //Double values:
-        assertEquals(4.52,validPlanet2.angularSize());
-        assertEquals(5.56,validPlanet2.magnitude());
+        assertEquals(4.52,validPlanet2.angularSize(),EPSILON);
+        assertEquals(5.56,validPlanet2.magnitude(),EPSILON);
     }
 
 }

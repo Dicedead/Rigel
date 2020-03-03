@@ -17,7 +17,7 @@ final class SignatureChecks_4 {
         d = c.y();
     }
 
-    /*@Test
+    @Test
     void checkStereographicProjection() {
         HorizontalCoordinates h = null;
         StereographicProjection s;
@@ -29,7 +29,7 @@ final class SignatureChecks_4 {
         d = s.applyToAngle(d);
         c = s.apply(h);
         h = s.inverseApply(c);
-    }*/
+    }
 
     @Test
     void checkCelestialObject() {
