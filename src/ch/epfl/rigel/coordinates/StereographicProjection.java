@@ -15,7 +15,7 @@ import static java.lang.Math.*;
 public final class StereographicProjection implements Function<HorizontalCoordinates, CartesianCoordinates> {
 
     private final HorizontalCoordinates centerOfProjection;
-    final double cosPhi1, sinPhi1;
+    private final double cosPhi1, sinPhi1;
 
     public StereographicProjection(HorizontalCoordinates center)
     {
@@ -35,13 +35,13 @@ public final class StereographicProjection implements Function<HorizontalCoordin
         double lambda = azAlt.az() - centerOfProjection.az();
 
         double phi = azAlt.alt();
-        double sinP = 2*sin(azAlt.alt());
+        double sinP = 2*sin(phi);
 
         double term1 = cos(lambda - phi)+cos(lambda + phi);
         double num = sinPhi1*term1 - cosPhi1*sinP;
         double den = 1/(sinPhi1*sinP + cosPhi1*term1+2);
 
-        return CartesianCoordinates.of(sin(lambda)*cosPhi1 *(den), - num * den);
+        return CartesianCoordinates.of(sin(lambda)*cos(phi)*2*den, - num * den);
     }
 
     /**
@@ -80,12 +80,18 @@ public final class StereographicProjection implements Function<HorizontalCoordin
      */
     public HorizontalCoordinates inverseApply(CartesianCoordinates xy)
     {
-        double y        = xy.y();
-        double x        = xy.x();
-        double term1    = x*x +y*y - 1;
-        double term2    = 2*y;
+        double y = xy.y();
+        double x = xy.x();
+        double p = Math.sqrt(x*x + y*y);
+        double p2 = x*x + y*y;
+        double den = p2 + 1;
+        double sinC = 2*p /den;
+        double cosC = (1-p2)/den;
+        double term = y*sinC;
 
-        return HorizontalCoordinates.of(Angle.normalizePositive(atan2(2*x, cosPhi1*abs(term1)-term2*sinPhi1) + centerOfProjection.az()), asin((sinPhi1*abs(term1)+term2*cosPhi1)/(term1+2)));
+        return HorizontalCoordinates.of(
+                Angle.normalizePositive(centerOfProjection.az()+atan2(x*sinC,p*cosPhi1*cosC - term*sinPhi1)),
+                asin(cosC*sinPhi1 + (term*cosPhi1)/p));
     }
 
 
