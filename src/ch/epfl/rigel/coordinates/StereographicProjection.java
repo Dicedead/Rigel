@@ -39,8 +39,6 @@ public final class StereographicProjection implements Function<HorizontalCoordin
         double den = 1/(sinPhi1*(sinA-C*cosA)+1);
 
         return CartesianCoordinates.of(sin(lambda)*cosA*cosPhi1 *(den), (sinA*cosPhi1 - C*cosA*sinPhi1)*den );
-
-
     }
 
     /**
