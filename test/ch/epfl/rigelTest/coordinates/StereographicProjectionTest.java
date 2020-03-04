@@ -1,5 +1,6 @@
 package ch.epfl.rigelTest.coordinates;
 
+import ch.epfl.rigel.coordinates.CartesianCoordinates;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.coordinates.StereographicProjection;
 import ch.epfl.rigel.math.Angle;
@@ -14,7 +15,7 @@ class StereographicProjectionTest {
             new StereographicProjection (HorizontalCoordinates.ofDeg(23, 45));
     @Test
     void apply() {
-
+        assertEquals(stereographicProjection.apply(stereographicProjection.inverseApply(CartesianCoordinates.of(10, 10))).y(), 10);
     }
 
     @Test
@@ -31,9 +32,6 @@ class StereographicProjectionTest {
         assertEquals(4.363330053e-3,stereographicProjection.applyToAngle(Angle.ofDeg(1/2.0)),EPSILON);
     }
 
-    @Test
-    void inverseApply() {
-    }
 
     @Test
     void testToString() {
