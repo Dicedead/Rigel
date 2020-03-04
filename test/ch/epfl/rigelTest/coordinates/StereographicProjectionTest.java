@@ -8,7 +8,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class StereographicProjectionTest {
-    StereographicProjection stereographicProjection = new StereographicProjection (HorizontalCoordinates.ofDeg(23, 45));
+
+    private final static double EPSILON = 1e-7;
+    private final static StereographicProjection stereographicProjection =
+            new StereographicProjection (HorizontalCoordinates.ofDeg(23, 45));
     @Test
     void apply() {
 
@@ -25,6 +28,7 @@ class StereographicProjectionTest {
 
     @Test
     void applyToAngle() {
+        assertEquals(4.363330053e-3,stereographicProjection.applyToAngle(Angle.ofDeg(1/2.0)),EPSILON);
     }
 
     @Test
