@@ -1,6 +1,5 @@
 package ch.epfl.rigel.coordinates;
 
-import java.util.Locale;
 
 /**
  * Cartesian coordinates representaation
@@ -45,8 +44,7 @@ public final class CartesianCoordinates {
 
     @Override
     public String toString() {
-        return String.format(Locale.ROOT,
-                "CartesianCoordinates: x=%.4f; y=%.4f",x,y);
+        return "CartesianCoordinates : ("+x+" ; "+y+")";
     }
 
     @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
