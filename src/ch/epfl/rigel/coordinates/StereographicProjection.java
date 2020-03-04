@@ -4,6 +4,12 @@ import java.util.function.Function;
 
 import static java.lang.Math.*;
 
+/**
+ * StereographicProjection function like class
+ *
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public final class StereographicProjection implements Function<HorizontalCoordinates, CartesianCoordinates> {
 
     private final HorizontalCoordinates centerOfProjection;
@@ -16,6 +22,11 @@ public final class StereographicProjection implements Function<HorizontalCoordin
         sinPhi1 = sin(center.alt());
     }
 
+    /**
+     * Horizontal -> Cartesian
+     * @param azAlt input horizontal coordinates
+     * @return Cartesian coordinate corresponding to azAlt
+     */
     @Override
     public CartesianCoordinates apply(HorizontalCoordinates azAlt) {
 
@@ -32,21 +43,40 @@ public final class StereographicProjection implements Function<HorizontalCoordin
 
     }
 
+    /**
+     *
+     * @param hor he corresponding parallel on earth
+     * @return the center of the circle projected from parallel
+     */
     public CartesianCoordinates circleCenterForParallel(HorizontalCoordinates hor)
     {
         return CartesianCoordinates.of(0, cosPhi1/(sin(hor.alt())) + sinPhi1);
     }
 
+    /**
+     *
+     * @param parallel the corresponding parallel on earth
+     * @return the radius of the circle projected from parallel
+     */
     public double circleRadiusForParallel(HorizontalCoordinates parallel)
     {
         return 1/atan2( parallel.alt(),1) + sinPhi1;
     }
 
+    /**
+     *
+     * @param rad size of the sphere
+     * @return diameter of the projected circle of angular size rad
+     */
     public double applyToAngle(double rad)
     {
         return 2*atan2(rad,4);
     }
-
+    /**
+     *  Cartesian -> Horizontal
+     * @param xy input cartesian coordinates
+     * @return Horizontal corresponding to azAlt
+     */
     public HorizontalCoordinates inverseApply(CartesianCoordinates xy)
     {
         double y        = xy.y();
@@ -73,11 +103,11 @@ public final class StereographicProjection implements Function<HorizontalCoordin
     }
 
     /**
-     * @return formatted polynomial
+     * @return formatted coordinates
      */
     @Override
     public String toString() {
 
-        return null;
+        return "StereographicProjection : (" + centerOfProjection.alt()+" ; " + centerOfProjection.az() +")";
     }
 }

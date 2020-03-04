@@ -37,11 +37,7 @@ public final class EclipticToEquatorialConversion implements Function<EclipticCo
         sinEpsilon  = sin(epsilon);
         cosEpsilon  = cos(epsilon);
     }
-
-    /**
-     * @param eclipticCoordinates coordinates to convert
-     * @return Equatorial coordinates corresponding to the input
-     */
+c
     @Override
     public EquatorialCoordinates apply(EclipticCoordinates eclipticCoordinates) {
 
