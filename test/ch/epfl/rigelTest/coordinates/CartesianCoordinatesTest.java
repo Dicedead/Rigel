@@ -17,7 +17,7 @@ class CartesianCoordinatesTest {
 
     @Test
     void testToString() {
-        assertEquals("CartesianCoordinates: x=10.5926; y=5.6149",cartes.toString());
+        assertEquals("CartesianCoordinates : (10.59258 ; 5.614905)",cartes.toString());
     }
 
     @Test
@@ -25,9 +25,7 @@ class CartesianCoordinatesTest {
         assertThrows(UnsupportedOperationException.class, () -> {
             cartes.equals(cartes);
         });
-        assertThrows(UnsupportedOperationException.class, () -> {
-            cartes.hashCode();
-        });
+        assertThrows(UnsupportedOperationException.class, cartes::hashCode);
     }
 
 }

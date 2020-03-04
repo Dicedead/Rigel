@@ -102,12 +102,8 @@ public final class StereographicProjection implements Function<HorizontalCoordin
         throw new UnsupportedOperationException();
     }
 
-    /**
-     * @return formatted coordinates
-     */
     @Override
     public String toString() {
-
         return "StereographicProjection : (" + centerOfProjection.alt()+" ; " + centerOfProjection.az() +")";
     }
 }
