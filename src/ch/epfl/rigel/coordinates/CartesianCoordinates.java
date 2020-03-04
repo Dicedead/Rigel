@@ -1,4 +1,7 @@
 package ch.epfl.rigel.coordinates;
+
+import java.util.Locale;
+
 /**
  * Cartesian coordinates representaation
  *
@@ -7,24 +10,26 @@ package ch.epfl.rigel.coordinates;
  */
 public final class CartesianCoordinates {
 
+    private final double x, y;
+
     private CartesianCoordinates(double x, double y) {
         this.x = x;
         this.y = y;
     }
 
     /**
-     * Allows to construct a cartesian system
+     * Constructs a cartesian system
+     *
      * @param x coordinate
      * @param y coordinate
      * @return a cartesian coordinates
      */
-    static CartesianCoordinates of(double x, double y)
+    public static CartesianCoordinates of(double x, double y)
     {
         return new CartesianCoordinates(x, y);
     }
 
     /**
-     *
      * @return x coordinate
      */
     public double x() {
@@ -32,16 +37,19 @@ public final class CartesianCoordinates {
     }
 
     /**
-     *
      * @return y coordinates
      */
     public double y() {
         return y;
     }
 
-    private final double x, y;
+    @Override
+    public String toString() {
+        return String.format(Locale.ROOT,
+                "CartesianCoordinates: x=%.4f; y=%.4f",x,y);
+    }
 
-
+    @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
     @Override
     public final boolean equals(Object o) {
         //System.err.println("Fatal error : tried to test equality between intervals but double precision does not \n" +

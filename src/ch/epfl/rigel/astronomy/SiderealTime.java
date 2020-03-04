@@ -19,8 +19,7 @@ import static ch.epfl.rigel.math.Angle.ofHr;
  */
 public final class SiderealTime {
 
-    private SiderealTime() {
-    }
+    private SiderealTime() {}
 
     private final static double S_ZERO_COEFF_0 = 0.000025862;
     private final static double[] S_ZERO_COEFFS = {2400.051336, 6.697374558};
