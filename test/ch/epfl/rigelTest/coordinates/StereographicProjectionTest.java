@@ -9,23 +9,37 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class StereographicProjectionTest {
-    StereographicProjection stereographicProjection = new StereographicProjection (HorizontalCoordinates.ofDeg(23, 45));
+
+    private final static double EPSILON = 1e-6;
+    private final static HorizontalCoordinates center = HorizontalCoordinates.ofDeg(0, 0);
+    private final static StereographicProjection stereographicProjection =
+            new StereographicProjection (HorizontalCoordinates.ofDeg(23, 45));
+    private final static StereographicProjection stereographicProjection0 =
+            new StereographicProjection (center);
+    private final static StereographicProjection stereographicProjection45 =
+            new StereographicProjection (HorizontalCoordinates.ofDeg(45, 45));
     @Test
     void apply() {
-        assertEquals(stereographicProjection.apply(stereographicProjection.inverseApply(CartesianCoordinates.of(10, 10))).y(), 10);
+        assertEquals(-0.1316524976, stereographicProjection45.apply(HorizontalCoordinates.ofDeg(45,30)).y(),EPSILON);
+        assertEquals(Angle.ofDeg(29.05537+180), stereographicProjection45.inverseApply(CartesianCoordinates.of(10,0)).az(), EPSILON);
+        assertEquals(stereographicProjection.apply(stereographicProjection.inverseApply(CartesianCoordinates.of(10, 15))).y(), 15, EPSILON);
     }
 
     @Test
     void circleCenterForParallel() {
 
+        assertEquals(1/0. ,stereographicProjection0.circleCenterForParallel(center).y(), EPSILON);
+
     }
 
     @Test
     void circleRadiusForParallel() {
+        assertEquals(1/0. ,stereographicProjection0.circleRadiusForParallel(center), EPSILON);
     }
 
     @Test
     void applyToAngle() {
+        assertEquals(4.363330053e-3,stereographicProjection.applyToAngle(Angle.ofDeg(1/2.0)),EPSILON);
     }
 
 
