@@ -1,5 +1,7 @@
 package ch.epfl.rigel.coordinates;
 
+import ch.epfl.rigel.math.Angle;
+
 import java.util.function.Function;
 
 import static java.lang.Math.*;
@@ -31,14 +33,15 @@ public final class StereographicProjection implements Function<HorizontalCoordin
     public CartesianCoordinates apply(HorizontalCoordinates azAlt) {
 
         double lambda = azAlt.az() - centerOfProjection.az();
-        double C = cos(lambda);
 
-        double cosA = cos(azAlt.alt());
-        double sinA = sin(azAlt.alt());
+        double phi = azAlt.alt();
+        double sinP = 2*sin(azAlt.alt());
 
-        double den = 1/(sinPhi1*(sinA-C*cosA)+1);
+        double term1 = cos(lambda - phi)+cos(lambda + phi);
+        double num = sinPhi1*term1 - cosPhi1*sinP;
+        double den = 1/(sinPhi1*sinP + cosPhi1*term1+2);
 
-        return CartesianCoordinates.of(sin(lambda)*cosA*cosPhi1 *(den), (sinA*cosPhi1 - C*cosA*sinPhi1)*den );
+        return CartesianCoordinates.of(sin(lambda)*cosPhi1 *(den), - num * den);
     }
 
     /**
@@ -79,10 +82,10 @@ public final class StereographicProjection implements Function<HorizontalCoordin
     {
         double y        = xy.y();
         double x        = xy.x();
-        double term1    = abs(x*x +y*y - 1);
-        double term2    = 2*y*sinPhi1;
+        double term1    = x*x +y*y - 1;
+        double term2    = 2*y;
 
-        return HorizontalCoordinates.of(atan2(2*x, cosPhi1*term1-term2), asin(sinPhi1*term1+term2/(term1+2)));
+        return HorizontalCoordinates.of(Angle.normalizePositive(atan2(2*x, cosPhi1*abs(term1)-term2*sinPhi1) + centerOfProjection.az()), asin((sinPhi1*abs(term1)+term2*cosPhi1)/(term1+2)));
     }
 
 
