@@ -21,6 +21,8 @@ public final class EclipticToEquatorialConversion implements Function<EclipticCo
 
     private final double sinEpsilon;
     private final double cosEpsilon;
+    private final static Polynomial POLYNOM = Polynomial.of(
+            ofArcsec(0.00181), ofArcsec(-0.0006), ofArcsec(-46.815), Angle.ofDMS(23, 26, 21.45));
 
     /**
      * Initialize epsilon for calculations
@@ -30,9 +32,7 @@ public final class EclipticToEquatorialConversion implements Function<EclipticCo
     {
         double T    = J2000.julianCenturiesUntil(when);
 
-        double epsilon = Polynomial.of(
-                ofArcsec(0.00181), ofArcsec(-0.0006), ofArcsec(-46.815), Angle.ofDMS(23, 26, 21.45))
-                .at(T);
+        double epsilon = POLYNOM.at(T);
 
         sinEpsilon  = sin(epsilon);
         cosEpsilon  = cos(epsilon);

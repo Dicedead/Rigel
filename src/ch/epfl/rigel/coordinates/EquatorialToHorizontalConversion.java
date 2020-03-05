@@ -1,15 +1,11 @@
 package ch.epfl.rigel.coordinates;
 
 import ch.epfl.rigel.astronomy.SiderealTime;
-import ch.epfl.rigel.math.Angle;
-import ch.epfl.rigel.math.Polynomial;
 
 import java.time.ZonedDateTime;
 import java.util.function.Function;
 
-import static ch.epfl.rigel.astronomy.Epoch.J2000;
 import static ch.epfl.rigel.math.Angle.normalizePositive;
-import static ch.epfl.rigel.math.Angle.ofArcsec;
 import static java.lang.Math.*;
 
 /**
@@ -25,6 +21,7 @@ public final class EquatorialToHorizontalConversion implements Function<Equatori
     private final double cosPhi;
     private final GeographicCoordinates geographicCoordinates;
     private final ZonedDateTime now;
+    private final double localTime;
 
     /**
      * Initialize epsilon for calculations
@@ -32,13 +29,12 @@ public final class EquatorialToHorizontalConversion implements Function<Equatori
      */
     public EquatorialToHorizontalConversion(ZonedDateTime  when, GeographicCoordinates where)
     {
+        now         = when;
         geographicCoordinates = where;
-
+        localTime = SiderealTime.local(now, geographicCoordinates);
 
         sinPhi      = sin(geographicCoordinates.lat());
         cosPhi      = cos(geographicCoordinates.lat());
-        now         = when;
-
     }
 
     /**
@@ -51,7 +47,7 @@ public final class EquatorialToHorizontalConversion implements Function<Equatori
         double ra       = equatorialCoordinates.ra();
         double dec      = equatorialCoordinates.dec();
         double sinDec   = sin(dec);
-        double H        = SiderealTime.local(now, geographicCoordinates) - ra;
+        double H        = localTime - ra;
 
         double term1    = sinDec*sinPhi + cosPhi*cos(dec)*cos(H);
           /*Same playing around with trigonometry as for EclipticToEquatorialConversion in order to perform less

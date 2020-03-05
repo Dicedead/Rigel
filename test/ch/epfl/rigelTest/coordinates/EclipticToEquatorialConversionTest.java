@@ -12,11 +12,6 @@ import java.time.ZonedDateTime;
 
 import static ch.epfl.rigel.astronomy.Epoch.J2000;
 import static ch.epfl.rigel.math.Angle.ofArcsec;
-import static ch.epfl.rigel.math.Angle.ofDeg;
-import static java.lang.Math.acos;
-import static java.lang.Math.asin;
-import static java.lang.Math.cos;
-import static java.lang.Math.sin;
 import static org.junit.jupiter.api.Assertions.*;
 
 class EclipticToEquatorialConversionTest {
