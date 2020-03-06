@@ -4,6 +4,7 @@ import ch.epfl.rigel.astronomy.Planet;
 import ch.epfl.rigel.coordinates.EquatorialCoordinates;
 import org.junit.jupiter.api.Test;
 
+import static java.lang.Float.NaN;
 import static org.junit.jupiter.api.Assertions.*;
 
 class CelestialObjectTest {
@@ -29,6 +30,10 @@ class CelestialObjectTest {
         EquatorialCoordinates equatorialCoord = null;
         assertThrows(NullPointerException.class, () -> {
             new Planet("lul", equatorialCoord,4f,5f);
+        });
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            new Planet("lul", EquatorialCoordinates.of(0,0),NaN,NaN);
         });
     }
 
