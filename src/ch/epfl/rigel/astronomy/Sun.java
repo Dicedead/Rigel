@@ -14,7 +14,7 @@ import java.util.Objects;
 public final class Sun extends CelestialObject {
 
     private final static String NAME = "Soleil";
-    private final static float magnitude = -26.7f;
+    private final static float MAGNITUDE = -26.7f;
     private final EclipticCoordinates eclipticPos;
     private final float meanAnomaly;
 
@@ -29,7 +29,7 @@ public final class Sun extends CelestialObject {
      * @throws NullPointerException if name, eclipticPos or equatorialPos are null
      */
     public Sun(EclipticCoordinates eclipticPos, EquatorialCoordinates equatorialPos, float angularSize, float meanAnomaly) {
-        super(NAME, equatorialPos, angularSize, magnitude);
+        super(NAME, equatorialPos, angularSize, MAGNITUDE);
 
         this.eclipticPos = Objects.requireNonNull(eclipticPos);
         this.meanAnomaly = meanAnomaly;

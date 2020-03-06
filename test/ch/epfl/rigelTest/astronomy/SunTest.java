@@ -30,7 +30,7 @@ class SunTest {
 
     @Test
     void magnitude() {
-        assertEquals(-26.7,sunTest.magnitude(),EPSILON);
+        assertEquals(-26.7,sunTest.magnitude());
     }
 
     @Test
