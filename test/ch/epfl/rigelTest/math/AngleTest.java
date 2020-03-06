@@ -9,7 +9,7 @@ class AngleTest {
 
     @Test
     void normalizePositive() {
-        assertEquals(0, Angle.normalizePositive(12*Math.PI));
+        assertEquals(0, Angle.normalizePositive(6.283185307179586));
     }
 
     @Test

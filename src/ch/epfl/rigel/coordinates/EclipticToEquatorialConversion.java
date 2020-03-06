@@ -56,7 +56,7 @@ public final class EclipticToEquatorialConversion implements Function<EclipticCo
         double ra       = atan2(term2*cosEpsilon - term1*sinEpsilon, 2*cos(lambda)*cos(beta));
         double dec      = asin(0.5*(term1*cosEpsilon + term2*sinEpsilon));
         
-        return EquatorialCoordinates.of(Angle.normalizePositive(ra), dec);
+        return EquatorialCoordinates.of(Angle.normalizePositive(Angle.normalizePositive(ra)), dec);
     }
 
     @Override
