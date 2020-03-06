@@ -1,6 +1,8 @@
 package ch.epfl.rigel.coordinates;
 
 import ch.epfl.rigel.math.Angle;
+import ch.epfl.rigel.math.ClosedInterval;
+import ch.epfl.rigel.math.RightOpenInterval;
 
 import java.util.function.Function;
 
@@ -61,7 +63,7 @@ public final class StereographicProjection implements Function<HorizontalCoordin
      */
     public double circleRadiusForParallel(HorizontalCoordinates parallel)
     {
-        return 1/atan2( parallel.alt(),1) + sinPhi1;
+        return 1/atan2(parallel.alt(),1) + sinPhi1;
     }
 
     /**
@@ -92,7 +94,7 @@ public final class StereographicProjection implements Function<HorizontalCoordin
 
         return HorizontalCoordinates.of(
                 Angle.normalizePositive(centerOfProjection.az()+atan2(x*sinC,p*cosPhi1*cosC - term*sinPhi1)),
-                asin(cosC*sinPhi1 + (term*cosPhi1)/p));
+                (asin(cosC*sinPhi1 + (term*cosPhi1)/p)) );
     }
 
 
