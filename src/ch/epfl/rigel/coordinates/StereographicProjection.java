@@ -60,7 +60,7 @@ public final class StereographicProjection implements Function<HorizontalCoordin
      */
     public double circleRadiusForParallel(HorizontalCoordinates parallel)
     {
-        return 1/atan2(parallel.alt(),1) + sinPhi1;
+        return cos(parallel.alt())/(sin(parallel.alt()) + sinPhi1);
     }
 
     /**

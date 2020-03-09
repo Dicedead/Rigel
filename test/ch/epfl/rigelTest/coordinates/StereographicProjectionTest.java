@@ -26,25 +26,31 @@ class StereographicProjectionTest {
     @Test
     void apply() {
         assertEquals(-0.1316524976, stereographicProjection45.apply(HorizontalCoordinates.ofDeg(45,30)).y(),EPSILON);
-        assertEquals(Angle.ofDeg(29.05537+180), stereographicProjection45.inverseApply(CartesianCoordinates.of(10,0)).az(), EPSILON);
-        assertEquals(stereographicProjection.apply(stereographicProjection.inverseApply(CartesianCoordinates.of(10, 15))).y(), 15, EPSILON);
+        assertEquals(Angle.ofDeg(29.05537+180), stereographicProjection45.inverseApply(CartesianCoordinates.of(10,0)).az(),EPSILON);
+        assertEquals(15,stereographicProjection.apply(stereographicProjection.inverseApply(CartesianCoordinates.of(10, 15))).y(), EPSILON);
         assertTrue(RightOpenInterval.of(0,Angle.TAU).contains(Angle.normalizePositive(-1.1102230246251565E-16)));
-        assertEquals(stereographicProjection.inverseApply(stereographicProjection.apply(center)).alt(), 0, EPSILON);
-        assertEquals(stereographicProjection.inverseApply(stereographicProjection.apply(center)).az(), 0, EPSILON);
+        assertEquals(0,stereographicProjection.inverseApply(stereographicProjection.apply(center)).alt(),  EPSILON);
+        assertEquals(0,stereographicProjection.inverseApply(stereographicProjection.apply(center)).az(),  EPSILON);
 
     }
 
     @Test
     void circleCenterForParallel() {
-
         assertEquals(1/0. ,stereographicProjection0.circleCenterForParallel(center).y(), EPSILON);
-
-
+        assertEquals(0.6089987401,stereographicProjection45.circleCenterForParallel(HorizontalCoordinates.ofDeg(
+                0,27
+        )).y(),EPSILON);
+        assertEquals(0,stereographicProjection45.circleCenterForParallel(HorizontalCoordinates.ofDeg(
+                0,27
+        )).x());
     }
 
     @Test
     void circleRadiusForParallel() {
         assertEquals(1/0. ,stereographicProjection0.circleRadiusForParallel(center), EPSILON);
+        assertEquals(0.7673831804,stereographicProjection45.circleRadiusForParallel(HorizontalCoordinates.ofDeg(
+                0,27
+        )),EPSILON);
     }
 
     @Test
