@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class MoonTest {
+class MyMoonTest {
 
     private final static Moon testMoon = new Moon(EquatorialCoordinates.of(0,0),3,3,0.2347f);
 

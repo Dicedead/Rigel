@@ -1,4 +1,4 @@
-package ch.epfl.test;
+package ch.epfl.rigelTest;
 
 import ch.epfl.rigel.astronomy.SiderealTime;
 import ch.epfl.rigel.coordinates.GeographicCoordinates;

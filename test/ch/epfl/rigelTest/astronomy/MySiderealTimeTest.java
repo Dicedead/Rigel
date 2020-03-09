@@ -11,7 +11,7 @@ import java.time.ZonedDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class SiderealTimeTest {
+class MySiderealTimeTest {
 
     private final static double EPSILON = 1e-7;
 
