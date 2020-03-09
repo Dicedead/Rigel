@@ -1,9 +1,6 @@
 package ch.epfl.rigel.coordinates;
 
 import ch.epfl.rigel.math.Angle;
-import ch.epfl.rigel.math.ClosedInterval;
-import ch.epfl.rigel.math.RightOpenInterval;
-
 import java.util.function.Function;
 
 import static java.lang.Math.*;

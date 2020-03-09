@@ -19,8 +19,6 @@ public final class EquatorialToHorizontalConversion implements Function<Equatori
 
     private final double sinPhi;
     private final double cosPhi;
-    private final GeographicCoordinates geographicCoordinates;
-    private final ZonedDateTime now;
     private final double localTime;
 
     /**
@@ -29,12 +27,10 @@ public final class EquatorialToHorizontalConversion implements Function<Equatori
      */
     public EquatorialToHorizontalConversion(ZonedDateTime  when, GeographicCoordinates where)
     {
-        now         = when;
-        geographicCoordinates = where;
-        localTime = SiderealTime.local(now, geographicCoordinates);
+        localTime = SiderealTime.local(when, where);
 
-        sinPhi      = sin(geographicCoordinates.lat());
-        cosPhi      = cos(geographicCoordinates.lat());
+        sinPhi      = sin(where.lat());
+        cosPhi      = cos(where.lat());
     }
 
     /**
