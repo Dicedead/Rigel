@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import static java.lang.Float.NaN;
 import static org.junit.jupiter.api.Assertions.*;
 
-class CelestialObjectTest {
+class MyCelestialObjectTest {
 
     private final static Planet validPlanet = new Planet("lul", EquatorialCoordinates.of(0,0),4f,5f);
     private final static Planet validPlanet2 = new Planet("lul", EquatorialCoordinates.of(0,0),4.52f,5.56f);
