@@ -5,7 +5,7 @@ import ch.epfl.rigel.coordinates.EquatorialCoordinates;
 public final class Star extends CelestialObject{
     public Star(int hipparcosId, String name, EquatorialCoordinates equatorialPos, float magnitude, float colorIndex)
     {
-        super(name, equatorialPos, );
+        super(name, equatorialPos, magnitude, 0);
     }
     public int hipparcosId(){
         return 0;

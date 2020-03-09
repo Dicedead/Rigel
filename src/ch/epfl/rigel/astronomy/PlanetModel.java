@@ -1,6 +1,8 @@
 package ch.epfl.rigel.astronomy;
 
+import ch.epfl.rigel.coordinates.EclipticCoordinates;
 import ch.epfl.rigel.coordinates.EclipticToEquatorialConversion;
+import ch.epfl.rigel.math.Angle;
 
 import java.util.List;
 
@@ -30,24 +32,64 @@ public enum PlanetModel implements CelestialObjectModel<Planet>{
     NEPTUNE("Neptune", 165.84539, 326.895127, 23.07, 0.010483,
             30.1985, 1.7673, 131.879, 62.20, -6.87);
 
-    static public List<PlanetModel> ALL = List.of(MERCURY, VENUS, EARTH, MARS, JUPITER, SATURN, URANUS, NEPTUNE);
+    static final public List<PlanetModel> ALL = List.of(MERCURY, VENUS, EARTH, MARS, JUPITER, SATURN, URANUS, NEPTUNE);
+
+    private final static double DAYS_IN_TROP_YEAR = 365.242191;
+
     @Override
     public Planet at(double daysSinceJ2010, EclipticToEquatorialConversion eclipticToEquatorialConversion) {
-        return null;
+
+        //DETERMINATION OF COORDINATES LAMBDA AND BETA
+        double M    = (Angle.TAU * daysSinceJ2010)/(DAYS_IN_TROP_YEAR *Tp) + epsilon - LonPer;
+        double v    = M + 2 * excent * Math.sin(M);
+        double r    = a * (1 - excent * excent) / (1 + excent * Math.cos(v));
+        double l    = v + LonPer;
+        double sinl_LonN = Math.sin(l-LonN);
+        double psi  = Math.asin(sinl_LonN*Math.sin(inc));
+
+        double r_Pr = r * Math.cos(psi);
+        double l_Pr = Math.atan2(sinl_LonN * Math.cos(inc),Math.cos(l-LonN)) + LonN;
+
+        double M_E  = (Angle.TAU * daysSinceJ2010)/(DAYS_IN_TROP_YEAR * EARTH.Tp) + EARTH.epsilon - EARTH.LonPer;
+        double v_E  = M_E + 2 * EARTH.excent * Math.sin(M_E);
+        double R    = EARTH.a * (1 - EARTH.excent * EARTH.excent) / (1 + EARTH.excent * Math.cos(v_E));
+        double L    = v_E + EARTH.LonPer;
+
+        double Lambda;
+        double sinl_Pr_L = Math.sin(l_Pr - L);
+        if (ALL.indexOf(this) <= 1) {
+            Lambda = Math.PI + L + Math.atan2(-1 * r_Pr * sinl_Pr_L, R - r_Pr * Math.cos(L - l_Pr));
+        } else {
+            Lambda = l_Pr + Math.atan2(R * sinl_Pr_L, r_Pr - R * Math.cos(l_Pr - L));
+        }
+
+        double Beta = Math.atan2(r_Pr * Math.tan(psi) * Math.sin(Lambda - l_Pr),
+                                  R * sinl_Pr_L);
+
+        //ANGULAR SIZE & MAGNITUDE
+        double rho       = Math.sqrt(R*R + r*r - 2*R*r*Math.cos(l-L)*Math.cos(psi));
+        double angSize   = theta0/rho;
+
+        double sqrt_F    = Math.sqrt((1 + Math.cos(Lambda - l))/2);
+        double magnitude = V0 + 5*Math.log10(r*rho / sqrt_F);
+
+        return new Planet(name, eclipticToEquatorialConversion
+                .apply(EclipticCoordinates.of(Lambda,Beta)), (float)angSize, (float)magnitude);
     }
 
-    final private double Rev, Lon2010, LonPer, Ex, DGA, Inc, LonN, TA, Magn;
-    private String name;
+    final private double Tp, epsilon, LonPer, excent, a, inc, LonN, theta0, V0;
+    private final String name;
     private PlanetModel(String name, double v, double v1, double v2, double v3, double v4, double v5, double v6, double v7, double v8)
     {
-        Rev = v;
-        Lon2010 = v1;
-        LonPer = v2;
-        Ex =v3;
-        DGA = v4;
-        Inc = v5;
-        LonN = v6;
-        TA = v7;
-        Magn = v8;
+        this.name = name;
+        Tp = v;
+        epsilon = Angle.ofDeg(v1);
+        LonPer = Angle.ofDeg(v2);
+        excent =v3;
+        a = v4;
+        inc = v5;
+        LonN = Angle.ofDeg(v6);
+        theta0 = Angle.ofArcsec(v7);
+        V0 = v8;
     }
 }

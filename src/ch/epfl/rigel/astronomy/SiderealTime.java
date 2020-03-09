@@ -34,7 +34,8 @@ public final class SiderealTime {
      * @return (double) Greenwich's sidereal time normalized to [0,TAU[ interval
      */
     public static double greenwich(ZonedDateTime when) {
-        ZonedDateTime dayOfWhen = when.withZoneSameInstant(ZoneOffset.UTC).truncatedTo(ChronoUnit.DAYS);double T = J2000.julianCenturiesUntil(dayOfWhen);
+        ZonedDateTime dayOfWhen = when.withZoneSameInstant(ZoneOffset.UTC).truncatedTo(ChronoUnit.DAYS);
+        double T = J2000.julianCenturiesUntil(dayOfWhen);
         double t =dayOfWhen.until(when,ChronoUnit.MILLIS) * COEFF_TO_HOURS;
 
         return normalizePositive(ofHr(POLYNOM.at(T) + S_ONE_COEFF * t));
