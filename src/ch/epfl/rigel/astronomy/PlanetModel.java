@@ -12,7 +12,6 @@ import java.util.List;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-
 public enum PlanetModel implements CelestialObjectModel<Planet>{
 
     MERCURY("Mercure", 0.24085, 75.5671, 77.612, 0.205627,
@@ -32,10 +31,34 @@ public enum PlanetModel implements CelestialObjectModel<Planet>{
     NEPTUNE("Neptune", 165.84539, 326.895127, 23.07, 0.010483,
             30.1985, 1.7673, 131.879, 62.20, -6.87);
 
-    static final public List<PlanetModel> ALL = List.of(MERCURY, VENUS, EARTH, MARS, JUPITER, SATURN, URANUS, NEPTUNE);
+    static final public List<PlanetModel> ALL = List.of(PlanetModel.values());
 
     private final static double DAYS_IN_TROP_YEAR = 365.242191;
 
+    private final double Tp, epsilon, LonPer, excent, a, inc, LonN, theta0, V0;
+    private final String name;
+
+    private PlanetModel(String name, double v, double v1, double v2, double v3, double v4, double v5, double v6, double v7, double v8)
+    {
+        this.name = name;
+        Tp = v;
+        epsilon = Angle.ofDeg(v1);
+        LonPer = Angle.ofDeg(v2);
+        excent =v3;
+        a = v4;
+        inc = v5;
+        LonN = Angle.ofDeg(v6);
+        theta0 = Angle.ofArcsec(v7);
+        V0 = v8;
+    }
+
+    /**
+     * Builds a Planet at a given point and time.
+     *
+     * @param daysSinceJ2010 (double)
+     * @param eclipticToEquatorialConversion Celestial object's coordinates
+     * @return (Planet) Fully created Planet with appropriate time, geographic and physical parameters.
+     */
     @Override
     public Planet at(double daysSinceJ2010, EclipticToEquatorialConversion eclipticToEquatorialConversion) {
 
@@ -50,6 +73,8 @@ public enum PlanetModel implements CelestialObjectModel<Planet>{
         double r_Pr = r * Math.cos(psi);
         double l_Pr = Math.atan2(sinl_LonN * Math.cos(inc),Math.cos(l-LonN)) + LonN;
 
+             //Making private auxiliary methods for computing M, v, r l values for the Earth seemed a little bit
+             //overkill.
         double M_E  = (Angle.TAU * daysSinceJ2010)/(DAYS_IN_TROP_YEAR * EARTH.Tp) + EARTH.epsilon - EARTH.LonPer;
         double v_E  = M_E + 2 * EARTH.excent * Math.sin(M_E);
         double R    = EARTH.a * (1 - EARTH.excent * EARTH.excent) / (1 + EARTH.excent * Math.cos(v_E));
@@ -75,21 +100,5 @@ public enum PlanetModel implements CelestialObjectModel<Planet>{
 
         return new Planet(name, eclipticToEquatorialConversion
                 .apply(EclipticCoordinates.of(Lambda,Beta)), (float)angSize, (float)magnitude);
-    }
-
-    final private double Tp, epsilon, LonPer, excent, a, inc, LonN, theta0, V0;
-    private final String name;
-    private PlanetModel(String name, double v, double v1, double v2, double v3, double v4, double v5, double v6, double v7, double v8)
-    {
-        this.name = name;
-        Tp = v;
-        epsilon = Angle.ofDeg(v1);
-        LonPer = Angle.ofDeg(v2);
-        excent =v3;
-        a = v4;
-        inc = v5;
-        LonN = Angle.ofDeg(v6);
-        theta0 = Angle.ofArcsec(v7);
-        V0 = v8;
     }
 }
