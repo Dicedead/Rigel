@@ -81,6 +81,7 @@ public enum PlanetModel implements CelestialObjectModel<Planet> {
 
         double Lambda;
         double sinl_Pr_L = Math.sin(l_Pr - L);
+
         if (ALL.indexOf(this) <= 1) {
             Lambda = Math.PI + L + Math.atan2(-1 * r_Pr * sinl_Pr_L, R - r_Pr * Math.cos(L - l_Pr));
         } else {

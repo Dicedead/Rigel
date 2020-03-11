@@ -10,6 +10,11 @@ import java.util.List;
  */
 public final class Asterism {
     private final List<Star> starList;
+
+    /**
+     *
+     * @param stars Starrs to be considered as an asterism
+     */
     public Asterism(List<Star> stars){
         starList = stars;
     };
