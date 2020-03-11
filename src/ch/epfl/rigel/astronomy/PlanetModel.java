@@ -3,6 +3,7 @@ package ch.epfl.rigel.astronomy;
 import ch.epfl.rigel.coordinates.EclipticCoordinates;
 import ch.epfl.rigel.coordinates.EclipticToEquatorialConversion;
 import ch.epfl.rigel.math.Angle;
+import ch.epfl.rigel.math.ClosedInterval;
 
 import java.util.List;
 
@@ -45,7 +46,7 @@ public enum PlanetModel implements CelestialObjectModel<Planet> {
         LonPer = Angle.ofDeg(v2);
         excent = v3;
         a = v4;
-        inc = v5;
+        inc = Angle.ofDeg(v5);
         LonN = Angle.ofDeg(v6);
         theta0 = Angle.ofArcsec(v7);
         V0 = v8;
@@ -83,22 +84,20 @@ public enum PlanetModel implements CelestialObjectModel<Planet> {
         double sinl_Pr_L = Math.sin(l_Pr - L);
 
         if (ALL.indexOf(this) <= 1) {
-            Lambda = Math.PI + L + Math.atan2(-1 * r_Pr * sinl_Pr_L, R - r_Pr * Math.cos(L - l_Pr));
+            Lambda = Angle.normalizePositive(Math.PI + L + Math.atan2(-1 * r_Pr * sinl_Pr_L, R - r_Pr * Math.cos(L - l_Pr)));
         } else {
-            Lambda = l_Pr + Math.atan2(R * sinl_Pr_L, r_Pr - R * Math.cos(l_Pr - L));
+            Lambda = Angle.normalizePositive(l_Pr + Math.atan2(R * sinl_Pr_L, r_Pr - R * Math.cos(l_Pr - L)));
         }
 
-        double Beta = Math.atan2(r_Pr * Math.tan(psi) * Math.sin(Lambda - l_Pr),
-                R * sinl_Pr_L);
+        double Beta = Math.atan(r_Pr * Math.tan(psi) * Math.sin(Lambda - l_Pr) / R * sinl_Pr_L);
 
         //ANGULAR SIZE & MAGNITUDE
         double rho = Math.sqrt(R * R + r * r - 2 * R * r * Math.cos(l - L) * Math.cos(psi));
-        double angSize = theta0 / rho;
 
         double sqrt_F = Math.sqrt((1 + Math.cos(Lambda - l)) / 2);
-        double magnitude = V0 + 5 * Math.log10(r * rho / sqrt_F);
 
         return new Planet(name, eclipticToEquatorialConversion
-                .apply(EclipticCoordinates.of(Lambda, Beta)), (float) angSize, (float) magnitude);
+                .apply(EclipticCoordinates.of(Lambda, Beta)), (float) (theta0 / rho),
+                (float) (V0 + 5 * Math.log10(r * rho / sqrt_F)));
     }
 }
