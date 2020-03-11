@@ -4,6 +4,8 @@ import ch.epfl.rigel.coordinates.EclipticCoordinates;
 import ch.epfl.rigel.coordinates.EclipticToEquatorialConversion;
 import ch.epfl.rigel.coordinates.EquatorialCoordinates;
 
+import java.awt.*;
+
 import static ch.epfl.rigel.math.Angle.*;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
@@ -35,10 +37,15 @@ public enum SunModel implements CelestialObjectModel<Sun>
      */
     @Override
     public Sun at(double daysSinceJ2010, EclipticToEquatorialConversion eclipticToEquatorialConversion) {
+
         double meanAnomaly = Ratio * daysSinceJ2010 + Lon2010 - LonPer;
+
         double trueAnomaly = meanAnomaly + doubleE*sin(meanAnomaly);
 
-        EclipticCoordinates eq = EclipticCoordinates.of(trueAnomaly + LonPer, 0);
-        return new Sun(eq ,eclipticToEquatorialConversion.apply(eq), (float)(ofDeg(0.533128)*(1+Math.exp(1)*cos(trueAnomaly))/(1-Math.exp(2))), (float)(meanAnomaly));
+        EclipticCoordinates eq = EclipticCoordinates.of(normalizePositive(trueAnomaly + LonPer), 0);
+
+        float angularSize = (float)(ofDeg(0.533128)*(1+Math.exp(1)*cos(trueAnomaly))/(1-Math.exp(2)));
+
+        return new Sun(eq ,eclipticToEquatorialConversion.apply(eq), angularSize, (float)(meanAnomaly));
     }
 }
