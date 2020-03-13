@@ -1,10 +1,11 @@
-package ch.epfl.rigel.astronomy;
+package ch.epfl.rigelTest.astronomy;
 
+import ch.epfl.rigel.astronomy.Asterism;
+import ch.epfl.rigel.astronomy.Star;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 

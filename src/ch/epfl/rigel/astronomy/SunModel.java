@@ -20,7 +20,6 @@ public enum SunModel implements CelestialObjectModel<Sun>
 {
     SUN(ofDeg(279.557208), ofDeg(283.112438), ofArcsec(0.016705));
     static private final double Ratio = TAU/365.242191;
-    static private final double doubleE = 2*Math.exp(1);
     private final double Lon2010, LonPer, Ex;
     SunModel(double ofDeg, double ofDeg1, double ofArcsec) {
         Lon2010 = ofDeg;
@@ -40,12 +39,11 @@ public enum SunModel implements CelestialObjectModel<Sun>
 
         double meanAnomaly = Ratio * daysSinceJ2010 + Lon2010 - LonPer;
 
-        double trueAnomaly = meanAnomaly + doubleE*sin(meanAnomaly);
+        double trueAnomaly = meanAnomaly + 2*Ex*sin(meanAnomaly);
 
         EclipticCoordinates eq = EclipticCoordinates.of(normalizePositive(trueAnomaly + LonPer), 0);
 
-        float angularSize = (float)(ofDeg(0.533128)*(1+Math.exp(1)*cos(trueAnomaly))/(1-Math.exp(2)));
-
-        return new Sun(eq ,eclipticToEquatorialConversion.apply(eq), angularSize, (float)(meanAnomaly));
+        return new Sun(eq ,eclipticToEquatorialConversion.apply(eq),
+                (float)(ofDeg(0.533128)*(1 + Ex*cos(trueAnomaly))/(1-Math.pow(Ex, 2))), (float)(meanAnomaly));
     }
 }

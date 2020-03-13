@@ -1,5 +1,6 @@
-package ch.epfl.rigel.astronomy;
+package ch.epfl.rigelTest.astronomy;
 
+import ch.epfl.rigel.astronomy.Star;
 import ch.epfl.rigel.coordinates.EquatorialCoordinates;
 import org.junit.jupiter.api.Test;
 
@@ -15,11 +16,11 @@ class StarTest {
             (float)(-0.03));
     @Test
     void hipparcosId() {
-        assertEquals(0, Rigel.hipparcosId());
+        assertEquals(1, Rigel.hipparcosId());
     }
 
     @Test
     void colorTemperature() {
-        assertEquals(12000, Rigel.colorTemperature(), 1000);
+        assertEquals(10000, Rigel.colorTemperature(), 1000);
     }
 }
