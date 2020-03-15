@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import static ch.epfl.rigel.math.Angle.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-class StarTest {
+class MyStarTest {
 
     static public final Star Rigel = new Star(1,
             "Rigel",
@@ -21,6 +21,9 @@ class StarTest {
 
     @Test
     void colorTemperature() {
-        assertEquals(10000, Rigel.colorTemperature(), 1000);
+        assertEquals(10515,new Star(24436, "Rigel", EquatorialCoordinates.of(0, 0), 0, -0.03f)
+                .colorTemperature());
+        assertEquals( 3793,new Star(27989, "Betelgeuse", EquatorialCoordinates.of(0, 0), 0, 1.50f)
+                .colorTemperature());
     }
 }

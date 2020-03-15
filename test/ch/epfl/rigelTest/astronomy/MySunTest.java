@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class SunTest {
+class MySunTest {
 
     private static final Sun sunTest = new Sun(EclipticCoordinates.of(Angle.ofDeg(5.64),Angle.ofDeg(43)),
             EquatorialCoordinates.of(Angle.ofDeg(5),Angle.ofDeg(6)), 5.15903f,7.1589f);

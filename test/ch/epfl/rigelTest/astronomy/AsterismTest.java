@@ -13,7 +13,7 @@ class AsterismTest {
 
     @Test
     void stars() {
-        Asterism a = new Asterism(new ArrayList<Star>(Collections.singleton(StarTest.Rigel)));
-        assertEquals( new ArrayList<Star>(Collections.singleton(StarTest.Rigel)), a.stars());
+        Asterism a = new Asterism(new ArrayList<Star>(Collections.singleton(MyStarTest.Rigel)));
+        assertEquals( new ArrayList<Star>(Collections.singleton(MyStarTest.Rigel)), a.stars());
     }
 }

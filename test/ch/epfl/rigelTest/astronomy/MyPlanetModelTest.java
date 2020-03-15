@@ -6,6 +6,9 @@ import ch.epfl.rigel.coordinates.EclipticToEquatorialConversion;
 import ch.epfl.rigel.math.Angle;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.Month;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
@@ -28,6 +31,7 @@ class MyPlanetModelTest {
 
         Planet jupTest = PlanetModel.JUPITER.at(days22Nov,
                 new EclipticToEquatorialConversion(D));
+
         assertEquals(Angle.ofArcsec(35.1),jupTest.angularSize(),EPSILON);
         assertEquals(-2,jupTest.magnitude(),EPSILON*10);
     }
