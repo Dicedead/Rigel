@@ -1,5 +1,7 @@
 package ch.epfl.rigel.astronomy;
 
+import ch.epfl.rigel.Preconditions;
+
 import java.util.List;
 
 /**
@@ -12,12 +14,19 @@ public final class Asterism {
     private final List<Star> starList;
 
     /**
+     * Construct an immutable Asterim
      *
-     * @param stars Starrs to be considered as an asterism
+     * @param stars (List<Star>) Stars to be considered as an asterism
+     * @throws IllegalArgumentException if stars is an empty list
      */
     public Asterism(List<Star> stars){
-        starList = stars;
-    };
+        Preconditions.checkArgument(!(stars.size() == 0));
+        starList = List.copyOf(stars);
+    }
+
+    /**
+     * @return (List<Star>) immutable list of stars in the asterism
+     */
     public List<Star> stars(){
         return starList;
     };

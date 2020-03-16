@@ -18,7 +18,7 @@ import static java.lang.Math.sin;
  */
 public enum SunModel implements CelestialObjectModel<Sun>
 {
-    SUN(ofDeg(279.557208), ofDeg(283.112438), ofArcsec(0.016705));
+    SUN(ofDeg(279.557208), ofDeg(283.112438), 0.016705);
     static private final double Ratio = TAU/365.242191;
     private final double Lon2010, LonPer, Ex;
     SunModel(double ofDeg, double ofDeg1, double ofArcsec) {
