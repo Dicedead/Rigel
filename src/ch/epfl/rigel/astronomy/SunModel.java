@@ -28,7 +28,7 @@ public enum SunModel implements CelestialObjectModel<Sun>
     }
 
     /**
-     * Builds the Sun at a given point and time.
+     * Builds the Sun at a given point in time.
      *
      * @param daysSinceJ2010 (double)
      * @param eclipticToEquatorialConversion Celestial object's coordinates
