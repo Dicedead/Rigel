@@ -16,7 +16,7 @@ public enum MoonModel implements CelestialObjectModel<Moon>{
     MOON(ofDeg(91.929336), ofDeg(130.143076), ofDeg(291.682547), ofDeg(5.145396), 0.0549);
 
     final private double LonM,  LonPer,  LonAsc,  inc,  exc;
-    final private Double[] c = Stream.of(13.1763966, 0.1114041, 1.2739,
+    static final private Double[] c = Stream.of(13.1763966, 0.1114041, 1.2739,
                                         0.1858 - 0.37, 6.2886, 0.214,
                                         0.6583, 0.0529539, 0.16, 0.5181)
                                         .map(Angle::ofDeg)
@@ -53,7 +53,7 @@ public enum MoonModel implements CelestialObjectModel<Moon>{
 
         return new Moon(eclipticToEquatorialConversion.apply(
                 EclipticCoordinates.of(
-                        atan2(sin(lonCorrAsc)*cos(inc), cos(lonCorrAsc)) - lonCorrAsc + lonOrb,
+                        Angle.normalizePositive(atan2(sin(lonCorrAsc)*cos(inc), cos(lonCorrAsc)) - lonCorrAsc + lonOrb),
                         asin(sin(lonCorrAsc)*sin(inc)))),
                 (float)((1+exc*cos(anomaly+CorrC))/(1-pow(exc, 2)) * c[9]),
                 0, (float)(1- cos(lonOrb - lonOrbM - sunLon)/2) );
