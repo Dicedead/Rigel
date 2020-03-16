@@ -2,19 +2,14 @@ package ch.epfl.rigel.astronomy;
 
 import ch.epfl.rigel.coordinates.EclipticCoordinates;
 import ch.epfl.rigel.coordinates.EclipticToEquatorialConversion;
-import ch.epfl.rigel.coordinates.EquatorialCoordinates;
 import ch.epfl.rigel.math.Angle;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
 
 import static ch.epfl.rigel.math.Angle.ofDeg;
 import static java.lang.Math.*;
-import static java.util.Arrays.asList;
+
 
 public enum MoonModel implements CelestialObjectModel<Moon>{
 
@@ -26,6 +21,7 @@ public enum MoonModel implements CelestialObjectModel<Moon>{
                                         0.6583, 0.0529539, 0.16, 0.5181)
                                         .map(Angle::ofDeg)
                                         .collect(Collectors.toList()).toArray(Double[]::new);
+
     private MoonModel(double lonM, double lonPer, double lonAsc, double inc, double exc) {
         LonM = lonM;
         LonPer = lonPer;
