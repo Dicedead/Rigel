@@ -20,37 +20,39 @@ public final class StarCatalogue {
     /**
      * Constructs a catalogue of stars in and possibly out of asterisms
      *
-     * @param stars (List<Star>) List of all the stars in the asterisms and possibly more
+     * @param stars     (List<Star>) List of all the stars in the asterisms and possibly more
      * @param asterisms (List<Asterism>) List of asterisms grouping some or all the stars in 'stars' List
      * @throws IllegalArgumentException if a star in an asterim isn't listed in stars
      */
-    public StarCatalogue(List<Star> stars, List<Asterism> asterisms)
-    {
-        for(Asterism currentAsterism : asterisms) {
-            for(Star currentStar : currentAsterism.stars()) {
+    public StarCatalogue(List<Star> stars, List<Asterism> asterisms) {
+        for (Asterism currentAsterism : asterisms) {
+            for (Star currentStar : currentAsterism.stars()) {
                 Preconditions.checkArgument(stars.contains(currentStar));
             }
         }
         this.starList = List.copyOf(stars);
         asterismMap = new HashMap<>();
 
-        /*TODO: fill this map using Loader/Builder methods implemented below */
-
+        for (Asterism asterism : asterisms) {
+            List<Integer> indicesList = new ArrayList<>();
+            for (Star star : asterism.stars()) {
+                indicesList.add(starList.indexOf(star));
+            }
+            asterismMap.put(asterism, indicesList);
+        }
     }
 
     /**
-     * @return (List<Star>) all the stars in the catalogue as a list
+     * @return (List < Star >) all the stars in the catalogue as a list
      */
-    public List<Star> stars()
-    {
+    public List<Star> stars() {
         return starList;
     }
 
     /**
-     * @return (Set<Asterism>) a set of all the asterisms in the catalogue
+     * @return (Set < Asterism >) a set of all the asterisms in the catalogue
      */
-    public Set<Asterism> asterisms()
-    {
+    public Set<Asterism> asterisms() {
         return asterismMap.keySet();
     }
 
@@ -58,10 +60,9 @@ public final class StarCatalogue {
      * Method for finding the indices of the stars (given in asterism) in starList
      *
      * @param asterism (Asterism)
-     * @return (List<Integer>) a list of said indices
+     * @return (List < Integer >) a list of said indices
      */
-    public List<Integer> asterismIndices(Asterism asterism)
-    {
+    public List<Integer> asterismIndices(Asterism asterism) {
         Preconditions.checkArgument(asterismMap.containsKey(asterism));
         return asterismMap.get(asterism);
     }
@@ -78,8 +79,8 @@ public final class StarCatalogue {
          * Default constructor initializing 2 empty lists of stars and asterisms
          */
         public Builder() {
-            starsToBuild     = List.of();
-            asterismsToBuild = List.of();
+            starsToBuild = new ArrayList<>();
+            asterismsToBuild = new ArrayList<>();
         }
 
         /**
@@ -105,14 +106,14 @@ public final class StarCatalogue {
         }
 
         /**
-         * @return (List<Star>) unmodifiable view of the starList being built
+         * @return (List < Star >) unmodifiable view of the starList being built
          */
         public List<Star> stars() {
             return Collections.unmodifiableList(starsToBuild);
         }
 
         /**
-         * @return (List<Asterism>) unmodifiable view of the list of asterisms being built
+         * @return (List < Asterism >) unmodifiable view of the list of asterisms being built
          */
         public List<Asterism> asterisms() {
             return Collections.unmodifiableList(asterismsToBuild);
@@ -122,14 +123,12 @@ public final class StarCatalogue {
          * Adds to the catalogue the stars and/or asterisms in the inputStream via the loader
          *
          * @param inputStream (InputStream)
-         * @param loader (Loader)
-         * @throws IOException (I/O method)
+         * @param loader      (Loader)
          * @return (Builder) this
+         * @throws IOException (I/O method)
          */
         public Builder loadFrom(InputStream inputStream, Loader loader) throws IOException {
-
-            //TODO
-
+            loader.load(inputStream,this);
             return this;
         }
 
@@ -137,7 +136,7 @@ public final class StarCatalogue {
          * @return (StarCatalogue) fully built and immutable StarCatalogue
          */
         public StarCatalogue build() {
-            return new StarCatalogue(starsToBuild,asterismsToBuild);
+            return new StarCatalogue(starsToBuild, asterismsToBuild);
         }
     }
 
@@ -150,7 +149,7 @@ public final class StarCatalogue {
          * Abstracts the loading of an inputStream into a StarCatalogue.Builder
          *
          * @param inputStream (InputStream) data to be loaded
-         * @param builder (StarCatalogue.Builder)
+         * @param builder     (StarCatalogue.Builder)
          * @throws IOException (I/O method)
          */
         public abstract void load(InputStream inputStream, Builder builder) throws IOException;

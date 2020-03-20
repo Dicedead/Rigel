@@ -51,17 +51,17 @@ public enum MoonModel implements CelestialObjectModel<Moon>{
         Sun sun = SunModel.SUN.at(daysSinceJ2010, eclipticToEquatorialConversion);
 
         double sunLon = sun.eclipticPos().lon();
-        double sinSun = sin(sun.meanAnomaly());
+        double sin_sunMeanAnomaly = sin(sun.meanAnomaly());
 
         double evection = c[2]* sin(2*(lonOrbM - sunLon)-AnMoy);
 
-        double anomaly = AnMoy + evection - (c[3])*sinSun;
+        double anomaly = AnMoy + evection - (c[3])*sin_sunMeanAnomaly;
         double CorrC = c[4] * sin(anomaly);
 
         double lonOrbCorr = lonOrbM + evection + CorrC - evection +  c[5] * sin(2*anomaly);
         double lonOrb = lonOrbCorr + c[6]* sin(2*lonOrbCorr - sunLon);
 
-        double lonCorrAsc = lonOrb - lonAsc - c[7]*daysSinceJ2010 - c[8]*sinSun;
+        double lonCorrAsc = lonOrb - lonAsc - c[7]*daysSinceJ2010 - c[8]*sin_sunMeanAnomaly;
 
         return new Moon(eclipticToEquatorialConversion.apply(
                 EclipticCoordinates.of(
