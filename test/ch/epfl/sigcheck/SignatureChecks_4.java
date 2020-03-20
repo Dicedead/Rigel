@@ -9,7 +9,6 @@ import java.util.function.Function;
 
 final class SignatureChecks_4 {
 
-    @Test
     void checkCartesianCoordinates() {
         double d = 0;
         CartesianCoordinates c = CartesianCoordinates.of(d, d);
@@ -17,7 +16,6 @@ final class SignatureChecks_4 {
         d = c.y();
     }
 
-    @Test
     void checkStereographicProjection() {
         HorizontalCoordinates h = null;
         StereographicProjection s;
@@ -31,7 +29,6 @@ final class SignatureChecks_4 {
         h = s.inverseApply(c);
     }
 
-    @Test
     void checkCelestialObject() {
         CelestialObject c = null;
         String s;
@@ -44,7 +41,6 @@ final class SignatureChecks_4 {
         s = c.info();
     }
 
-    @Test
     void checkSun() {
         CelestialObject c;
         Sun s;
@@ -58,7 +54,6 @@ final class SignatureChecks_4 {
         c = s;
     }
 
-    @Test
     void checkMoon() {
         CelestialObject c;
         Moon m;
@@ -68,7 +63,6 @@ final class SignatureChecks_4 {
         c = m;
     }
 
-    @Test
     void checkPlanet() {
         CelestialObject c;
         Planet m;

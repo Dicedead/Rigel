@@ -3,12 +3,11 @@ package ch.epfl.rigel.astronomy;
 import ch.epfl.rigel.coordinates.EclipticCoordinates;
 import ch.epfl.rigel.coordinates.EclipticToEquatorialConversion;
 import ch.epfl.rigel.math.Angle;
-import ch.epfl.rigel.math.ClosedInterval;
 
 import java.util.List;
 
 /**
- * Model of all planets
+ * Mathematical model of all planets
  *
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
@@ -36,18 +35,18 @@ public enum PlanetModel implements CelestialObjectModel<Planet> {
 
     private final static double DAYS_IN_TROP_YEAR = 365.242191;
 
-    private final double Tp, epsilon, LonPer, excent, a, inc, LonN, theta0, V0;
+    private final double Tp, epsilon, lonPer, excent, a, inc, lonN, theta0, V0;
     private final String name;
 
     private PlanetModel(String name, double v, double v1, double v2, double v3, double v4, double v5, double v6, double v7, double v8) {
         this.name = name;
         Tp = v;
         epsilon = Angle.ofDeg(v1);
-        LonPer = Angle.ofDeg(v2);
+        lonPer = Angle.ofDeg(v2);
         excent = v3;
         a = v4;
         inc = Angle.ofDeg(v5);
-        LonN = Angle.ofDeg(v6);
+        lonN = Angle.ofDeg(v6);
         theta0 = Angle.ofArcsec(v7);
         V0 = v8;
     }
@@ -63,41 +62,41 @@ public enum PlanetModel implements CelestialObjectModel<Planet> {
     public Planet at(double daysSinceJ2010, EclipticToEquatorialConversion eclipticToEquatorialConversion) {
 
         //DETERMINATION OF COORDINATES LAMBDA AND BETA
-        double M = (Angle.TAU * daysSinceJ2010) / (DAYS_IN_TROP_YEAR * Tp) + epsilon - LonPer;
-        double v = M + 2 * excent * Math.sin(M);
-        double r = a * (1 - excent * excent) / (1 + excent * Math.cos(v));
-        double l = v + LonPer;
-        double sinl_LonN = Math.sin(l - LonN);
+        double meanAnomaly = (Angle.TAU * daysSinceJ2010) / (DAYS_IN_TROP_YEAR * Tp) + epsilon - lonPer;
+        double trueAnomaly = meanAnomaly + 2 * excent * Math.sin(meanAnomaly);
+        double distanceToSun = a * (1 - excent * excent) / (1 + excent * Math.cos(trueAnomaly));
+        double helioLon = trueAnomaly + lonPer;
+        double sinl_LonN = Math.sin(helioLon - lonN);
         double psi = Math.asin(sinl_LonN * Math.sin(inc));
 
-        double r_Pr = r * Math.cos(psi);
-        double l_Pr = Math.atan2(sinl_LonN * Math.cos(inc), Math.cos(l - LonN)) + LonN;
+        double distanceToSun_Pr = distanceToSun * Math.cos(psi);
+        double helioLon_Pr = Math.atan2(sinl_LonN * Math.cos(inc), Math.cos(helioLon - lonN)) + lonN;
 
-        //Making private auxiliary methods for computing M, v, r l values for the Earth seemed a little bit
-        //overkill.
-        double M_E = (Angle.TAU * daysSinceJ2010) / (DAYS_IN_TROP_YEAR * EARTH.Tp) + EARTH.epsilon - EARTH.LonPer;
-        double v_E = M_E + 2 * EARTH.excent * Math.sin(M_E);
-        double R = EARTH.a * (1 - EARTH.excent * EARTH.excent) / (1 + EARTH.excent * Math.cos(v_E));
-        double L = v_E + EARTH.LonPer;
+        //Making private auxiliary methods for computing meanAnomaly, trueAnomaly, distanceToSun & helioLon values for the
+        //Earth seemed a little bit overkill.
+        double meanAnomaly_E = (Angle.TAU * daysSinceJ2010) / (DAYS_IN_TROP_YEAR * EARTH.Tp) + EARTH.epsilon - EARTH.lonPer;
+        double trueAnomaly_E = meanAnomaly_E + 2 * EARTH.excent * Math.sin(meanAnomaly_E);
+        double distanceToSun_E = EARTH.a * (1 - EARTH.excent * EARTH.excent) / (1 + EARTH.excent * Math.cos(trueAnomaly_E));
+        double helioLon_E = trueAnomaly_E + EARTH.lonPer;
 
-        double Lambda;
-        double sinl_Pr_L = Math.sin(l_Pr - L);
+        double lambda;
+        double sinl_Pr_L = Math.sin(helioLon_Pr - helioLon_E);
 
         if (ALL.indexOf(this) <= 1) {
-            Lambda = Angle.normalizePositive(Math.PI + L + Math.atan2(-1 * r_Pr * sinl_Pr_L, R - r_Pr * Math.cos(L - l_Pr)));
+            lambda = Angle.normalizePositive(Math.PI + helioLon_E + Math.atan2(-1 * distanceToSun_Pr * sinl_Pr_L, distanceToSun_E - distanceToSun_Pr * Math.cos(helioLon_E - helioLon_Pr)));
         } else {
-            Lambda = Angle.normalizePositive(l_Pr + Math.atan2(R * sinl_Pr_L, r_Pr - R * Math.cos(l_Pr - L)));
+            lambda = Angle.normalizePositive(helioLon_Pr + Math.atan2(distanceToSun_E * sinl_Pr_L, distanceToSun_Pr - distanceToSun_E * Math.cos(helioLon_Pr - helioLon_E)));
         }
 
-        double Beta = Math.atan(r_Pr * Math.tan(psi) * Math.sin(Lambda - l_Pr) / R * sinl_Pr_L);
+        double beta = Math.atan(distanceToSun_Pr * Math.tan(psi) * Math.sin(lambda - helioLon_Pr) / distanceToSun_E * sinl_Pr_L);
 
         //ANGULAR SIZE & MAGNITUDE
-        double rho = Math.sqrt(R * R + r * r - 2 * R * r * Math.cos(l - L) * Math.cos(psi));
+        double rho = Math.sqrt(distanceToSun_E * distanceToSun_E + distanceToSun * distanceToSun - 2 * distanceToSun_E * distanceToSun * Math.cos(helioLon - helioLon_E) * Math.cos(psi));
 
-        double sqrt_F = Math.sqrt((1 + Math.cos(Lambda - l)) / 2);
+        double sqrtOfPhase = Math.sqrt((1 + Math.cos(lambda - helioLon)) / 2);
 
-        return new Planet(name, eclipticToEquatorialConversion
-                .apply(EclipticCoordinates.of(Lambda, Beta)), (float) (theta0 / rho),
-                (float) (V0 + 5 * Math.log10(r * rho / sqrt_F)));
+        return new Planet(name,
+                eclipticToEquatorialConversion.apply(EclipticCoordinates.of(lambda, beta)), (float) (theta0 / rho),
+                (float) (V0 + 5 * Math.log10(distanceToSun * rho / sqrtOfPhase)));
     }
 }

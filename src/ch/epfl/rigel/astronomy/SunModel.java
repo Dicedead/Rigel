@@ -2,9 +2,6 @@ package ch.epfl.rigel.astronomy;
 
 import ch.epfl.rigel.coordinates.EclipticCoordinates;
 import ch.epfl.rigel.coordinates.EclipticToEquatorialConversion;
-import ch.epfl.rigel.coordinates.EquatorialCoordinates;
-
-import java.awt.*;
 
 import static ch.epfl.rigel.math.Angle.*;
 import static java.lang.Math.cos;
@@ -20,11 +17,11 @@ public enum SunModel implements CelestialObjectModel<Sun>
 {
     SUN(ofDeg(279.557208), ofDeg(283.112438), 0.016705);
     static private final double Ratio = TAU/365.242191;
-    private final double Lon2010, LonPer, Ex;
-    SunModel(double ofDeg, double ofDeg1, double ofArcsec) {
-        Lon2010 = ofDeg;
-        LonPer = ofDeg1;
-        Ex = ofArcsec;
+    private final double lon2010, lonPer, excent;
+    SunModel(double ofDeg, double ofDeg1, double excentricity) {
+        lon2010 = ofDeg;
+        lonPer = ofDeg1;
+        this.excent = excentricity;
     }
 
     /**
@@ -37,13 +34,13 @@ public enum SunModel implements CelestialObjectModel<Sun>
     @Override
     public Sun at(double daysSinceJ2010, EclipticToEquatorialConversion eclipticToEquatorialConversion) {
 
-        double meanAnomaly = Ratio * daysSinceJ2010 + Lon2010 - LonPer;
+        double meanAnomaly = Ratio * daysSinceJ2010 + lon2010 - lonPer;
 
-        double trueAnomaly = meanAnomaly + 2*Ex*sin(meanAnomaly);
+        double trueAnomaly = meanAnomaly + 2* excent *sin(meanAnomaly);
 
-        EclipticCoordinates eq = EclipticCoordinates.of(normalizePositive(trueAnomaly + LonPer), 0);
+        EclipticCoordinates eclipticCoordinates = EclipticCoordinates.of(normalizePositive(trueAnomaly + lonPer), 0);
 
-        return new Sun(eq ,eclipticToEquatorialConversion.apply(eq),
-                (float)(ofDeg(0.533128)*(1 + Ex*cos(trueAnomaly))/(1-Math.pow(Ex, 2))), (float)(meanAnomaly));
+        return new Sun(eclipticCoordinates ,eclipticToEquatorialConversion.apply(eclipticCoordinates),
+                (float)(ofDeg(0.533128)*(1 + excent *cos(trueAnomaly))/(1-Math.pow(excent, 2))), (float)(meanAnomaly));
     }
 }

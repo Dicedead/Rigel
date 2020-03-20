@@ -10,7 +10,6 @@ import java.util.function.Function;
 
 final class SignatureChecks_3 {
 
-    @Test
     void checkEpoch() {
         double d;
         ZonedDateTime z = null;
@@ -20,7 +19,6 @@ final class SignatureChecks_3 {
         d = e.julianCenturiesUntil(z);
     }
 
-    @Test
     void checkSiderealTime() {
         double d;
         ZonedDateTime z = null;
@@ -29,14 +27,12 @@ final class SignatureChecks_3 {
         d = SiderealTime.local(z, g);
     }
 
-    @Test
     void checkEclipticToEquatorialConversion() {
         ZonedDateTime z = null;
         EclipticToEquatorialConversion e = new EclipticToEquatorialConversion(z);
         Function<EclipticCoordinates, EquatorialCoordinates> f = e;
     }
 
-    @Test
     void checkEquatorialToHorizontalConversion() {
         ZonedDateTime z = null;
         GeographicCoordinates g = null;

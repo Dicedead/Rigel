@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 
 final class SignatureChecks_2 {
 
-    @Test
     void checkGeographicCoordinates() {
         boolean b;
         double d = 0;
@@ -22,7 +21,6 @@ final class SignatureChecks_2 {
         d = g.latDeg();
     }
 
-    @Test
     void checkHorizontalCoordinates() {
         double d = 0;
         String s = "";
@@ -37,7 +35,6 @@ final class SignatureChecks_2 {
         d = h.angularDistanceTo(h);
     }
 
-    @Test
     void checkEquatorialCoordinates() {
         double d = 0;
         EquatorialCoordinates e;
@@ -49,7 +46,6 @@ final class SignatureChecks_2 {
         d = e.decDeg();
     }
 
-    @Test
     void checkEclipticCoordinates() {
         double d = 0;
         EclipticCoordinates e;
