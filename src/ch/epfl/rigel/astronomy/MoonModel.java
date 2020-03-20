@@ -22,7 +22,7 @@ public enum MoonModel implements CelestialObjectModel<Moon>{
 
     final private double lonM, lonPer, lonAsc,  inc,  exc;
     static final private Double[] c = Stream.of(13.1763966, 0.1114041, 1.2739,
-                                        0.1858 - 0.37, 6.2886, 0.214,
+                                        0.1858 + 0.37, 6.2886, 0.214,
                                         0.6583, 0.0529539, 0.16, 0.5181)
                                         .map(Angle::ofDeg)
                                         .collect(Collectors.toList()).toArray(Double[]::new);
@@ -55,19 +55,20 @@ public enum MoonModel implements CelestialObjectModel<Moon>{
 
         double evection = c[2]* sin(2*(lonOrbM - sunLon)-AnMoy);
 
-        double anomaly = AnMoy + evection - (c[3])*sin_sunMeanAnomaly;
+        double anomaly = AnMoy + evection - c[3]*sin_sunMeanAnomaly;
         double CorrC = c[4] * sin(anomaly);
 
-        double lonOrbCorr = lonOrbM + evection + CorrC - evection +  c[5] * sin(2*anomaly);
+        double lonOrbCorr = lonOrbM + evection + CorrC - (c[3] + Angle.ofDeg(0.37))*sin_sunMeanAnomaly + c[5] * sin(2*anomaly);
         double lonOrb = lonOrbCorr + c[6]* sin(2*lonOrbCorr - sunLon);
 
-        double lonCorrAsc = lonOrb - lonAsc - c[7]*daysSinceJ2010 - c[8]*sin_sunMeanAnomaly;
+        double lonCorrAsc = lonAsc - c[7]*daysSinceJ2010 - c[8]*sin_sunMeanAnomaly;
+        double lonOrb_lonCorrAsc = lonOrb - lonCorrAsc;
 
         return new Moon(eclipticToEquatorialConversion.apply(
                 EclipticCoordinates.of(
-                        Angle.normalizePositive(atan2(sin(lonCorrAsc)*cos(inc), cos(lonCorrAsc)) - lonCorrAsc + lonOrb),
-                        asin(sin(lonCorrAsc)*sin(inc)))),
-                (float)((1+exc*cos(anomaly+CorrC))/(1-pow(exc, 2)) * c[9]),
-                0, (float)(1- cos(lonOrb - lonOrbM - sunLon)/2) );
+                        Angle.normalizePositive(atan2(sin(lonOrb_lonCorrAsc)*cos(inc), cos(lonOrb_lonCorrAsc)) + lonCorrAsc),
+                        asin(sin(lonOrb_lonCorrAsc)*sin(inc)))),
+                (float)(((1+exc*cos(anomaly+CorrC))/(1-pow(exc, 2))) * c[9]),
+                0, (float)((1-cos(lonOrb - lonOrbM - sunLon))/2) );
     }
 }
