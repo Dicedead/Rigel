@@ -38,10 +38,10 @@ public final class StereographicProjection implements Function<HorizontalCoordin
         double sinP = 2 * sin(phi);
 
         double term1 = cos(lambda - phi) + cos(lambda + phi);
-        double num = sinPhi1 * term1 - cosPhi1 * sinP;
+        double num =  cosPhi1 * sinP - sinPhi1 * term1;
         double den = 1 / (sinPhi1 * sinP + cosPhi1 * term1 + 2); // +2 and remove 1/2
 
-        return CartesianCoordinates.of(sin(lambda) * cos(phi) * 2 * den, -num * den);
+        return CartesianCoordinates.of(sin(lambda) * cos(phi) * 2 * den, num * den);
     }
 
     /**
@@ -92,15 +92,15 @@ public final class StereographicProjection implements Function<HorizontalCoordin
 
     @Override
     public final boolean equals(Object o) {
-        //System.err.println("Fatal error : tried to test equality between intervals but double precision does not \n" +
-        //        "allows it.");
+        //System.err.println("Fatal error : tried to test equality but double precision does not \n" +
+        //        "allow it.");
         throw new UnsupportedOperationException();
     }
 
     @Override
     public final int hashCode() {
-        //System.err.println("Fatal error : tried to test equality between intervals but double precision does not \n" +
-        //        "allows it.");
+        //System.err.println("Fatal error : tried to test equality but double precision does not \n" +
+        //        "allow it.");
         throw new UnsupportedOperationException();
     }
 

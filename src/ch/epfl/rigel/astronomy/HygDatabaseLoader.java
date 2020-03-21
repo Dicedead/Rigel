@@ -46,11 +46,11 @@ public enum HygDatabaseLoader implements StarCatalogue.Loader {
                 String[] line = reader.readLine().split(",");
                 int hip = Integer.parseInt(line[Column.HIP.ordinal()].equals("") ? "0" : line[Column.HIP.ordinal()]);
 
-                String proper = line[Column.PROPER.ordinal()].equals("") ? line[Column.BAYER.ordinal()].equals("") ? "?" :
-                        line[Column.BAYER.ordinal()] + line[Column.CON.ordinal()] : line[Column.PROPER.ordinal()];
+                String proper = line[Column.PROPER.ordinal()].equals("") ? ((line[Column.BAYER.ordinal()].equals("") ? "?" :
+                        line[Column.BAYER.ordinal()]) + " " + line[Column.CON.ordinal()]) : line[Column.PROPER.ordinal()];
 
-                float mag = (float) (Double.parseDouble(line[Column.MAG.ordinal()].equals("") ? "0" : line[Column.MAG.ordinal()]));
-                float ci = (float) Double.parseDouble(line[Column.CI.ordinal()].equals("") ? "0" : line[Column.CI.ordinal()]);
+                float mag = Float.parseFloat(line[Column.MAG.ordinal()].equals("") ? "0" : line[Column.MAG.ordinal()]);
+                float ci = Float.parseFloat(line[Column.CI.ordinal()].equals("") ? "0" : line[Column.CI.ordinal()]);
 
                 builder.addStar(new Star(hip, proper, EquatorialCoordinates.of(Double.parseDouble(line[Column.RARAD.ordinal()]),
                         Double.parseDouble(line[Column.DECRAD.ordinal()])), mag, ci));

@@ -72,6 +72,6 @@ public enum MoonModel implements CelestialObjectModel<Moon> {
                         Angle.normalizePositive(atan2(sin(lonOrb_lonCorrAsc) * cos(inc), cos(lonOrb_lonCorrAsc)) + lonCorrAsc),
                         asin(sin(lonOrb_lonCorrAsc) * sin(inc)))),
                 (float) (((1 + exc * cos(anomaly + CorrC)) / (1 - pow(exc, 2))) * c[9]),
-                0, (float) ((1 - cos(lonOrb - lonOrbM - sunLon)) / 2));
+                0, (float) ((1 - cos(lonOrb - sunLon)) / 2));
     }
 }

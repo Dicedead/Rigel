@@ -49,4 +49,38 @@ public class MyMoonModelTest {
                 ))).equatorialPos().dec());
 
     }
+
+    @Test
+    void atAngSize() {
+
+        assertEquals(Angle.ofDMS(0, 32, 49),
+                MoonModel.MOON.at(J2010.daysUntil(ZonedDateTime.of(
+                        LocalDate.of(1979, 9, 1),
+                        LocalTime.of(0, 0),
+                        ZoneOffset.UTC
+                )), new EclipticToEquatorialConversion(ZonedDateTime.of(
+                        LocalDate.of(1979, 9, 1),
+                        LocalTime.of(0, 0),
+                        ZoneOffset.UTC
+                ))).angularSize());
+
+    }
+
+    @Test
+    void atPhase() {
+
+        assertEquals("Lune (22.5%)",
+                MoonModel.MOON.at(J2010.daysUntil(ZonedDateTime.of(
+                        LocalDate.of(2003, 9, 1),
+                        LocalTime.of(0, 0),
+                        ZoneOffset.UTC
+                )), new EclipticToEquatorialConversion(ZonedDateTime.of(
+                        LocalDate.of(2003, 9, 1),
+                        LocalTime.of(0, 0),
+                        ZoneOffset.UTC
+                ))).info());
+
+    }
+
+
 }

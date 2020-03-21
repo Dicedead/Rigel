@@ -51,15 +51,15 @@ abstract class SphericalCoordinates
     @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
     @Override
     public final boolean equals(Object o) {
-        //System.err.println("Fatal error : tried to test equality between intervals but double precision does not \n" +
-        //        "allows it.");
+        //System.err.println("Fatal error : tried to test equality but double precision does not \n" +
+        //        "allow it.");
         throw new UnsupportedOperationException();
     }
 
     @Override
     public final int hashCode() {
-        //System.err.println("Fatal error : tried to test equality between intervals but double precision does not \n" +
-        //        "allows it.");
+        //System.err.println("Fatal error : tried to test equality but double precision does not \n" +
+        //        "allow it.");
         throw new UnsupportedOperationException();
     }
 }

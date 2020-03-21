@@ -99,8 +99,8 @@ public class MyStereographicProjectionTest2 {
     @Test
     void equalsThrowsUOE() {
         assertThrows(UnsupportedOperationException.class, () -> {
-            CartesianCoordinates coordonnées= CartesianCoordinates.of(9,0);
-            coordonnées.equals(coordonnées);
+            CartesianCoordinates coordonnees= CartesianCoordinates.of(9,0);
+            coordonnees.equals(coordonnees);
         });
     }
 

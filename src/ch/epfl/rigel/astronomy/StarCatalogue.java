@@ -41,7 +41,7 @@ public final class StarCatalogue {
     }
 
     /**
-     * @return (List < Star >) all the stars in the catalogue as a list
+     * @return (List < Star >) all the stars in the catalogue as a list (immutable)
      */
     public List<Star> stars() {
         return starList;

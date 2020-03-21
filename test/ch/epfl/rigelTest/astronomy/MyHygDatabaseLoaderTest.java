@@ -8,7 +8,9 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MyHygDatabaseLoaderTest {
     private static final String HYG_CATALOGUE_NAME =
@@ -35,6 +37,24 @@ public class MyHygDatabaseLoaderTest {
                     rigel = s;
             }
             assertNotNull(rigel);
+        }
+    }
+
+    @Test
+    void hygDatabaseTreatsNamesCorrectly() throws IOException {
+        try (InputStream hygStream = getClass()
+                .getResourceAsStream(HYG_CATALOGUE_NAME)) {
+            StarCatalogue.Builder builder = new StarCatalogue.Builder();
+            builder.loadFrom(hygStream,HygDatabaseLoader.INSTANCE);
+
+            int i = 0;
+            for(Star star : builder.stars()) {
+                if (star.name().charAt(0) == '?') {
+                    i = 1;
+                    assertEquals(' ', star.name().charAt(1));
+                }
+            }
+            assertEquals(1,i);
         }
     }
 }
