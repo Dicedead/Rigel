@@ -30,7 +30,7 @@ public final class Angle {
      * @return Reduced value of the angle
      */
     static public double normalizePositive(double rad) {
-        return //Normalizing twice for bug fixing: TAU was mapped to TAU and not 0 when applied only once
+        return //Normalizing twice for bug fixing: TAU is mapped to TAU and not 0 when applied only once
                 NORMALIZING_INTERVAL.reduce(NORMALIZING_INTERVAL.reduce(rad));
     }
 

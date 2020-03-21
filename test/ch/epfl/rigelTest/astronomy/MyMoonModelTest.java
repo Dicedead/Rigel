@@ -3,6 +3,8 @@ package ch.epfl.rigelTest.astronomy;
 import ch.epfl.rigel.astronomy.MoonModel;
 import ch.epfl.rigel.astronomy.SunModel;
 import ch.epfl.rigel.coordinates.EclipticToEquatorialConversion;
+import ch.epfl.rigel.math.Angle;
+import ch.epfl.rigelTest.math.UsefulMathTestingMethods;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -17,16 +19,34 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class MyMoonModelTest {
 
     @Test
-    void atWorksOnKnownValues() {
-        assertEquals(14 + 12/60.0 + 42/3600d,
+    void atRaHr() {
+
+        assertEquals(UsefulMathTestingMethods.hoursFromHMS(14, 12, 42),
                 MoonModel.MOON.at(J2010.daysUntil(ZonedDateTime.of(
-                        LocalDate.of(2003,9,1),
-                        LocalTime.of(0,0),
+                        LocalDate.of(2003, 9, 1),
+                        LocalTime.of(0, 0),
                         ZoneOffset.UTC
-                )),new EclipticToEquatorialConversion(ZonedDateTime.of(
-                        LocalDate.of(2003,9,1),
-                        LocalTime.of(0,0),
+                )), new EclipticToEquatorialConversion(ZonedDateTime.of(
+                        LocalDate.of(2003, 9, 1),
+                        LocalTime.of(0, 0),
                         ZoneOffset.UTC
                 ))).equatorialPos().raHr());
+
+    }
+
+    @Test
+    void atDec() {
+
+        assertEquals(Angle.ofDMS(-11, 31, 38),
+                MoonModel.MOON.at(J2010.daysUntil(ZonedDateTime.of(
+                        LocalDate.of(2003, 9, 1),
+                        LocalTime.of(0, 0),
+                        ZoneOffset.UTC
+                )), new EclipticToEquatorialConversion(ZonedDateTime.of(
+                        LocalDate.of(2003, 9, 1),
+                        LocalTime.of(0, 0),
+                        ZoneOffset.UTC
+                ))).equatorialPos().dec());
+
     }
 }

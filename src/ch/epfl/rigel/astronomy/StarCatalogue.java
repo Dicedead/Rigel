@@ -26,9 +26,7 @@ public final class StarCatalogue {
      */
     public StarCatalogue(List<Star> stars, List<Asterism> asterisms) {
         for (Asterism currentAsterism : asterisms) {
-            for (Star currentStar : currentAsterism.stars()) {
-                Preconditions.checkArgument(stars.contains(currentStar));
-            }
+            Preconditions.checkArgument(stars.containsAll(currentAsterism.stars()));
         }
         this.starList = List.copyOf(stars);
         asterismMap = new HashMap<>();
@@ -128,7 +126,7 @@ public final class StarCatalogue {
          * @throws IOException (I/O method)
          */
         public Builder loadFrom(InputStream inputStream, Loader loader) throws IOException {
-            loader.load(inputStream,this);
+            loader.load(inputStream, this);
             return this;
         }
 
