@@ -48,11 +48,11 @@ public enum HygDatabaseLoader implements StarCatalogue.Loader {
                 String proper = line[Column.PROPER.ordinal()].equals("") ? ((line[Column.BAYER.ordinal()].equals("") ? "?" :
                         line[Column.BAYER.ordinal()]) + " " + line[Column.CON.ordinal()]) : line[Column.PROPER.ordinal()];
 
-                float mag = Float.parseFloat(line[Column.MAG.ordinal()].equals("") ? "0" : line[Column.MAG.ordinal()]);
-                float ci = Float.parseFloat(line[Column.CI.ordinal()].equals("") ? "0" : line[Column.CI.ordinal()]);
+                float magnitude = Float.parseFloat(line[Column.MAG.ordinal()].equals("") ? "0" : line[Column.MAG.ordinal()]);
+                float colorIndex = Float.parseFloat(line[Column.CI.ordinal()].equals("") ? "0" : line[Column.CI.ordinal()]);
 
                 builder.addStar(new Star(hip, proper, EquatorialCoordinates.of(Double.parseDouble(line[Column.RARAD.ordinal()]),
-                        Double.parseDouble(line[Column.DECRAD.ordinal()])), mag, ci));
+                        Double.parseDouble(line[Column.DECRAD.ordinal()])), magnitude, colorIndex));
 
 
             }

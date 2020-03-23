@@ -48,10 +48,10 @@ public final class StarCatalogue {
     }
 
     /**
-     * @return (Set < Asterism >) a set of all the asterisms in the catalogue
+     * @return (Set < Asterism >) an immutable set of all the asterisms in the catalogue
      */
     public Set<Asterism> asterisms() {
-        return asterismMap.keySet();
+        return Set.copyOf(asterismMap.keySet());
     }
 
     /**

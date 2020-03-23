@@ -50,7 +50,7 @@ public class MyAsterismLoaderTestQUEUELESS {
                     beltegeuse = s;
                 }
             }
-            assertNotNull(beltegeuse);
+            //assertNotNull(beltegeuse);
             }
         }
 */
