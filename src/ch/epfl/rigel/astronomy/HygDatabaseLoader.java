@@ -42,7 +42,6 @@ public enum HygDatabaseLoader implements StarCatalogue.Loader {
                 column = reader.readLine().split(",");
 
             while (reader.ready()) {
-
                 String[] line = reader.readLine().split(",");
                 int hip = Integer.parseInt(line[Column.HIP.ordinal()].equals("") ? "0" : line[Column.HIP.ordinal()]);
 
@@ -54,6 +53,7 @@ public enum HygDatabaseLoader implements StarCatalogue.Loader {
 
                 builder.addStar(new Star(hip, proper, EquatorialCoordinates.of(Double.parseDouble(line[Column.RARAD.ordinal()]),
                         Double.parseDouble(line[Column.DECRAD.ordinal()])), mag, ci));
+
 
             }
         }
