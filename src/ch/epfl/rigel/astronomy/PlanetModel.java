@@ -87,7 +87,7 @@ public enum PlanetModel implements CelestialObjectModel<Planet> {
                 Angle.normalizePositive(helioLon_Pr + Math.atan2(distanceToSun_E * sinl_Pr_L,
                                        distanceToSun_Pr - distanceToSun_E * Math.cos(helioLon_Pr - helioLon_E)));
 
-        double beta = Math.atan(distanceToSun_Pr * Math.tan(psi) * Math.sin(lambda - helioLon_Pr) / distanceToSun_E * sinl_Pr_L);
+        double beta = Math.atan((distanceToSun_Pr * Math.tan(psi) * Math.sin(lambda - helioLon_Pr))/(distanceToSun_E * sinl_Pr_L));
 
         //ANGULAR SIZE & MAGNITUDE
         double rho = Math.sqrt(distanceToSun_E * distanceToSun_E + distanceToSun * distanceToSun - 2 * distanceToSun_E *
