@@ -33,7 +33,9 @@ class MyPlanetModelTest {
                 new EclipticToEquatorialConversion(D));
 
         assertEquals(Angle.ofArcsec(35.1),jupTest.angularSize(),EPSILON);
-        assertEquals(-2,jupTest.magnitude(),EPSILON*10);
+        assertEquals(-1.9885659217834473,jupTest.magnitude());
+
+        assertEquals(35.11141185362771,Angle.toDeg(PlanetModel.JUPITER.at(-2231.0,new EclipticToEquatorialConversion(ZonedDateTime.of(LocalDate.of(2003, Month.NOVEMBER, 22), LocalTime.of(0, 0, 0, 0), ZoneOffset.UTC))).angularSize())*3600);
     }
 
     @Test

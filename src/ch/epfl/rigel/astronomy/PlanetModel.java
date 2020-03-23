@@ -79,19 +79,19 @@ public enum PlanetModel implements CelestialObjectModel<Planet> {
         double distanceToSun_E = EARTH.a * (1 - EARTH.excent * EARTH.excent) / (1 + EARTH.excent * Math.cos(trueAnomaly_E));
         double helioLon_E = trueAnomaly_E + EARTH.lonPer;
 
-        double lambda;
         double sinl_Pr_L = Math.sin(helioLon_Pr - helioLon_E);
 
-        if (ALL.indexOf(this) <= 1) {
-            lambda = Angle.normalizePositive(Math.PI + helioLon_E + Math.atan2(-1 * distanceToSun_Pr * sinl_Pr_L, distanceToSun_E - distanceToSun_Pr * Math.cos(helioLon_E - helioLon_Pr)));
-        } else {
-            lambda = Angle.normalizePositive(helioLon_Pr + Math.atan2(distanceToSun_E * sinl_Pr_L, distanceToSun_Pr - distanceToSun_E * Math.cos(helioLon_Pr - helioLon_E)));
-        }
+        double lambda = (ALL.indexOf(this) <= 1) ?
+                Angle.normalizePositive(Math.PI + helioLon_E + Math.atan2(-1 * distanceToSun_Pr * sinl_Pr_L,
+                                       distanceToSun_E - distanceToSun_Pr * Math.cos(helioLon_E - helioLon_Pr))) :
+                Angle.normalizePositive(helioLon_Pr + Math.atan2(distanceToSun_E * sinl_Pr_L,
+                                       distanceToSun_Pr - distanceToSun_E * Math.cos(helioLon_Pr - helioLon_E)));
 
         double beta = Math.atan(distanceToSun_Pr * Math.tan(psi) * Math.sin(lambda - helioLon_Pr) / distanceToSun_E * sinl_Pr_L);
 
         //ANGULAR SIZE & MAGNITUDE
-        double rho = Math.sqrt(distanceToSun_E * distanceToSun_E + distanceToSun * distanceToSun - 2 * distanceToSun_E * distanceToSun * Math.cos(helioLon - helioLon_E) * Math.cos(psi));
+        double rho = Math.sqrt(distanceToSun_E * distanceToSun_E + distanceToSun * distanceToSun - 2 * distanceToSun_E *
+                distanceToSun * Math.cos(helioLon - helioLon_E) * Math.cos(psi));
 
         double sqrtOfPhase = Math.sqrt((1 + Math.cos(lambda - helioLon)) / 2);
 
