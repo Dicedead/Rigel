@@ -57,4 +57,21 @@ public class MyHygDatabaseLoaderTest {
             assertEquals(1,i);
         }
     }
+
+    @Test
+    void hygDatabaseDefaultValues() throws IOException {
+        try (InputStream hygStream = getClass()
+                .getResourceAsStream(HYG_CATALOGUE_NAME)) {
+            StarCatalogue.Builder builder = new StarCatalogue.Builder();
+            builder.loadFrom(hygStream,HygDatabaseLoader.INSTANCE);
+            for(Star star : builder.stars()) {
+                if (star.name().equals("Tau")) {
+
+                    assertEquals(0, star.colorTemperature());
+                }
+
+            }
+        }
+    }
+
 }
