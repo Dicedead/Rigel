@@ -57,8 +57,18 @@ class MyPlanetModelTest {
         ZonedDateTime D = ZonedDateTime.of(2003,11,22,0,0,0,0, ZoneOffset.UTC);
         double days22Nov = J2010.daysUntil(D);
 
-        assertEquals(Angle.ofDMS(-1 *24,30,9),PlanetModel.MERCURY.at(days22Nov,
-                new EclipticToEquatorialConversion(D)).equatorialPos().dec(),EPSILON);
+        assertEquals(16.820074565897194,PlanetModel.MERCURY.at(-2231.0,
+                new EclipticToEquatorialConversion(
+                        ZonedDateTime.of(LocalDate.of(2003, Month.NOVEMBER, 22),
+                                LocalTime.of(0, 0, 0, 0), ZoneOffset.UTC)))
+                .equatorialPos().raHr(),1e-10);
+
+        assertEquals(-24.500872462861274,PlanetModel.MERCURY.at(-2231.0,
+                new EclipticToEquatorialConversion(
+                        ZonedDateTime.of(LocalDate.of(2003, Month.NOVEMBER, 22),
+                                LocalTime.of(0, 0, 0, 0), ZoneOffset.UTC)))
+                .equatorialPos().decDeg(),1e-10);
+
         assertEquals(Angle.ofHr(16+49/60.0 +12/3600.0),PlanetModel.MERCURY.at(days22Nov,
                 new EclipticToEquatorialConversion(D)).equatorialPos().ra(),EPSILON);
     }

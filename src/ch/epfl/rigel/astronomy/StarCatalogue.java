@@ -62,7 +62,7 @@ public final class StarCatalogue {
      */
     public List<Integer> asterismIndices(Asterism asterism) {
         Preconditions.checkArgument(asterismMap.containsKey(asterism));
-        return asterismMap.get(asterism);
+        return List.copyOf(asterismMap.get(asterism));
     }
 
     /***

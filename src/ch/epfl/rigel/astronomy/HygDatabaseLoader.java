@@ -44,13 +44,13 @@ public enum HygDatabaseLoader implements StarCatalogue.Loader {
             while (reader.ready()) {
 
                 String[] line = reader.readLine().split(",");
-                int hip = Integer.parseInt(line[Column.HIP.ordinal()].equals("") ? "0" : line[Column.HIP.ordinal()]);
+                int hip = line[Column.HIP.ordinal()].equals("") ? 0 : Integer.parseInt(line[Column.HIP.ordinal()]);
 
                 String proper = line[Column.PROPER.ordinal()].equals("") ? ((line[Column.BAYER.ordinal()].equals("") ? "?" :
                         line[Column.BAYER.ordinal()]) + " " + line[Column.CON.ordinal()]) : line[Column.PROPER.ordinal()];
 
-                float magnitude = Float.parseFloat(line[Column.MAG.ordinal()].equals("") ? "0" : line[Column.MAG.ordinal()]);
-                float colorIndex = Float.parseFloat(line[Column.CI.ordinal()].equals("") ? "0" : line[Column.CI.ordinal()]);
+                float magnitude = line[Column.MAG.ordinal()].equals("") ? 0 : Float.parseFloat(line[Column.MAG.ordinal()]);
+                float colorIndex = line[Column.CI.ordinal()].equals("") ? 0 : Float.parseFloat(line[Column.CI.ordinal()]);
 
                 builder.addStar(new Star(hip, proper, EquatorialCoordinates.of(Double.parseDouble(line[Column.RARAD.ordinal()]),
                         Double.parseDouble(line[Column.DECRAD.ordinal()])), magnitude, colorIndex));
