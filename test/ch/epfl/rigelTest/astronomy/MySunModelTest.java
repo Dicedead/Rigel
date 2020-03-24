@@ -1,5 +1,6 @@
 package ch.epfl.rigelTest.astronomy;
 
+import ch.epfl.rigel.astronomy.Epoch;
 import ch.epfl.rigel.astronomy.Sun;
 import ch.epfl.rigel.astronomy.SunModel;
 import ch.epfl.rigel.coordinates.EclipticToEquatorialConversion;
@@ -40,6 +41,9 @@ class MySunModelTest {
         assertEquals(8.392682808297808, eq1.raHr(), 1e-12);
         assertEquals(19.35288373097352, eq1.decDeg());
         assertEquals(5.9325494700300885,SunModel.SUN.at(27 + 31, new EclipticToEquatorialConversion(ZonedDateTime.of(LocalDate.of(2010,  Month.FEBRUARY, 27),LocalTime.of(0,0), ZoneOffset.UTC))).equatorialPos().ra());
+
+        ZonedDateTime zdt = ZonedDateTime.of(LocalDate.of(1988, Month.JULY, 27), LocalTime.of(0, 0), ZoneOffset.UTC);
+        assertEquals(0.3353207024580374,SunModel.SUN.at(Epoch.J2010.daysUntil(zdt), new EclipticToEquatorialConversion(zdt)).equatorialPos().dec());
 
     }
 }

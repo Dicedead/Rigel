@@ -16,6 +16,7 @@ public final class StarCatalogue {
 
     private final List<Star> starList;
     private final Map<Asterism, List<Integer>> asterismMap;
+    private final Set<Asterism> immutableAsterismSet;
 
     /**
      * Constructs a catalogue of stars in and possibly out of asterisms
@@ -31,13 +32,15 @@ public final class StarCatalogue {
         this.starList = List.copyOf(stars);
         asterismMap = new HashMap<>();
 
+        List<Integer> indicesList = new ArrayList<>();
         for (Asterism asterism : asterisms) {
-            List<Integer> indicesList = new ArrayList<>();
             for (Star star : asterism.stars()) {
                 indicesList.add(starList.indexOf(star));
             }
-            asterismMap.put(asterism, indicesList);
+            asterismMap.put(asterism, List.copyOf(indicesList));
+            indicesList.clear();
         }
+        immutableAsterismSet = Set.copyOf(asterismMap.keySet());
     }
 
     /**
@@ -51,18 +54,18 @@ public final class StarCatalogue {
      * @return (Set < Asterism >) an immutable set of all the asterisms in the catalogue
      */
     public Set<Asterism> asterisms() {
-        return Set.copyOf(asterismMap.keySet());
+        return immutableAsterismSet;
     }
 
     /**
      * Method for finding the indices of the stars (given in asterism) in starList
      *
      * @param asterism (Asterism)
-     * @return (List < Integer >) a list of said indices
+     * @return (List < Integer >) an immutable list of said indices
      */
     public List<Integer> asterismIndices(Asterism asterism) {
         Preconditions.checkArgument(asterismMap.containsKey(asterism));
-        return List.copyOf(asterismMap.get(asterism));
+        return asterismMap.get(asterism);
     }
 
     /***
