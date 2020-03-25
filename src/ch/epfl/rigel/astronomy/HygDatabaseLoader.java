@@ -29,10 +29,6 @@ public enum HygDatabaseLoader implements StarCatalogue.Loader {
         RARAD, DECRAD, PMRARAD, PMDECRAD, BAYER, FLAM, CON,
         COMP, COMP_PRIMARY, BASE, LUM, VAR, VAR_MIN, VAR_MAX;
     }
-    final private List<Integer> availables = Arrays.asList(Column.HIP.ordinal(), Column.PROPER.ordinal(),
-            Column.BAYER.ordinal(), Column.MAG.ordinal(), Column.CI.ordinal(),
-            Column.RARAD.ordinal(), Column.DECRAD.ordinal());
-
 
     private <T> T buildWithDefault(String sub, T def, Function<String, T> convert)
     {
@@ -50,19 +46,20 @@ public enum HygDatabaseLoader implements StarCatalogue.Loader {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream,
                 StandardCharsets.US_ASCII))) {
 
-            String[] column = new String[0];
             if (reader.ready())
-                column = reader.readLine().split(",");
+                reader.readLine();
 
             while (reader.ready()) {
-                String[] line = reader.readLine().split(",");
-                builder.addStar( new Star(
-                        buildWithDefault(line[Column.HIP.ordinal()], 0, Integer::parseInt),
-                        buildWithDefault(line[Column.PROPER.ordinal()], buildWithDefault(line[Column.BAYER.ordinal()], "? ", x -> (x + " " + line[Column.BAYER.ordinal()])), Function.identity()),
-                        EquatorialCoordinates.of(Double.parseDouble(line[Column.RARAD.ordinal()]),
-                                Double.parseDouble(line[Column.DECRAD.ordinal()])),
-                        buildWithDefault(line[Column.MAG.ordinal()], 0, Float::parseFloat).floatValue(),
-                        buildWithDefault(line[Column.CI.ordinal()], 0, Float::parseFloat).floatValue()));
+                final String[] line = reader.readLine().split(",");
+                builder.addStar(
+                        new Star(
+                            buildWithDefault(line[Column.HIP.ordinal()], 0, Integer::parseInt),
+                            buildWithDefault(line[Column.PROPER.ordinal()], buildWithDefault(line[Column.BAYER.ordinal()], "? ", x -> (x + " " + line[Column.BAYER.ordinal()])), Function.identity()),
+                            EquatorialCoordinates.of(Double.parseDouble(line[Column.RARAD.ordinal()]), Double.parseDouble(line[Column.DECRAD.ordinal()])),
+                            buildWithDefault(line[Column.MAG.ordinal()], 0, Float::parseFloat).floatValue(),
+                            buildWithDefault(line[Column.CI.ordinal()], 0, Float::parseFloat).floatValue()
+                        )
+                );
             }
         }
     }
