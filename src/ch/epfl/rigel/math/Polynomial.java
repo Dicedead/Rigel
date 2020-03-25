@@ -3,7 +3,9 @@ package ch.epfl.rigel.math;
 import ch.epfl.rigel.Preconditions;
 
 import java.text.DecimalFormat;
+import java.util.Arrays;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 
 /**
  * Polynomial object definition and associated tools
@@ -83,7 +85,8 @@ public final class Polynomial {
                -Appending the '^' sign and the degree if degree != 0 ^ degree != 1
                -Appending the next coefficient's sign (if it exists ^ is != 0)
              */
-            format.append(f.apply(i)).append(isEqual(coefficients[i], 0) ? "" : "x")
+            format.append(f.apply(i))
+                    .append(isEqual(coefficients[i], 0) ? "" : "x")
                     .append((i == degree - 1 || isEqual(coefficients[i], 0)) ? "" : "^" + (degree - i))
                     .append(isEqual(coefficients[i + 1], 0) ? "" : (0 > coefficients[i + 1]) ? "-" : "+");
 

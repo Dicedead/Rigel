@@ -11,8 +11,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class MyStereographicProjectionTest {
 
-    private final static double EPSILON = 1e-6;
-    private final static double EPSILON2 = 1e-5;
+    private final static double EPSILON = 1e-10;
+    private final static double EPSILON2 = 1e-10;
 
     private final static HorizontalCoordinates center = HorizontalCoordinates.ofDeg(0, 0);
 
@@ -27,7 +27,7 @@ class MyStereographicProjectionTest {
     @Test
     void apply() {
         assertEquals(-0.1316524976, stereographicProjection45.apply(HorizontalCoordinates.ofDeg(45,30)).y(),EPSILON);
-        assertEquals(Angle.ofDeg(29.05537+180), stereographicProjection45.inverseApply(CartesianCoordinates.of(10,0)).az(),EPSILON);
+        assertEquals(3.648705, stereographicProjection45.inverseApply(CartesianCoordinates.of(10,0)).az(),1e-6);
         assertEquals(15,stereographicProjection.apply(stereographicProjection.inverseApply(CartesianCoordinates.of(10, 15))).y(), EPSILON);
         assertTrue(RightOpenInterval.of(0,Angle.TAU).contains(Angle.normalizePositive(-1.1102230246251565E-16)));
         assertEquals(0,stereographicProjection.inverseApply(stereographicProjection.apply(center)).alt(),  EPSILON);

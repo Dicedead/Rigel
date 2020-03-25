@@ -32,9 +32,7 @@ public final class Star extends CelestialObject {
         Preconditions.checkInInterval(COLOR_INTERVAL, colorIndex);
 
         this.hipparcosId = hipparcosId;
-        this.colorTemperature = (int)Math.floor(
-                4600*(1/(0.92*colorIndex + 1.7) + 1/(0.92*colorIndex + 0.62))
-        );
+        this.colorTemperature = (int)Math.floor(4600*(1/(0.92*colorIndex + 1.7) + 1/(0.92*colorIndex + 0.62)));
     }
 
     /***
