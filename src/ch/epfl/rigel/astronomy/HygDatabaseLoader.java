@@ -30,15 +30,15 @@ public enum HygDatabaseLoader implements StarCatalogue.Loader {
         COMP, COMP_PRIMARY, BASE, LUM, VAR, VAR_MIN, VAR_MAX;
     }
 
-    private <T> T buildWithDefault(String sub, T def, Function<String, T> convert)
-    {
-        return  sub.equals("") ? def : convert.apply(sub);
+    private <T> T buildWithDefault(String sub, T def, Function<String, T> convert) {
+        return sub.equals("") ? def : convert.apply(sub);
     }
+
     /**
      * Loads an HYG database into a builder
      *
      * @param inputStream (InputStream)
-     * @param builder (StarCatalogue.Builder)
+     * @param builder     (StarCatalogue.Builder)
      * @throws IOException (as expected from I/O methods)
      */
     @Override
@@ -46,6 +46,7 @@ public enum HygDatabaseLoader implements StarCatalogue.Loader {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream,
                 StandardCharsets.US_ASCII))) {
 
+            //Avoiding the first line
             if (reader.ready())
                 reader.readLine();
 
@@ -53,11 +54,13 @@ public enum HygDatabaseLoader implements StarCatalogue.Loader {
                 final String[] line = reader.readLine().split(",");
                 builder.addStar(
                         new Star(
-                            buildWithDefault(line[Column.HIP.ordinal()], 0, Integer::parseInt),
-                            buildWithDefault(line[Column.PROPER.ordinal()], buildWithDefault(line[Column.BAYER.ordinal()],  "? "+ line[Column.CON.ordinal()], x -> (x + " " + line[Column.CON.ordinal()])), Function.identity()),
-                            EquatorialCoordinates.of(Double.parseDouble(line[Column.RARAD.ordinal()]), Double.parseDouble(line[Column.DECRAD.ordinal()])),
-                            buildWithDefault(line[Column.MAG.ordinal()], 0, Float::parseFloat).floatValue(),
-                            buildWithDefault(line[Column.CI.ordinal()], 0, Float::parseFloat).floatValue()
+                                buildWithDefault(line[Column.HIP.ordinal()], 0, Integer::parseInt),
+                                buildWithDefault(line[Column.PROPER.ordinal()], buildWithDefault(line[Column.BAYER.ordinal()],
+                                        "? " + line[Column.CON.ordinal()], x -> (x + " " + line[Column.CON.ordinal()])), Function.identity()),
+                                EquatorialCoordinates.of(Double.parseDouble(line[Column.RARAD.ordinal()]),
+                                        Double.parseDouble(line[Column.DECRAD.ordinal()])),
+                                buildWithDefault(line[Column.MAG.ordinal()], 0, Float::parseFloat).floatValue(),
+                                buildWithDefault(line[Column.CI.ordinal()], 0, Float::parseFloat).floatValue()
                         )
                 );
             }

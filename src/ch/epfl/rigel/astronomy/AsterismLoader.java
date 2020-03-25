@@ -38,7 +38,8 @@ public enum AsterismLoader implements StarCatalogue.Loader {
                     .stars().stream().collect(Collectors.toMap(Star::hipparcosId, Function.identity(), (v1, v2)-> v2));
 
             while (reader.ready()) {
-                builder.addAsterism(new Asterism(Arrays.stream(reader.readLine().split(",")).map(s -> hipparcosToStarMap.get(Integer.parseInt(s))).collect(Collectors.toList())));
+                builder.addAsterism(new Asterism(Arrays.stream(reader.readLine().split(","))
+                        .map(s -> hipparcosToStarMap.get(Integer.parseInt(s))).collect(Collectors.toList())));
             }
         }
     }
