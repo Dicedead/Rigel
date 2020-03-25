@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Catalogue of stars and asterisms
@@ -33,10 +32,9 @@ public final class StarCatalogue {
             Preconditions.checkArgument(stars.containsAll(currentAsterism.stars()));
         }
         this.starList = List.copyOf(stars);
-
         asterismMap = asterisms.stream().collect(Collectors.toMap(Function.identity(),
-                asterism -> List.copyOf(asterism.stars().stream().map(starList::indexOf).collect(Collectors.toList())),
-                (v,u) -> u));
+                x -> List.copyOf(x.stars().stream().map(starList::indexOf).collect(Collectors.toList())), (v, u) -> u));
+
         immutableAsterismSet = Set.copyOf(asterismMap.keySet());
     }
 

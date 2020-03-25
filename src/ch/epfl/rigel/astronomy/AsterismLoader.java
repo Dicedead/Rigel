@@ -35,7 +35,7 @@ public enum AsterismLoader implements StarCatalogue.Loader {
 
             //Making this map avoids the need of another for loop in the main while loop
             final Map<Integer,Star> hipparcosToStarMap =  builder
-                    .stars().stream().collect(Collectors.toMap(Star::hipparcosId, Function.identity(), (v1, v2)-> v2));
+                    .stars().parallelStream().collect(Collectors.toMap(Star::hipparcosId, Function.identity(), (v1, v2)-> v2));
 
             while (reader.ready()) {
                 builder.addAsterism(new Asterism(Arrays.stream(reader.readLine().split(","))
