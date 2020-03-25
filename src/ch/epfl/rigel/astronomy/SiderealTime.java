@@ -25,7 +25,7 @@ public final class SiderealTime {
     private final static double[] S_ZERO_COEFFS = {2400.051336, 6.697374558};
     private final static double S_ONE_COEFF = 1.002737909;
     private final static Polynomial POLYNOM = Polynomial.of(S_ZERO_COEFF_0, S_ZERO_COEFFS);
-    private final static double COEFF_TO_HOURS = 1/36e5;
+    private final static double COEFF_TO_HOURS = 1d/36e5;
 
     /**
      * Computes sidereal Greenwich time

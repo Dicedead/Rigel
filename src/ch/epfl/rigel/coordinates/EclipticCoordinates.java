@@ -29,7 +29,7 @@ public final class EclipticCoordinates extends SphericalCoordinates{
 
 
     /**
-     * Constructs a EclipticCoordinates
+     * Constructs an EclipticCoordinates object
      * @param lon input in rad for longitude
      * @param lat input in rad for latitude
      */
@@ -38,30 +38,25 @@ public final class EclipticCoordinates extends SphericalCoordinates{
 
         return new EclipticCoordinates(
                 (Preconditions.checkInInterval(LON_INTERVAL_RAD_0toTAU, lon)),
-                (Preconditions.checkInInterval(LAT_INTERVAL_RAD_SYM_PI, lat)
-                ));
+                (Preconditions.checkInInterval(LAT_INTERVAL_RAD_SYM_PI, lat)));
 
     }
     /**
-     * Getter for longitude in radians
      * @return longitude in radians
      */
     public double lon() { return super.lon(); }
 
     /**
-     * Getter for longitude in degrees
      * @return longitude in degrees
      */
     public double lonDeg() {return super.lonDeg();}
 
     /**
-     * Getter for latitude in radians
      * @return latitude in radians
      */
     public double lat(){ return super.lat(); }
 
     /**
-     * Getter for latitude in degrees
      * @return latitude in degrees
      */
     public double latDeg(){return super.latDeg();}

@@ -15,7 +15,9 @@ import static java.lang.Math.sin;
  * @author Salim Najib (310003)
  */
 public enum SunModel implements CelestialObjectModel<Sun> {
+
     SUN(ofDeg(279.557208), ofDeg(283.112438), 0.016705);
+
     static private final double Ratio  = TAU / 365.242191;
     static private final double theta0 = (ofDeg(0.533128));
     private final double lon2010, lonPer, excent;
@@ -42,6 +44,7 @@ public enum SunModel implements CelestialObjectModel<Sun> {
         final EclipticCoordinates eclipticCoordinates = EclipticCoordinates.of(normalizePositive(trueAnomaly + lonPer), 0);
 
         return new Sun(eclipticCoordinates, eclipticToEquatorialConversion.apply(eclipticCoordinates),
-                (float) (theta0 * (1 + excent * cos(trueAnomaly)) / (1 - Math.pow(excent, 2))), (float) (meanAnomaly));
+                (float) (theta0 * (1 + excent * cos(trueAnomaly)) / (1 - Math.pow(excent, 2))), //Angular size
+                (float) (meanAnomaly));
     }
 }

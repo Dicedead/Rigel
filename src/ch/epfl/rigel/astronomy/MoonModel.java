@@ -25,10 +25,10 @@ public enum MoonModel implements CelestialObjectModel<Moon> {
     //Converting many constants to rad
     static final private Double[] c =
             Stream.of(13.1763966, 0.1114041, 1.2739,
-            0.1858 + 0.37, 6.2886, 0.214,
-            0.6583, 0.0529539, 0.16, 0.5181)
-            .map(Angle::ofDeg)
-            .collect(Collectors.toList()).toArray(Double[]::new);
+                    0.1858 + 0.37, 6.2886, 0.214,
+                    0.6583, 0.0529539, 0.16, 0.5181)
+                    .map(Angle::ofDeg)
+                    .collect(Collectors.toList()).toArray(Double[]::new);
 
     private MoonModel(double lonM, double lonPer, double lonAsc, double inc, double exc) {
         this.lonM = lonM;

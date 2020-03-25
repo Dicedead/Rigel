@@ -14,8 +14,7 @@ import static java.lang.Math.*;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-public final class EquatorialToHorizontalConversion implements Function<EquatorialCoordinates, HorizontalCoordinates>
-{
+public final class EquatorialToHorizontalConversion implements Function<EquatorialCoordinates, HorizontalCoordinates> {
 
     private final double sinPhi;
     private final double cosPhi;
@@ -23,14 +22,14 @@ public final class EquatorialToHorizontalConversion implements Function<Equatori
 
     /**
      * Initialize epsilon for calculations
+     *
      * @param when time to convert
      */
-    public EquatorialToHorizontalConversion(ZonedDateTime  when, GeographicCoordinates where)
-    {
+    public EquatorialToHorizontalConversion(ZonedDateTime when, GeographicCoordinates where) {
         localTime = SiderealTime.local(when, where);
 
-        sinPhi      = sin(where.lat());
-        cosPhi      = cos(where.lat());
+        sinPhi = sin(where.lat());
+        cosPhi = cos(where.lat());
     }
 
     /**
@@ -40,17 +39,17 @@ public final class EquatorialToHorizontalConversion implements Function<Equatori
     @Override
     public HorizontalCoordinates apply(EquatorialCoordinates equatorialCoordinates) {
 
-        final double ra       = equatorialCoordinates.ra();
-        final double dec      = equatorialCoordinates.dec();
-        final double sinDec   = sin(dec);
-        final double H        = localTime - ra;
+        final double ra = equatorialCoordinates.ra();
+        final double dec = equatorialCoordinates.dec();
+        final double sinDec = sin(dec);
+        final double H = localTime - ra;
 
-        final double term1    = sinDec*sinPhi + cosPhi*cos(dec)*cos(H);
+        final double term1 = sinDec * sinPhi + cosPhi * cos(dec) * cos(H);
           /*Same playing around with trigonometry as for EclipticToEquatorialConversion in order to perform less
             computation.*/
 
-        final double h        = asin(term1);
-        final double A        = atan2( -cosPhi*cos(dec)*sin(H), sinDec - sinPhi * term1);
+        final double h = asin(term1);
+        final double A = atan2(-cosPhi * cos(dec) * sin(H), sinDec - sinPhi * term1);
 
         return HorizontalCoordinates.of(normalizePositive(A), h);
     }

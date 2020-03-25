@@ -59,8 +59,6 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
     }
 
     /**
-     * Getter for azimuth in radians
-     *
      * @return azimuth in radians
      */
     public double az() {
@@ -68,8 +66,6 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
     }
 
     /**
-     * Getter for azimuth in degrees
-     *
      * @return azimuth in degrees
      */
     public double azDeg() {
@@ -77,7 +73,7 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
     }
 
     /**
-     * Calculates and outputs azimuth's octant in desired string format
+     * Computes and outputs azimuth's octant in desired string format
      *
      * @param n (desired) placeholder for North
      * @param e placeholder for East
@@ -99,7 +95,6 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
     }
 
     /**
-     * Getter for altitude in radians
      * @return altitude in radians
      */
     public double alt() {
@@ -107,7 +102,6 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
     }
 
     /**
-     * Getter for altitude in degrees
      * @return altitude in degrees
      */
     public double altDeg() {
@@ -122,13 +116,9 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
      */
     public double angularDistanceTo(HorizontalCoordinates that) {
         return
-               Math.acos(
-               Math.sin(this.alt())
-             * Math.sin(that.alt())
+               Math.acos(Math.sin(this.alt()) * Math.sin(that.alt())
              +
-               Math.cos(this.alt())
-             * Math.cos(that.alt())
-             * Math.cos(this.az() - that.az()));
+               Math.cos(this.alt()) * Math.cos(that.alt()) * Math.cos(this.az() - that.az()));
     }
 
     /**

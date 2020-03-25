@@ -19,15 +19,17 @@ public final class Asterism {
      * @param stars (List<Star>) Stars to be considered as an asterism
      * @throws IllegalArgumentException if stars is an empty list
      */
-    public Asterism(List<Star> stars){
+    public Asterism(List<Star> stars) {
         Preconditions.checkArgument(!(stars.size() == 0));
         starList = List.copyOf(stars);
     }
 
     /**
-     * @return (List<Star>) immutable list of stars in the asterism
+     * @return (List < Star >) immutable list of stars in the asterism
      */
-    public List<Star> stars(){
+    public List<Star> stars() {
         return starList;
-    };
+    }
+
+    ;
 }
