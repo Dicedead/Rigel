@@ -5,6 +5,8 @@ import ch.epfl.rigel.Preconditions;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Catalogue of stars and asterisms
@@ -30,16 +32,9 @@ public final class StarCatalogue {
             Preconditions.checkArgument(stars.containsAll(currentAsterism.stars()));
         }
         this.starList = List.copyOf(stars);
-        asterismMap = new HashMap<>();
+        asterismMap = asterisms.stream().collect(Collectors.toMap(Function.identity(),
+                x -> List.copyOf(x.stars().stream().map(starList::indexOf).collect(Collectors.toList())), (v, u) -> u));
 
-        List<Integer> indicesList = new ArrayList<>();
-        for (Asterism asterism : asterisms) {
-            for (Star star : asterism.stars()) {
-                indicesList.add(starList.indexOf(star));
-            }
-            asterismMap.put(asterism, List.copyOf(indicesList));
-            indicesList.clear();
-        }
         immutableAsterismSet = Set.copyOf(asterismMap.keySet());
     }
 
