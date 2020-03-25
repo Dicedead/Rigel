@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class MyAsterismLoaderTest {
@@ -43,7 +44,9 @@ public class MyAsterismLoaderTest {
                     }
                 }
             }
+            int astCount = 0;
             for (Asterism ast : a) {
+                ++astCount;
                 for (Star s : ast.stars()) {
                     if (s.name().equalsIgnoreCase("Betelgeuse")) {
                         beltegeuse = s;
@@ -51,6 +54,7 @@ public class MyAsterismLoaderTest {
                 }
             }
             assertNotNull(beltegeuse);
+            assertEquals(2,astCount);
         }
     }
 
