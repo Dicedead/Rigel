@@ -47,13 +47,11 @@ public enum HygDatabaseLoader implements StarCatalogue.Loader {
     public void load(InputStream inputStream, StarCatalogue.Builder builder) throws IOException {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream,
                 StandardCharsets.US_ASCII))) {
-
             if (reader.ready())
                 reader.readLine();
 
             while (reader.ready()) {
                 final String[] line = reader.readLine().split(",");
-
                 builder.addStar(
                         new Star(
                             buildWithDefault(line[Column.HIP.ordinal()], 0, Integer::parseInt),

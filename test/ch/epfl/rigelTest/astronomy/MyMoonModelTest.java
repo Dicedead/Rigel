@@ -1,7 +1,6 @@
 package ch.epfl.rigelTest.astronomy;
 
 import ch.epfl.rigel.astronomy.MoonModel;
-import ch.epfl.rigel.astronomy.SunModel;
 import ch.epfl.rigel.coordinates.EclipticToEquatorialConversion;
 import ch.epfl.rigel.math.Angle;
 import ch.epfl.rigelTest.math.UsefulMathTestingMethods;
@@ -9,7 +8,6 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.Month;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
@@ -18,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MyMoonModelTest {
 
+    final private double  delta = 0;
     @Test
     void atRaHr() {
 
@@ -30,7 +29,7 @@ public class MyMoonModelTest {
                         LocalDate.of(2003, 9, 1),
                         LocalTime.of(0, 0),
                         ZoneOffset.UTC
-                ))).equatorialPos().raHr());
+                ))).equatorialPos().raHr(), delta);
 
     }
 
@@ -46,7 +45,7 @@ public class MyMoonModelTest {
                         LocalDate.of(2003, 9, 1),
                         LocalTime.of(0, 0),
                         ZoneOffset.UTC
-                ))).equatorialPos().dec());
+                ))).equatorialPos().dec(), delta);
 
     }
 
@@ -62,7 +61,7 @@ public class MyMoonModelTest {
                         LocalDate.of(1979, 9, 1),
                         LocalTime.of(0, 0),
                         ZoneOffset.UTC
-                ))).angularSize());
+                ))).angularSize(), delta);
 
     }
 

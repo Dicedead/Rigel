@@ -20,6 +20,9 @@ import static ch.epfl.rigel.astronomy.Epoch.J2010;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class MySunModelTest {
+    private final static double delta = 1e-14;
+    private final static double delta2 = 1e-4;
+    private final static double delta3 = 1e-5;
 
     @Test
     void at() {
@@ -31,14 +34,13 @@ class MySunModelTest {
         );
         assertEquals(UsefulMathTestingMethods.hoursFromHMS(8,23,34), SunModel.SUN.at(
                 J2010.daysUntil(time), new EclipticToEquatorialConversion(time)
-        ).equatorialPos().raHr(), 1e-4);
+        ).equatorialPos().raHr(), delta2);
         assertEquals(Angle.ofDMS(0, 31, 30), SunModel.SUN.at(
                 J2010.daysUntil(time), new EclipticToEquatorialConversion(time)
-        ).angularSize(),1e-5);
-
+        ).angularSize(),delta3);
         EquatorialCoordinates eq1 = SunModel.SUN.at(-2349, new EclipticToEquatorialConversion(ZonedDateTime.of(LocalDate.of(2003, Month.JULY,
                 27), LocalTime.of(0, 0, 0, 0), ZoneOffset.UTC))).equatorialPos();
-        assertEquals(8.392682808297808, eq1.raHr(), 1e-12);
+        assertEquals(8.392682808297808, eq1.raHr(), delta);
         assertEquals(19.35288373097352, eq1.decDeg());
         assertEquals(5.9325494700300885,SunModel.SUN.at(27 + 31, new EclipticToEquatorialConversion(ZonedDateTime.of(LocalDate.of(2010,  Month.FEBRUARY, 27),LocalTime.of(0,0), ZoneOffset.UTC))).equatorialPos().ra());
 

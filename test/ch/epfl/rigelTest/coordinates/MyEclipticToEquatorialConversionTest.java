@@ -16,6 +16,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class MyEclipticToEquatorialConversionTest {
     private final static double EPSILON = 1e-6;
+    private final static double EPSILON2 = 1e-8;
+
 
     @Test
     void epsilon() {
@@ -27,7 +29,7 @@ class MyEclipticToEquatorialConversionTest {
                 ofArcsec(0.00181), ofArcsec(-0.0006), ofArcsec(-46.815), Angle.ofDMS(23, 26, 21.45))
                 .at(T);
 
-        assertEquals( Angle.ofDeg(23.43805531),epsilon,EPSILON);
+        assertEquals( Angle.ofDeg(23.43805531),epsilon,EPSILON2);
     }
 
     @Test
@@ -38,6 +40,6 @@ class MyEclipticToEquatorialConversionTest {
         EquatorialCoordinates equatCoords = converter.apply(eclipCoords);
 
         assertEquals(9+34/60.0+53.32/3600,equatCoords.raHr(),EPSILON);
-        assertEquals(Angle.ofDMS(19,32,6.01),equatCoords.dec(),EPSILON);
+        assertEquals(Angle.ofDMS(19,32,6.01),equatCoords.dec(),EPSILON2);
     }
 }

@@ -9,7 +9,7 @@ import static java.lang.Math.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class MyEquatorialToHorizontalConversionTest {
-
+    private final double delta = 1e-8;
     @Test
     void apply() {
         double A    = ofDeg(283.271027);
@@ -29,13 +29,8 @@ class MyEquatorialToHorizontalConversionTest {
         double A_        = atan2(numA,denomA);
 
         A_ = normalizePositive(A_);
-        /*if(denomA < 0) {
-            A_ += Math.PI;
-        } else if (numA < 0) {
-            A_ += Angle.TAU;
-        }*/
-        assertEquals(A, A_, 1e-6);
-        assertEquals(h, h_, 1e-6);
+        assertEquals(A, A_, delta);
+        assertEquals(h, h_, delta);
 
     }
 }

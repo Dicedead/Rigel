@@ -17,7 +17,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class MyPlanetModelTest {
 
-    private final static double EPSILON = 1e-4;
+    private final static double EPSILON = 1e-7;
+    private final static double EPSILON2 = 1e-13;
+    private final static double EPSILON3 = 1e-4;
+    private final static double EPSILON4 = 1e-5;
+
+
 
     @Test
     void atOuterPlanet() {
@@ -28,18 +33,18 @@ class MyPlanetModelTest {
                 new EclipticToEquatorialConversion(
                         ZonedDateTime.of(LocalDate.of(2003, Month.NOVEMBER, 22),
                                 LocalTime.of(0, 0, 0, 0), ZoneOffset.UTC)))
-                .equatorialPos().raHr(),1e-10);
+                .equatorialPos().raHr(),EPSILON2);
 
         assertEquals(6.356635506685756,PlanetModel.JUPITER.at(-2231.0,
                 new EclipticToEquatorialConversion(
                         ZonedDateTime.of(LocalDate.of(2003, Month.NOVEMBER, 22),
                                 LocalTime.of(0, 0, 0, 0), ZoneOffset.UTC)))
-                .equatorialPos().decDeg(),1e-10);
+                .equatorialPos().decDeg(),EPSILON2);
 
         assertEquals(Angle.ofDMS(6,21,25), PlanetModel.JUPITER.at(days22Nov,
-                new EclipticToEquatorialConversion(D)).equatorialPos().dec(),EPSILON);
+                new EclipticToEquatorialConversion(D)).equatorialPos().dec(),EPSILON4);
         assertEquals(Angle.ofHr(11+11/60.0+14/3600.0), PlanetModel.JUPITER.at(days22Nov,
-                new EclipticToEquatorialConversion(D)).equatorialPos().ra(),EPSILON);
+                new EclipticToEquatorialConversion(D)).equatorialPos().ra(),EPSILON3);
 
         Planet jupTest = PlanetModel.JUPITER.at(days22Nov,
                 new EclipticToEquatorialConversion(D));
@@ -61,15 +66,15 @@ class MyPlanetModelTest {
                 new EclipticToEquatorialConversion(
                         ZonedDateTime.of(LocalDate.of(2003, Month.NOVEMBER, 22),
                                 LocalTime.of(0, 0, 0, 0), ZoneOffset.UTC)))
-                .equatorialPos().raHr(),1e-10);
+                .equatorialPos().raHr(),EPSILON2);
 
         assertEquals(-24.500872462861274,PlanetModel.MERCURY.at(-2231.0,
                 new EclipticToEquatorialConversion(
                         ZonedDateTime.of(LocalDate.of(2003, Month.NOVEMBER, 22),
                                 LocalTime.of(0, 0, 0, 0), ZoneOffset.UTC)))
-                .equatorialPos().decDeg(),1e-10);
+                .equatorialPos().decDeg(),EPSILON2);
 
         assertEquals(Angle.ofHr(16+49/60.0 +12/3600.0),PlanetModel.MERCURY.at(days22Nov,
-                new EclipticToEquatorialConversion(D)).equatorialPos().ra(),EPSILON);
+                new EclipticToEquatorialConversion(D)).equatorialPos().ra(),EPSILON3);
     }
 }
