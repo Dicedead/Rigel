@@ -20,8 +20,6 @@ public abstract class Interval {
     final private double inf, sup;
 
     /**
-     * Getter for lower bound
-     *
      * @return value of the lower bound of the interval
      */
     public double low() {
@@ -29,8 +27,6 @@ public abstract class Interval {
     }
 
     /**
-     * Getter for higher bound
-     *
      * @return value of the higher bound of the interval
      */
     public double high() {
@@ -38,8 +34,6 @@ public abstract class Interval {
     }
 
     /**
-     * Getter for size
-     *
      * @return size of the interval
      */
     public double size() {
