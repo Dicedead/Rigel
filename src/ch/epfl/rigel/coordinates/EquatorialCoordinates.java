@@ -28,7 +28,7 @@ public final class EquatorialCoordinates extends SphericalCoordinates{
     }
 
     /**
-     * Constructs a EquatorialCoordinates
+     * Constructs an EquatorialCoordinates object
      * @param ra input in radians for longitude
      * @param dec input in radians for latitude
      */
@@ -42,31 +42,26 @@ public final class EquatorialCoordinates extends SphericalCoordinates{
     }
 
     /**
-     * Getter for right ascension in radians
      * @return right ascension in radians
      */
     public double ra() { return super.lon(); }
 
     /**
-     * Getter for right ascension in degrees
      * @return right ascension in degrees
      */
     public double raDeg() {return Angle.toDeg(super.lon());}
 
     /**
-     * Getter for right ascension in hours
      * @return right ascension in hours
      */
     public double raHr() { return Angle.toHr(super.lon()); }
 
     /**
-     * Getter for declination in rad
      * @return declination in rad
      */
     public double dec() {return super.lat();}
 
     /**
-     * Getter for declination in deg
      * @return declination in deg
      */
     public double decDeg() {return super.latDeg();}

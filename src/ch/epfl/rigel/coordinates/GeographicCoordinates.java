@@ -38,8 +38,7 @@ public final class GeographicCoordinates extends SphericalCoordinates {
 
         return new GeographicCoordinates(
                 Angle.ofDeg(Preconditions.checkInInterval(LON_INTERVAL_DEG_SYM_360, lonDeg)),
-                Angle.ofDeg(Preconditions.checkInInterval(LAT_INTERVAL_DEG_SYM_180, latDeg)
-                ));
+                Angle.ofDeg(Preconditions.checkInInterval(LAT_INTERVAL_DEG_SYM_180, latDeg)));
 
     }
 
@@ -63,8 +62,6 @@ public final class GeographicCoordinates extends SphericalCoordinates {
 
 
     /**
-     * Getter for longitude in radians
-     *
      * @return longitude in radians
      */
     public double lon() {
@@ -72,8 +69,6 @@ public final class GeographicCoordinates extends SphericalCoordinates {
     }
 
     /**
-     * Getter for longitude in degrees
-     *
      * @return longitude in degrees
      */
     public double lonDeg() {
@@ -81,8 +76,6 @@ public final class GeographicCoordinates extends SphericalCoordinates {
     }
 
     /**
-     * Getter for latitude in radians
-     *
      * @return latitude in radians
      */
     public double lat() {
@@ -90,8 +83,6 @@ public final class GeographicCoordinates extends SphericalCoordinates {
     }
 
     /**
-     * Getter for latitude in degrees
-     *
      * @return latitude in degrees
      */
     public double latDeg() {

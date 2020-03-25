@@ -25,25 +25,21 @@ abstract class SphericalCoordinates
     }
 
     /**
-     * Getter for longitude in radians
      * @return longitude in radians
      */
     double lon() { return longitude; }
 
     /**
-     * Getter for longitude in degrees
      * @return longitude in degrees
      */
     double lonDeg() {return toDeg(longitude);}
 
     /**
-     * Getter for latitude in radians
      * @return latitude in radians
      */
     double lat(){ return latitude; }
 
     /**
-     * Getter for latitude in degrees
      * @return latitude in degrees
      */
     double latDeg(){return toDeg(latitude);}

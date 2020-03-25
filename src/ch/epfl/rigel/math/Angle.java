@@ -12,15 +12,15 @@ public final class Angle {
     static final public double TAU = 2 * Math.PI;
 
     //Number of ...
-    static final private double SECONDS_IN_MINUTES = 60.;
-    static final private double MINUTES_IN_HOURS = 60.;
-    static final private double HOUR_IN_DEGREE = 1. / 15;
-    static final private double DEGREE_IN_HOUR = 15.;
+    static final private double SECONDS_IN_MINUTES = 60d;
+    static final private double MINUTES_IN_HOURS = 60d;
+    static final private double HOUR_IN_DEGREE = 1d / 15;
+    static final private double DEGREE_IN_HOUR = 15d;
 
     static final private double RATIO_MIN_RAD = TAU / (360 * MINUTES_IN_HOURS);
-    static final private double RATIO_RAD_DEG = 360. / TAU;
-    static final private double RATIO_DEG_RAD = TAU / 360.;
-    static final private double RATIO_SEC_RAD = TAU / (360 * MINUTES_IN_HOURS * SECONDS_IN_MINUTES);
+    static final private double RATIO_RAD_DEG = 360 / TAU;
+    static final private double RATIO_DEG_RAD = TAU / 360;
+    static final private double RATIO_SEC_RAD = TAU / (360d * MINUTES_IN_HOURS * SECONDS_IN_MINUTES);
     static final private RightOpenInterval NORMALIZING_INTERVAL = RightOpenInterval.of(0,TAU);
 
     /**

@@ -13,15 +13,14 @@ public final class Planet extends CelestialObject {
     /**
      * Planet constructor
      *
-     * @param name (String) object's identification
+     * @param name          (String) object's identification
      * @param equatorialPos (EquatorialCoordinates) object's coordinates
-     * @param angularSize (float) object's angular size
-     * @param magnitude (float) object's apparent magnitude
+     * @param angularSize   (float) object's angular size
+     * @param magnitude     (float) object's apparent magnitude
      * @throws IllegalArgumentException if angularSize < 0
-     * @throws NullPointerException if name or equatorialPos are null
+     * @throws NullPointerException     if name or equatorialPos are null
      */
     public Planet(String name, EquatorialCoordinates equatorialPos, float angularSize, float magnitude) {
         super(name, equatorialPos, angularSize, magnitude);
     }
-
 }

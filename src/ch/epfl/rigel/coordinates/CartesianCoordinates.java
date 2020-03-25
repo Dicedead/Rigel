@@ -2,7 +2,7 @@ package ch.epfl.rigel.coordinates;
 
 
 /**
- * Cartesian coordinates representaation
+ * Cartesian coordinates representation
  *
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)

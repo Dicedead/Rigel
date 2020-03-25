@@ -4,7 +4,11 @@ import ch.epfl.rigel.Preconditions;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -28,14 +32,18 @@ public final class StarCatalogue {
      * @throws IllegalArgumentException if a star in an asterim isn't listed in stars
      */
     public StarCatalogue(List<Star> stars, List<Asterism> asterisms) {
-
-        asterisms.forEach(x ->  Preconditions.checkArgument(stars.containsAll(x.stars())));
+        for (Asterism currentAsterism : asterisms) {
+            Preconditions.checkArgument(stars.containsAll(currentAsterism.stars()));
+        }
         this.starList = List.copyOf(stars);
 
-        asterismMap = asterisms.stream().collect(Collectors.toMap(Function.identity(),
-                x -> List.copyOf(x.stars().stream().map(starList::indexOf).collect(Collectors.toList())), (v, u) -> u));
+        asterismMap = asterisms.stream().collect(Collectors.toMap(Function.identity(), //identity ie the asterism itself
+                asterism -> List.copyOf(asterism.stars().stream()              //this function associates an asterism with
+                        .map(starList::indexOf).collect(Collectors.toList())), //the desired with of indices.
+                (v, u) -> u)); //finally, merging duplicate asterisms (if there's any).
 
         immutableAsterismSet = Set.copyOf(asterismMap.keySet());
+        //keySet allows for retain & retainAll, need to make it immutable someway
     }
 
     /**
@@ -75,8 +83,8 @@ public final class StarCatalogue {
          * Default constructor initializing 2 empty lists of stars and asterisms
          */
         public Builder() {
-            starsToBuild = new ArrayList<>(100);
-            asterismsToBuild = new ArrayList<>(50);
+            starsToBuild = new ArrayList<>();
+            asterismsToBuild = new ArrayList<>();
         }
 
         /**

@@ -21,14 +21,14 @@ public abstract class CelestialObject {
     /**
      * Celestial Object constructor
      *
-     * @param name (String) object's identification
+     * @param name          (String) object's identification
      * @param equatorialPos (EquatorialCoordinates) object's coordinates
-     * @param angularSize (float) object's angular size
-     * @param magnitude (float) object's apparent magnitude
+     * @param angularSize   (float) object's angular size
+     * @param magnitude     (float) object's apparent magnitude
      * @throws IllegalArgumentException if angularSize < 0
-     * @throws NullPointerException if name or equatorialPos are null
+     * @throws NullPointerException     if name or equatorialPos are null
      */
-    CelestialObject(String name, EquatorialCoordinates equatorialPos, float angularSize, float magnitude){
+    CelestialObject(String name, EquatorialCoordinates equatorialPos, float angularSize, float magnitude) {
         Preconditions.checkArgument(angularSize >= 0);
 
         this.name = Objects.requireNonNull(name);
@@ -40,29 +40,40 @@ public abstract class CelestialObject {
     /**
      * @return (String) Object's name
      */
-    public String name(){ return name; }
+    public String name() {
+        return name;
+    }
 
     /**
      * @return (double) Object's angular size
      */
-    public double angularSize(){ return angularSize; }
+    public double angularSize() {
+        return angularSize;
+    }
 
     /**
      * @return (double) Object's apparent magnitude
      */
-    public double magnitude(){ return magnitude; }
+    public double magnitude() {
+        return magnitude;
+    }
 
     /**
      * @return (EquatorialCoordinates) Object's equatorial coordinates
      */
-    public EquatorialCoordinates equatorialPos() { return equatorialPos; }
-    //No need to make a defensive copy of equatorialPos as it is immutable.
+    public EquatorialCoordinates equatorialPos() {
+        return equatorialPos;
+    }
 
     /**
      * @return (String) Information on the object (by default: its name)
      */
-    public String info(){ return name(); }
+    public String info() {
+        return name();
+    }
 
     @Override
-    public String toString(){ return info(); }
+    public String toString() {
+        return info();
+    }
 }
