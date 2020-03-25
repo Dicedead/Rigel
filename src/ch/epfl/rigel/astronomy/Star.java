@@ -27,8 +27,10 @@ public final class Star extends CelestialObject {
      */
     public Star(int hipparcosId, String name, EquatorialCoordinates equatorialPos, float magnitude, float colorIndex) {
         super(name, equatorialPos, 0, magnitude);
+
         Preconditions.checkArgument(hipparcosId >= 0);
         Preconditions.checkInInterval(COLOR_INTERVAL, colorIndex);
+
         this.hipparcosId = hipparcosId;
         this.colorTemperature = (int)Math.floor(
                 4600*(1/(0.92*colorIndex + 1.7) + 1/(0.92*colorIndex + 0.62))

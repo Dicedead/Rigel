@@ -48,7 +48,6 @@ abstract class SphericalCoordinates
      */
     double latDeg(){return toDeg(latitude);}
 
-    @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
     @Override
     public final boolean equals(Object o) {
         //System.err.println("Fatal error : tried to test equality but double precision does not \n" +

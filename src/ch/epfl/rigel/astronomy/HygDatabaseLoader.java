@@ -7,6 +7,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Utility class for loading the HYG database
@@ -24,8 +29,15 @@ public enum HygDatabaseLoader implements StarCatalogue.Loader {
         RARAD, DECRAD, PMRARAD, PMDECRAD, BAYER, FLAM, CON,
         COMP, COMP_PRIMARY, BASE, LUM, VAR, VAR_MIN, VAR_MAX;
     }
+    final private List<Integer> availables = Arrays.asList(Column.HIP.ordinal(), Column.PROPER.ordinal(),
+            Column.BAYER.ordinal(), Column.MAG.ordinal(), Column.CI.ordinal(),
+            Column.RARAD.ordinal(), Column.DECRAD.ordinal());
 
 
+    private <T> T buildWithDefault(String sub, T def, Function<String, T> convert)
+    {
+        return  sub.equals("") ? def : convert.apply(sub);
+    }
     /**
      * Loads an HYG database into a builder
      *
@@ -37,24 +49,20 @@ public enum HygDatabaseLoader implements StarCatalogue.Loader {
     public void load(InputStream inputStream, StarCatalogue.Builder builder) throws IOException {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream,
                 StandardCharsets.US_ASCII))) {
+
             String[] column = new String[0];
             if (reader.ready())
                 column = reader.readLine().split(",");
 
             while (reader.ready()) {
                 String[] line = reader.readLine().split(",");
-                int hip = line[Column.HIP.ordinal()].equals("") ? 0 : Integer.parseInt(line[Column.HIP.ordinal()]);
-
-                String proper = line[Column.PROPER.ordinal()].equals("") ? ((line[Column.BAYER.ordinal()].equals("") ? "?" :
-                        line[Column.BAYER.ordinal()]) + " " + line[Column.CON.ordinal()]) : line[Column.PROPER.ordinal()];
-
-                float magnitude = line[Column.MAG.ordinal()].equals("") ? 0 : Float.parseFloat(line[Column.MAG.ordinal()]);
-                float colorIndex = line[Column.CI.ordinal()].equals("") ? 0 : Float.parseFloat(line[Column.CI.ordinal()]);
-
-                builder.addStar(new Star(hip, proper, EquatorialCoordinates.of(Double.parseDouble(line[Column.RARAD.ordinal()]),
-                        Double.parseDouble(line[Column.DECRAD.ordinal()])), magnitude, colorIndex));
-
-
+                builder.addStar( new Star(
+                        buildWithDefault(line[Column.HIP.ordinal()], 0, Integer::parseInt),
+                        buildWithDefault(line[Column.PROPER.ordinal()], buildWithDefault(line[Column.BAYER.ordinal()], "? ", x -> (x + " " + line[Column.BAYER.ordinal()])), Function.identity()),
+                        EquatorialCoordinates.of(Double.parseDouble(line[Column.RARAD.ordinal()]),
+                                Double.parseDouble(line[Column.DECRAD.ordinal()])),
+                        buildWithDefault(line[Column.MAG.ordinal()], 0, Float::parseFloat).floatValue(),
+                        buildWithDefault(line[Column.CI.ordinal()], 0, Float::parseFloat).floatValue()));
             }
         }
     }

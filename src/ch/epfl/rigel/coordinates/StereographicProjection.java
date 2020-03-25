@@ -32,14 +32,14 @@ public final class StereographicProjection implements Function<HorizontalCoordin
     @Override
     public CartesianCoordinates apply(HorizontalCoordinates azAlt) {
 
-        double lambda = azAlt.az() - centerOfProjection.az();
+        final double lambda = azAlt.az() - centerOfProjection.az();
 
-        double phi = azAlt.alt();
-        double sinP = 2 * sin(phi);
+        final double phi = azAlt.alt();
+        final double sinP = 2 * sin(phi);
 
-        double term1 = cos(lambda - phi) + cos(lambda + phi);
-        double num =  cosPhi1 * sinP - sinPhi1 * term1;
-        double den = 1 / (sinPhi1 * sinP + cosPhi1 * term1 + 2); // +2 and remove 1/2
+        final double term1 = cos(lambda - phi) + cos(lambda + phi);
+        final double num =  cosPhi1 * sinP - sinPhi1 * term1;
+        final double den = 1 / (sinPhi1 * sinP + cosPhi1 * term1 + 2); // +2 and remove 1/2
 
         return CartesianCoordinates.of(sin(lambda) * cos(phi) * 2 * den, num * den);
     }
@@ -75,15 +75,15 @@ public final class StereographicProjection implements Function<HorizontalCoordin
      * @return Horizontal corresponding to azAlt
      */
     public HorizontalCoordinates inverseApply(CartesianCoordinates xy) {
-        double y = xy.y();
-        double x = xy.x();
-        double p2 = x * x + y * y;
-        double p = Math.sqrt(p2);
+        final double y = xy.y();
+        final double x = xy.x();
+        final double p2 = x * x + y * y;
+        final double p = Math.sqrt(p2);
 
-        double den = 1 / (p2 + 1);
-        double sinC = 2 * p * den;
-        double cosC = (1 - p2) * den;
-        double term = y * sinC;
+        final double den = 1 / (p2 + 1);
+        final double sinC = 2 * p * den;
+        final double cosC = (1 - p2) * den;
+        final double term = y * sinC;
         return HorizontalCoordinates.of(
                 Angle.normalizePositive((centerOfProjection.az() + atan2(x * sinC, p * cosPhi1 * cosC - term * sinPhi1))),
                 (asin(cosC * sinPhi1 + (term * cosPhi1) / p)));

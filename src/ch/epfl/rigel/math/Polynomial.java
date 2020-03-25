@@ -97,7 +97,6 @@ public final class Polynomial {
         return (Math.abs(value1 - value2)) <= EPSILON;
     }
 
-    @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
     @Override
     public boolean equals(Object o) {
         //System.err.println("Fatal error : tried to test equality between intervals but double precision does not \n" +

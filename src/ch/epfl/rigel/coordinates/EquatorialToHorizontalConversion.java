@@ -40,17 +40,17 @@ public final class EquatorialToHorizontalConversion implements Function<Equatori
     @Override
     public HorizontalCoordinates apply(EquatorialCoordinates equatorialCoordinates) {
 
-        double ra       = equatorialCoordinates.ra();
-        double dec      = equatorialCoordinates.dec();
-        double sinDec   = sin(dec);
-        double H        = localTime - ra;
+        final double ra       = equatorialCoordinates.ra();
+        final double dec      = equatorialCoordinates.dec();
+        final double sinDec   = sin(dec);
+        final double H        = localTime - ra;
 
-        double term1    = sinDec*sinPhi + cosPhi*cos(dec)*cos(H);
+        final double term1    = sinDec*sinPhi + cosPhi*cos(dec)*cos(H);
           /*Same playing around with trigonometry as for EclipticToEquatorialConversion in order to perform less
             computation.*/
 
-        double h        = asin(term1);
-        double A        = atan2(-cosPhi*cos(dec)*sin(H),sinDec - sinPhi * term1);
+        final double h        = asin(term1);
+        final double A        = atan2( -cosPhi*cos(dec)*sin(H), sinDec - sinPhi * term1);
 
         return HorizontalCoordinates.of(normalizePositive(A), h);
     }

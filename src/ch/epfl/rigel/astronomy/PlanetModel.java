@@ -62,38 +62,38 @@ public enum PlanetModel implements CelestialObjectModel<Planet> {
     public Planet at(double daysSinceJ2010, EclipticToEquatorialConversion eclipticToEquatorialConversion) {
 
         //DETERMINATION OF COORDINATES LAMBDA AND BETA
-        double meanAnomaly = (Angle.TAU * daysSinceJ2010) / (DAYS_IN_TROP_YEAR * Tp) + epsilon - lonPer;
-        double trueAnomaly = meanAnomaly + 2 * excent * Math.sin(meanAnomaly);
-        double distanceToSun = a * (1 - excent * excent) / (1 + excent * Math.cos(trueAnomaly));
-        double helioLon = trueAnomaly + lonPer;
-        double sinl_LonN = Math.sin(helioLon - lonN);
-        double psi = Math.asin(sinl_LonN * Math.sin(inc));
+        final double meanAnomaly = (Angle.TAU * daysSinceJ2010) / (DAYS_IN_TROP_YEAR * Tp) + epsilon - lonPer;
+        final double trueAnomaly = meanAnomaly + 2 * excent * Math.sin(meanAnomaly);
+        final double distanceToSun = a * (1 - excent * excent) / (1 + excent * Math.cos(trueAnomaly));
+        final double helioLon = trueAnomaly + lonPer;
+        final double sinl_LonN = Math.sin(helioLon - lonN);
+        final double psi = Math.asin(sinl_LonN * Math.sin(inc));
 
-        double distanceToSun_Pr = distanceToSun * Math.cos(psi);
-        double helioLon_Pr = Math.atan2(sinl_LonN * Math.cos(inc), Math.cos(helioLon - lonN)) + lonN;
+        final double distanceToSun_Pr = distanceToSun * Math.cos(psi);
+        final double helioLon_Pr = Math.atan2(sinl_LonN * Math.cos(inc), Math.cos(helioLon - lonN)) + lonN;
 
         //Making private auxiliary methods for computing meanAnomaly, trueAnomaly, distanceToSun & helioLon values for the
         //Earth seemed a little bit overkill.
-        double meanAnomaly_E = (Angle.TAU * daysSinceJ2010) / (DAYS_IN_TROP_YEAR * EARTH.Tp) + EARTH.epsilon - EARTH.lonPer;
-        double trueAnomaly_E = meanAnomaly_E + 2 * EARTH.excent * Math.sin(meanAnomaly_E);
-        double distanceToSun_E = EARTH.a * (1 - EARTH.excent * EARTH.excent) / (1 + EARTH.excent * Math.cos(trueAnomaly_E));
-        double helioLon_E = trueAnomaly_E + EARTH.lonPer;
+        final double meanAnomaly_E = (Angle.TAU * daysSinceJ2010) / (DAYS_IN_TROP_YEAR * EARTH.Tp) + EARTH.epsilon - EARTH.lonPer;
+        final double trueAnomaly_E = meanAnomaly_E + 2 * EARTH.excent * Math.sin(meanAnomaly_E);
+        final double distanceToSun_E = EARTH.a * (1 - EARTH.excent * EARTH.excent) / (1 + EARTH.excent * Math.cos(trueAnomaly_E));
+        final double helioLon_E = trueAnomaly_E + EARTH.lonPer;
 
-        double sinl_Pr_L = Math.sin(helioLon_Pr - helioLon_E);
+        final double sinl_Pr_L = Math.sin(helioLon_Pr - helioLon_E);
 
-        double lambda = (ALL.indexOf(this) <= 1) ?
+        final double lambda = (ALL.indexOf(this) <= 1) ?
                 Angle.normalizePositive(Math.PI + helioLon_E + Math.atan2(-1 * distanceToSun_Pr * sinl_Pr_L,
                                        distanceToSun_E - distanceToSun_Pr * Math.cos(helioLon_E - helioLon_Pr))) :
                 Angle.normalizePositive(helioLon_Pr + Math.atan2(distanceToSun_E * sinl_Pr_L,
                                        distanceToSun_Pr - distanceToSun_E * Math.cos(helioLon_Pr - helioLon_E)));
 
-        double beta = Math.atan((distanceToSun_Pr * Math.tan(psi) * Math.sin(lambda - helioLon_Pr))/(distanceToSun_E * sinl_Pr_L));
+        final double beta = Math.atan((distanceToSun_Pr * Math.tan(psi) * Math.sin(lambda - helioLon_Pr))/(distanceToSun_E * sinl_Pr_L));
 
         //ANGULAR SIZE & MAGNITUDE
-        double rho = Math.sqrt(distanceToSun_E * distanceToSun_E + distanceToSun * distanceToSun - 2 * distanceToSun_E *
+        final double rho = Math.sqrt(distanceToSun_E * distanceToSun_E + distanceToSun * distanceToSun - 2 * distanceToSun_E *
                 distanceToSun * Math.cos(helioLon - helioLon_E) * Math.cos(psi));
 
-        double sqrtOfPhase = Math.sqrt((1 + Math.cos(lambda - helioLon)) / 2);
+        final double sqrtOfPhase = Math.sqrt((1 + Math.cos(lambda - helioLon)) / 2);
 
         return new Planet(name,
                 eclipticToEquatorialConversion.apply(EclipticCoordinates.of(lambda, beta)), (float) (theta0 / rho),

@@ -4,11 +4,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 
 /**
@@ -34,21 +34,11 @@ public enum AsterismLoader implements StarCatalogue.Loader {
                 StandardCharsets.US_ASCII))) {
 
             //Making this map avoids the need of another for loop in the main while loop
-            Map<Integer,Star> hipparcosToStarMap = new HashMap<>();
-            for(Star star : builder.stars()) {
-                hipparcosToStarMap.put(star.hipparcosId(),star);
-            }
+            final Map<Integer,Star> hipparcosToStarMap =  builder
+                    .stars().stream().collect(Collectors.toMap(Star::hipparcosId, Function.identity(), (v1, v2)-> v2));
 
             while (reader.ready()) {
-                List<Star> starsInAsterism = new ArrayList<>();
-                String[] line = reader.readLine().split(",");
-
-                for(String hipparcosString : line) {
-                    starsInAsterism.add(hipparcosToStarMap.get(Integer.parseInt(hipparcosString)));
-
-                }
-                builder.addAsterism(new Asterism(starsInAsterism));
-
+                builder.addAsterism(new Asterism(Arrays.stream(reader.readLine().split(",")).map(s -> hipparcosToStarMap.get(Integer.parseInt(s))).collect(Collectors.toList())));
             }
         }
     }

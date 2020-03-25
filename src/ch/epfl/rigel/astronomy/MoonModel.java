@@ -48,24 +48,24 @@ public enum MoonModel implements CelestialObjectModel<Moon> {
     @Override
     public Moon at(double daysSinceJ2010, EclipticToEquatorialConversion eclipticToEquatorialConversion) {
 
-        double lonOrbM = c[0] * daysSinceJ2010 + lonM;
-        double AnMoy = lonOrbM - c[1] * daysSinceJ2010 - lonPer;
+        final double lonOrbM = c[0] * daysSinceJ2010 + lonM;
+        final double AnMoy = lonOrbM - c[1] * daysSinceJ2010 - lonPer;
 
-        Sun sun = SunModel.SUN.at(daysSinceJ2010, eclipticToEquatorialConversion);
+        final Sun sun = SunModel.SUN.at(daysSinceJ2010, eclipticToEquatorialConversion);
 
-        double sunLon = sun.eclipticPos().lon();
-        double sin_sunMeanAnomaly = sin(sun.meanAnomaly());
+        final double sunLon = sun.eclipticPos().lon();
+        final double sin_sunMeanAnomaly = sin(sun.meanAnomaly());
 
-        double evection = c[2] * sin(2 * (lonOrbM - sunLon) - AnMoy);
+        final double evection = c[2] * sin(2 * (lonOrbM - sunLon) - AnMoy);
 
-        double anomaly = AnMoy + evection - c[3] * sin_sunMeanAnomaly;
-        double CorrC = c[4] * sin(anomaly);
+        final double anomaly = AnMoy + evection - c[3] * sin_sunMeanAnomaly;
+        final double CorrC = c[4] * sin(anomaly);
 
-        double lonOrbCorr = lonOrbM + evection + CorrC - (c[3] - Angle.ofDeg(0.37)) * sin_sunMeanAnomaly + c[5] * sin(2 * anomaly);
-        double lonOrb = lonOrbCorr + c[6] * sin(2 * (lonOrbCorr - sunLon));
+        final double lonOrbCorr = lonOrbM + evection + CorrC - (c[3] - Angle.ofDeg(0.37)) * sin_sunMeanAnomaly + c[5] * sin(2 * anomaly);
+        final double lonOrb = lonOrbCorr + c[6] * sin(2 * (lonOrbCorr - sunLon));
 
-        double lonCorrAsc = lonAsc - c[7] * daysSinceJ2010 - c[8] * sin_sunMeanAnomaly;
-        double lonOrb_lonCorrAsc = lonOrb - lonCorrAsc;
+        final double lonCorrAsc = lonAsc - c[7] * daysSinceJ2010 - c[8] * sin_sunMeanAnomaly;
+        final double lonOrb_lonCorrAsc = lonOrb - lonCorrAsc;
 
         return new Moon(eclipticToEquatorialConversion.apply(
                 EclipticCoordinates.of(
