@@ -37,7 +37,7 @@ public final class StarCatalogue {
         }
         this.starList = List.copyOf(stars);
 
-        asterismMap = asterisms.stream().collect(Collectors.toMap(Function.identity(), //identity ie the asterism itself
+        asterismMap = asterisms.parallelStream().collect(Collectors.toMap(Function.identity(), //identity ie the asterism itself
                 asterism -> List.copyOf(asterism.stars().stream()              //this function associates an asterism with
                         .map(starList::indexOf).collect(Collectors.toList())), //the desired with of indices.
                 (v, u) -> u)); //finally, merging duplicate asterisms (if there's any).
