@@ -72,6 +72,9 @@ public abstract class CelestialObject {
         return name();
     }
 
+    /**
+     * @see Object#toString()
+     */
     @Override
     public String toString() {
         return info();

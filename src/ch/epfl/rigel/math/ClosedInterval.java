@@ -50,7 +50,7 @@ public final class ClosedInterval extends Interval {
     }
 
     /**
-     * @return interval in a standard form : [a, b]
+     * @return (String) interval in a standard form : [a, b]
      */
     @Override
     public String toString() {

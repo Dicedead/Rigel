@@ -89,7 +89,10 @@ public final class StereographicProjection implements Function<HorizontalCoordin
                 (asin(cosC * sinPhi1 + (term * cosPhi1) / p)));
     }
 
-
+    /**
+     * @see Object#equals(Object)
+     * @throws UnsupportedOperationException (double precision does not allow for equals)
+     */
     @Override
     public final boolean equals(Object o) {
         //System.err.println("Fatal error : tried to test equality but double precision does not \n" +
@@ -97,13 +100,18 @@ public final class StereographicProjection implements Function<HorizontalCoordin
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * @see Object#hashCode()
+     * @throws UnsupportedOperationException (double precision does not allow for hashcode)
+     */
     @Override
     public final int hashCode() {
-        //System.err.println("Fatal error : tried to test equality but double precision does not \n" +
-        //        "allow it.");
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * @return (String) "StereographicProjection : (center.az() ; center.alt())"
+     */
     @Override
     public String toString() {
         return "StereographicProjection : (" + centerOfProjection.az() + " ; " + centerOfProjection.alt() + ")";

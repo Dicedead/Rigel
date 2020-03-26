@@ -3,9 +3,7 @@ package ch.epfl.rigel.math;
 import ch.epfl.rigel.Preconditions;
 
 import java.text.DecimalFormat;
-import java.util.Arrays;
 import java.util.function.Function;
-import java.util.stream.IntStream;
 
 /**
  * Polynomial object definition and associated tools
@@ -71,7 +69,7 @@ public final class Polynomial {
 
         //Template for coefficient formatting
         Function<Integer, String> f = (Integer i) ->
-                ((isEqual(Math.abs(coefficients[i]), 1) || isEqual(coefficients[i], 0)) ? "" :
+                ((areEqual(Math.abs(coefficients[i]), 1) || areEqual(coefficients[i], 0)) ? "" :
                 new DecimalFormat("##.########").format(Math.abs(coefficients[i])));
 
         //Main loop: constructing the string
@@ -86,9 +84,9 @@ public final class Polynomial {
                -Appending the next coefficient's sign (if it exists ^ is != 0)
              */
             format.append(f.apply(i))
-                    .append(isEqual(coefficients[i], 0) ? "" : "x")
-                    .append((i == degree - 1 || isEqual(coefficients[i], 0)) ? "" : "^" + (degree - i))
-                    .append(isEqual(coefficients[i + 1], 0) ? "" : (0 > coefficients[i + 1]) ? "-" : "+");
+                    .append(areEqual(coefficients[i], 0) ? "" : "x")
+                    .append((i == degree - 1 || areEqual(coefficients[i], 0)) ? "" : "^" + (degree - i))
+                    .append(areEqual(coefficients[i + 1], 0) ? "" : (0 > coefficients[i + 1]) ? "-" : "+");
 
         }
 
@@ -96,10 +94,21 @@ public final class Polynomial {
         return format.append(f.apply(degree)).toString();
     }
 
-    private boolean isEqual(double value1, double value2) {
+    /**
+     * Testing equality between two double values using a small epsilon
+     *
+     * @param value1 (double)
+     * @param value2 (double)
+     * @return (boolean) boolean of equality
+     */
+    private boolean areEqual(double value1, double value2) {
         return (Math.abs(value1 - value2)) <= EPSILON;
     }
 
+    /**
+     * @see Object#equals(Object)
+     * @throws UnsupportedOperationException (double precision does not allow for equals)
+     */
     @Override
     public boolean equals(Object o) {
         //System.err.println("Fatal error : tried to test equality between intervals but double precision does not \n" +
@@ -107,10 +116,12 @@ public final class Polynomial {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * @see Object#hashCode()
+     * @throws UnsupportedOperationException (double precision does not allow for hashcode)
+     */
     @Override
     public int hashCode() {
-        //System.err.println("Fatal error : tried to test equality between intervals but double precision does not \n" +
-        //        "allows it.");
         throw new UnsupportedOperationException();
     }
 }

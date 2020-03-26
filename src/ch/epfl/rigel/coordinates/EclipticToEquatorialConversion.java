@@ -59,6 +59,10 @@ public final class EclipticToEquatorialConversion implements Function<EclipticCo
         return EquatorialCoordinates.of(Angle.normalizePositive(ra), dec);
     }
 
+    /**
+     * @see Object#equals(Object)
+     * @throws UnsupportedOperationException (double precision does not allow for equals)
+     */
     @Override
     public final boolean equals(Object o) {
         //System.err.println("Fatal error : tried to test equality but double precision does not \n" +
@@ -66,10 +70,12 @@ public final class EclipticToEquatorialConversion implements Function<EclipticCo
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * @see Object#hashCode()
+     * @throws UnsupportedOperationException (double precision does not allow for hashcode)
+     */
     @Override
     public final int hashCode() {
-        //System.err.println("Fatal error : tried to test equality but double precision does not \n" +
-        //        "allow it.");
         throw new UnsupportedOperationException();
     }
 }
