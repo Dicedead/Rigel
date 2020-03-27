@@ -5,11 +5,13 @@ import ch.epfl.rigel.astronomy.AsterismLoader;
 import ch.epfl.rigel.astronomy.HygDatabaseLoader;
 import ch.epfl.rigel.astronomy.Star;
 import ch.epfl.rigel.astronomy.StarCatalogue;
+import ch.epfl.rigel.coordinates.EquatorialCoordinates;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayDeque;
+import java.util.List;
 import java.util.Queue;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,17 +46,23 @@ public class MyAsterismLoaderTest {
                     }
                 }
             }
+            Asterism testAst = new Asterism(List.of(new Star (0,"lul", EquatorialCoordinates.of(0,0),0,0)));
             int astCount = 0;
             for (Asterism ast : a) {
                 ++astCount;
                 for (Star s : ast.stars()) {
                     if (s.name().equalsIgnoreCase("Betelgeuse")) {
+                        testAst = ast;
                         beltegeuse = s;
                     }
                 }
             }
             assertNotNull(beltegeuse);
             assertEquals(2,astCount);
+            for(Star testStar : testAst.stars()) {
+                assertEquals(catalogue.stars().get(catalogue.asterismIndices(testAst).get(testAst.stars().indexOf(testStar))).name(),
+                        testStar.name());
+            }
         }
     }
 

@@ -18,25 +18,21 @@ import static java.lang.Math.*;
  */
 public enum MoonModel implements CelestialObjectModel<Moon> {
 
-    MOON(ofDeg(91.929336), ofDeg(130.143076), ofDeg(291.682547), ofDeg(5.145396), 0.0549);
+    MOON;
 
-    final private double lonM, lonPer, lonAsc, inc, exc;
+    static final private double LON_M   = ofDeg(91.929336);
+    static final private double LON_PER = ofDeg(130.143076);
+    static final private double LON_ASC = ofDeg(291.682547);
+    static final private double INC = ofDeg(5.145396);
+    static final private double EXC = 0.0549;
 
-    //Converting many constants to rad
+    //Converting many nameless constants to rad
     static final private Double[] c =
             Stream.of(13.1763966, 0.1114041, 1.2739,
                     0.1858 + 0.37, 6.2886, 0.214,
-                    0.6583, 0.0529539, 0.16, 0.5181)
+                    0.6583, 0.0529539, 0.16, 0.5181, 0.37)
                     .map(Angle::ofDeg)
                     .collect(Collectors.toList()).toArray(Double[]::new);
-
-    private MoonModel(double lonM, double lonPer, double lonAsc, double inc, double exc) {
-        this.lonM = lonM;
-        this.lonPer = lonPer;
-        this.lonAsc = lonAsc;
-        this.inc = inc;
-        this.exc = exc;
-    }
 
     /**
      * Computes the Moon's position at a given time
@@ -48,30 +44,33 @@ public enum MoonModel implements CelestialObjectModel<Moon> {
     @Override
     public Moon at(double daysSinceJ2010, EclipticToEquatorialConversion eclipticToEquatorialConversion) {
 
-        final double lonOrbM = c[0] * daysSinceJ2010 + lonM;
-        final double AnMoy = lonOrbM - c[1] * daysSinceJ2010 - lonPer;
+        //Mean anomaly
+        final double lonOrbM = c[0] * daysSinceJ2010 + LON_M;
+        final double AnMoy = lonOrbM - c[1] * daysSinceJ2010 - LON_PER;
 
+        //Computation of Sun's values
         final Sun sun = SunModel.SUN.at(daysSinceJ2010, eclipticToEquatorialConversion);
 
         final double sunLon = sun.eclipticPos().lon();
         final double sin_sunMeanAnomaly = sin(sun.meanAnomaly());
 
+        //Computing ingredients for Moon's position, phase and angular size
         final double evection = c[2] * sin(2 * (lonOrbM - sunLon) - AnMoy);
 
         final double anomaly = AnMoy + evection - c[3] * sin_sunMeanAnomaly;
         final double CorrC = c[4] * sin(anomaly);
 
-        final double lonOrbCorr = lonOrbM + evection + CorrC - (c[3] - Angle.ofDeg(0.37)) * sin_sunMeanAnomaly + c[5] * sin(2 * anomaly);
+        final double lonOrbCorr = lonOrbM + evection + CorrC - (c[3] - c[10]) * sin_sunMeanAnomaly + c[5] * sin(2 * anomaly);
         final double lonOrb = lonOrbCorr + c[6] * sin(2 * (lonOrbCorr - sunLon));
 
-        final double lonCorrAsc = lonAsc - c[7] * daysSinceJ2010 - c[8] * sin_sunMeanAnomaly;
+        final double lonCorrAsc = LON_ASC - c[7] * daysSinceJ2010 - c[8] * sin_sunMeanAnomaly;
         final double lonOrb_lonCorrAsc = lonOrb - lonCorrAsc;
 
         return new Moon(eclipticToEquatorialConversion.apply(
                 EclipticCoordinates.of(
-                        Angle.normalizePositive(atan2(sin(lonOrb_lonCorrAsc) * cos(inc), cos(lonOrb_lonCorrAsc)) + lonCorrAsc),
-                        asin(sin(lonOrb_lonCorrAsc) * sin(inc)))),
-                (float) (((1 + exc * cos(anomaly + CorrC)) / (1 - pow(exc, 2))) * c[9]),
+                        Angle.normalizePositive(atan2(sin(lonOrb_lonCorrAsc) * cos(INC), cos(lonOrb_lonCorrAsc)) + lonCorrAsc),
+                        asin(sin(lonOrb_lonCorrAsc) * sin(INC)))),
+                (float) (((1 + EXC * cos(anomaly + CorrC)) / (1 - pow(EXC, 2))) * c[9]),
                 0, (float) ((1 - cos(lonOrb - sunLon)) / 2));
     }
 }

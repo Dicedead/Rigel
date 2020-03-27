@@ -2,7 +2,6 @@ package ch.epfl.rigel.astronomy;
 
 import ch.epfl.rigel.coordinates.EclipticCoordinates;
 import ch.epfl.rigel.coordinates.EclipticToEquatorialConversion;
-import ch.epfl.rigel.math.Angle;
 
 import static ch.epfl.rigel.math.Angle.*;
 import static java.lang.Math.cos;
@@ -16,17 +15,13 @@ import static java.lang.Math.sin;
  */
 public enum SunModel implements CelestialObjectModel<Sun> {
 
-    SUN(ofDeg(279.557208), ofDeg(283.112438), 0.016705);
+    SUN;
 
-    static private final double Ratio  = TAU / 365.242191;
-    static private final double theta0 = (ofDeg(0.533128));
-    private final double lon2010, lonPer, excent;
-
-    SunModel(double ofDeg, double ofDeg1, double excentricity) {
-        lon2010 = ofDeg;
-        lonPer = ofDeg1;
-        this.excent = excentricity;
-    }
+    static private final double RATIO    = TAU / 365.242191;
+    static private final double THETA_0  = ofDeg(0.533128);
+    static private final double LON_2010 = ofDeg(279.557208);
+    static private final double LON_PER = ofDeg(283.112438);
+    static private final double EXCENT  = 0.016705;
 
     /**
      * Builds the Sun at a given point in time.
@@ -38,13 +33,13 @@ public enum SunModel implements CelestialObjectModel<Sun> {
     @Override
     public Sun at(double daysSinceJ2010, EclipticToEquatorialConversion eclipticToEquatorialConversion) {
 
-        final double meanAnomaly = Ratio * daysSinceJ2010 + lon2010 - lonPer;
-        final double trueAnomaly = meanAnomaly + 2 * excent * sin(meanAnomaly);
+        final double meanAnomaly = RATIO * daysSinceJ2010 + LON_2010 - LON_PER;
+        final double trueAnomaly = meanAnomaly + 2 * EXCENT * sin(meanAnomaly);
 
-        final EclipticCoordinates eclipticCoordinates = EclipticCoordinates.of(normalizePositive(trueAnomaly + lonPer), 0);
+        final EclipticCoordinates eclipticCoordinates = EclipticCoordinates.of(normalizePositive(trueAnomaly + LON_PER), 0);
 
         return new Sun(eclipticCoordinates, eclipticToEquatorialConversion.apply(eclipticCoordinates),
-                (float) (theta0 * (1 + excent * cos(trueAnomaly)) / (1 - Math.pow(excent, 2))), //Angular size
+                (float) (THETA_0 * (1 + EXCENT * cos(trueAnomaly)) / (1 - Math.pow(EXCENT, 2))), //Angular size
                 (float) (meanAnomaly));
     }
 }
