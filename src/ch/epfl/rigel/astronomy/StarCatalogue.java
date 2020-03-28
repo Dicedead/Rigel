@@ -32,9 +32,9 @@ public final class StarCatalogue {
      * @throws IllegalArgumentException if a star in an asterim isn't listed in stars
      */
     public StarCatalogue(List<Star> stars, List<Asterism> asterisms) {
-        for (Asterism currentAsterism : asterisms) {
-            Preconditions.checkArgument(stars.containsAll(currentAsterism.stars()));
-        }
+
+        asterisms.forEach(currentAsterism -> Preconditions.checkArgument(stars.containsAll(currentAsterism.stars())));
+
         this.starList = List.copyOf(stars);
 
         asterismMap = asterisms.parallelStream().collect(Collectors.toMap(Function.identity(), //identity ie the asterism itself
@@ -76,8 +76,8 @@ public final class StarCatalogue {
      */
     public static final class Builder {
 
-        private List<Star> starsToBuild;
-        private List<Asterism> asterismsToBuild;
+        private final List<Star> starsToBuild;
+        private final List<Asterism> asterismsToBuild;
 
         /**
          * Default constructor initializing 2 empty lists of stars and asterisms

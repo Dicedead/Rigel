@@ -32,6 +32,9 @@ class MySunModelTest {
                 LocalTime.of(0,0),
                 ZoneOffset.UTC
         );
+        assertEquals(201.159131,Angle.toDeg(Angle.normalizePositive(SunModel.SUN.at(
+                J2010.daysUntil(time), new EclipticToEquatorialConversion(time)
+        ).meanAnomaly())),1e-3); //Normalised!
         assertEquals(UsefulMathTestingMethods.hoursFromHMS(8,23,34), SunModel.SUN.at(
                 J2010.daysUntil(time), new EclipticToEquatorialConversion(time)
         ).equatorialPos().raHr(), delta2);

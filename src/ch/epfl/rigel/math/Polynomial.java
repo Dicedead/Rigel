@@ -16,11 +16,10 @@ import java.util.stream.IntStream;
 public final class Polynomial {
 
     private final double[] coefficients;
-    private static int degree;
+    private final int degree;
     private final static double EPSILON = 1e-6;
 
-    private Polynomial(double coefficientN, double... coefficients)
-    {
+    private Polynomial(double coefficientN, double... coefficients) {
 
         this.coefficients = new double[coefficients.length + 1];
         this.coefficients[0] = coefficientN;
@@ -43,20 +42,24 @@ public final class Polynomial {
     }
 
     /**
-     * Interpretation of the polynomial function at a point using horner method
+     * Interpretation of the polynomial function at a point using (recursive) horner method
      *
-     * @param x point to interpret
-     * @return result
-     * @throws NullPointerException if Polynomial is declared but has not been created with Polynomial.of
+     * @param x (double) point to interpret
+     * @return (double) polynomial computed at desired point
      */
-    public double at(double x)
-    {
-        return atR(x, degree);
+    public double at(double x) {
+        return atRecur(x, degree);
     }
 
-    public double atR( double x, int c)
-    {
-        return c == 0 ? coefficients[0] : atR(x, c - 1) * x + coefficients[c];
+    /**
+     * Auxiliary recursive method applying horner's scheme
+     *
+     * @param x (double) point to interpret
+     * @param c (int) degree of subpolynomial
+     * @return (double)
+     */
+    private double atRecur(double x, int c) {
+        return c == 0 ? coefficients[0] : atRecur(x, c - 1) * x + coefficients[c];
     }
 
     /**
@@ -71,11 +74,10 @@ public final class Polynomial {
         //Template for coefficient formatting
         final Function<Integer, String> f = (Integer i) ->
                 ((areEqual(Math.abs(coefficients[i]), 1) || areEqual(coefficients[i], 0)) ? "" :
-                new DecimalFormat("##.########").format(Math.abs(coefficients[i])));
+                        new DecimalFormat("##.########").format(Math.abs(coefficients[i])));
 
         //Main loop: constructing the string
-        for (int i = 0; i <= degree - 1; ++i)
-        {
+        for (int i = 0; i <= degree - 1; ++i) {
             /*
             Concatenation of the coefficient, its associated x to the power of degree-i, and the next coefficient's sign.
             Steps:
@@ -106,6 +108,10 @@ public final class Polynomial {
         return (Math.abs(value1 - value2)) <= EPSILON;
     }
 
+    /**
+     * @throws UnsupportedOperationException (double precision does not allow for equals)
+     * @see Object#equals(Object)
+     */
     @Override
     public boolean equals(Object o) {
         //System.err.println("Fatal error : tried to test equality between intervals but double precision does not \n" +
@@ -113,10 +119,12 @@ public final class Polynomial {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * @throws UnsupportedOperationException (double precision does not allow for hashcode)
+     * @see Object#hashCode()
+     */
     @Override
     public int hashCode() {
-        //System.err.println("Fatal error : tried to test equality between intervals but double precision does not \n" +
-        //        "allows it.");
         throw new UnsupportedOperationException();
     }
 }

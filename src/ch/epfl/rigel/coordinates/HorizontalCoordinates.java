@@ -5,6 +5,7 @@ import ch.epfl.rigel.math.Angle;
 import ch.epfl.rigel.math.ClosedInterval;
 import ch.epfl.rigel.math.RightOpenInterval;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.function.Function;
 import java.util.stream.IntStream;
@@ -22,6 +23,9 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
 
     private final static RightOpenInterval LON_INTERVAL_DEG_0to360 = RightOpenInterval.of(0,360);
     private final static ClosedInterval LAT_INTERVAL_DEG_SYM_180 = ClosedInterval.symmetric(180);
+
+    private final static Function<Integer, Double> DEFINE_OCTANT_EDGE =
+            A -> A * Math.PI / 4 - Math.PI / 8;
 
     /**
      * Constructor for HorizontalCoordinates
@@ -84,19 +88,23 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
      * @return String with concatenated octant representation
      */
     public String azOctantName(String n, String e, String s, String w) {
-
-        int current = 0;
-        final String[] tab = {n, n + e, e, s + e, s, s + w, w, n + w};
-        final Function <Integer, Double> f = A -> A * Math.PI / 4 - Math.PI / 8;
-
-        while (!RightOpenInterval.of(f.apply(current), f.apply(current + 1)).contains(az()))
-        {
-            ++current;
-        }
-
-        return tab[current % 8];
+        return List.of(n, n + e, e, s + e, s, s + w, w, n + w)
+                .get(azOctantRecur(0) % 8);
     }
 
+    /**
+     * Auxiliary method for finding azimuth's octant
+     *
+     * @param current (int) incrementing int
+     * @return (int) az in octant: current, if not: recursive call with current <- current + 1
+     */
+    private int azOctantRecur(int current) {
+        return RightOpenInterval.of(
+                    DEFINE_OCTANT_EDGE.apply(current),
+                    DEFINE_OCTANT_EDGE.apply(current + 1))
+                .contains(az()) ?
+                current : azOctantRecur(current + 1);
+    }
 
     /**
      * @return altitude in radians
