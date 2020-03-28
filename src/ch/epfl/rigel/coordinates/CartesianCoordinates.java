@@ -42,11 +42,18 @@ public final class CartesianCoordinates {
         return y;
     }
 
+    /**
+     * @return (String) "CartesianCoordinates : (x,y)"
+     */
     @Override
     public String toString() {
         return "CartesianCoordinates : ("+x+" ; "+y+")";
     }
 
+    /**
+     * @see Object#equals(Object)
+     * @throws UnsupportedOperationException (double precision does not allow for equals)
+     */
     @Override
     public final boolean equals(Object o) {
         //System.err.println("Fatal error : tried to test equality but double precision does not \n" +
@@ -54,10 +61,12 @@ public final class CartesianCoordinates {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * @see Object#hashCode()
+     * @throws UnsupportedOperationException (double precision does not allow for hashcode)
+     */
     @Override
     public final int hashCode() {
-        //System.err.println("Fatal error : tried to test equality but double precision does not \n" +
-        //        "allow it.");
         throw new UnsupportedOperationException();
     }
 }

@@ -47,5 +47,11 @@ class MySunModelTest {
         ZonedDateTime zdt = ZonedDateTime.of(LocalDate.of(1988, Month.JULY, 27), LocalTime.of(0, 0), ZoneOffset.UTC);
         assertEquals(0.3353207024580374,SunModel.SUN.at(Epoch.J2010.daysUntil(zdt), new EclipticToEquatorialConversion(zdt)).equatorialPos().dec());
 
+        ZonedDateTime zone1988 = ZonedDateTime.of(
+                LocalDate.of(1988,Month.JULY,27),
+                LocalTime.of(0,0),ZoneOffset.UTC
+        );
+        assertEquals(Angle.ofDMS(0,31,30),SunModel.SUN.at(J2010.daysUntil(zone1988),new EclipticToEquatorialConversion(zone1988)).angularSize(), Angle.ofDMS(0,0,0.5));
+
     }
 }
