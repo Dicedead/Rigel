@@ -23,12 +23,10 @@ public final class Polynomial {
     private final double[] coefficients;
     private final int degree;
     private final static double EPSILON = 1e-6;
-    private final static BiFunction<Boolean, String, Function<String, String>> g = (b, s) -> l -> b ? l : s;
-    private final static BiFunction<StringBuilder, Boolean, Function<String, StringBuilder>> h = (sb, b) -> s -> sb.append(g.apply(b, s).apply(""));
+    private final static BiFunction<StringBuilder, Boolean, Function<String, StringBuilder>> h = (sb, b) -> s -> sb.append(b ? "" : s);
     private final static BiFunction<int[], double[], List<Boolean>> boolL =  (i, c) -> List.of(areEqual(c[i[0]], 0), (i[0] == i[1] - 1 || areEqual(c[i[0]], 0)), areEqual(c[i[0] + 1], 0));
-    private final static BiFunction<int[], double[], List<String>> formatL =  (i, c) -> List.of("x", "^" + (i[1] - i[0]), g.apply((0 > c[i[0] + 1]),"+" ).apply("-"));
-    private final static BiFunction<Integer, double[], String> f = (j, c) -> (g.apply(areEqual(Math.abs(c[j]), 1) || areEqual(c[j], 0) ,
-            new DecimalFormat("##.########").format(Math.abs(c[j]))).apply(""));
+    private final static BiFunction<int[], double[], List<String>> formatL =  (i, c) -> List.of("x", "^" + (i[1] - i[0]), (0 > c[i[0] + 1]) ? "-" :  "+" );
+    private final static BiFunction<Integer, double[], String> f = (j, c) -> (areEqual(Math.abs(c[j]), 1) || areEqual(c[j], 0) ? "" : new DecimalFormat("##.########").format(Math.abs(c[j])));
 
     private Polynomial(double coefficientN, double... coefficients) {
 
@@ -79,20 +77,17 @@ public final class Polynomial {
     @Override
     public String toString() {
         //Highest degree term's sign initialization
-        return toRecurence(new StringBuilder((coefficients[0] < 0) ? "-" : ""), 0).toString();
+        //Treatment of the (eventual) constant term
+        return toRecurence(new StringBuilder((coefficients[0] < 0) ? "-" : ""), 0).append(f.apply(degree, coefficients)).toString();
     }
 
     private StringBuilder toRecurence (final StringBuilder format,final int i)
     {
-        var b = boolL.apply(new int[] {i, degree},  coefficients);
-        var s = formatL.apply(new int[] {i, degree},  coefficients);
-
-        var res = IntStream.of(0, 1, 2).mapToObj(k -> h.apply(k == 0 ? format.append(f.apply(i, coefficients)) : format, b.get(k)).apply(s.get(k)))
-                .collect(Collectors.toList()).get(2);
-
-        //Treatment of the (eventual) constant term
-        return i == degree - 1 ? res.append(f.apply(degree, coefficients)) :
-                toRecurence(res, i + 1);
+        return i == degree || degree == 0 ? format : toRecurence
+                (IntStream.of(0, 1, 2).mapToObj(k -> h.apply(k == 0 ? format.append(f.apply(i, coefficients)) :
+                        format, boolL.apply(new int[] {i, degree}, coefficients).get(k))
+                        .apply(formatL.apply(new int[] {i, degree},coefficients).get(k)))
+                        .collect(Collectors.toList()).get(2), i + 1);
     }
 
     /**
