@@ -30,9 +30,9 @@ public final class EclipticToEquatorialConversion implements Function<EclipticCo
      * @param when time to convert
      */
     public EclipticToEquatorialConversion(ZonedDateTime when) {
-        double T = J2000.julianCenturiesUntil(when);
+        final double T = J2000.julianCenturiesUntil(when);
 
-        double epsilon = POLYNOM.at(T);
+        final double epsilon = POLYNOM.at(T);
 
         sinEpsilon = sin(epsilon);
         cosEpsilon = cos(epsilon);
@@ -45,16 +45,16 @@ public final class EclipticToEquatorialConversion implements Function<EclipticCo
     @Override
     public EquatorialCoordinates apply(EclipticCoordinates eclipticCoordinates) {
 
-        double lambda = eclipticCoordinates.lon();
-        double beta = eclipticCoordinates.lat();
+        final double lambda = eclipticCoordinates.lon();
+        final double beta = eclipticCoordinates.lat();
 
-        double term1 = 2 * sin(beta);
-        double term2 = sin(lambda - beta) + sin(lambda + beta);
+        final double term1 = 2 * sin(beta);
+        final  double term2 = sin(lambda - beta) + sin(lambda + beta);
             /*Playing around with some trigonometry, one can isolate these 2 common terms so there's no need to compute
               them twice.*/
 
-        double ra = atan2(term2 * cosEpsilon - term1 * sinEpsilon, 2 * cos(lambda) * cos(beta));
-        double dec = asin(0.5 * (term1 * cosEpsilon + term2 * sinEpsilon));
+        final double ra = atan2(term2 * cosEpsilon - term1 * sinEpsilon, 2 * cos(lambda) * cos(beta));
+        final double dec = asin(0.5 * (term1 * cosEpsilon + term2 * sinEpsilon));
 
         return EquatorialCoordinates.of(Angle.normalizePositive(ra), dec);
     }

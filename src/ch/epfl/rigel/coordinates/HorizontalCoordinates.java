@@ -6,6 +6,8 @@ import ch.epfl.rigel.math.ClosedInterval;
 import ch.epfl.rigel.math.RightOpenInterval;
 
 import java.util.Locale;
+import java.util.function.Function;
+import java.util.stream.IntStream;
 
 /**
  * Horizontal coordinates system
@@ -84,10 +86,10 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
     public String azOctantName(String n, String e, String s, String w) {
 
         int current = 0;
-        String[] tab = {n, n + e, e, s + e, s, s + w, w, n + w};
-
-        while (!RightOpenInterval.of(current * Math.PI / 4 - Math.PI / 8,
-                (current + 1) * Math.PI / 4 - Math.PI / 8).contains(az())) {
+        final String[] tab = {n, n + e, e, s + e, s, s + w, w, n + w};
+        final Function <Integer, Double> f = A -> A * Math.PI / 4 - Math.PI / 8;
+        while (!RightOpenInterval.of(f.apply(current), f.apply(current + 1)).contains(az()))
+        {
             ++current;
         }
 
