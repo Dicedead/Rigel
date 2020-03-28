@@ -74,7 +74,7 @@ public enum HygDatabaseLoader implements StarCatalogue.Loader {
      * @param <T>     return value type
      * @return (T)
      */
-    private <T> T buildWithDefault(final String sub, final T def, final Function<String, T> convert) {
+    private static <T> T buildWithDefault(final String sub, final T def, final Function<String, T> convert) {
         return sub.equals("") ? def : convert.apply(sub);
     }
 }

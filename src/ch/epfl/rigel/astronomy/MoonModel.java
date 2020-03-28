@@ -23,8 +23,8 @@ public enum MoonModel implements CelestialObjectModel<Moon> {
     static final private double LON_M   = ofDeg(91.929336);
     static final private double LON_PER = ofDeg(130.143076);
     static final private double LON_ASC = ofDeg(291.682547);
-    static final private double INC = ofDeg(5.145396);
-    static final private double EXC = 0.0549;
+    static final private double INC     = ofDeg(5.145396);
+    static final private double EXC     = 0.0549;
 
     //Converting many nameless constants to rad
     static final private Double[] c =
