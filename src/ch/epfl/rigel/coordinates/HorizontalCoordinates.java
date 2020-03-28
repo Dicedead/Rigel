@@ -88,6 +88,7 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
         int current = 0;
         final String[] tab = {n, n + e, e, s + e, s, s + w, w, n + w};
         final Function <Integer, Double> f = A -> A * Math.PI / 4 - Math.PI / 8;
+
         while (!RightOpenInterval.of(f.apply(current), f.apply(current + 1)).contains(az()))
         {
             ++current;
@@ -95,6 +96,7 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
 
         return tab[current % 8];
     }
+
 
     /**
      * @return altitude in radians

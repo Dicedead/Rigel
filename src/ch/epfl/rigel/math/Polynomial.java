@@ -106,10 +106,6 @@ public final class Polynomial {
         return (Math.abs(value1 - value2)) <= EPSILON;
     }
 
-    /**
-     * @see Object#equals(Object)
-     * @throws UnsupportedOperationException (double precision does not allow for equals)
-     */
     @Override
     public boolean equals(Object o) {
         //System.err.println("Fatal error : tried to test equality between intervals but double precision does not \n" +
@@ -117,12 +113,10 @@ public final class Polynomial {
         throw new UnsupportedOperationException();
     }
 
-    /**
-     * @see Object#hashCode()
-     * @throws UnsupportedOperationException (double precision does not allow for hashcode)
-     */
     @Override
     public int hashCode() {
+        //System.err.println("Fatal error : tried to test equality between intervals but double precision does not \n" +
+        //        "allows it.");
         throw new UnsupportedOperationException();
     }
 }
