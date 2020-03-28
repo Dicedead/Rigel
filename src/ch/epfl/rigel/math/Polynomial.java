@@ -2,7 +2,9 @@ package ch.epfl.rigel.math;
 
 import ch.epfl.rigel.Preconditions;
 
+import java.security.cert.CollectionCertStoreParameters;
 import java.text.DecimalFormat;
+import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -10,7 +12,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
-
 /**
  * Polynomial object definition and associated tools
  *
@@ -22,9 +23,10 @@ public final class Polynomial {
     private final double[] coefficients;
     private final int degree;
     private final static double EPSILON = 1e-6;
-    private final static BiFunction<Boolean, String, Function<String, String>> g = (b, s) -> l -> b ? l : s;
-    private final static BiFunction<StringBuilder, Boolean, Function<String, StringBuilder>> h = (sb, b) -> s -> sb.append(g.apply(b, s).apply(""));
-
+    private final static BiFunction<StringBuilder, Boolean, Function<String, StringBuilder>> h = (sb, b) -> s -> sb.append(b ? "" : s);
+    private final static BiFunction<int[], double[], List<Boolean>> boolL =  (i, c) -> List.of(areEqual(c[i[0]], 0), (i[0] == i[1] - 1 || areEqual(c[i[0]], 0)), areEqual(c[i[0] + 1], 0));
+    private final static BiFunction<int[], double[], List<String>> formatL =  (i, c) -> List.of("x", "^" + (i[1] - i[0]), (0 > c[i[0] + 1]) ? "-" :  "+" );
+    private final static BiFunction<Integer, double[], String> f = (j, c) -> (areEqual(Math.abs(c[j]), 1) || areEqual(c[j], 0) ? "" : new DecimalFormat("##.########").format(Math.abs(c[j])));
 
     private Polynomial(double coefficientN, double... coefficients) {
 
@@ -75,19 +77,17 @@ public final class Polynomial {
     @Override
     public String toString() {
         //Highest degree term's sign initialization
-        return toRecurence(new StringBuilder((coefficients[0] < 0) ? "-" : ""), 0).toString();
+        //Treatment of the (eventual) constant term
+        return toRecurence(new StringBuilder((coefficients[0] < 0) ? "-" : ""), 0).append(f.apply(degree, coefficients)).toString();
     }
 
     private StringBuilder toRecurence (final StringBuilder format,final int i)
     {
-        final  Function<Integer, String> f = j -> (g.apply(areEqual(Math.abs(coefficients[j]), 1) || areEqual(coefficients[j], 0) ,
-                        new DecimalFormat("##.########").format(Math.abs(coefficients[j]))).apply(""));
-
-        //Treatment of the (eventual) constant term
-        return i == degree ? format.append(f.apply(degree)) :
-                toRecurence(h.apply(h.apply(h.apply(format.append(f.apply(i)), areEqual(coefficients[i], 0)).apply("x"),
-                (i == degree - 1 || areEqual(coefficients[i], 0))).apply("^" + (degree - i)),
-                areEqual(coefficients[i + 1], 0)).apply(g.apply((0 > coefficients[i + 1]),"+" ).apply("-")), i + 1);
+        return i == degree || degree == 0 ? format : toRecurence
+                (IntStream.of(0, 1, 2).mapToObj(k -> h.apply(k == 0 ? format.append(f.apply(i, coefficients)) :
+                        format, boolL.apply(new int[] {i, degree}, coefficients).get(k))
+                        .apply(formatL.apply(new int[] {i, degree},coefficients).get(k)))
+                        .collect(Collectors.toList()).get(2), i + 1);
     }
 
     /**
