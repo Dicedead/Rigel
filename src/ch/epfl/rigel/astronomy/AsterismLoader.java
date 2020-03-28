@@ -39,11 +39,10 @@ public enum AsterismLoader implements StarCatalogue.Loader {
                     .collect(Collectors.toMap(Star::hipparcosId, Function.identity(), (v1, v2) -> v2));
             //Using the function: star -> (hipparcosOf(star),star), and wrapping the result in a Map
 
-            while (reader.ready()) {
-                builder.addAsterism(new Asterism(Arrays.stream(reader.readLine().split(","))
-                        .map(s -> hipparcosToStarMap.get(Integer.parseInt(s))).collect(Collectors.toList())));
-                //Mapping each line in inputStream to a List of stars via their hipparcos
-            }
+            reader.lines().forEach(l -> builder.addAsterism(new Asterism(Arrays.stream(l.split(","))
+                    .map(s -> hipparcosToStarMap.get(Integer.parseInt(s))).collect(Collectors.toList()))));
+            //Mapping each line in inputStream to a List of stars via their hipparcos
+
         }
     }
 }
