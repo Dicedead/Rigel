@@ -14,7 +14,7 @@ import java.util.function.Function;
 public final class Polynomial {
 
     private final double[] coefficients;
-    private static int degree;
+    private final int degree;
     private final static double EPSILON = 1e-6;
 
     private Polynomial(double coefficientN, double... coefficients)
@@ -41,21 +41,25 @@ public final class Polynomial {
     }
 
     /**
-     * Interpretation of the polynomial function at a point using horner method
+     * Interpretation of the polynomial function at a point using (recursive) horner method
      *
-     * @param x point to interpret
-     * @return result
-     * @throws NullPointerException if Polynomial is declared but has not been created with Polynomial.of
+     * @param x (double) point to interpret
+     * @return (double) polynomial computed at desired point
      */
     public double at(double x) {
+        return atR(x, degree);
+    }
 
-        double result = coefficients[0];
-
-        for (int i = 1; i <= coefficients.length - 1; ++i) {
-            result = result * x + coefficients[i];
-        }
-
-        return result;
+    /**
+     * Auxiliary recursive method applying horner's scheme
+     *
+     * @param x (double) point to interpret
+     * @param c (int) degree of subpolynomial
+     * @return (double)
+     */
+    private double atR(double x, int c)
+    {
+        return c == 0 ? coefficients[0] : atR(x, c - 1) * x + coefficients[c];
     }
 
     /**
@@ -65,10 +69,10 @@ public final class Polynomial {
     public String toString() {
 
         //Highest degree term's sign initialization
-        StringBuilder format = new StringBuilder((coefficients[0] < 0) ? "-" : "");
+        final StringBuilder format = new StringBuilder((coefficients[0] < 0) ? "-" : "");
 
         //Template for coefficient formatting
-        Function<Integer, String> f = (Integer i) ->
+        final Function<Integer, String> f = (Integer i) ->
                 ((areEqual(Math.abs(coefficients[i]), 1) || areEqual(coefficients[i], 0)) ? "" :
                 new DecimalFormat("##.########").format(Math.abs(coefficients[i])));
 

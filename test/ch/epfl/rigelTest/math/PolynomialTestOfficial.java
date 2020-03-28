@@ -2,9 +2,11 @@
 
 package ch.epfl.rigelTest.math;
 
+import ch.epfl.rigel.math.Angle;
 import ch.epfl.rigel.math.Polynomial;
 import org.junit.jupiter.api.Test;
 
+import static ch.epfl.rigel.math.Angle.ofArcsec;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -42,6 +44,7 @@ class PolynomialTestOfficial {
         assertEquals(5, polynomial.at(0));
         assertEquals(9, polynomial.at(2));
         assertEquals(-2, polynomial.at(-3.5));
+        assertEquals(8, polynomial.at(1.5));
     }
 
     @Test
