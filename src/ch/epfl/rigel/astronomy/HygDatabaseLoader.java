@@ -35,7 +35,7 @@ public enum HygDatabaseLoader implements StarCatalogue.Loader {
      */
     @Override
     public void load(InputStream inputStream, StarCatalogue.Builder builder) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream,
+        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream,
                 StandardCharsets.US_ASCII))) {
 
             //Skipping the first line
@@ -74,7 +74,7 @@ public enum HygDatabaseLoader implements StarCatalogue.Loader {
      * @param <T> return value type
      * @return (T)
      */
-    private <T> T buildWithDefault(String sub, T def, Function<String, T> convert) {
+    private <T> T buildWithDefault(final String sub, final T def, final Function<String, T> convert) {
         return sub.equals("") ? def : convert.apply(sub);
     }
 }

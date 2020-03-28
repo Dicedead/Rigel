@@ -31,11 +31,11 @@ public enum AsterismLoader implements StarCatalogue.Loader {
     @Override
     public void load(InputStream inputStream, StarCatalogue.Builder builder) throws IOException {
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream,
+        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream,
                 StandardCharsets.US_ASCII))) {
 
             //Making this map avoids the need of another for loop in the main while loop
-            final Map<Integer, Star> hipparcosToStarMap = builder.stars().parallelStream()
+            final Map<Integer, Star> hipparcosToStarMap = builder.stars().stream()
                     .collect(Collectors.toMap(Star::hipparcosId, Function.identity(), (v1, v2) -> v2));
             //Using the function: star -> (hipparcosOf(star),star), and wrapping the result in a Map
 
