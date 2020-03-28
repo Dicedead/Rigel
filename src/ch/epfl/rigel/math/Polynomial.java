@@ -4,7 +4,11 @@ import ch.epfl.rigel.Preconditions;
 
 import java.text.DecimalFormat;
 import java.util.Arrays;
+import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
 /**
@@ -18,6 +22,12 @@ public final class Polynomial {
     private final double[] coefficients;
     private final int degree;
     private final static double EPSILON = 1e-6;
+    private final static BiFunction<Boolean, String, Function<String, String>> g = (b, s) -> l -> b ? l : s;
+    private final static BiFunction<StringBuilder, Boolean, Function<String, StringBuilder>> h = (sb, b) -> s -> sb.append(g.apply(b, s).apply(""));
+
+    private final static Function<Integer, Function<List<Double>, String>> f =
+            (Integer j) -> c -> (g.apply(areEqual(Math.abs(c.get(j)), 1) || areEqual(c.get(j), 0) ,
+                    new DecimalFormat("##.########").format(Math.abs(c.get(j)))).apply(""));
 
     private Polynomial(double coefficientN, double... coefficients) {
 
@@ -58,7 +68,7 @@ public final class Polynomial {
      * @param c (int) degree of subpolynomial
      * @return (double)
      */
-    private double atRecur(double x, int c) {
+    private double atRecur(final double x, final int c) {
         return c == 0 ? coefficients[0] : atRecur(x, c - 1) * x + coefficients[c];
     }
 
@@ -67,34 +77,18 @@ public final class Polynomial {
      */
     @Override
     public String toString() {
-
         //Highest degree term's sign initialization
-        final StringBuilder format = new StringBuilder((coefficients[0] < 0) ? "-" : "");
+        return toRecurence(new StringBuilder((coefficients[0] < 0) ? "-" : ""), 0).toString();
+    }
 
-        //Template for coefficient formatting
-        final Function<Integer, String> f = (Integer i) ->
-                ((areEqual(Math.abs(coefficients[i]), 1) || areEqual(coefficients[i], 0)) ? "" :
-                        new DecimalFormat("##.########").format(Math.abs(coefficients[i])));
-
-        //Main loop: constructing the string
-        for (int i = 0; i <= degree - 1; ++i) {
-            /*
-            Concatenation of the coefficient, its associated x to the power of degree-i, and the next coefficient's sign.
-            Steps:
-               -Formatting using Function f
-               -Checking whether the coefficient != 0 (0 -> x is skipped)
-               -Appending the '^' sign and the degree if degree != 0 ^ degree != 1
-               -Appending the next coefficient's sign (if it exists ^ is != 0)
-             */
-            format.append(f.apply(i))
-                    .append(areEqual(coefficients[i], 0) ? "" : "x")
-                    .append((i == degree - 1 || areEqual(coefficients[i], 0)) ? "" : "^" + (degree - i))
-                    .append(areEqual(coefficients[i + 1], 0) ? "" : (0 > coefficients[i + 1]) ? "-" : "+");
-
-        }
-
+    private StringBuilder toRecurence (final StringBuilder format,final int i)
+    {
+        final Function<Integer, String> t = j -> f.apply(j).apply(DoubleStream.of(coefficients).boxed().collect(Collectors.toUnmodifiableList()));
         //Treatment of the (eventual) constant term
-        return format.append(f.apply(degree)).toString();
+        return i == degree ? format.append(t.apply(degree)) :
+                toRecurence(h.apply(h.apply(h.apply(format.append(f.apply(i)), areEqual(coefficients[i], 0)).apply("x"),
+                (i == degree - 1 || areEqual(coefficients[i], 0))).apply("^" + (degree - i)),
+                areEqual(coefficients[i + 1], 0)).apply(g.apply((0 > coefficients[i + 1]),"+" ).apply("-")), i + 1);
     }
 
     /**
@@ -104,7 +98,7 @@ public final class Polynomial {
      * @param value2 (double)
      * @return (boolean) boolean of equality
      */
-    private boolean areEqual(double value1, double value2) {
+    private static boolean areEqual(double value1, double value2) {
         return (Math.abs(value1 - value2)) <= EPSILON;
     }
 

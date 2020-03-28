@@ -24,8 +24,7 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
     private final static RightOpenInterval LON_INTERVAL_DEG_0to360 = RightOpenInterval.of(0,360);
     private final static ClosedInterval LAT_INTERVAL_DEG_SYM_180 = ClosedInterval.symmetric(180);
 
-    private final static Function<Integer, Double> DEFINE_OCTANT_EDGE =
-            A -> A * Math.PI / 4 - Math.PI / 8;
+    private final static Function<Integer, Double> DEFINE_OCTANT_EDGE = A -> A * Math.PI / 4 - Math.PI / 8;
 
     /**
      * Constructor for HorizontalCoordinates

@@ -84,6 +84,7 @@ public final class StereographicProjection implements Function<HorizontalCoordin
         final double sinC = 2 * p * den;
         final double cosC = (1 - p2) * den;
         final double term = y * sinC;
+
         return HorizontalCoordinates.of(
                 Angle.normalizePositive((centerOfProjection.az() + atan2(x * sinC, p * cosPhi1 * cosC - term * sinPhi1))),
                 (asin(cosC * sinPhi1 + (term * cosPhi1) / p)));
