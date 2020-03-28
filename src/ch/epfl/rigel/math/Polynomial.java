@@ -25,6 +25,7 @@ public final class Polynomial {
     private final static BiFunction<Boolean, String, Function<String, String>> g = (b, s) -> l -> b ? l : s;
     private final static BiFunction<StringBuilder, Boolean, Function<String, StringBuilder>> h = (sb, b) -> s -> sb.append(g.apply(b, s).apply(""));
 
+
     private Polynomial(double coefficientN, double... coefficients) {
 
         this.coefficients = new double[coefficients.length + 1];
@@ -73,20 +74,20 @@ public final class Polynomial {
      */
     @Override
     public String toString() {
+        //Highest degree term's sign initialization
         return toRecurence(new StringBuilder((coefficients[0] < 0) ? "-" : ""), 0).toString();
     }
 
     private StringBuilder toRecurence (final StringBuilder format,final int i)
     {
-        final  Function<Integer, String> f =
-                j -> (g.apply(areEqual(Math.abs(coefficients[j]), 1) || areEqual(coefficients[j], 0) ,
+        final  Function<Integer, String> f = j -> (g.apply(areEqual(Math.abs(coefficients[j]), 1) || areEqual(coefficients[j], 0) ,
                         new DecimalFormat("##.########").format(Math.abs(coefficients[j]))).apply(""));
 
+        //Treatment of the (eventual) constant term
         return i == degree ? format.append(f.apply(degree)) :
-                toRecurence(h.apply(h.apply(h.apply(
-                        format.append(f.apply(i)), areEqual(coefficients[i], 0)).apply("x"),
-                        (i == degree - 1 || areEqual(coefficients[i], 0))).apply("^" + (degree - i)),
-                        areEqual(coefficients[i + 1], 0)).apply(g.apply((0 > coefficients[i + 1]),"+" ).apply("-")), i + 1);
+                toRecurence(h.apply(h.apply(h.apply(format.append(f.apply(i)), areEqual(coefficients[i], 0)).apply("x"),
+                (i == degree - 1 || areEqual(coefficients[i], 0))).apply("^" + (degree - i)),
+                areEqual(coefficients[i + 1], 0)).apply(g.apply((0 > coefficients[i + 1]),"+" ).apply("-")), i + 1);
     }
 
     /**
