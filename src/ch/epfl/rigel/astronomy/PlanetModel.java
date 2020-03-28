@@ -81,7 +81,7 @@ public enum PlanetModel implements CelestialObjectModel<Planet> {
 
         final double sinl_Pr_L = Math.sin(helioLon_Pr - helioLon_E);
 
-        final double lambda = (ALL.indexOf(this) <= 1) ?
+        final double lambda = (this.ordinal() <= 1) ?
                 Angle.normalizePositive(Math.PI + helioLon_E + Math.atan2(-1 * distanceToSun_Pr * sinl_Pr_L,
                         distanceToSun_E - distanceToSun_Pr * Math.cos(helioLon_E - helioLon_Pr))) :
                 Angle.normalizePositive(helioLon_Pr + Math.atan2(distanceToSun_E * sinl_Pr_L,

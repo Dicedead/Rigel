@@ -30,6 +30,4 @@ public final class Asterism {
     public List<Star> stars() {
         return starList;
     }
-
-    ;
 }

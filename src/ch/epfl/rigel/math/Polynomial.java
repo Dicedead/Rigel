@@ -17,8 +17,7 @@ public final class Polynomial {
     private final int degree;
     private final static double EPSILON = 1e-6;
 
-    private Polynomial(double coefficientN, double... coefficients)
-    {
+    private Polynomial(double coefficientN, double... coefficients) {
 
         this.coefficients = new double[coefficients.length + 1];
         this.coefficients[0] = coefficientN;
@@ -47,7 +46,7 @@ public final class Polynomial {
      * @return (double) polynomial computed at desired point
      */
     public double at(double x) {
-        return atR(x, degree);
+        return atRecur(x, degree);
     }
 
     /**
@@ -57,9 +56,8 @@ public final class Polynomial {
      * @param c (int) degree of subpolynomial
      * @return (double)
      */
-    private double atR(double x, int c)
-    {
-        return c == 0 ? coefficients[0] : atR(x, c - 1) * x + coefficients[c];
+    private double atRecur(double x, int c) {
+        return c == 0 ? coefficients[0] : atRecur(x, c - 1) * x + coefficients[c];
     }
 
     /**
@@ -74,11 +72,10 @@ public final class Polynomial {
         //Template for coefficient formatting
         final Function<Integer, String> f = (Integer i) ->
                 ((areEqual(Math.abs(coefficients[i]), 1) || areEqual(coefficients[i], 0)) ? "" :
-                new DecimalFormat("##.########").format(Math.abs(coefficients[i])));
+                        new DecimalFormat("##.########").format(Math.abs(coefficients[i])));
 
         //Main loop: constructing the string
-        for (int i = 0; i <= degree - 1; ++i)
-        {
+        for (int i = 0; i <= degree - 1; ++i) {
             /*
             Concatenation of the coefficient, its associated x to the power of degree-i, and the next coefficient's sign.
             Steps:
@@ -110,8 +107,8 @@ public final class Polynomial {
     }
 
     /**
-     * @see Object#equals(Object)
      * @throws UnsupportedOperationException (double precision does not allow for equals)
+     * @see Object#equals(Object)
      */
     @Override
     public boolean equals(Object o) {
@@ -121,8 +118,8 @@ public final class Polynomial {
     }
 
     /**
-     * @see Object#hashCode()
      * @throws UnsupportedOperationException (double precision does not allow for hashcode)
+     * @see Object#hashCode()
      */
     @Override
     public int hashCode() {
