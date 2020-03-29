@@ -39,7 +39,7 @@ public final class StarCatalogue {
 
         asterismMap = asterisms.parallelStream().collect(Collectors.toMap(Function.identity(), //identity ie the asterism itself
                 asterism -> List.copyOf(asterism.stars().stream()              //this function associates an asterism with
-                        .map(starList::indexOf).collect(Collectors.toList())), //the desired with of indices.
+                        .map(starList::indexOf).collect(Collectors.toList())), //the desired List of indices.
                 (v, u) -> u)); //finally, merging duplicate asterisms (if there's any).
 
         immutableAsterismSet = Set.copyOf(asterismMap.keySet());

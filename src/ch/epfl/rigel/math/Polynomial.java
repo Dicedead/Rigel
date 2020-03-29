@@ -18,18 +18,24 @@ public final class Polynomial {
 
     private final double[] coefficients;
     private final int degree;
-    private final static double EPSILON = 1e-6;
+    private final static double EPSILON = 1e-8;
 
-    private final static BiFunction<StringBuilder, Boolean, Function<String, StringBuilder>> h = (sb, b) -> s -> sb.append(b ? "" : s);
-
-    private final static BiFunction<Integer, Integer, Function<double[], List<Boolean>>> boolL =  (i, d) -> c ->
+    private final static BiFunction<Integer, Integer, Function<double[], List<Boolean>>> COEFF_FORMAT =  (i, d) -> c ->
             List.of(areEqual(c[i], 0), (i == d - 1 || areEqual(c[i], 0)), areEqual(c[i + 1], 0));
+            //Evaluates a bunch of conditions on the coefficients (if they're 0, if the next 0 is 0, if they're the constant
+            //term. The boolean list it constructs is used in conjunction with the following Functions:
 
-    private final static BiFunction<Integer, Integer, Function<double[], List<String>>> formatL =  (i, d) -> c ->
+    private final static BiFunction<StringBuilder, Boolean, Function<String, StringBuilder>> SKIPP_COEFF =
+                    (sb, b) -> s -> sb.append(b ? "" : s);
+                    //Skips the coefficient if it is == 0
+
+    private final static BiFunction<Integer, Integer, Function<double[], List<String>>> X_TO_POWER =  (i, d) -> c ->
             List.of("x", "^" + (d - i), (0 > c[i + 1]) ? "-" :  "+" );
+            //Taking care of x^(power)(next sign) format
 
-    private final static BiFunction<Integer, double[], String> f = (j, c) ->
+    private final static BiFunction<Integer, double[], String> NUMBER_FORMAT = (j, c) ->
             (areEqual(Math.abs(c[j]), 1) || areEqual(c[j], 0) ? "" : new DecimalFormat("##.########").format(Math.abs(c[j])));
+            //If coefficient is non-zero, show first 8 decimals
 
     private Polynomial(double coefficientN, double... coefficients) {
 
@@ -79,16 +85,35 @@ public final class Polynomial {
      */
     @Override
     public String toString() {
-        //Highest degree term's sign initialization
-        //Treatment of the (eventual) constant term
-        return toRecurence(new StringBuilder((coefficients[0] < 0) ? "-" : ""), 0).append(f.apply(degree, coefficients)).toString();
+        return toStringRecursive(new StringBuilder((coefficients[0] < 0) ? "-" : ""), 0) //Treating highest degree term
+                .append(NUMBER_FORMAT.apply(degree, coefficients)).toString(); //Setting number of decimals
     }
 
-    private StringBuilder toRecurence (StringBuilder format, final int i)
+    /**
+     * Auxiliary recursive method for toString String formatting
+     *
+     * @param format (StringBuilder) String being built before step i
+     * @param i (int) incremental
+     * @return (StringBuilder) String being built at step i / before step i+1
+     */
+    private StringBuilder toStringRecursive(StringBuilder format, final int i)
     {
-        return i == degree || degree == 0 ? format : toRecurence(IntStream.of(0, 1, 2).mapToObj(k -> h.apply(k == 0 ?
-                format.append(f.apply(i, coefficients)) : format, boolL.apply(i, degree).apply(coefficients).get(k))
-                .apply(formatL.apply(i, degree).apply(coefficients).get(k))).collect(Collectors.toList()).get(2), i + 1);
+        //Largely applying currying Functions defined above
+        return (i == degree || degree == 0) ? format : toStringRecursive(IntStream.of(0, 1, 2)
+                    .mapToObj(k -> SKIPP_COEFF.apply(k == 0 ? format.append(NUMBER_FORMAT.apply(i, coefficients)) : format,
+                    COEFF_FORMAT.apply(i, degree).apply(coefficients).get(k)).apply(X_TO_POWER.apply(i, degree).apply(coefficients).get(k)))
+                .collect(Collectors.toList()).get(2), i + 1);
+
+        //The IntStream(0,1,2) defines steps to take:
+        //   first (only when k=0), append the absolute value of the coefficient if non-zero; (NUMBER_FORMAT(...))
+        //   second, check the necessary conditions for constructing the rest of the term*,
+        //           store them in a List<Boolean> after 2 currying calls used in third step; (COEFF_FORMAT(...))
+        //   third: if k = 0: checks whether number is a zero, if so, omits next steps         (X_TO_POWER(...))
+        //          if k = 1: get the boolean value indicating whether nothing, x^i or x should be appended
+        //          if k = 2: checks whether next number is a zero or not in order to add a sign if it's not the case
+        //... and then repeat by going down the list of coefficients (get(2) gets the resulting substring for this iteration).
+        //
+        // *we define "term" by the String [-](value!=1^0)x(^power!=1^0), ex: -5x^3, 1, x^2, x.
     }
 
     /**
