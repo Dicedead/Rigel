@@ -64,10 +64,10 @@ public enum PlanetModel implements CelestialObjectModel<Planet> {
         //DETERMINATION OF COORDINATES LAMBDA AND BETA
         final double meanAnomaly = (Angle.TAU * daysSinceJ2010) / (DAYS_IN_TROP_YEAR * Tp) + epsilon - lonPer;
         final double trueAnomaly = meanAnomaly + 2 * excent * Math.sin(meanAnomaly);
-        final double distanceToSun = a * (1 - excent * excent) / (1 + excent * Math.cos(trueAnomaly));
         final double helioLon = trueAnomaly + lonPer;
         final double sinl_LonN = Math.sin(helioLon - lonN);
         final double psi = Math.asin(sinl_LonN * Math.sin(inc));
+        final double distanceToSun = a * (1 - excent * excent) / (1 + excent * Math.cos(trueAnomaly));
 
         final double distanceToSun_Pr = distanceToSun * Math.cos(psi);
         final double helioLon_Pr = Math.atan2(sinl_LonN * Math.cos(inc), Math.cos(helioLon - lonN)) + lonN;

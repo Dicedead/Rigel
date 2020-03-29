@@ -2,13 +2,12 @@ package ch.epfl.rigel.math;
 
 import ch.epfl.rigel.Preconditions;
 import java.text.DecimalFormat;
-import java.util.Iterator;
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
 /**
  * Polynomial object definition and associated tools
  *
