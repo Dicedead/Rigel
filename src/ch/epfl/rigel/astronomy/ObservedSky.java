@@ -1,23 +1,27 @@
 package ch.epfl.rigel.astronomy;
 
 import ch.epfl.rigel.coordinates.*;
-import com.sun.source.tree.Tree;
 
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 
 import static java.lang.Math.pow;
 
+/**
+ *
+ *
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public final class ObservedSky {
 
     private final Map<Sun, CartesianCoordinates> sunMap;
     private final Map<Moon, CartesianCoordinates> moonMap;
 
-    private final Map<CelestialObject, CartesianCoordinates> coordsToCelObjectsMap = new HashMap<>();
+    private final Map<CelestialObject, CartesianCoordinates> celestObjToCoordsMap = new HashMap<>();
 
     private final StarCatalogue catalogue;
     private final double[] starsPositions;
@@ -34,8 +38,9 @@ public final class ObservedSky {
     //done but pre-step 7 classes need not to be modified.
 
     static private final Function<CartesianCoordinates, BiFunction<CartesianCoordinates, CartesianCoordinates, Integer>>
-            CLOSEST_TO_C = c -> (a, b) -> Double.compare((pow(a.x() - c.x(), 2) + pow(a.y() - c.y(), 2)), (pow(b.x() - c.x(), 2)
-            + pow(b.y() - c.y(), 2)));
+            CLOSEST_TO_C = c -> (a, b) -> Double.compare((a.x() - c.x())*(a.x() - c.x()) + ((a.y() - c.y())*(a.y() - c.y())),
+            ((b.x() - c.x())*(b.x() - c.x())) + ((b.y() - c.y())*(b.y() - c.y())));
+             //Squaring with Math.pow is a little slower
 
 
     public ObservedSky(final ZonedDateTime date, final GeographicCoordinates geoCoords,
@@ -65,13 +70,13 @@ public final class ObservedSky {
         planetPositions = positionsToArray(planetMap);
         starsPositions = positionsToArray(starMap);
 
-        List.of(starMap, planetMap, sunMap, moonMap).forEach(coordsToCelObjectsMap::putAll);
+        List.of(starMap, planetMap, sunMap, moonMap).forEach(celestObjToCoordsMap::putAll);
     }
 
     public Optional<CelestialObject> objectClosestTo(final CartesianCoordinates point, final double maxDistance) {
-        return coordsToCelObjectsMap.keySet().stream().min((l, j) -> CLOSEST_TO_C.apply(point)
-                .apply(coordsToCelObjectsMap.get(l), coordsToCelObjectsMap.get(j)))
-                .filter(i -> CLOSEST_TO_C.apply(point).apply(coordsToCelObjectsMap.get(i), point) <= maxDistance);
+        return celestObjToCoordsMap.keySet().stream().min((m, n) -> CLOSEST_TO_C.apply(point)
+                .apply(celestObjToCoordsMap.get(m), celestObjToCoordsMap.get(n)))
+                .filter(i -> CLOSEST_TO_C.apply(point).apply(celestObjToCoordsMap.get(i), point) <= maxDistance);
     }
 
     public List<Star> stars() {

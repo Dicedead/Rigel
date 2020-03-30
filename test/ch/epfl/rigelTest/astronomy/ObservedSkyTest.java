@@ -7,7 +7,6 @@ import ch.epfl.rigel.astronomy.HygDatabaseLoader;
 import ch.epfl.rigel.astronomy.MoonModel;
 import ch.epfl.rigel.astronomy.ObservedSky;
 import ch.epfl.rigel.astronomy.Planet;
-import ch.epfl.rigel.astronomy.PlanetModel;
 import ch.epfl.rigel.astronomy.Star;
 import ch.epfl.rigel.astronomy.StarCatalogue;
 import ch.epfl.rigel.astronomy.SunModel;
@@ -28,12 +27,7 @@ import java.time.ZonedDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Alexandre Sallinen (303162)
- * @author Salim Najib (310003)
- */
 public class ObservedSkyTest {
 
     private static final String HYG_CATALOGUE_NAME =
