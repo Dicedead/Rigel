@@ -7,9 +7,6 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static java.lang.Math.pow;
 
 import static java.lang.Math.pow;
 
@@ -31,6 +28,11 @@ public final class ObservedSky {
     private final EquatorialToHorizontalConversion eqToHor;
     private final ZonedDateTime dateT;
 
+    static private final Function<CartesianCoordinates, BiFunction<CartesianCoordinates, CartesianCoordinates, Integer>>
+            CLOSEST_TO_C = c -> (a, b) -> Double.compare((pow(a.x() - c.x(), 2) + pow(a.y() - c.y(), 2)) , (pow(b.x() - c.x(), 2)
+                + pow(b.y()- c.y(), 2)));
+
+
     public ObservedSky(final ZonedDateTime date, final GeographicCoordinates geoCoords,
                        final StereographicProjection projection, final StarCatalogue catalogue) {
         this.positionToObserve = projection;
@@ -38,7 +40,7 @@ public final class ObservedSky {
         this.dateT = date;
         this.catalogue = catalogue; //Kept for its immutable list of stars
 
-        final List<PlanetModel> extraTerrPlanets = Arrays.asList(PlanetModel.values());
+        final List<PlanetModel> extraTerrPlanets = new ArrayList<>(Arrays.asList(PlanetModel.values()));
         extraTerrPlanets.remove(2); //removing the earth
 
         starMap = Map.copyOf(calculatePosition(catalogue.stars(), Function.identity()));
@@ -52,18 +54,11 @@ public final class ObservedSky {
 
         List.of(starMap, planetMap, sunMap, moonMap).forEach(coordsToCelObjectsMap::putAll);
     }
-    static private final Function<CartesianCoordinates, BiFunction<CartesianCoordinates, CartesianCoordinates, Integer>> f =
-            c -> (a, b) -> Double.compare((pow(a.x() - c.x(), 2) + pow(a.y() - c.y(), 2)) , (pow(b.x() - c.x(), 2) + pow(b.y()- c.y(), 2)));
-
-    public Optional<CelestialObject> objectClosestTo(final CartesianCoordinates point, final double maxDistance) {
-        final var closestCoord = coordsToCelObjectsMap.keySet().stream()
-                .min(Comparator.comparingDouble(coord -> euclidianDistance(coordsToCelObjectsMap.get(coord), point))).get();
-        return (euclidianDistance(coordsToCelObjectsMap.get(closestCoord),point) <= maxDistance) ? Optional.of(closestCoord) : Optional.empty();
-    }
 
     public Optional<CelestialObject> objectClosestTo (final double distMax, final CartesianCoordinates me) {
-        return coordsToCelObjectsMap.keySet().stream().min((l, j) -> f.apply(me).apply(coordsToCelObjectsMap.get(l), coordsToCelObjectsMap.get(j)))
-                .filter(i -> f.apply(me).apply(coordsToCelObjectsMap.get(i), me) < distMax);
+        return coordsToCelObjectsMap.keySet().stream().min((l, j) -> CLOSEST_TO_C.apply(me)
+                .apply(coordsToCelObjectsMap.get(l), coordsToCelObjectsMap.get(j)))
+                .filter(i -> CLOSEST_TO_C.apply(me).apply(coordsToCelObjectsMap.get(i), me) < distMax);
     }
 
     public List<Star> stars() {
@@ -84,7 +79,8 @@ public final class ObservedSky {
     }
 
     public Sun sun() {
-        return (Sun) sunMap.keySet().toArray()[0]; //note that the keySet's size is only 1, hence toArray costs 1 flop
+        return (Sun) sunMap.keySet().toArray()[0]; //note that the keySet's size is only 1, hence toArray costs 1 flop,
+                                                   //and one more to get
     }
 
     public CartesianCoordinates sunPosition() {
@@ -97,10 +93,6 @@ public final class ObservedSky {
 
     public CartesianCoordinates moonPosition() {
         return (CartesianCoordinates) moonMap.values().toArray()[0];
-    }
-
-    private static double euclidianDistance(CartesianCoordinates coord1, CartesianCoordinates coord2) {
-        return ((coord1.x() - coord2.x())*(coord1.x() - coord2.x()) + (coord1.y() - coord2.y())*(coord1.y() - coord2.y()));
     }
 
     private <K extends CelestialObject> K getAt(final CelestialObjectModel<K> k) {
