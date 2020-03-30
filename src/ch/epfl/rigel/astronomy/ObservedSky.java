@@ -7,6 +7,9 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.lang.Math.pow;
 
 import static java.lang.Math.pow;
 
@@ -17,7 +20,7 @@ public final class ObservedSky {
     private final Map<Sun, CartesianCoordinates> sunMap;
     private final Map<Moon, CartesianCoordinates> moonMap;
 
-    private final Map<CartesianCoordinates, ? extends CelestialObject> coordsToCelObjectsMap;
+    private final Map< CelestialObject , CartesianCoordinates> coordsToCelObjectsMap = new HashMap<>();
 
     private final StarCatalogue catalogue;
     private final List<Double> starsPositions;
@@ -47,13 +50,20 @@ public final class ObservedSky {
         planetPositions = List.copyOf(positionsToList(planetMap));
         starsPositions = List.copyOf(positionsToList(starMap));
 
-        coordsToCelObjectsMap = mergeMaps(List.of(invertKeys(starMap), invertKeys(planetMap), invertKeys(sunMap), invertKeys(moonMap)));
+        List.of(starMap, planetMap, sunMap, moonMap).forEach(coordsToCelObjectsMap::putAll);
     }
+    static private final Function<CartesianCoordinates, BiFunction<CartesianCoordinates, CartesianCoordinates, Integer>> f =
+            c -> (a, b) -> Double.compare((pow(a.x() - c.x(), 2) + pow(a.y() - c.y(), 2)) , (pow(b.x() - c.x(), 2) + pow(b.y()- c.y(), 2)));
 
     public Optional<CelestialObject> objectClosestTo(final CartesianCoordinates point, final double maxDistance) {
-        final CartesianCoordinates closestCoord = coordsToCelObjectsMap.keySet().stream()
-                .min(Comparator.comparingDouble(coord -> euclidianDistance(coord, point))).get();
-        return (euclidianDistance(closestCoord,point) <= maxDistance) ? Optional.of(coordsToCelObjectsMap.get(closestCoord)) : Optional.empty();
+        final var closestCoord = coordsToCelObjectsMap.keySet().stream()
+                .min(Comparator.comparingDouble(coord -> euclidianDistance(coordsToCelObjectsMap.get(coord), point))).get();
+        return (euclidianDistance(coordsToCelObjectsMap.get(closestCoord),point) <= maxDistance) ? Optional.of(closestCoord) : Optional.empty();
+    }
+
+    public Optional<CelestialObject> objectClosestTo (final double distMax, final CartesianCoordinates me) {
+        return coordsToCelObjectsMap.keySet().stream().min((l, j) -> f.apply(me).apply(coordsToCelObjectsMap.get(l), coordsToCelObjectsMap.get(j)))
+                .filter(i -> f.apply(me).apply(coordsToCelObjectsMap.get(i), me) < distMax);
     }
 
     public List<Star> stars() {
@@ -63,6 +73,7 @@ public final class ObservedSky {
     public List<Double> starsPosition() {
         return starsPositions;
     }
+
 
     public List<Planet> planets() {
         return planetList;
@@ -89,7 +100,7 @@ public final class ObservedSky {
     }
 
     private static double euclidianDistance(CartesianCoordinates coord1, CartesianCoordinates coord2) {
-        return Math.sqrt((coord1.x() - coord2.x())*(coord1.x() - coord2.x()) + (coord1.y() - coord2.y())*(coord1.y() - coord2.y()));
+        return ((coord1.x() - coord2.x())*(coord1.x() - coord2.x()) + (coord1.y() - coord2.y())*(coord1.y() - coord2.y()));
     }
 
     private <K extends CelestialObject> K getAt(final CelestialObjectModel<K> k) {
@@ -105,28 +116,6 @@ public final class ObservedSky {
         return objectsMap.values().stream().flatMap(l -> List.of(l.x(), l.y()).stream()).collect(Collectors.toList());
     }
 
-    private static <K, V> Map<V, K> invertKeys(Map<K, V> map) {
-        return map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
-    }
 
-    private static Map<CartesianCoordinates, CelestialObject> mergeMaps(List<Map<CartesianCoordinates, ? extends CelestialObject>> maps) {
-        final Map<CartesianCoordinates, CelestialObject> bigMap = new HashMap<>();
-        maps.forEach(bigMap::putAll);
-        return bigMap;
-    }
-
-    /*public <T> List<T> getObj(Class<T> cls) throws IllegalAccessException {
-        for (final Field f : ObservedSky.class.getDeclaredFields())
-        {
-            if (f.getType() == Map.class) {
-                f.setAccessible(true);
-                if(((Map<T, CartesianCoordinates>)f.get(this)).keySet().toArray()[0].getClass() == cls)
-                {
-                    return new ArrayList<T>(((Map<T, CartesianCoordinates>) f.get(this)).keySet());
-                }
-            }
-        }
-        throw new IllegalArgumentException();
-    }*/
 
 }
