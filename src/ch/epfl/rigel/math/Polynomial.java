@@ -103,16 +103,16 @@ public final class Polynomial {
                     COEFF_FORMAT.apply(i, degree).apply(coefficients).get(k)).apply(X_TO_POWER.apply(i, degree).apply(coefficients).get(k)))
                 .collect(Collectors.toList()).get(2), i + 1);
 
-        //The IntStream(0,1,2) defines steps to take:
-        //   first (only when k=0), append the absolute value of the coefficient if non-zero; (NUMBER_FORMAT(...))
-        //   second, check the necessary conditions for constructing the rest of the term*,
-        //           store them in a List<Boolean> after 2 currying calls used in third step; (COEFF_FORMAT(...))
-        //   third: if k = 0: checks whether number is a zero, if so, omits next steps         (X_TO_POWER(...))
-        //          if k = 1: get the boolean value indicating whether nothing, x^i or x should be appended
-        //          if k = 2: checks whether next number is a zero or not in order to add a sign if it's not the case
-        //... and then repeat by going down the list of coefficients (get(2) gets the resulting substring for this iteration).
-        //
-        // *we define "term" by the String [-](value!=1^0)x(^power!=1^0), ex: -5x^3, 1, x^2, x.
+        /*The IntStream(0,1,2) defines steps to take:
+             first (only when k=0), append the absolute value of the coefficient if non-zero; (NUMBER_FORMAT(...))
+             second, check the necessary conditions for constructing the rest of the term*,
+                     store them in a List<Boolean> after 2 currying calls used in third step; (COEFF_FORMAT(...))
+             third: if k = 0: checks whether number is a zero, if so, omits next steps         (X_TO_POWER(...))
+                    if k = 1: get the boolean value indicating whether nothing, x^i or x should be appended
+                    if k = 2: checks whether next number is a zero or not in order to add a sign if it's not the case
+          ... and then repeat by going down the list of coefficients (get(2) gets the resulting substring for this iteration).
+
+           *we define "term" by the String [-](value!=1^0)x(^power!=1^0), ex: -5x^3, 1, x^2, x. */
     }
 
     /**
