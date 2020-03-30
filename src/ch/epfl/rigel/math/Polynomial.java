@@ -7,6 +7,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
 /**
  * Polynomial object definition and associated tools
  *
@@ -18,7 +19,7 @@ public final class Polynomial {
     private final double[] coefficients;
     private final int degree;
     private final static double EPSILON = 1e-8;
-
+    //Handling multiple variables through currying
     private final static BiFunction<Integer, Integer, Function<double[], List<Boolean>>> COEFF_FORMAT =  (i, d) -> c ->
             List.of(areEqual(c[i], 0), (i == d - 1 || areEqual(c[i], 0)), areEqual(c[i + 1], 0));
             //Evaluates a bunch of conditions on the coefficients (if they're 0, if the next 0 is 0, if they're the constant
@@ -97,7 +98,7 @@ public final class Polynomial {
      */
     private StringBuilder toStringRecursive(StringBuilder format, final int i)
     {
-        //Largely applying currying Functions defined above
+        //Largely applying Functions defined above
         return (i == degree || degree == 0) ? format : toStringRecursive(IntStream.of(0, 1, 2)
                     .mapToObj(k -> SKIPP_COEFF.apply(k == 0 ? format.append(NUMBER_FORMAT.apply(i, coefficients)) : format,
                     COEFF_FORMAT.apply(i, degree).apply(coefficients).get(k)).apply(X_TO_POWER.apply(i, degree).apply(coefficients).get(k)))
