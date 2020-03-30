@@ -4,8 +4,11 @@ import ch.epfl.rigel.coordinates.*;
 
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static java.lang.Math.pow;
 
 public final class ObservedSky {
 
@@ -14,7 +17,7 @@ public final class ObservedSky {
     private final Map<Sun, CartesianCoordinates> sunMap;
     private final Map<Moon, CartesianCoordinates> moonMap;
 
-    //private final List<Map<CartesianCoordinates,? extends CelestialObject>> mapList;
+    private final Map<CartesianCoordinates, ? extends CelestialObject> coordsToCelObjectsMap;
 
     private final StarCatalogue catalogue;
     private final List<Double> starsPositions;
@@ -25,9 +28,8 @@ public final class ObservedSky {
     private final EquatorialToHorizontalConversion eqToHor;
     private final ZonedDateTime dateT;
 
-    public ObservedSky (final ZonedDateTime date, final GeographicCoordinates geoCoords,
-                        final StereographicProjection projection, final StarCatalogue catalogue)
-    {
+    public ObservedSky(final ZonedDateTime date, final GeographicCoordinates geoCoords,
+                       final StereographicProjection projection, final StarCatalogue catalogue) {
         this.positionToObserve = projection;
         this.eqToHor = new EquatorialToHorizontalConversion(date, geoCoords);
         this.dateT = date;
@@ -45,13 +47,14 @@ public final class ObservedSky {
         planetPositions = List.copyOf(positionsToList(planetMap));
         starsPositions = List.copyOf(positionsToList(starMap));
 
-        //mapList = List.of(starMap,planetMap,sunMap,moonMap);
+        coordsToCelObjectsMap = mergeMaps(List.of(invertKeys(starMap), invertKeys(planetMap), invertKeys(sunMap), invertKeys(moonMap)));
     }
 
-    /*public Optional<CelestialObject> objectClosestTo(final CartesianCoordinates point, final double maxDistance) {
-        final CartesianCoordinates
-        mapList.forEach();
-    }*/
+    public Optional<CelestialObject> objectClosestTo(final CartesianCoordinates point, final double maxDistance) {
+        final CartesianCoordinates closestCoord = coordsToCelObjectsMap.keySet().stream()
+                .min(Comparator.comparingDouble(coord -> euclidianDistance(coord, point))).get();
+        return (euclidianDistance(closestCoord,point) <= maxDistance) ? Optional.of(coordsToCelObjectsMap.get(closestCoord)) : Optional.empty();
+    }
 
     public List<Star> stars() {
         return catalogue.stars();
@@ -60,7 +63,6 @@ public final class ObservedSky {
     public List<Double> starsPosition() {
         return starsPositions;
     }
-
 
     public List<Planet> planets() {
         return planetList;
@@ -74,8 +76,7 @@ public final class ObservedSky {
         return (Sun) sunMap.keySet().toArray()[0]; //note that the keySet's size is only 1, hence toArray costs 1 flop
     }
 
-    public CartesianCoordinates sunPosition ()
-    {
+    public CartesianCoordinates sunPosition() {
         return (CartesianCoordinates) sunMap.values().toArray()[0];
     }
 
@@ -83,18 +84,19 @@ public final class ObservedSky {
         return (Moon) moonMap.keySet().toArray()[0];
     }
 
-    public CartesianCoordinates moonPosition ()
-    {
+    public CartesianCoordinates moonPosition() {
         return (CartesianCoordinates) moonMap.values().toArray()[0];
     }
 
-    private<K extends CelestialObject> K getAt (final CelestialObjectModel<K> k)
-    {
+    private static double euclidianDistance(CartesianCoordinates coord1, CartesianCoordinates coord2) {
+        return Math.sqrt((coord1.x() - coord2.x())*(coord1.x() - coord2.x()) + (coord1.y() - coord2.y())*(coord1.y() - coord2.y()));
+    }
+
+    private <K extends CelestialObject> K getAt(final CelestialObjectModel<K> k) {
         return k.at(Epoch.J2010.daysUntil(dateT), new EclipticToEquatorialConversion(dateT));
     }
 
-    private <T, K extends CelestialObject > Map<K, CartesianCoordinates> calculatePosition(final List<T> data, final Function<T, K> f)
-    {
+    private <T, K extends CelestialObject> Map<K, CartesianCoordinates> calculatePosition(final List<T> data, final Function<T, K> f) {
         return data.stream().map(f).collect(Collectors.toUnmodifiableMap(Function.identity(),
                 l -> positionToObserve.apply(eqToHor.apply(l.equatorialPos())), (u, v) -> v));
     }
@@ -103,7 +105,15 @@ public final class ObservedSky {
         return objectsMap.values().stream().flatMap(l -> List.of(l.x(), l.y()).stream()).collect(Collectors.toList());
     }
 
-    //private <K,V> void invertKeys(Map<K,V> )
+    private static <K, V> Map<V, K> invertKeys(Map<K, V> map) {
+        return map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+    }
+
+    private static Map<CartesianCoordinates, CelestialObject> mergeMaps(List<Map<CartesianCoordinates, ? extends CelestialObject>> maps) {
+        final Map<CartesianCoordinates, CelestialObject> bigMap = new HashMap<>();
+        maps.forEach(bigMap::putAll);
+        return bigMap;
+    }
 
     /*public <T> List<T> getObj(Class<T> cls) throws IllegalAccessException {
         for (final Field f : ObservedSky.class.getDeclaredFields())
