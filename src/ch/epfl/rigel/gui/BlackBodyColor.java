@@ -2,7 +2,6 @@ package ch.epfl.rigel.gui;
 
 import ch.epfl.rigel.Preconditions;
 import javafx.scene.paint.Color;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -21,7 +20,6 @@ public final class BlackBodyColor {
     private static final String COLOR_FILE = "/bbr_color.txt";
     private static final int FILE_USABLE_LENGTH = 782;
     private static final int SKIP_FIRST_LINES = 19;
-
     private static final ArrayList<Color> COLOR_LIST = new ArrayList<>();
 
     //Non instantiable
@@ -38,6 +36,7 @@ public final class BlackBodyColor {
      * @throws UncheckedIOException     (I/O method)
      */
     public static Color colorForTemperature(final double temperature) {
+
         Preconditions.checkArgument(1000 <= temperature && temperature <= 40_000);
 
         if (COLOR_LIST.size() == 0) {

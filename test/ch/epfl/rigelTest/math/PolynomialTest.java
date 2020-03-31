@@ -1,6 +1,7 @@
 package ch.epfl.rigelTest.math;
 
 import ch.epfl.rigel.math.Polynomial;
+import ch.epfl.test.Chronometer;
 import org.junit.jupiter.api.Test;
 
 import static ch.epfl.test.TestRandomizer.newRandom;
