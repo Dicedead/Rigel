@@ -1,11 +1,10 @@
 package ch.epfl.test;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.SplittableRandom;
+import java.util.*;
 import java.util.function.Function;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 public class Chronometer
 {
     private Chronometer() {
@@ -44,22 +43,18 @@ public class Chronometer
         return res;
     }
 
-    static public <A, B, C, D> double[] battle(final Function<A, B> f, final Function<C, D> g, A arg1, C arg2, int repetition)
-    {
-        var t1 = System.nanoTime();
-        for (int i = 0; i < repetition; i++) {
-            f.apply(arg1);
-        }
-        var t2 = System.nanoTime();
-        double elapsed1 = t2 - t1;
+    static public Map<Integer, Long> battle(final List<Method> func, List<Object[]> args, List<Object> from,  int repetition) throws InvocationTargetException, IllegalAccessException {
+        Map<Integer, Long> results = new HashMap<>(func.size());
+        for (int j = 0; j < func.size(); ++j) {
+            var t1 = System.nanoTime();
+            for (int i = 0; i < repetition; i++) {
+                func.get(j).invoke(from, args.get(j));
+            }
+            var t2 = System.nanoTime();
+            results.put(j, t2 - t1);
 
-        var t3 = System.nanoTime();
-        for (int i = 0; i < repetition; i++) {
-            g.apply(arg2);
         }
-        var t4 = System.nanoTime();
-        double elapsed2 = t4 - t3;
-
-        return new double[]{elapsed1, elapsed2};
+        return results;
     }
+
 }
