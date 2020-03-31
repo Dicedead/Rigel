@@ -5,6 +5,8 @@ import java.util.function.Function;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.stream.Collectors;
+
 public class Chronometer
 {
     private Chronometer() {
@@ -43,18 +45,27 @@ public class Chronometer
         return res;
     }
 
-    static public Map<Integer, Long> battle(final List<Method> func, List<? extends Object> args, Object[] from,  int repetition) throws InvocationTargetException, IllegalAccessException {
+    static public Map<Integer, Long> battle(final List<Method> func, List<Object[]> args, Object[] from, int repetition) throws InvocationTargetException, IllegalAccessException {
         Map<Integer, Long> results = new HashMap<>(func.size());
         for (int j = 0; j < func.size(); ++j) {
             var t1 = System.nanoTime();
             for (int i = 0; i < repetition; i++) {
-                func.get(j).invoke(from[j], args.get(j));
+                if (from == null)
+                    func.get(j).invoke(null, args.get(j));
+                else
+                    func.get(j).invoke(from[j], args.get(j));
             }
             var t2 = System.nanoTime();
-            results.put(j, t2 - t1);
+            results.put(j, (t2 - t1));
 
         }
         return results;
+    }
+
+    static public String prettyPrint (Map<Integer, Long> k)
+    {
+        return "Results \n******************* \n" +
+                k.entrySet().stream().map(E -> "Function " + E.getKey().toString() + " scored " + E.getValue()).collect(Collectors.joining());
     }
 
 }

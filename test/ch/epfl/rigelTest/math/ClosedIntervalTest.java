@@ -1,8 +1,13 @@
 package ch.epfl.rigelTest.math;
 
 import ch.epfl.rigel.math.ClosedInterval;
+import ch.epfl.rigel.math.RightOpenInterval;
+import ch.epfl.test.Chronometer;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -36,5 +41,11 @@ class ClosedIntervalTest{
         assertFalse(closedInterval.contains(765));
 
 
+    }
+
+    @Test
+    void test() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+
+        System.out.println(Chronometer.prettyPrint(Chronometer.battle(List.of(ClosedInterval.class.getMethod("of", double.class, double.class)), List.of(new Object[][]{{3., 5.}}), null, 50)));
     }
 }

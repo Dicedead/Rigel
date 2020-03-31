@@ -35,8 +35,7 @@ class PolynomialTest {
     @org.junit.jupiter.api.Test
     void testToString() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         assertEquals("4x^15-5x^14+6x^13+x^12+4x^10-5x^9+6x^8+3x^7+7x^6-5x^2+6x+7", polynomial.toString());
-        var a = Chronometer.battle(List.of(Polynomial.class.getMethod("at", double.class)), List.of(3.), new Polynomial[]{polynomial}, 1000);
-        a.keySet().stream().forEach(k -> System.out.println(a.get(k)));
+
     }
 
 }
