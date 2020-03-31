@@ -14,16 +14,16 @@ public final class Preconditions {
 
     /**
      * Validity checking method
-     * @param isTrue Boolean to check
+     * @param argIsTrue Boolean to check
      */
-    public static void checkArgument(boolean isTrue){
-        if (!isTrue) {
+    public static void checkArgument(boolean argIsTrue){
+        if (!argIsTrue) {
             throw new IllegalArgumentException();
         }
     }
 
     /**
-     * Checking value containment in an interval
+     * Checking value containment in an interval, returns value if it passes the check
      *
      * @param interval Said interval
      * @param value Said value
