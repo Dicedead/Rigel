@@ -43,12 +43,12 @@ public class Chronometer
         return res;
     }
 
-    static public Map<Integer, Long> battle(final List<Method> func, List<Object[]> args, List<Object> from,  int repetition) throws InvocationTargetException, IllegalAccessException {
+    static public Map<Integer, Long> battle(final List<Method> func, List<Object[]> args, Object[] from,  int repetition) throws InvocationTargetException, IllegalAccessException {
         Map<Integer, Long> results = new HashMap<>(func.size());
         for (int j = 0; j < func.size(); ++j) {
             var t1 = System.nanoTime();
             for (int i = 0; i < repetition; i++) {
-                func.get(j).invoke(from, args.get(j));
+                func.get(j).invoke(from[j], args.get(j));
             }
             var t2 = System.nanoTime();
             results.put(j, t2 - t1);
