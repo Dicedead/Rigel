@@ -34,13 +34,13 @@ public enum AsterismLoader implements StarCatalogue.Loader {
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream,
                 StandardCharsets.US_ASCII))) {
 
-            //Making this map avoids the need of another for loop in the main while loop
             final Map<Integer, Star> hipparcosToStarMap = builder.stars().stream()
                     .collect(Collectors.toMap(Star::hipparcosId, Function.identity(), (v1, v2) -> v2));
                     //Using the function: star -> (hipparcosOf(star),star), and wrapping the result in a Map
 
-            reader.lines().forEach(l -> builder.addAsterism(new Asterism(Arrays.stream(l.split(","))
-                    .map(s -> hipparcosToStarMap.get(Integer.parseInt(s))).collect(Collectors.toList()))));
+            reader.lines().forEach(
+                    line -> builder.addAsterism(new Asterism(Arrays.stream(line.split(","))
+                    .map(hipparcos -> hipparcosToStarMap.get(Integer.parseInt(hipparcos))).collect(Collectors.toList()))));
                     //Mapping each line in inputStream to a List of stars via their hipparcos
 
         }

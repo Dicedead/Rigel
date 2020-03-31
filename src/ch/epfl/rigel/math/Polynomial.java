@@ -73,11 +73,11 @@ public final class Polynomial {
      * Auxiliary recursive method applying horner's scheme
      *
      * @param x (double) point to interpret
-     * @param c (int) degree of subpolynomial
+     * @param currDegree (int) degree of subpolynomial
      * @return (double)
      */
-    private double atRecur(final double x, final int c) {
-        return c == 0 ? coefficients[0] : atRecur(x, c - 1) * x + coefficients[c];
+    private double atRecur(final double x, final int currDegree) {
+        return currDegree == 0 ? coefficients[0] : atRecur(x, currDegree - 1) * x + coefficients[currDegree];
     }
 
     /**
@@ -104,7 +104,7 @@ public final class Polynomial {
                     COEFF_FORMAT.apply(i, degree).apply(coefficients).get(k)).apply(X_TO_POWER.apply(i, degree).apply(coefficients).get(k)))
                 .collect(Collectors.toList()).get(2), i + 1);
 
-        /*The IntStream(0,1,2) defines steps to take:
+        /*The IntStream(0,1,2) defines steps to take: (for k in this IntStream:)
              first (only when k=0), append the absolute value of the coefficient if non-zero; (NUMBER_FORMAT(...))
              second, check the necessary conditions for constructing the rest of the term*,
                      store them in a List<Boolean> after 2 currying calls used in third step; (COEFF_FORMAT(...))

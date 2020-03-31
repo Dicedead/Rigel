@@ -9,6 +9,7 @@ import ch.epfl.rigel.Preconditions;
  * @author Salim Najib (310003)
  */
 public final class Angle {
+
     static final public double TAU = 2 * Math.PI;
 
     //Number of ...

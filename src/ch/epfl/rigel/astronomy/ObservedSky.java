@@ -20,7 +20,7 @@ public final class ObservedSky {
     private final Map<Sun, CartesianCoordinates> sunMap;
     private final Map<Moon, CartesianCoordinates> moonMap;
 
-    private final Map<CelestialObject, CartesianCoordinates> celestObjToCoordsMap = new HashMap<>();
+    private final Map<CelestialObject, CartesianCoordinates> celestObjToCoordsMap;
 
     private final StarCatalogue catalogue;
     private final double[] starsPositions;
@@ -81,6 +81,7 @@ public final class ObservedSky {
         planetPositions = positionsToArray(planetMap);
         starsPositions = positionsToArray(starMap);
 
+        celestObjToCoordsMap = new HashMap<>();
         List.of(starMap, planetMap, sunMap, moonMap).forEach(celestObjToCoordsMap::putAll);
     }
 
@@ -94,9 +95,9 @@ public final class ObservedSky {
      *         closest CelestialObject wrapped in an Optional cell.
      */
     public Optional<CelestialObject> objectClosestTo(final CartesianCoordinates point, final double maxDistance) {
-        return celestObjToCoordsMap.keySet().parallelStream().min((m, n) -> CLOSEST_TO_C.apply(point)
-                .apply(celestObjToCoordsMap.get(m), celestObjToCoordsMap.get(n))) //(*)
-                .filter(i -> CLOSEST_TO_C.apply(point).apply(celestObjToCoordsMap.get(i), point) <= maxDistance); //(**)
+        return celestObjToCoordsMap.keySet().parallelStream().min((celestObj1, celestObj2) -> CLOSEST_TO_C.apply(point)
+                .apply(celestObjToCoordsMap.get(celestObj1), celestObjToCoordsMap.get(celestObj2))) //(*)
+                .filter(celestObj -> CLOSEST_TO_C.apply(point).apply(celestObjToCoordsMap.get(celestObj), point) <= maxDistance); //(**)
         /*
         Constructing celestObjToCoordsMap beforehand allows this method to run in linear time - all it does is search
         for the "minimum" of the CartesianCoordinates, comparing their distances to point at line (*), then check if
@@ -186,7 +187,7 @@ public final class ObservedSky {
      */
     private <T, S extends CelestialObject> Map<S, CartesianCoordinates> mapObjectToPosition(final List<T> data, final Function<T, S> f) {
         return data.stream().map(f).collect(Collectors.toUnmodifiableMap(
-                Function.identity(), l -> stereoProj.apply(eqToHor.apply(l.equatorialPos())), (u,v) -> v));
+                Function.identity(), celestObj -> stereoProj.apply(eqToHor.apply(celestObj.equatorialPos())), (u,v) -> v));
         //In our uses, f is either the identity -when data already contains CelestialObjects of type S-
         //or applyModel via method reference    -when data contains CelestialObjectModels<S>.
     }
@@ -200,7 +201,7 @@ public final class ObservedSky {
      *         arranged in the same order as objectsMap's keys
      */
     private static <K extends CelestialObject> double[] positionsToArray(final Map<K, CartesianCoordinates> objectsMap) {
-        return objectsMap.values().stream().flatMap(l -> List.of(l.x(), l.y()).stream())
+        return objectsMap.values().stream().flatMap(celestObj -> List.of(celestObj.x(), celestObj.y()).stream())
                 .mapToDouble(Double::doubleValue).toArray(); //conversion from Double[] to double[]
     }
 }

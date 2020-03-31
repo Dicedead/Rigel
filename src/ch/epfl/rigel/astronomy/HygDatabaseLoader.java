@@ -42,8 +42,8 @@ public enum HygDatabaseLoader implements StarCatalogue.Loader {
             if (reader.ready())
                 reader.readLine();
 
-            reader.lines().forEach(l -> {
-                final String[] line = l.split(",");
+            reader.lines().forEach(lineInFile -> {
+                final String[] line = lineInFile.split(",");
                 builder.addStar(
                     new Star(
                             /*hipparcos*/ buildWithDefault(line[Column.HIP.ordinal()], 0, Integer::parseInt),
