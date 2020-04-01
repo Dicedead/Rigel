@@ -6,11 +6,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Catalogue of stars and asterisms
@@ -33,17 +37,23 @@ public final class StarCatalogue {
      */
     public StarCatalogue(List<Star> stars, List<Asterism> asterisms) {
 
-        asterisms.forEach(currentAsterism -> Preconditions.checkArgument(stars.containsAll(currentAsterism.stars())));
-
-        this.starList = List.copyOf(stars);
+        final Map<Star, Integer> starToIndexMap = new HashMap<>(); //Avoiding the O(n2) time indexOf would take to fill
+        IntStream.range(0,stars.size()).forEach(                   //up asterismMap at the cost of some spatial complexity
+                i-> starToIndexMap.put(stars.get(i),i)             //with this Star->Index map.
+        );
 
         asterismMap = asterisms.stream().collect(Collectors.toMap(Function.identity(),
-                asterism -> List.copyOf(asterism.stars().stream()              //this function associates an asterism with
-                        .map(starList::indexOf).collect(Collectors.toList())), //the desired List of indices.
-                (v, u) -> u)); //finally, merging duplicate asterisms (if there's any).
+                asterism -> { Preconditions.checkArgument(starToIndexMap.keySet().containsAll(asterism.stars())); //(*)
+                return List.copyOf(asterism.stars().stream().map(starToIndexMap::get).collect(Collectors.toList()));},
+                (v, u) -> u)); //the method ref is equivalent to: star -> starToIndexMap.get(star)
 
-        immutableAsterismSet = Set.copyOf(asterismMap.keySet());
-        //keySet allows for retain & retainAll, need to make it immutable someway
+        /* (*): starToIndexMap is a HashMap, therefore calling containsAll upon it may be better but no worse than
+                upon a List, depending on the hash. In this case, it proved to speed up the construction of
+                StarCatalogue instances 20+ times in average.*/
+
+        this.starList = List.copyOf(stars);
+        this.immutableAsterismSet = Set.copyOf(asterismMap.keySet());
+        //keySet allows for retain & retainAll, need to make it immutable
     }
 
     /**
@@ -145,7 +155,7 @@ public final class StarCatalogue {
     }
 
     /**
-     * Abstraction of a loader
+     * Abstraction of a resource loader
      */
     public interface Loader {
 

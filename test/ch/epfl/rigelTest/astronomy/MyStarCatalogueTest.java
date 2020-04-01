@@ -22,6 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class MyStarCatalogueTest {
 
+    //Essentially tested in corresponding loaders
+
     private static final String HYG_CATALOGUE_NAME =
             "/hygdata_v3.csv";
     private static final String AST_CATALOGUE_NAME =
@@ -36,9 +38,11 @@ public class MyStarCatalogueTest {
                     .loadFrom(hygStream, HygDatabaseLoader.INSTANCE);
         }
         try (InputStream astStream = MyStarCatalogueTest.class.getResourceAsStream(AST_CATALOGUE_NAME)) {
-            catalogue = builder
-                    .loadFrom(astStream, AsterismLoader.INSTANCE)
-                    .build();
+            builder.loadFrom(astStream, AsterismLoader.INSTANCE);
+
+            //long time0 = System.nanoTime();
+            catalogue = builder.build();
+            //System.out.println(System.nanoTime()-time0);
         }
     }
 
@@ -46,6 +50,7 @@ public class MyStarCatalogueTest {
     void listIndicesWork() {
         assertEquals(1019,catalogue.asterismIndices(builder.asterisms().get(94)).get(0));
         for(Asterism testAst : catalogue.asterisms()) {
+            assertThrows(UnsupportedOperationException.class, () -> catalogue.asterismIndices(testAst).set(0,5));
             for(Star testStar : testAst.stars()) {
                 Star currentStar = catalogue.stars().get(catalogue.asterismIndices(testAst).get(testAst.stars().indexOf(testStar)));
                 assertEquals(currentStar,testStar);
@@ -58,27 +63,5 @@ public class MyStarCatalogueTest {
         assertThrows(IllegalArgumentException.class, () -> new StarCatalogue(List.of(new Star(242,"lol", EquatorialCoordinates.of(0,0),0,0)),List.of(
                 new Asterism(List.of(new Star(242,"lol", EquatorialCoordinates.of(0,0),0,0)))
         )));
-    }
-
-    @Test
-    void starsIsImmutable() {
-        List<Star> starList = new ArrayList<>();
-        starList.add(new Star(0456, "star0", EquatorialCoordinates.of(0, 0), -0.5f, -0.5f));
-        starList.add(new Star(0443, "stir", EquatorialCoordinates.of(0, 0), -0.5f, 3.5f));
-        starList.add(new Star(45789070, "staaar", EquatorialCoordinates.of(0, 0), -0.5f, 0.5f));
-
-        assertThrows(UnsupportedOperationException.class, () -> { new Asterism(starList).stars().add(new Star(5676545, "starLight", EquatorialCoordinates.of(0,0), 0.2f, 1)); });
-        assertThrows(UnsupportedOperationException.class, () -> { new Asterism(starList).stars().remove(1); });
-
-        Asterism astres = new Asterism(starList);
-        starList.remove(2);
-        astres.stars().get(2);
-
-        starList.add(new Star(45789070, "staaar", EquatorialCoordinates.of(0, 0), -0.5f, 0.5f));
-        starList.add(new Star(45770, "staaoar", EquatorialCoordinates.of(0, 0), -0.5f, 0.2f));
-        assertThrows(ArrayIndexOutOfBoundsException.class, () -> {astres.stars().get(3);});
-
-
-
     }
 }
