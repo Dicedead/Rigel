@@ -23,7 +23,7 @@ public final class Polynomial {
     private final static BiFunction<Integer, Integer, Function<double[], List<Boolean>>> COEFF_FORMAT =  (i, d) -> c ->
             List.of(areEqual(c[i], 0), (i == d - 1 || areEqual(c[i], 0)), areEqual(c[i + 1], 0));
             //Evaluates a bunch of conditions on the coefficients (if they're 0, if the next 0 is 0, if they're the constant
-            //term. The boolean list it constructs is used in conjunction with the following Functions:
+            //term. The boolean list it constructs is used in conjunction with the following currying Functions:
 
     private final static BiFunction<StringBuilder, Boolean, Function<String, StringBuilder>> SKIPP_COEFF =
                     (sb, b) -> s -> sb.append(b ? "" : s);

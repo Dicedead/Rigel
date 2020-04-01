@@ -136,7 +136,7 @@ class StereographicProjectionTest {
     @Test
     void applyAndInverseApplyAreInverses() {
         var rng = TestRandomizer.newRandom();
-        for (int i = 0; i < TestRandomizer.RANDOM_ITERATIONS; i++) {
+        for (int i = 0; i < 3; i++) {
             var centerAzDeg = rng.nextDouble(0, 360);
             var centerAltDeg = rng.nextDouble(-89.9999, 90);
             var center = HorizontalCoordinates.ofDeg(centerAzDeg, centerAltDeg);

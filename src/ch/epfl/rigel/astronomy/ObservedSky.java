@@ -34,9 +34,9 @@ public final class ObservedSky {
 
     private static final List<String> PLANET_NAMES = List.of("Mercure","Vénus","Mars","Jupiter","Saturne","Uranus","Neptune");
     //Sadly, PlanetModel does not offer any way to compare instances of Planet - a getter for such a list would have
-    //done but pre-step 7 classes need not to be modified.
+    //done but pre-step 7 classes' API need not to be modified.
 
-    static private final Function<CartesianCoordinates, BiFunction<CartesianCoordinates, CartesianCoordinates, Integer>>
+    private static final Function<CartesianCoordinates, BiFunction<CartesianCoordinates, CartesianCoordinates, Integer>>
             CLOSEST_TO_C = c -> (a, b) -> Double.compare((a.x() - c.x())*(a.x() - c.x()) + ((a.y() - c.y())*(a.y() - c.y())),
             ((b.x() - c.x())*(b.x() - c.x())) + ((b.y() - c.y())*(b.y() - c.y())));
              //Squaring with Math.pow is a little less efficient
@@ -101,7 +101,7 @@ public final class ObservedSky {
         /*
         Constructing celestObjToCoordsMap beforehand allows this method to run in linear time - all it does is search
         for the "minimum" of the CartesianCoordinates, comparing their distances to point at line (*), then check if
-        its distance  to point is <= maxDistance at (**).
+        its distance to point is <= maxDistance at (**). parallelStream proved to shorten the execution on testing.
          */
     }
 
