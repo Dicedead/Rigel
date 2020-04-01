@@ -19,6 +19,7 @@ public final class Polynomial {
     private final double[] coefficients;
     private final int degree;
     private final static double EPSILON = 1e-8;
+
     //Handling multiple variables through currying
     private final static BiFunction<Integer, Integer, Function<double[], List<Boolean>>> COEFF_FORMAT =  (i, d) -> c ->
             List.of(areEqual(c[i], 0), (i == d - 1 || areEqual(c[i], 0)), areEqual(c[i + 1], 0));

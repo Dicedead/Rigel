@@ -11,6 +11,7 @@ import ch.epfl.rigel.astronomy.Star;
 import ch.epfl.rigel.astronomy.StarCatalogue;
 import ch.epfl.rigel.astronomy.SunModel;
 import ch.epfl.rigel.coordinates.EclipticToEquatorialConversion;
+import ch.epfl.rigel.coordinates.EquatorialCoordinates;
 import ch.epfl.rigel.coordinates.EquatorialToHorizontalConversion;
 import ch.epfl.rigel.coordinates.GeographicCoordinates;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
@@ -38,7 +39,7 @@ public class ObservedSkyTest {
     private static ObservedSky sky;
     private static StereographicProjection stereo;
     private static GeographicCoordinates geoCoords;
-    private static ZonedDateTime observationTime;
+    private static ZonedDateTime time;
     private static EquatorialToHorizontalConversion convEquToHor;
     private static EclipticToEquatorialConversion convEcltoEqu;
 
@@ -59,7 +60,7 @@ public class ObservedSkyTest {
                         .build();
             }
 
-            observationTime = ZonedDateTime.of(
+            time = ZonedDateTime.of(
                     LocalDate.of(2020, Month.APRIL, 4),
                     LocalTime.of(0, 0), ZoneOffset.UTC
             );
@@ -68,12 +69,12 @@ public class ObservedSkyTest {
 
             stereo = new StereographicProjection(HorizontalCoordinates.ofDeg(20, 22));
 
-            convEquToHor = new EquatorialToHorizontalConversion(observationTime, geoCoords);
+            convEquToHor = new EquatorialToHorizontalConversion(time, geoCoords);
 
-            convEcltoEqu = new EclipticToEquatorialConversion(observationTime);
+            convEcltoEqu = new EclipticToEquatorialConversion(time);
 
             long time0 = System.nanoTime();
-            sky = new ObservedSky(observationTime, geoCoords, stereo, catalogue);
+            sky = new ObservedSky(time, geoCoords, stereo, catalogue);
             //System.out.println(System.nanoTime()-time0);
         }
     }
@@ -100,7 +101,15 @@ public class ObservedSkyTest {
                         0).get().name());
 
                 assertEquals(Optional.empty(), sky.objectClosestTo(stereo.apply(convEquToHor.apply(star.equatorialPos())),
-                        -1));
+                        -10));
+
+                assertEquals("Tau Phe",
+                        sky.objectClosestTo(stereo.apply(new EquatorialToHorizontalConversion(time,geoCoords)
+                                .apply(EquatorialCoordinates.of(0.004696959812148989,-0.861893035343076))),0.1).get().name());
+                assertEquals(Optional.empty(),
+                        sky.objectClosestTo(stereo.apply(new EquatorialToHorizontalConversion(time,geoCoords)
+                                .apply(EquatorialCoordinates.of(0.004696959812148989,-0.8618930353430763))),0.001));
+
             }
         }
         //System.out.println((timeAvg / (total * 1000000d))+" in milliseconds"); //PERFORMANCE BENCH
@@ -145,19 +154,19 @@ public class ObservedSkyTest {
     @Test
     void moonAndSun() throws IOException {
         init();
-        assertEquals(SunModel.SUN.at(Epoch.J2010.daysUntil(observationTime),convEcltoEqu).eclipticPos().lon(),
+        assertEquals(SunModel.SUN.at(Epoch.J2010.daysUntil(time),convEcltoEqu).eclipticPos().lon(),
                 sky.sun().eclipticPos().lon());
         //Sun possède le getter equatorialPos mais autant tester la précision avec 2 conversions successives...
-        assertEquals(stereo.apply(convEquToHor.apply(convEcltoEqu.apply(SunModel.SUN.at(Epoch.J2010.daysUntil(observationTime),convEcltoEqu).eclipticPos()))).x(),
+        assertEquals(stereo.apply(convEquToHor.apply(convEcltoEqu.apply(SunModel.SUN.at(Epoch.J2010.daysUntil(time),convEcltoEqu).eclipticPos()))).x(),
                 sky.sunPosition().x());
-        assertEquals(stereo.apply(convEquToHor.apply(convEcltoEqu.apply(SunModel.SUN.at(Epoch.J2010.daysUntil(observationTime),convEcltoEqu).eclipticPos()))).y(),
+        assertEquals(stereo.apply(convEquToHor.apply(convEcltoEqu.apply(SunModel.SUN.at(Epoch.J2010.daysUntil(time),convEcltoEqu).eclipticPos()))).y(),
                 sky.sunPosition().y());
 
-        assertEquals(MoonModel.MOON.at(Epoch.J2010.daysUntil(observationTime),convEcltoEqu).equatorialPos().dec(),
+        assertEquals(MoonModel.MOON.at(Epoch.J2010.daysUntil(time),convEcltoEqu).equatorialPos().dec(),
                 sky.moon().equatorialPos().dec());
-        assertEquals(stereo.apply(convEquToHor.apply(MoonModel.MOON.at(Epoch.J2010.daysUntil(observationTime),convEcltoEqu).equatorialPos())).x(),
+        assertEquals(stereo.apply(convEquToHor.apply(MoonModel.MOON.at(Epoch.J2010.daysUntil(time),convEcltoEqu).equatorialPos())).x(),
                 sky.moonPosition().x());
-        assertEquals(stereo.apply(convEquToHor.apply(MoonModel.MOON.at(Epoch.J2010.daysUntil(observationTime),convEcltoEqu).equatorialPos())).y(),
+        assertEquals(stereo.apply(convEquToHor.apply(MoonModel.MOON.at(Epoch.J2010.daysUntil(time),convEcltoEqu).equatorialPos())).y(),
                 sky.moonPosition().y());
     }
 }
