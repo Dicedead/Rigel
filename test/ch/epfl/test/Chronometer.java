@@ -53,7 +53,7 @@ public class Chronometer
                 if (from == null)
                     func.get(j).invoke(null, args.get(j));
                 else
-                    func.get(j).invoke(from[j], args.get(j));
+                    func.get(j).invoke(from[j], args.get(j ));
             }
             var t2 = System.nanoTime();
             results.put(j, (t2 - t1));

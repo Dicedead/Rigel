@@ -6,7 +6,10 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Pooling all the models and corresponding celestial objects, creating a representation of the Observed Sky at a
@@ -60,16 +63,10 @@ public final class ObservedSky {
         this.daysUntilJ2010 = Epoch.J2010.daysUntil(date);
         this.catalogue = catalogue; //Kept for its immutable list of stars
 
-        final List<PlanetModel> extraTerrPlanets = new ArrayList<>(Arrays.asList(PlanetModel.values()));
-        extraTerrPlanets.remove(2); //removing the Earth
-
-        final Map<Star, CartesianCoordinates> starMap = new TreeMap<>(Comparator.comparingInt((Star i) ->
-                catalogue.stars().indexOf(i)));
-        starMap.putAll(mapObjectToPosition(catalogue.stars(), Function.identity()));
-
-        final Map<Planet, CartesianCoordinates> planetMap = new TreeMap<>(Comparator.comparingInt((Planet i) ->
-                PLANET_NAMES.indexOf(i.name())));
-        planetMap.putAll(mapObjectToPosition(List.copyOf(extraTerrPlanets), this::applyModel));
+        final var starMap = transform( catalogue.stars(), Function.identity(), catalogue.stars()::indexOf);
+        final var planetMap = transform(Arrays.stream(PlanetModel.values())
+                .filter(i -> ! i.name().equals("Terre")).collect(Collectors.toList()),
+                this::applyModel, i -> PLANET_NAMES.indexOf(i.name()));
 
         sunMap = mapObjectToPosition(List.of(SunModel.SUN), this::applyModel);
         moonMap = mapObjectToPosition(List.of(MoonModel.MOON), this::applyModel);
@@ -78,9 +75,24 @@ public final class ObservedSky {
         planetPositions = positionsToArray(planetMap);
         starsPositions = positionsToArray(starMap);
 
-        celestObjToCoordsMap = new HashMap<>();
-        List.of(starMap, planetMap, sunMap, moonMap).forEach(celestObjToCoordsMap::putAll);
+        celestObjToCoordsMap = Stream.of(starMap, planetMap, sunMap, moonMap)
+                .flatMap(l -> l.entrySet().stream()).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (u,v) -> v));
+
     }
+
+    /**
+     * Helper creating a Treemap with cartesian coordinates from a list of Celestial Objects
+     * @param l List to draw the celestial object from
+     * @param f Function to apply in mapObjectToPosition
+     * @param g Comparator to keep order
+     * @param <T> Specialised Celestial object Model
+     * @param <S> Specialised Celestial object
+     * @return Map containig the position of each Celestial object
+     */
+    private <T, S extends CelestialObject> Map<S, CartesianCoordinates> transform (final List<T> l , final Function<T, S> f, final ToIntFunction<S> g)
+    {
+        return  mapObjectToPosition(l, f).entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (o1, o2) -> o1,  () -> new TreeMap<>(Comparator.comparingInt(g))));
+    };
 
     /**
      * Computes and returns a cell containing the celestial object that's closest to the given point if it's within a
