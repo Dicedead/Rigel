@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -35,7 +36,7 @@ public enum AsterismLoader implements StarCatalogue.Loader {
                 StandardCharsets.US_ASCII))) {
 
             final Map<Integer, Star> hipparcosToStarMap = builder.stars().stream()
-                    .collect(Collectors.toMap(Star::hipparcosId, Function.identity(), (v1, v2) -> v2));
+                    .collect(Collectors.toMap(Star::hipparcosId, Function.identity(), (v1, v2) -> v2, HashMap::new));
                     //Using the function: star -> (hipparcosOf(star),star), and wrapping the result in a Map
 
             reader.lines().forEach(

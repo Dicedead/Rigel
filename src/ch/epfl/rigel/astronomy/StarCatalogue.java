@@ -37,19 +37,18 @@ public final class StarCatalogue {
      */
     public StarCatalogue(List<Star> stars, List<Asterism> asterisms) {
 
-        final Map<Star, Integer> starToIndexMap = new HashMap<>(); //Avoiding the O(n2) time indexOf would take to fill
-        IntStream.range(0,stars.size()).forEach(                   //up asterismMap at the cost of some spatial complexity
-                i-> starToIndexMap.put(stars.get(i),i)             //with this Star->Index map.
-        );
+        final Map<Star, Integer> starToIndexMap = IntStream.range(0,stars.size()).boxed()
+                .collect(Collectors.toMap(stars::get,Function.identity(), (o1,o2)->o1, HashMap::new));
+        //Although this map causes some spatial complexity, it avoids an O(n*m) call to indexOf below
 
-        asterismMap = asterisms.stream().collect(Collectors.toMap(Function.identity(),
+        this.asterismMap = asterisms.stream().collect(Collectors.toMap(Function.identity(),
                 asterism -> { Preconditions.checkArgument(starToIndexMap.keySet().containsAll(asterism.stars())); //(*)
                 return List.copyOf(asterism.stars().stream().map(starToIndexMap::get).collect(Collectors.toList()));},
                 (v, u) -> u)); //the method ref is equivalent to: star -> starToIndexMap.get(star)
 
-        /* (*): starToIndexMap is a HashMap, therefore calling containsAll upon it may be better but no worse than
-                upon a List, depending on the hash. In this case, it proved to speed up the construction of
-                StarCatalogue instances 20+ times in average.*/
+        /* (*): starToIndexMap is a HashMap, therefore calling containsAll upon its keySet may be better but no worse
+                than upon a List - depends of the hash. In this case, it proved to speed up the construction of
+                StarCatalogue instances by 20+ times in average.*/
 
         this.starList = List.copyOf(stars);
         this.immutableAsterismSet = Set.copyOf(asterismMap.keySet());
