@@ -67,8 +67,9 @@ public final class ObservedSky {
         this.catalogue = catalogue; //Kept for its immutable list of stars
 
         final var starMap = transform( catalogue.stars(), Function.identity(), catalogue.stars()::indexOf);
-        final var planetMap = transform(Arrays.stream(PlanetModel.values())
-                .filter(i -> ! i.name().equals("Terre")).collect(Collectors.toList()),
+
+        final var planetMap = transform( Arrays.stream(PlanetModel.values())
+                .filter(i -> i.ordinal()!=2).collect(Collectors.toList()),
                 this::applyModel, i -> PLANET_NAMES.indexOf(i.name()));
 
         sunMap = mapObjectToPosition(List.of(SunModel.SUN), this::applyModel);
@@ -79,8 +80,8 @@ public final class ObservedSky {
         starsPositions = positionsToArray(starMap);
 
         celestObjToCoordsMap = Stream.of(starMap, planetMap, sunMap, moonMap)
-                .flatMap(l -> l.entrySet().stream()).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (u,v) -> v));
-
+                .flatMap(l -> l.entrySet().stream())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (u,v) -> v));
     }
 
     /**
@@ -94,8 +95,9 @@ public final class ObservedSky {
      */
     private <T, S extends CelestialObject> Map<S, CartesianCoordinates> transform (final List<T> l , final Function<T, S> f, final ToIntFunction<S> g)
     {
-        return  mapObjectToPosition(l, f).entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (o1, o2) -> o1,  () -> new TreeMap<>(Comparator.comparingInt(g))));
-    };
+        return  mapObjectToPosition(l, f).entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                (o1, o2) -> o2, () -> new TreeMap<>(Comparator.comparingInt(g))));
+    }
 
     /**
      * Computes and returns a cell containing the celestial object that's closest to the given point if it's within a
