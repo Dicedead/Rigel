@@ -14,6 +14,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -30,15 +31,15 @@ public final class ObservedSky {
 
     private final Map<CelestialObject, CartesianCoordinates> celestObjToCoordsMap;
 
-    private final StarCatalogue catalogue;
-    private final double[] starsPositions;
     private final List<Planet> planetList;
+    private final double[] starsPositions;
     private final double[] planetPositions;
 
     private final StereographicProjection stereoProj;
     private final EquatorialToHorizontalConversion eqToHor;
     private final EclipticToEquatorialConversion eclToEqu;
     private final double daysUntilJ2010;
+    private final StarCatalogue catalogue;
 
     private static final List<String> PLANET_NAMES = List.of("Mercure", "Vénus", "Mars", "Jupiter", "Saturne", "Uranus", "Neptune");
     //Sadly, PlanetModel does not offer any way to compare instances of Planet - a getter for such a list would have
@@ -66,11 +67,19 @@ public final class ObservedSky {
         this.eqToHor = new EquatorialToHorizontalConversion(date, geoCoords);
         this.eclToEqu = new EclipticToEquatorialConversion(date);
         this.daysUntilJ2010 = Epoch.J2010.daysUntil(date);
-        this.catalogue = catalogue; //Kept for its immutable list of stars
+        this.catalogue = catalogue; //kept for its precious list of Stars
 
-        final Map<Star, CartesianCoordinates> starMap = transform( catalogue.stars(), Function.identity(), catalogue.stars()::indexOf);
+        final Map<Star, Integer> starToIndexMap = IntStream.range(0,catalogue.stars().size()).boxed()
+                .collect(Collectors.toMap(catalogue.stars()::get,Function.identity(), (o1,o2)->o1, HashMap::new));
+        // Extensive comment about this choice of implementation at the bottom of the class.
+        // In short, it seemed like the best compromise between time and space complexity & cleanness.
 
-        final Map<Planet, CartesianCoordinates> planetMap = transform( Arrays.stream(PlanetModel.values())
+        //starMap and planetMap are constructed as TreeMaps, both ordering by index in a base list; again, this
+        //implementation choice is argued at the bottom of the class for starMap.
+        final Map<Star, CartesianCoordinates> starMap = transform(catalogue.stars(), Function.identity(),
+               starToIndexMap::get);
+
+        final Map<Planet, CartesianCoordinates> planetMap = transform(Arrays.stream(PlanetModel.values())
                 .filter(i -> i.ordinal()!=2).collect(Collectors.toList()),
                 this::applyModel, i -> PLANET_NAMES.indexOf(i.name()));
 
@@ -102,7 +111,7 @@ public final class ObservedSky {
         /*
         Constructing celestObjToCoordsMap beforehand allows this method to run in linear time - all it does is search
         for the "minimum" of the CartesianCoordinates, comparing their distances to point at line (*), then check if
-        its distance to point is <= maxDistance at (**). parallelStream proved to shorten the execution on testing.
+        its distance to point is <= maxDistance at (**). parallelStream proved to greatly shorten the execution on testing.
          */
     }
 
@@ -141,7 +150,7 @@ public final class ObservedSky {
      */
     public Sun sun() {
         return (Sun) sunMap.keySet().toArray()[0]; //note that the keySet's size is only 1, hence toArray costs 1 flop,
-    }                                              //and one more to get
+    }                                              //and one more to get [0]
 
     /**
      * @return (CartesianCoordinates) Sun's CartesianCoordinates
@@ -233,4 +242,23 @@ public final class ObservedSky {
         return (coord1.x() - coord2.x()) * (coord1.x() - coord2.x()) + (coord1.y() - coord2.y()) * (coord1.y() - coord2.y());
         //Math.pow(n,2) is just a tad slower than n*n for squaring, so was Math.hyp compared to this method
     }
+
+    // COMMENT ON STARTOINDEXMAP:
+    /*     starToIndexMap's used to order the stars injected in starMap below in some way.
+           Unlike in StarCatalogue, any order could have been used, as long as the Stars returned in stars() were
+           ordered the same way as their coordinates in starsPosition(), and in fact, there is a way to order the stars
+           with zero collisions using this IntFunction for example:
+           star -> (int)(star.equatorialPos().ra()*1e7) + star.hipparcos() + star.colorTemperature() [¤]
+           (None of the three terms suffices alone). It is messy though and relies on uncontrollable resources.
+
+           The main advantage of creating this map Star->index of Star in catalogue.stars() is the ability to keep the
+           catalogue as an attribute, avoiding an expensive copy of its list of stars. On top of that, this solution runs
+           only 2 milliseconds on average slower than the messier one suggested above (at [¤]).
+           It is also a 5 to 6-fold time gain compared to simply using catalogue.stars().indexOf which runs in O(n2).
+
+           We felt the need to properly argue this choice of implementation, as it has a significant but only temporary
+           cost on memory usage (creating then disposing of a Map) while reducing time complexity, while other solutions
+           had either significantly greater time complexity (indexOf) or unnecessary spatial complexity
+           (creating and saving a new List<Star>).
+         */
 }

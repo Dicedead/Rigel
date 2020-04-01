@@ -41,8 +41,8 @@ public final class StarCatalogue {
 
         this.asterismMap = asterisms.stream().collect(Collectors.toMap(Function.identity(),
                 asterism -> { Preconditions.checkArgument(starToIndexMap.keySet().containsAll(asterism.stars())); //(*)
-                return List.copyOf(asterism.stars().stream().map(starToIndexMap::get).collect(Collectors.toList()));},
-                (v, u) -> u)); //the method ref is equivalent to: star -> starToIndexMap.get(star)
+                return List.copyOf(asterism.stars().stream().map(starToIndexMap::get).collect(Collectors.toCollection(ArrayList::new)));},
+                (v, u) -> u, HashMap::new)); //the method ref is equivalent to: star -> starToIndexMap.get(star)
 
         /* (*): starToIndexMap is a HashMap, therefore calling containsAll upon its keySet may be better but no worse
                 than upon a List - depends of the hash. In this case, it proved to speed up the construction of

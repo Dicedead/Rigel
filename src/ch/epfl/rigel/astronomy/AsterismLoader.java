@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,14 +37,20 @@ public enum AsterismLoader implements StarCatalogue.Loader {
                 StandardCharsets.US_ASCII))) {
 
             final Map<Integer, Star> hipparcosToStarMap = builder.stars().stream()
-                    .collect(Collectors.toMap(Star::hipparcosId, Function.identity(), (v1, v2) -> v2, HashMap::new));
+                    .collect(Collectors.toMap(Star::hipparcosId, Function.identity(), (v1, v2) -> v2, HashMap::new)); //(*)
                     //Using the function: star -> (hipparcosOf(star),star), and wrapping the result in a Map
 
             reader.lines().forEach(
                     line -> builder.addAsterism(new Asterism(Arrays.stream(line.split(","))
-                    .map(hipparcos -> hipparcosToStarMap.get(Integer.parseInt(hipparcos))).collect(Collectors.toList()))));
+                    .map(hipparcos -> hipparcosToStarMap.get(Integer.parseInt(hipparcos))).collect(
+                            Collectors.toCollection(ArrayList::new))))); //(**)
                     //Mapping each line in inputStream to a List of stars via their hipparcos
 
         }
     }
+    /* (*) Even though, upon source code inspection, HashMap is the default return type of Collectors.toMap, the
+       following statement in its Javadoc pushed us to specify it anyway:
+       "There are no guarantees on the type, mutability, serializability, or thread-safety of the Map returned."
+       (**) The same goes for ArrayList.
+ */
 }

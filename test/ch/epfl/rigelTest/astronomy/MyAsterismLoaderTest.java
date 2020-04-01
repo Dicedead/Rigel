@@ -16,6 +16,7 @@ import java.util.Queue;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class MyAsterismLoaderTest {
 
@@ -59,6 +60,12 @@ public class MyAsterismLoaderTest {
             }
             assertNotNull(beltegeuse);
             assertEquals(2,astCount);
+            assertThrows(UnsupportedOperationException.class, () ->{
+                catalogue.stars().add(new Star(0, "Fake", EquatorialCoordinates.of(0,0), 0f, 0f));;
+            });
+            assertThrows(UnsupportedOperationException.class, () ->{
+                catalogue.asterisms().add(null);
+            });
             for(Star testStar : testAst.stars()) {
                 assertEquals(catalogue.stars().get(catalogue.asterismIndices(testAst).get(testAst.stars().indexOf(testStar))).name(),
                         testStar.name());

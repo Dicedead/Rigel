@@ -103,15 +103,19 @@ public class ObservedSkyTest {
                 assertEquals(Optional.empty(), sky.objectClosestTo(stereo.apply(convEquToHor.apply(star.equatorialPos())),
                         -10));
 
-                assertEquals("Tau Phe",
-                        sky.objectClosestTo(stereo.apply(new EquatorialToHorizontalConversion(time,geoCoords)
-                                .apply(EquatorialCoordinates.of(0.004696959812148989,-0.861893035343076))),0.1).get().name());
-                assertEquals(Optional.empty(),
-                        sky.objectClosestTo(stereo.apply(new EquatorialToHorizontalConversion(time,geoCoords)
-                                .apply(EquatorialCoordinates.of(0.004696959812148989,-0.8618930353430763))),0.001));
 
             }
+
         }
+        long time5 = System.nanoTime();
+        assertEquals("Tau Phe",
+                sky.objectClosestTo(stereo.apply(new EquatorialToHorizontalConversion(time,geoCoords)
+                        .apply(EquatorialCoordinates.of(0.004696959812148989,-0.861893035343076))),0.1).get().name());
+        //System.out.println(System.nanoTime()-time5);
+        assertEquals(Optional.empty(),
+                sky.objectClosestTo(stereo.apply(new EquatorialToHorizontalConversion(time,geoCoords)
+                        .apply(EquatorialCoordinates.of(0.004696959812148989,-0.8618930353430763))),0.001));
+
         //System.out.println((timeAvg / (total * 1000000d))+" in milliseconds"); //PERFORMANCE BENCH
     }
 
