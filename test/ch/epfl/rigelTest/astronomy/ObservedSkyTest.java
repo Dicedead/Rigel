@@ -134,25 +134,26 @@ public class ObservedSkyTest {
         double memory = sky.starsPosition()[0];
         sky.starsPosition()[0] = Double.MAX_VALUE;
         assertEquals(memory, sky.starsPosition()[0]);
+        assertEquals(5067*2, sky.starsPosition().length);
     }
 
     @Test
     void planets() throws IOException {
         init();
-        assertEquals(14, sky.planetPosition().length);
+        assertEquals(14, sky.planetsPosition().length);
 
         int i = 0;
         for (Planet planet : sky.planets()) {
                 assertEquals(stereo.apply(convEquToHor.apply(planet.equatorialPos())).x(),
-                        sky.planetPosition()[i++]);
+                        sky.planetsPosition()[i++]);
                 assertEquals(stereo.apply(convEquToHor.apply(planet.equatorialPos())).y(),
-                        sky.planetPosition()[i++]);
+                        sky.planetsPosition()[i++]);
         }
 
         //Si fail: Cloner le tableau
-        double memory = sky.planetPosition()[0];
-        sky.planetPosition()[0] = Double.MAX_VALUE;
-        assertEquals(memory, sky.planetPosition()[0]);
+        double memory = sky.planetsPosition()[0];
+        sky.planetsPosition()[0] = Double.MAX_VALUE;
+        assertEquals(memory, sky.planetsPosition()[0]);
     }
 
     @Test

@@ -44,6 +44,8 @@ public class MyStarCatalogueTest {
             catalogue = builder.build();
             //System.out.println(System.nanoTime()-time0);
         }
+        assertEquals(5067, catalogue.stars().size());
+        assertEquals(153, catalogue.asterisms().size());
     }
 
     @Test

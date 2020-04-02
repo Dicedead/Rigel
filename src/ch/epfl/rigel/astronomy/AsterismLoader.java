@@ -42,7 +42,7 @@ public enum AsterismLoader implements StarCatalogue.Loader {
 
             reader.lines().forEach(
                     line -> builder.addAsterism(new Asterism(Arrays.stream(line.split(","))
-                    .map(hipparcos -> hipparcosToStarMap.get(Integer.parseInt(hipparcos))).collect(
+                            .map(hipparcos -> hipparcosToStarMap.get(Integer.parseInt(hipparcos))).collect(
                             Collectors.toCollection(ArrayList::new))))); //(**)
                     //Mapping each line in inputStream to a List of stars via their hipparcos
 

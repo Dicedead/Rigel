@@ -141,7 +141,7 @@ public final class ObservedSky {
      * @return (double[]) array of doubles containing the planets' x coords in even indices, y coords in odd indices, in
      * the same order as returned by planets()
      */
-    public double[] planetPosition() {
+    public double[] planetsPosition() {
         return planetPositions.clone();
     }
 
@@ -254,7 +254,8 @@ public final class ObservedSky {
            The main advantage of creating this map Star->index of Star in catalogue.stars() is the ability to keep the
            catalogue as an attribute, avoiding an expensive copy of its list of stars. On top of that, this solution runs
            only 2 milliseconds on average slower than the messier one suggested above (at [¤]).
-           It is also a 5 to 6-fold time gain compared to simply using catalogue.stars().indexOf which runs in O(n2).
+           It is also a 5 to 6-fold time gain compared to simply using catalogue.stars().indexOf which runs in O(n),
+           resulting in an O(n2) iteration when building the TreeMap.
 
            We felt the need to properly argue this choice of implementation, as it has a significant but only temporary
            cost on memory usage (creating then disposing of a Map) while reducing time complexity, while other solutions
