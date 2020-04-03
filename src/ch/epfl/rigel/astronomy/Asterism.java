@@ -25,7 +25,7 @@ public final class Asterism {
     }
 
     /**
-     * @return (List < Star >) immutable list of stars in the asterism
+     * @return (List <Star>) immutable list of stars in the asterism
      */
     public List<Star> stars() {
         return starList;

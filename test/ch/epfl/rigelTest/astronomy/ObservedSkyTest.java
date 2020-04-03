@@ -47,6 +47,7 @@ public class ObservedSkyTest {
     void init() throws IOException {
 
         if (catalogue == null) {
+            long time0 = System.nanoTime();
             StarCatalogue.Builder builder;
             try (InputStream hygStream = getClass()
                     .getResourceAsStream(HYG_CATALOGUE_NAME)) {
@@ -73,7 +74,6 @@ public class ObservedSkyTest {
 
             convEcltoEqu = new EclipticToEquatorialConversion(time);
 
-            long time0 = System.nanoTime();
             sky = new ObservedSky(time, geoCoords, stereo, catalogue);
             //System.out.println(System.nanoTime()-time0);
         }
@@ -91,7 +91,7 @@ public class ObservedSkyTest {
             for (Star star : asterism.stars()) {
                 time0 = System.nanoTime();
                 if(!star.name().equals("Xi UMa"))
-                assertEquals(star, sky.objectClosestTo(stereo.apply(convEquToHor.apply(star.equatorialPos())),
+                assertEquals(star,sky.objectClosestTo(stereo.apply(convEquToHor.apply(star.equatorialPos())),
                         Double.MAX_VALUE).get());
 
                 timeAvg += System.nanoTime() - time0;
@@ -102,7 +102,6 @@ public class ObservedSkyTest {
 
                 assertEquals(Optional.empty(), sky.objectClosestTo(stereo.apply(convEquToHor.apply(star.equatorialPos())),
                         -10));
-
 
             }
 

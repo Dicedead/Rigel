@@ -16,17 +16,17 @@ public final class Moon extends CelestialObject {
 
     private final static String NAME = "Lune";
     private final float phase;
-    private final static ClosedInterval INTERVAL_01 = ClosedInterval.of(0,1);
+    private final static ClosedInterval INTERVAL_01 = ClosedInterval.of(0, 1);
 
     /**
      * Moon constructor
      *
      * @param equatorialPos (EquatorialCoordinates) object's coordinates
-     * @param angularSize (float) object's angular size
-     * @param magnitude (float) object's apparent magnitude
-     * @param phase (float) object's phase in interval [0,1]
+     * @param angularSize   (float) object's angular size
+     * @param magnitude     (float) object's apparent magnitude
+     * @param phase         (float) object's phase in interval [0,1]
      * @throws IllegalArgumentException if angularSize < 0 or phase not in [0,1]
-     * @throws NullPointerException if name or equatorialPos are null
+     * @throws NullPointerException     if name or equatorialPos are null
      */
     public Moon(EquatorialCoordinates equatorialPos, float angularSize, float magnitude, float phase) {
         super(NAME, equatorialPos, angularSize, magnitude);
@@ -36,11 +36,11 @@ public final class Moon extends CelestialObject {
 
 
     /**
-     * @return Moon's name and its phase percentage
+     * @return (String) Moon's name and its phase percentage
      */
     @Override
     public String info() {
-        return String.format(Locale.ROOT,"Lune (%.1f%%)",phase*100);
+        return String.format(Locale.ROOT, "Lune (%.1f%%)", phase * 100);
     }
 
 }

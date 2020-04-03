@@ -20,11 +20,11 @@ public enum MoonModel implements CelestialObjectModel<Moon> {
 
     MOON;
 
-    static final private double LON_M   = ofDeg(91.929336);
+    static final private double LON_M = ofDeg(91.929336);
     static final private double LON_PER = ofDeg(130.143076);
     static final private double LON_ASC = ofDeg(291.682547);
-    static final private double INC     = ofDeg(5.145396);
-    static final private double EXC     = 0.0549;
+    static final private double INC = ofDeg(5.145396);
+    static final private double EXC = 0.0549;
 
     //Converting many nameless constants to rad
     static final private Double[] c =
@@ -37,19 +37,19 @@ public enum MoonModel implements CelestialObjectModel<Moon> {
     /**
      * Computes the Moon's position at a given time
      *
-     * @param daysSinceJ2010                 (double) Calculated through Epoch or by other means: days between time t at J2010
-     * @param eclipticToEquatorialConversion at time t
+     * @param daysSinceJ2010        (double) Calculated through Epoch or by other means: days between time t at J2010
+     * @param eclipToEquaConversion (EclipticToEquatorialConversion) at time t
      * @return (Moon) fully parametrized Moon
      */
     @Override
-    public Moon at(double daysSinceJ2010, EclipticToEquatorialConversion eclipticToEquatorialConversion) {
+    public Moon at(double daysSinceJ2010, EclipticToEquatorialConversion eclipToEquaConversion) {
 
         //Mean anomaly
         final double lonOrbM = c[0] * daysSinceJ2010 + LON_M;
         final double AnMoy = lonOrbM - c[1] * daysSinceJ2010 - LON_PER;
 
         //Computation of Sun's values
-        final Sun sun = SunModel.SUN.at(daysSinceJ2010, eclipticToEquatorialConversion);
+        final Sun sun = SunModel.SUN.at(daysSinceJ2010, eclipToEquaConversion);
 
         final double sunLon = sun.eclipticPos().lon();
         final double sin_sunMeanAnomaly = sin(sun.meanAnomaly());
@@ -66,7 +66,7 @@ public enum MoonModel implements CelestialObjectModel<Moon> {
         final double lonCorrAsc = LON_ASC - c[7] * daysSinceJ2010 - c[8] * sin_sunMeanAnomaly;
         final double lonOrb_lonCorrAsc = lonOrb - lonCorrAsc;
 
-        return new Moon(eclipticToEquatorialConversion.apply(
+        return new Moon(eclipToEquaConversion.apply(
                 EclipticCoordinates.of(
                         Angle.normalizePositive(atan2(sin(lonOrb_lonCorrAsc) * cos(INC), cos(lonOrb_lonCorrAsc)) + lonCorrAsc),
                         asin(sin(lonOrb_lonCorrAsc) * sin(INC)))),

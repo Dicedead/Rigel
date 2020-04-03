@@ -2,6 +2,7 @@ package ch.epfl.rigel.gui;
 
 import ch.epfl.rigel.Preconditions;
 import javafx.scene.paint.Color;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -29,15 +30,21 @@ public final class BlackBodyColor {
     private BlackBodyColor() {
         throw new UnsupportedOperationException();
     }
+    /*
+      The constructor of a non instantiable class throwing a UO Exception rather than just being private:
+         a) guarantees that the following code does not create an instance, and
+         b) is immune to reflection (Field.setAccessible)
+     */
 
     /**
      * Initialises the Color list, preferably called before using colorTemperature at application startup.
+     *
      * @throws UncheckedIOException (I/O method)
      */
     public static void init() {
         // This method gives a way to enforce initialization of the List used in colorTemperature, ensuring consistency.
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(
-                BlackBodyColor.class.getResourceAsStream(COLOR_FILE),StandardCharsets.US_ASCII))) {
+                BlackBodyColor.class.getResourceAsStream(COLOR_FILE), StandardCharsets.US_ASCII))) {
 
             final List<String> linesOfInterest = reader.lines().filter(line -> line.length() > SKIP_LINES_FILTERINT)
                     .collect(Collectors.toCollection(ArrayList::new));

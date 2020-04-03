@@ -13,27 +13,28 @@ import java.util.Locale;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-public final class EquatorialCoordinates extends SphericalCoordinates{
+public final class EquatorialCoordinates extends SphericalCoordinates {
 
-    private final static RightOpenInterval LON_INTERVAL_RAD_0toTAU = RightOpenInterval.of(0, 2*Math.PI);
+    private final static RightOpenInterval LON_INTERVAL_RAD_0toTAU = RightOpenInterval.of(0, 2 * Math.PI);
     private final static ClosedInterval LAT_INTERVAL_RAD_SYM_PI = ClosedInterval.symmetric(Math.PI);
 
     /**
      * Constructor of EquatorialCoordinates
-     * @param ra input in radians for longitude
-     * @param dec input in radians for latitude
+     *
+     * @param ra  (double) input in radians for longitude
+     * @param dec (double) input in radians for latitude
      */
-    private EquatorialCoordinates(double ra, double dec){
+    private EquatorialCoordinates(double ra, double dec) {
         super(ra, dec);
     }
 
     /**
-     * Constructs an EquatorialCoordinates object
-     * @param ra input in radians for longitude
-     * @param dec input in radians for latitude
+     * Constructs an EquatorialCoordinates object (factory constructor)
+     *
+     * @param ra  (double) input in radians for longitude
+     * @param dec (double) input in radians for latitude
      */
-    public static EquatorialCoordinates of(double ra, double dec)
-    {
+    public static EquatorialCoordinates of(double ra, double dec) {
 
         return new EquatorialCoordinates(
                 Preconditions.checkInInterval(LON_INTERVAL_RAD_0toTAU, ra),
@@ -42,30 +43,45 @@ public final class EquatorialCoordinates extends SphericalCoordinates{
     }
 
     /**
-     * @return right ascension in radians
+     * @return (double) right ascension in radians
      */
-    public double ra() { return super.lon(); }
+    public double ra() {
+        return super.lon();
+    }
 
     /**
-     * @return right ascension in degrees
+     * @return (double) right ascension in degrees
      */
-    public double raDeg() {return Angle.toDeg(super.lon());}
+    public double raDeg() {
+        return Angle.toDeg(super.lon());
+    }
 
     /**
-     * @return right ascension in hours
+     * @return (double) right ascension in hours
      */
-    public double raHr() { return Angle.toHr(super.lon()); }
+    public double raHr() {
+        return Angle.toHr(super.lon());
+    }
 
     /**
-     * @return declination in rad
+     * @return (double) declination in rad
      */
-    public double dec() {return super.lat();}
+    public double dec() {
+        return super.lat();
+    }
 
     /**
-     * @return declination in deg
+     * @return (double) declination in deg
      */
-    public double decDeg() {return super.latDeg();}
+    public double decDeg() {
+        return super.latDeg();
+    }
 
+    /**
+     * toString override for EquatorialCoordinates
+     *
+     * @return (String) 4 decimal precision of right ascension in hours and declination in degrees
+     */
     @Override
     public String toString() {
         return String.format(Locale.ROOT,

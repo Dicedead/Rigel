@@ -15,7 +15,7 @@ public enum Epoch {
     J2010(ZonedDateTime.of(LocalDate.of(2010, Month.JANUARY, 1).minusDays(1), LocalTime.of(0, 0),
             ZoneOffset.UTC));
 
-    private final static double COEFF_JULIAN  = 1d / 36525;
+    private final static double COEFF_JULIAN = 1d / 36525;
     private final static double COEFF_TO_DAYS = 1d / (24 * 3600 * 1000);
     private final ZonedDateTime epoch;
 
@@ -24,16 +24,16 @@ public enum Epoch {
     }
 
     /**
-     * @param when the time we want to know the distance of
-     * @return the distance in days from our epoch to when
+     * @param when (ZonedDateTime) the time we want to know the distance of
+     * @return (double) the distance in days from our epoch to when
      */
     public double daysUntil(ZonedDateTime when) {
         return (epoch.until(when, ChronoUnit.MILLIS)) * COEFF_TO_DAYS;
     }
 
     /**
-     * @param when the time we want to know the distance of
-     * @return the distance in julian years from our epoch to when
+     * @param when (ZonedDateTime) the time we want to know the distance of
+     * @return (double) the distance in julian years from our epoch to when
      */
     public double julianCenturiesUntil(ZonedDateTime when) {
         return daysUntil(when) * COEFF_JULIAN;

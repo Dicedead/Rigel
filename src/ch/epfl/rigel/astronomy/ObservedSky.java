@@ -69,18 +69,18 @@ public final class ObservedSky {
         this.daysUntilJ2010 = Epoch.J2010.daysUntil(date);
         this.catalogue = catalogue; //kept for its precious list of Stars
 
-        final Map<Star, Integer> starToIndexMap = IntStream.range(0,catalogue.stars().size()).boxed()
-                .collect(Collectors.toMap(catalogue.stars()::get,Function.identity(), (o1,o2)->o1, HashMap::new));
+        final Map<Star, Integer> starToIndexMap = IntStream.range(0, catalogue.stars().size()).boxed()
+                .collect(Collectors.toMap(catalogue.stars()::get, Function.identity(), (o1, o2) -> o1, HashMap::new));
         // Extensive comment about this choice of implementation at the bottom of the class.
         // In short, it seemed like the best compromise between time and space complexity & cleanness.
 
         //starMap and planetMap are constructed as TreeMaps, both ordering by index in a base list; again, this
         //implementation choice is argued at the bottom of the class for starMap.
         final Map<Star, CartesianCoordinates> starMap = transform(catalogue.stars(), Function.identity(),
-               starToIndexMap::get);
+                starToIndexMap::get);
 
         final Map<Planet, CartesianCoordinates> planetMap = transform(Arrays.stream(PlanetModel.values())
-                .filter(i -> i.ordinal()!=2).collect(Collectors.toList()),
+                        .filter(i -> i.ordinal() != 2).collect(Collectors.toList()),
                 this::applyModel, i -> PLANET_NAMES.indexOf(i.name()));
 
         sunMap = mapObjectToPosition(List.of(SunModel.SUN), this::applyModel);
@@ -95,6 +95,7 @@ public final class ObservedSky {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (u, v) -> v, HashMap::new));
 
     }
+
     /**
      * Computes and returns a cell containing the celestial object that's closest to the given point if it's within a
      * distance <= to the given max distance, an empty one otherwise
@@ -111,7 +112,8 @@ public final class ObservedSky {
         /*
         Constructing celestObjToCoordsMap beforehand allows this method to run in linear time - all it does is search
         for the "minimum" of the CartesianCoordinates, comparing their distances to point at line (*), then check if
-        its distance to point is <= maxDistance at (**). parallelStream proved to greatly shorten the execution on testing.
+        its distance to point is <= maxDistance at (**). parallelStream proved to greatly shorten the execution time on
+        testing (at least 33%), making the map worthwhile when compared to 2 identically ordered lists.
          */
     }
 

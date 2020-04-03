@@ -1,6 +1,7 @@
 package ch.epfl.rigel.math;
 
 import ch.epfl.rigel.Preconditions;
+
 import java.util.Locale;
 
 /**
@@ -10,25 +11,35 @@ import java.util.Locale;
  * @author Salim Najib (310003)
  */
 public final class RightOpenInterval extends Interval {
+
     /**
-     * @param inf lower bound of the interval
-     * @param sup higher bound of the interval
+     * @param inf (double) lower bound of the interval
+     * @param sup (double) higher bound of the interval
      * @throws IllegalArgumentException if interval is empty
      */
     private RightOpenInterval(double inf, double sup) {
         super(inf, sup);
     }
 
+    /**
+     * Constructs a right open interval [low;high[
+     *
+     * @param low  (double) lower bound of the interval
+     * @param high (double) higher bound of the interval
+     * @return (RightOpenInterval)
+     * @throws IllegalArgumentException if low >= high
+     */
     public static RightOpenInterval of(double low, double high) {
         Preconditions.checkArgument(high > low);
         return new RightOpenInterval(low, high);
     }
 
     /**
-     * Returns a closed interval starting at zero, stopping at size if size is positive
+     * Returns a closed interval starting at zero, stopping at size if size is positive (factory constructor)
      *
-     * @param size is un unsigned double specifying the size of the interval
-     * @return IllegalArgumentException if size is negative, the desired interval in the other case
+     * @param size (double) is un unsigned double specifying the size of the interval
+     * @return (RightOpenInterval) the desired interval if size is positive
+     * @throws IllegalArgumentException if size <= 0
      */
     public static RightOpenInterval symmetric(double size) {
         Preconditions.checkArgument(size > 0);
@@ -38,8 +49,8 @@ public final class RightOpenInterval extends Interval {
     /**
      * Clipping sends number to itsellf if it is in the interval, and else at the nearest bound
      *
-     * @param v the number to clip
-     * @return the clipped number
+     * @param v (double) the number to clip
+     * @return (double) the clipped number
      */
     public double clip(double v) {
         /*This can be understood in this way : if v is smaller than the upper bound it may be in the interval so we
@@ -50,7 +61,7 @@ public final class RightOpenInterval extends Interval {
     }
 
     /**
-     * @return interval in a standard form : [a, b[
+     * @return (String) interval in a standard form : [a, b[
      */
     @Override
     public String toString() {
@@ -63,8 +74,8 @@ public final class RightOpenInterval extends Interval {
     /**
      * Checks whether a number is in the current interval
      *
-     * @param v number to be checked
-     * @return whether it is or not in the interval
+     * @param v (double) number to be checked
+     * @return (boolean) whether it is or not in the interval
      */
     @Override
     public boolean contains(double v) {
@@ -74,11 +85,10 @@ public final class RightOpenInterval extends Interval {
     /**
      * Reduces a value v to a semi open interval
      *
-     * @param v number to be reduced
-     * @return reduced number
+     * @param v (double) number to be reduced
+     * @return (double) reduced number
      */
     public double reduce(double v) {
-        double a = v - this.low(), b = this.size();
-        return this.low() + (a - b * Math.floor(a / b));
+        return v - this.size() * Math.floor((v - this.low()) / this.size());
     }
 }

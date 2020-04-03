@@ -22,13 +22,13 @@ public final class Angle {
     static final private double RATIO_RAD_DEG = 360 / TAU;
     static final private double RATIO_DEG_RAD = TAU / 360;
     static final private double RATIO_SEC_RAD = TAU / (360d * MINUTES_IN_HOURS * SECONDS_IN_MINUTES);
-    static final private RightOpenInterval NORMALIZING_INTERVAL = RightOpenInterval.of(0,TAU);
+    static final private RightOpenInterval NORMALIZING_INTERVAL = RightOpenInterval.of(0, TAU);
 
     /**
      * Normalize a value on the right open interval [0, TAU[
      *
-     * @param rad Angle to be reduced
-     * @return Reduced value of the angle
+     * @param rad (double) Angle to be reduced
+     * @return (double) Reduced value of the angle
      */
     static public double normalizePositive(double rad) {
         return //Normalizing twice for bug fixing: TAU is mapped to TAU and not 0 when applied only once
@@ -36,8 +36,8 @@ public final class Angle {
     }
 
     /**
-     * @param sec an angle in arc seconds
-     * @return its corresponding angle in radians
+     * @param sec (double) an angle in arc seconds
+     * @return (double) its corresponding angle in radians
      */
     static public double ofArcsec(double sec) {
         return RATIO_SEC_RAD * sec;
@@ -46,10 +46,10 @@ public final class Angle {
     /**
      * DMS --> Rad
      *
-     * @param deg Degrees
-     * @param min Minutes
-     * @param sec Seconds
-     * @return Angle in radians
+     * @param deg (double) Degrees
+     * @param min (double) Minutes
+     * @param sec (double) Seconds
+     * @return (double) Angle in radians
      */
     static public double ofDMS(int deg, int min, double sec) {
         Preconditions.checkArgument(min >= 0 && sec >= 0 && min < 60 && sec < 60);
@@ -59,8 +59,8 @@ public final class Angle {
     /**
      * Deg --> Rad
      *
-     * @param deg angle to convert in rad
-     * @return converted angle in rad
+     * @param deg (double) angle to convert in rad
+     * @return (double) converted angle in rad
      */
     static public double ofDeg(double deg) {
         return deg * RATIO_DEG_RAD;
@@ -69,8 +69,8 @@ public final class Angle {
     /**
      * Rad --> Deg
      *
-     * @param rad angle to convert in degrees
-     * @return converted angle in degrees
+     * @param rad (double) angle to convert in degrees
+     * @return (double) converted angle in degrees
      */
     static public double toDeg(double rad) {
         return rad * RATIO_RAD_DEG;
@@ -79,8 +79,8 @@ public final class Angle {
     /**
      * Hours --> Degrees --> Radians
      *
-     * @param hr hours to convert
-     * @return hr but in rad
+     * @param hr (double) hours to convert
+     * @return (double) hr but in rad
      */
     static public double ofHr(double hr) {
         return hr * DEGREE_IN_HOUR * RATIO_DEG_RAD;
@@ -89,8 +89,8 @@ public final class Angle {
     /**
      * Rad --> Degrees --> Hours
      *
-     * @param rad angle to convert
-     * @return Hours converted
+     * @param rad (double) angle to convert
+     * @return (double) Hours converted
      */
     static public double toHr(double rad) {
         return toDeg(rad) * HOUR_IN_DEGREE;

@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class BlackBodyColorTest {
-
     @Test
     void colorForTemperatureWorks() {
         assertEquals(Color.rgb(0xb3,0xcc,0xff), BlackBodyColor.colorForTemperature(14849.149));

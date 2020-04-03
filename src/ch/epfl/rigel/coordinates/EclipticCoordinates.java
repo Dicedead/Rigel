@@ -13,53 +13,63 @@ import java.util.Locale;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-public final class EclipticCoordinates extends SphericalCoordinates{
+public final class EclipticCoordinates extends SphericalCoordinates {
 
-    private final static RightOpenInterval LON_INTERVAL_RAD_0toTAU = RightOpenInterval.of(0,Angle.TAU);
+    private final static RightOpenInterval LON_INTERVAL_RAD_0toTAU = RightOpenInterval.of(0, Angle.TAU);
     private final static ClosedInterval LAT_INTERVAL_RAD_SYM_PI = ClosedInterval.symmetric(Math.PI);
 
     /**
      * Constructor of EclipticCoordinates
+     *
      * @param lon input in radians for longitude
      * @param lat input in radians for latitude
      */
-    private EclipticCoordinates(double lon, double lat){
-        super(lon,  lat);
+    private EclipticCoordinates(double lon, double lat) {
+        super(lon, lat);
     }
 
 
     /**
-     * Constructs an EclipticCoordinates object
+     * Constructs an EclipticCoordinates object (factory constructor)
+     *
      * @param lon input in rad for longitude
      * @param lat input in rad for latitude
      */
-    public static EclipticCoordinates of(double lon, double lat)
-    {
+    public static EclipticCoordinates of(double lon, double lat) {
 
         return new EclipticCoordinates(
                 (Preconditions.checkInInterval(LON_INTERVAL_RAD_0toTAU, lon)),
                 (Preconditions.checkInInterval(LAT_INTERVAL_RAD_SYM_PI, lat)));
 
     }
+
     /**
      * @return longitude in radians
      */
-    public double lon() { return super.lon(); }
+    public double lon() {
+        return super.lon();
+    }
 
     /**
      * @return longitude in degrees
      */
-    public double lonDeg() {return super.lonDeg();}
+    public double lonDeg() {
+        return super.lonDeg();
+    }
 
     /**
      * @return latitude in radians
      */
-    public double lat(){ return super.lat(); }
+    public double lat() {
+        return super.lat();
+    }
 
     /**
      * @return latitude in degrees
      */
-    public double latDeg(){return super.latDeg();}
+    public double latDeg() {
+        return super.latDeg();
+    }
 
     /**
      * toString override for EclipticCoordinates

@@ -49,19 +49,20 @@ public final class StarCatalogue {
                 StarCatalogue instances by 20+ times in average.*/
 
         this.starList = List.copyOf(stars);
-        this.immutableAsterismSet = Set.copyOf(asterismMap.keySet());
-        //keySet allows for retain & retainAll, need to make it immutable
+        this.immutableAsterismSet = Collections.unmodifiableSet(asterismMap.keySet());
+        //keySet allows for retain & retainAll, need to make it immutable; as the map's visibility is restrained to this
+        //class and the Asterisms are immutable objects, this O(1) call suffices.
     }
 
     /**
-     * @return (List < Star >) all the stars in the catalogue as a list (immutable)
+     * @return (List <Star>) all the stars in the catalogue as a list (immutable)
      */
     public List<Star> stars() {
         return starList;
     }
 
     /**
-     * @return (Set < Asterism >) an immutable set of all the asterisms in the catalogue
+     * @return (Set <Asterism>) an immutable set of all the asterisms in the catalogue
      */
     public Set<Asterism> asterisms() {
         return immutableAsterismSet;
@@ -71,7 +72,7 @@ public final class StarCatalogue {
      * Method for finding the indices of the stars (given in asterism) in starList
      *
      * @param asterism (Asterism)
-     * @return (List < Integer >) an immutable list of said indices
+     * @return (List <Integer>) an immutable list of said indices
      */
     public List<Integer> asterismIndices(Asterism asterism) {
         Preconditions.checkArgument(asterismMap.containsKey(asterism));
@@ -117,14 +118,14 @@ public final class StarCatalogue {
         }
 
         /**
-         * @return (List < Star >) unmodifiable view of the starList being built
+         * @return (List <Star>) unmodifiable view of the starList being built
          */
         public List<Star> stars() {
             return Collections.unmodifiableList(starsToBuild);
         }
 
         /**
-         * @return (List < Asterism >) unmodifiable view of the list of asterisms being built
+         * @return (List <Asterism>) unmodifiable view of the list of asterisms being built
          */
         public List<Asterism> asterisms() {
             return Collections.unmodifiableList(asterismsToBuild);

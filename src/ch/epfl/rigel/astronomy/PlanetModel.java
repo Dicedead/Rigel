@@ -40,26 +40,26 @@ public enum PlanetModel implements CelestialObjectModel<Planet> {
 
     private PlanetModel(String name, double v, double v1, double v2, double v3, double v4, double v5, double v6, double v7, double v8) {
         this.name = name;
-        Tp = v;
-        epsilon = Angle.ofDeg(v1);
-        lonPer = Angle.ofDeg(v2);
-        excent = v3;
-        a = v4;
-        inc = Angle.ofDeg(v5);
-        lonN = Angle.ofDeg(v6);
-        theta0 = Angle.ofArcsec(v7);
-        V0 = v8;
+        this.Tp = v;
+        this.epsilon = Angle.ofDeg(v1);
+        this.lonPer = Angle.ofDeg(v2);
+        this.excent = v3;
+        this.a = v4;
+        this.inc = Angle.ofDeg(v5);
+        this.lonN = Angle.ofDeg(v6);
+        this.theta0 = Angle.ofArcsec(v7);
+        this.V0 = v8;
     }
 
     /**
      * Builds a Planet at a given point and time.
      *
-     * @param daysSinceJ2010                 (double)
-     * @param eclipticToEquatorialConversion Celestial object's coordinates
+     * @param daysSinceJ2010        (double)
+     * @param eclipToEquaConversion Celestial object's coordinates
      * @return (Planet) Fully created Planet with appropriate time, geographic and physical parameters.
      */
     @Override
-    public Planet at(double daysSinceJ2010, EclipticToEquatorialConversion eclipticToEquatorialConversion) {
+    public Planet at(double daysSinceJ2010, EclipticToEquatorialConversion eclipToEquaConversion) {
 
         //DETERMINATION OF COORDINATES LAMBDA AND BETA
         final double meanAnomaly = (Angle.TAU * daysSinceJ2010) / (DAYS_IN_TROP_YEAR * Tp) + epsilon - lonPer;
@@ -96,7 +96,7 @@ public enum PlanetModel implements CelestialObjectModel<Planet> {
         final double sqrtOfPhase = Math.sqrt((1 + Math.cos(lambda - helioLon)) / 2);
 
         return new Planet(name,
-                eclipticToEquatorialConversion.apply(EclipticCoordinates.of(lambda, beta)), (float) (theta0 / rho),
+                eclipToEquaConversion.apply(EclipticCoordinates.of(lambda, beta)), (float) (theta0 / rho),
                 (float) (V0 + 5 * Math.log10(distanceToSun * rho / sqrtOfPhase)));
     }
 }
