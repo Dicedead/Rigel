@@ -47,20 +47,20 @@ public enum HygDatabaseLoader implements StarCatalogue.Loader {
                 reader.readLine();
 
             reader.lines().forEach(lineInFile -> {
-                final List<String> line = List.of(lineInFile.split(","));
+                final String[] line = lineInFile.split(",");
                 builder.addStar(
                         new Star(
-                                /*hipparcos*/ buildWithDefault(line.get(Column.HIP.ordinal()), 0, Integer::parseInt),
+                                /*hipparcos*/ buildWithDefault(line[Column.HIP.ordinal()], 0, Integer::parseInt),
 
-                                /*name*/ buildWithDefault(line.get(Column.PROPER.ordinal()), buildWithDefault(line.get(Column.BAYER.ordinal()),
-                                "? " + line.get(Column.CON.ordinal()), x -> (x + " " + line.get(Column.CON.ordinal()))), Function.identity()),
+                                /*name*/ buildWithDefault(line[Column.PROPER.ordinal()], buildWithDefault(line[Column.BAYER.ordinal()],
+                                "? " + line[Column.CON.ordinal()], x -> (x + " " + line[Column.CON.ordinal()])), Function.identity()),
 
-                                /*EquatorialCoords*/ EquatorialCoordinates.of(Double.parseDouble(line.get(Column.RARAD.ordinal())),
-                                Double.parseDouble(line.get(Column.DECRAD.ordinal()))),
+                                /*EquatorialCoords*/ EquatorialCoordinates.of(Double.parseDouble(line[Column.RARAD.ordinal()]),
+                                Double.parseDouble(line[Column.DECRAD.ordinal()])),
 
-                                /*magnitude*/ buildWithDefault(line.get(Column.MAG.ordinal()), 0, Float::parseFloat).floatValue(),
+                                /*magnitude*/ buildWithDefault(line[Column.MAG.ordinal()], 0, Float::parseFloat).floatValue(),
 
-                                /*colorIndex*/ buildWithDefault(line.get(Column.CI.ordinal()), 0, Float::parseFloat).floatValue()
+                                /*colorIndex*/ buildWithDefault(line[Column.CI.ordinal()], 0, Float::parseFloat).floatValue()
                         ));
             });
 

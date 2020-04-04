@@ -65,6 +65,7 @@ public final class SiderealTime {
     /**
      * Custom made until function from Java sources, this implementation is ~3x faster than the classic Java function
      * This function will be deleted in part 7 as the public interface may be changed from now on
+     *
      * @param now  (ZonedDateTime) the time we want to know the distance from
      * @param when (ZonedDateTime) the time we want to know the distance of
      * @return (double) the distance in days from now to when
@@ -75,7 +76,7 @@ public final class SiderealTime {
         final LocalDateTime end = LocalDateTime.from(when);
         final long amount = end.toLocalDate().toEpochDay() - you.toLocalDate().toEpochDay();
 
-        return ((amount-Long.signum(amount))*86400000L+(end.toLocalTime().toNanoOfDay() - you.toLocalTime().toNanoOfDay()
-                + Long.signum(amount)* 86400000000000L)/ 1000000.);
+        return ((amount-Long.signum(amount))*86_400_000L+(end.toLocalTime().toNanoOfDay() - you.toLocalTime().toNanoOfDay()
+                + Long.signum(amount)* 86_400_000_000_000L)/ 1_000_000.);
     }
 }

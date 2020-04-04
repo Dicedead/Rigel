@@ -37,13 +37,13 @@ public enum AsterismLoader implements StarCatalogue.Loader {
                 StandardCharsets.US_ASCII))) {
 
             final Map<Integer, Star> hipparcosToStarMap = builder.stars().stream()
-                    .collect(Collectors.toUnmodifiableMap(Star::hipparcosId, Function.identity(), (v1, v2) -> v2)); //(*)
+                    .collect(Collectors.toMap(Star::hipparcosId, Function.identity(), (v1, v2) -> v2, HashMap::new)); //(*)
             //Using the function: star -> (hipparcosOf(star),star), and wrapping the result in a Map
 
             reader.lines().forEach(
                     line -> builder.addAsterism(new Asterism(Arrays.stream(line.split(","))
                             .map(hipparcos -> hipparcosToStarMap.get(Integer.parseInt(hipparcos))).collect(
-                                    Collectors.toUnmodifiableList())))); //(**)
+                                    Collectors.toCollection(ArrayList::new))))); //(**)
             //Mapping each line in inputStream to a List of stars via their hipparcos
 
         }

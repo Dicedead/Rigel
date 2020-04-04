@@ -1,6 +1,6 @@
 package ch.epfl.rigel.gui;
 
-import ch.epfl.rigel.Preconditions;
+import ch.epfl.rigel.math.ClosedInterval;
 import javafx.scene.paint.Color;
 
 import java.io.BufferedReader;
@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static ch.epfl.rigel.Preconditions.checkInInterval;
+
 /**
  * Utility class for translating temperatures into colors
  *
@@ -19,6 +21,8 @@ import java.util.stream.IntStream;
  * @author Salim Najib (310003)
  */
 public final class BlackBodyColor {
+
+    private final static ClosedInterval TEMP_INTERVAL = ClosedInterval.of(1_000, 40_000);
 
     //Non instantiable
     private BlackBodyColor() {
@@ -30,18 +34,19 @@ public final class BlackBodyColor {
          b) is immune to reflection (Field.setAccessible)
      */
 
-    static private class colorListSingleton
-    {
-        private final static List<Color> COLOR_LIST= (initMap());;
+    static private class ColorListSingleton {
+
+        private final static List<Color> COLOR_LIST = initList();
+        //Singleton pattern used to enforce instantiation on first call while maintaining immutability
+
         private static final String COLOR_FILE = "/bbr_color.txt";
         private static final int FILE_USABLE_LENGTH = 782;
         private static final int SKIP_LINES_FILTERINT = 80;
 
-        private colorListSingleton()
-        {}
+        private ColorListSingleton() {
+        }
 
-        private static List<Color> initMap()
-        {
+        private static List<Color> initList() {
             try (final BufferedReader reader = new BufferedReader(new InputStreamReader(
                     BlackBodyColor.class.getResourceAsStream(COLOR_FILE), StandardCharsets.US_ASCII))) {
 
@@ -56,8 +61,7 @@ public final class BlackBodyColor {
             }
         }
 
-        public static List<Color> getInstance()
-        {
+        private static List<Color> getInstance() {
             return COLOR_LIST;
         }
     }
@@ -66,6 +70,14 @@ public final class BlackBodyColor {
         return colorListSingleton.getInstance().size();
     }
     /**
+     * @return (int) Size of list of colors, a way to initialise and (eventually) debug
+     */
+    public static int initSize() {
+        return ColorListSingleton.getInstance().size();
+    }
+
+
+    /**
      * Get the Color corresponding to a temperature between 1000 and 40_000
      *
      * @param temperature (double) temperature in Kelvin
@@ -73,9 +85,6 @@ public final class BlackBodyColor {
      * @throws IllegalArgumentException if temperature isn't in [1000,40000]
      */
     public static Color colorForTemperature(final double temperature) {
-
-        Preconditions.checkArgument(1000 <= temperature && temperature <= 40_000);
-
-        return colorListSingleton.getInstance().get((int) Math.round(temperature / 100) - 10);
+        return ColorListSingleton.getInstance().get((int) Math.round(checkInInterval(TEMP_INTERVAL, temperature) / 100) - 10);
     }
 }

@@ -89,7 +89,7 @@ public class ObservedSkyTest {
         long time0;
         long timeAvg = 0;
         long total = 0;
-        //for (int i = 0; i<25; ++i)
+        //for (int i = 0; i<40; ++i)
         for (Asterism asterism : catalogue.asterisms()) {
             total += asterism.stars().size();
             for (Star star : asterism.stars()) {

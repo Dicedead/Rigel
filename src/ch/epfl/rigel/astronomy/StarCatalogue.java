@@ -35,10 +35,10 @@ public final class StarCatalogue {
     public StarCatalogue(List<Star> stars, List<Asterism> asterisms) {
 
         final Map<Star, Integer> starToIndexMap = IntStream.range(0,stars.size()).boxed()
-                .collect(Collectors.toUnmodifiableMap(stars::get,Function.identity(), (o1,o2)->o1));
+                .collect(Collectors.toMap(stars::get,Function.identity(), (o1,o2)->o1));
         //Although this map causes some spatial complexity, it avoids an O(n*m) call to indexOf below
 
-        this.asterismMap = asterisms.stream().collect(Collectors.toUnmodifiableMap(Function.identity(),
+        this.asterismMap = asterisms.stream().collect(Collectors.toMap(Function.identity(),
                 asterism -> { Preconditions.checkArgument(starToIndexMap.keySet().containsAll(asterism.stars())); //(*)
                 return asterism.stars().stream().map(starToIndexMap::get).collect(Collectors.toUnmodifiableList());},
                 (v, u) -> u)); //the method ref is equivalent to: star -> starToIndexMap.get(star)
