@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -21,11 +20,6 @@ import java.util.stream.IntStream;
  */
 public final class BlackBodyColor {
 
-    private static final String COLOR_FILE = "/bbr_color.txt";
-    private static final int FILE_USABLE_LENGTH = 782;
-    private static final int SKIP_LINES_FILTERINT = 80;
-    private static final List<Color> COLOR_LIST = new ArrayList<>();
-
     //Non instantiable
     private BlackBodyColor() {
         throw new UnsupportedOperationException();
@@ -36,25 +30,35 @@ public final class BlackBodyColor {
          b) is immune to reflection (Field.setAccessible)
      */
 
-    /**
-     * Initialises the Color list, preferably called before using colorTemperature at application startup.
-     *
-     * @throws UncheckedIOException (I/O method)
-     */
-    public static void init() {
-        // This method gives a way to enforce initialization of the List used in colorTemperature, ensuring consistency.
-        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(
-                BlackBodyColor.class.getResourceAsStream(COLOR_FILE), StandardCharsets.US_ASCII))) {
+    static private class colorListSingleton
+    {
+        private final static List<Color> COLOR_LIST= (initMap());;
+        private static final String COLOR_FILE = "/bbr_color.txt";
+        private static final int FILE_USABLE_LENGTH = 782;
+        private static final int SKIP_LINES_FILTERINT = 80;
 
-            final List<String> linesOfInterest = reader.lines().filter(line -> line.length() > SKIP_LINES_FILTERINT)
-                    .collect(Collectors.toCollection(ArrayList::new));
+        private colorListSingleton()
+        {}
 
-            IntStream.range(0, FILE_USABLE_LENGTH / 2).forEach(
-                    inc -> COLOR_LIST.add(Color.web(linesOfInterest.get(inc * 2 + 1).substring(81, 87)))
-            );
+        private static List<Color> initMap()
+        {
+            try (final BufferedReader reader = new BufferedReader(new InputStreamReader(
+                    BlackBodyColor.class.getResourceAsStream(COLOR_FILE), StandardCharsets.US_ASCII))) {
 
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+                final List<String> linesOfInterest = reader.lines().filter(line -> line.length() > SKIP_LINES_FILTERINT)
+                        .collect(Collectors.toUnmodifiableList());
+
+                return IntStream.range(0, FILE_USABLE_LENGTH / 2).mapToObj(
+                        i -> Color.web(linesOfInterest.get(i * 2 + 1).substring(81, 87))).collect(Collectors.toUnmodifiableList());
+
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+
+        public static List<Color> getInstance()
+        {
+            return COLOR_LIST;
         }
     }
 
@@ -69,13 +73,6 @@ public final class BlackBodyColor {
 
         Preconditions.checkArgument(1000 <= temperature && temperature <= 40_000);
 
-        if (COLOR_LIST.size() == 0) {
-            // Effective Java's rules 69 and 71 (3rd Edition) made us avoid throwing an unnecessary exception here
-            // and simply call init instead. COLOR_LIST is only built once during execution, and the call to its
-            // size is O(1) (a getter).
-            init();
-        }
-
-        return COLOR_LIST.get((int) Math.round(temperature / 100) - 10);
+        return colorListSingleton.getInstance().get((int) Math.round(temperature / 100) - 10);
     }
 }
