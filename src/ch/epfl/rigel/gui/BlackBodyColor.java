@@ -62,6 +62,9 @@ public final class BlackBodyColor {
         }
     }
 
+    public static int init() {
+        return colorListSingleton.getInstance().size();
+    }
     /**
      * Get the Color corresponding to a temperature between 1000 and 40_000
      *
