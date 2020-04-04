@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -33,7 +32,7 @@ public final class BlackBodyColor {
 
     static private class colorListSingleton
     {
-        private final static List<Color> COLOR_LIST= List.copyOf(initMap());;
+        private final static List<Color> COLOR_LIST= (initMap());;
         private static final String COLOR_FILE = "/bbr_color.txt";
         private static final int FILE_USABLE_LENGTH = 782;
         private static final int SKIP_LINES_FILTERINT = 80;
