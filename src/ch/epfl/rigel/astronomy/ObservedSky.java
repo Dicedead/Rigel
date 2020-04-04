@@ -69,15 +69,15 @@ public final class ObservedSky {
         this.daysUntilJ2010 = Epoch.J2010.daysUntil(date);
         this.catalogue = catalogue; //kept for its precious list of Stars
 
-        final Map<Star, Integer> starToIndexMap = IntStream.range(0,catalogue.stars().size()).boxed()
-                .collect(Collectors.toMap(catalogue.stars()::get,Function.identity(), (o1,o2)->o1, HashMap::new));
-        // Extensive comment about this choice of implementation at the bottom of the class.
-        // In short, it seemed like the best compromise between time and space complexity & cleanness.
 
         //starMap and planetMap are constructed as TreeMaps, both ordering by index in a base list; again, this
         //implementation choice is argued at the bottom of the class for starMap.
         final Map<Star, CartesianCoordinates> starMap = transform(catalogue.stars(), Function.identity(),
-               starToIndexMap::get);
+                IntStream.range(0,catalogue.stars().size()).boxed()
+                        .collect(Collectors.toMap(catalogue.stars()::get,Function.identity(), (o1,o2)->o2, HashMap::new))::get);
+
+        // Extensive comment about this choice of implementation at the bottom of the class.
+        // In short, it seemed like the best compromise between time and space complexity & cleanness.
 
         final Map<Planet, CartesianCoordinates> planetMap = transform(Arrays.stream(PlanetModel.values())
                 .filter(i -> i.ordinal()!=2).collect(Collectors.toList()),
