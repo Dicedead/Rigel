@@ -1,6 +1,7 @@
 package ch.epfl.rigel.astronomy;
 
 import ch.epfl.rigel.coordinates.*;
+import ch.epfl.rigel.math.ClosedInterval;
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
@@ -111,9 +113,10 @@ public final class ObservedSky {
                 .filter(celestObj -> Math.sqrt(euclideanDistSquared(celestObjToCoordsMap.get(celestObj), point)) <= maxDistance); //(**)
         /*
         Constructing celestObjToCoordsMap beforehand allows this method to run in linear time - all it does is search
-        for the "minimum" of the CartesianCoordinates, comparing their distances to point at line (*), then check if
+        for the "minimum" of the CartesianCoordinates, comparing their distances^2 to point at line (*), then check if
         its distance to point is <= maxDistance at (**). parallelStream proved to greatly shorten the execution time on
-        testing (at least 33%), making the map worthwhile when compared to 2 identically ordered lists.
+        testing, especially for 10k+ iterations of the method after threads were initialised, even more so than applying
+        a first cheap filter or searching in two identically indexed lists.
          */
     }
 
