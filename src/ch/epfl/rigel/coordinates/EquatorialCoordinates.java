@@ -18,6 +18,8 @@ public final class EquatorialCoordinates extends SphericalCoordinates {
     private final static RightOpenInterval LON_INTERVAL_RAD_0toTAU = RightOpenInterval.of(0, 2 * Math.PI);
     private final static ClosedInterval LAT_INTERVAL_RAD_SYM_PI = ClosedInterval.symmetric(Math.PI);
 
+    private final double raHr;
+
     /**
      * Constructor of EquatorialCoordinates
      *
@@ -26,6 +28,7 @@ public final class EquatorialCoordinates extends SphericalCoordinates {
      */
     private EquatorialCoordinates(double ra, double dec) {
         super(ra, dec);
+        this.raHr = Angle.toHr(ra);
     }
 
     /**
@@ -53,14 +56,14 @@ public final class EquatorialCoordinates extends SphericalCoordinates {
      * @return (double) right ascension in degrees
      */
     public double raDeg() {
-        return Angle.toDeg(super.lon());
+        return super.lonDeg();
     }
 
     /**
      * @return (double) right ascension in hours
      */
     public double raHr() {
-        return Angle.toHr(super.lon());
+        return raHr;
     }
 
     /**
@@ -86,7 +89,7 @@ public final class EquatorialCoordinates extends SphericalCoordinates {
     public String toString() {
         return String.format(Locale.ROOT,
                 "(ra=%.4fh, dec=%.4f°)",
-                raHr(),
+                raHr,
                 decDeg());
     }
 }

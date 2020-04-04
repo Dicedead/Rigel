@@ -78,6 +78,20 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
     }
 
     /**
+     * @return (double) altitude in radians
+     */
+    public double alt() {
+        return super.lat();
+    }
+
+    /**
+     * @return (double) altitude in degrees
+     */
+    public double altDeg() {
+        return super.latDeg();
+    }
+
+    /**
      * Computes and outputs azimuth's octant in desired string format
      * <p>
      * n,e,s & w are Strings:
@@ -105,20 +119,6 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
                 DEFINE_OCTANT_EDGE.apply(current + 1))
                 .contains(az()) ?
                 current : azOctantRecur(current + 1);
-    }
-
-    /**
-     * @return (double) altitude in radians
-     */
-    public double alt() {
-        return super.lat();
-    }
-
-    /**
-     * @return (double) altitude in degrees
-     */
-    public double altDeg() {
-        return super.latDeg();
     }
 
     /**
