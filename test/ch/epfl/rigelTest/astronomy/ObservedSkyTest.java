@@ -119,7 +119,7 @@ public class ObservedSkyTest {
                 sky.objectClosestTo(stereo.apply(new EquatorialToHorizontalConversion(time,geoCoords)
                         .apply(EquatorialCoordinates.of(0.004696959812148989,-0.8618930353430763))),0.001));
 
-        System.out.println((timeAvg / (total * 1000000d))+" in milliseconds"); //PERFORMANCE BENCH
+        //System.out.println((timeAvg / (total * 1000000d))+" in milliseconds"); //PERFORMANCE BENCH
     }
 
     @Test
