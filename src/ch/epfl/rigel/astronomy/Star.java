@@ -15,14 +15,14 @@ public final class Star extends CelestialObject {
     private final int hipparcosId;
     private final int colorTemperature;
 
-    private final static ClosedInterval COLOR_INTERVAL = ClosedInterval.of(-0.5,5.5);
+    private final static ClosedInterval COLOR_INTERVAL = ClosedInterval.of(-0.5, 5.5);
 
     /**
-     * @param hipparcosId (int) Star's identification integer
-     * @param name (String) Star's name
-     * @param equatorialPos (EquatorialPos) Star's position
-     * @param magnitude (float)
-     * @param colorIndex (float)
+     * @param hipparcosId   (int) Star's identification integer
+     * @param name          (String)
+     * @param equatorialPos (EquatorialCoordinates) Star's position
+     * @param magnitude     (float)
+     * @param colorIndex    (float)
      * @throws IllegalArgumentException if hipparcosId < 0 or colorIndex not in [-0.5;5.5]
      */
     public Star(int hipparcosId, String name, EquatorialCoordinates equatorialPos, float magnitude, float colorIndex) {
@@ -32,7 +32,7 @@ public final class Star extends CelestialObject {
         Preconditions.checkInInterval(COLOR_INTERVAL, colorIndex);
 
         this.hipparcosId = hipparcosId;
-        this.colorTemperature = (int)Math.floor(4600*(1/(0.92*colorIndex + 1.7) + 1/(0.92*colorIndex + 0.62)));
+        this.colorTemperature = (int) Math.floor(4600 * (1 / (0.92 * colorIndex + 1.7) + 1 / (0.92 * colorIndex + 0.62)));
     }
 
     /***

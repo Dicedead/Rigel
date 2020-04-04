@@ -2,10 +2,12 @@ package ch.epfl.rigel.gui;
 
 import ch.epfl.rigel.Preconditions;
 import javafx.scene.paint.Color;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,28 +23,34 @@ public final class BlackBodyColor {
 
     private static final String COLOR_FILE = "/bbr_color.txt";
     private static final int FILE_USABLE_LENGTH = 782;
-    private static final int SKIP_FIRST_LINES = 19;
+    private static final int SKIP_LINES_FILTERINT = 80;
     private static final List<Color> COLOR_LIST = new ArrayList<>();
 
     //Non instantiable
     private BlackBodyColor() {
         throw new UnsupportedOperationException();
     }
+    /*
+      The constructor of a non instantiable class throwing a UO Exception rather than just being private:
+         a) guarantees that the following code does not create an instance, and
+         b) is immune to reflection (Field.setAccessible)
+     */
 
     /**
      * Initialises the Color list, preferably called before using colorTemperature at application startup.
+     *
      * @throws UncheckedIOException (I/O method)
      */
     public static void init() {
         // This method gives a way to enforce initialization of the List used in colorTemperature, ensuring consistency.
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(
-                BlackBodyColor.class.getResourceAsStream(COLOR_FILE)))) {
+                BlackBodyColor.class.getResourceAsStream(COLOR_FILE), StandardCharsets.US_ASCII))) {
 
-            final List<String> linesOfInterest = reader.lines().skip(SKIP_FIRST_LINES)
-                    .limit(FILE_USABLE_LENGTH).collect(Collectors.toList());
+            final List<String> linesOfInterest = reader.lines().filter(line -> line.length() > SKIP_LINES_FILTERINT)
+                    .collect(Collectors.toCollection(ArrayList::new));
 
             IntStream.range(0, FILE_USABLE_LENGTH / 2).forEach(
-                    inc -> COLOR_LIST.add(Color.web(linesOfInterest.get(inc * 2 + 1).substring(80, 87)))
+                    inc -> COLOR_LIST.add(Color.web(linesOfInterest.get(inc * 2 + 1).substring(81, 87)))
             );
 
         } catch (IOException e) {

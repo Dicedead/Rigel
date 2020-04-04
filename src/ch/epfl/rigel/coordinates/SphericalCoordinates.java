@@ -8,45 +8,57 @@ import static ch.epfl.rigel.math.Angle.toDeg;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-abstract class SphericalCoordinates
-{
+abstract class SphericalCoordinates {
+
     final private double longitude;
     final private double latitude;
+    final private double lonDeg;
+    final private double latDeg;
 
     /**
      * Constructor for SphericalCoordinates
-     * @param longitude input in radians for longitude
-     * @param latitude input in radians for latitude
+     *
+     * @param longitude (double) input in radians for longitude
+     * @param latitude  (double) input in radians for latitude
      */
-    SphericalCoordinates(double longitude, double latitude)
-    {
-        this.latitude   = latitude;
-        this.longitude  = longitude;
+    SphericalCoordinates(double longitude, double latitude) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.lonDeg = toDeg(longitude);
+        this.latDeg = toDeg(latitude);
     }
 
     /**
-     * @return longitude in radians
+     * @return (double) longitude in radians
      */
-    double lon() { return longitude; }
+    double lon() {
+        return longitude;
+    }
 
     /**
-     * @return longitude in degrees
+     * @return (double) longitude in degrees
      */
-    double lonDeg() {return toDeg(longitude);}
+    double lonDeg() {
+        return lonDeg;
+    }
 
     /**
-     * @return latitude in radians
+     * @return (double) latitude in radians
      */
-    double lat(){ return latitude; }
+    double lat() {
+        return latitude;
+    }
 
     /**
-     * @return latitude in degrees
+     * @return (double) latitude in degrees
      */
-    double latDeg(){return toDeg(latitude);}
+    double latDeg() {
+        return latDeg;
+    }
 
     /**
-     * @see Object#equals(Object)
      * @throws UnsupportedOperationException (double precision does not allow for equals)
+     * @see Object#equals(Object)
      */
     @Override
     public final boolean equals(Object o) {
@@ -56,8 +68,8 @@ abstract class SphericalCoordinates
     }
 
     /**
-     * @see Object#hashCode()
      * @throws UnsupportedOperationException (double precision does not allow for hashcode)
+     * @see Object#hashCode()
      */
     @Override
     public final int hashCode() {

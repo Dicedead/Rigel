@@ -8,16 +8,16 @@ package ch.epfl.rigel.math;
  */
 public abstract class Interval {
 
+    final private double inf, sup;
+
     /**
-     * @param inf lower bound of the interval
-     * @param sup higher bound of the interval
+     * @param inf (double) lower bound of the interval
+     * @param sup (double) higher bound of the interval
      */
     protected Interval(final double inf, final double sup) {
         this.inf = inf;
         this.sup = sup;
     }
-
-    final private double inf, sup;
 
     /**
      * @return value of the lower bound of the interval
@@ -43,8 +43,8 @@ public abstract class Interval {
     abstract public boolean contains(double v);
 
     /**
-     * @see Object#equals(Object)
      * @throws UnsupportedOperationException (double precision does not allow for equals)
+     * @see Object#equals(Object)
      */
     @Override
     public final boolean equals(Object o) {
@@ -54,8 +54,8 @@ public abstract class Interval {
     }
 
     /**
-     * @see Object#hashCode()
      * @throws UnsupportedOperationException (double precision does not allow for hashcode)
+     * @see Object#hashCode()
      */
     @Override
     public final int hashCode() {

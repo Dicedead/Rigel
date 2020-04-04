@@ -11,7 +11,7 @@ import static ch.epfl.rigel.math.Angle.ofArcsec;
 import static java.lang.Math.*;
 
 /**
- * Conversion class from ecliptic to equatorial coordinates
+ * Functional conversion class from ecliptic to equatorial coordinates
  *
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
@@ -27,29 +27,29 @@ public final class EclipticToEquatorialConversion implements Function<EclipticCo
     /**
      * Initialize epsilon for calculations
      *
-     * @param when time to convert
+     * @param when (ZonedDateTime) time to convert
      */
     public EclipticToEquatorialConversion(ZonedDateTime when) {
         final double T = J2000.julianCenturiesUntil(when);
 
         final double epsilon = POLYNOM.at(T);
 
-        sinEpsilon = sin(epsilon);
-        cosEpsilon = cos(epsilon);
+        this.sinEpsilon = sin(epsilon);
+        this.cosEpsilon = cos(epsilon);
     }
 
     /**
-     * @param eclipticCoordinates coordinates to convert
-     * @return Equatorial coordinates corresponding to the input
+     * @param eclipCoords (EclipticCoordinates) coordinates to convert
+     * @return (EquatorialCoordinates) Equatorial coordinates corresponding to the input
      */
     @Override
-    public EquatorialCoordinates apply(EclipticCoordinates eclipticCoordinates) {
+    public EquatorialCoordinates apply(EclipticCoordinates eclipCoords) {
 
-        final double lambda = eclipticCoordinates.lon();
-        final double beta = eclipticCoordinates.lat();
+        final double lambda = eclipCoords.lon();
+        final double beta = eclipCoords.lat();
 
         final double term1 = 2 * sin(beta);
-        final  double term2 = sin(lambda - beta) + sin(lambda + beta);
+        final double term2 = sin(lambda - beta) + sin(lambda + beta);
             /*Playing around with some trigonometry, one can isolate these 2 common terms so there's no need to compute
               them twice.*/
 
@@ -60,8 +60,8 @@ public final class EclipticToEquatorialConversion implements Function<EclipticCo
     }
 
     /**
-     * @see Object#equals(Object)
      * @throws UnsupportedOperationException (double precision does not allow for equals)
+     * @see Object#equals(Object)
      */
     @Override
     public final boolean equals(Object o) {
@@ -71,8 +71,8 @@ public final class EclipticToEquatorialConversion implements Function<EclipticCo
     }
 
     /**
-     * @see Object#hashCode()
      * @throws UnsupportedOperationException (double precision does not allow for hashcode)
+     * @see Object#hashCode()
      */
     @Override
     public final int hashCode() {

@@ -21,18 +21,18 @@ public final class GeographicCoordinates extends SphericalCoordinates {
     /**
      * Constructor of GeographicCoordinates
      *
-     * @param longitude input in radians for longitude
-     * @param latitude  input in radians for latitude
+     * @param longitude (double) input in radians for longitude
+     * @param latitude  (double) input in radians for latitude
      */
     private GeographicCoordinates(double longitude, double latitude) {
         super(longitude, latitude);
     }
 
     /**
-     * Constructs a GeographicCoordinates
+     * Constructs a GeographicCoordinates (factory constructor)
      *
-     * @param lonDeg input in degrees for longitude
-     * @param latDeg input in degrees for latitude
+     * @param lonDeg (double) input in degrees for longitude
+     * @param latDeg (double) input in degrees for latitude
      */
     public static GeographicCoordinates ofDeg(double lonDeg, double latDeg) {
 
@@ -45,16 +45,18 @@ public final class GeographicCoordinates extends SphericalCoordinates {
     /**
      * Checks that the passed angle is a valid longitude in degrees
      *
-     * @param lonDeg angle input in degrees
-     * @return true if it is between -180° and 180°
+     * @param lonDeg (double) angle input in degrees
+     * @return (boolean) true iff it is between -180° and 180°
      */
-    static public boolean isValidLonDeg(double lonDeg) { return LON_INTERVAL_DEG_SYM_360.contains(lonDeg); }
+    static public boolean isValidLonDeg(double lonDeg) {
+        return LON_INTERVAL_DEG_SYM_360.contains(lonDeg);
+    }
 
     /**
      * Checks that the passed angle is a valid latitude in degrees
      *
-     * @param latDeg angle input in degrees
-     * @return true if it is between -90° and 90°
+     * @param latDeg (double) angle input in degrees
+     * @return (boolean) true iff it is between -90° and 90°
      */
     static public boolean isValidLatDeg(double latDeg) {
         return LAT_INTERVAL_DEG_SYM_180.contains(latDeg);
@@ -62,29 +64,33 @@ public final class GeographicCoordinates extends SphericalCoordinates {
 
 
     /**
-     * @return longitude in radians
+     * @return (double) longitude in radians
      */
+    @Override
     public double lon() {
         return super.lon();
     }
 
     /**
-     * @return longitude in degrees
+     * @return (double) longitude in degrees
      */
+    @Override
     public double lonDeg() {
         return super.lonDeg();
     }
 
     /**
-     * @return latitude in radians
+     * @return (double) latitude in radians
      */
+    @Override
     public double lat() {
         return super.lat();
     }
 
     /**
-     * @return latitude in degrees
+     * @return (double) latitude in degrees
      */
+    @Override
     public double latDeg() {
         return super.latDeg();
     }

@@ -42,7 +42,7 @@ public final class Polynomial {
 
         this.coefficients = new double[coefficients.length + 1];
         this.coefficients[0] = coefficientN;
-        degree = this.coefficients.length - 1;
+        this.degree = this.coefficients.length - 1;
 
         System.arraycopy(coefficients, 0, this.coefficients, 1, coefficients.length);
 
@@ -51,9 +51,9 @@ public final class Polynomial {
     /**
      * Public instantiation of polynomial functions
      *
-     * @param coefficientN The highest coefficient, should not be null
-     * @param coefficients The others coefficients
-     * @return A polynomial with the specified coefficients in the reverse order of power
+     * @param coefficientN (double) The highest coefficient, should not be null
+     * @param coefficients (double...) The others coefficients
+     * @return (Polynomial) A polynomial with the specified coefficients in the reverse order of power
      */
     public static Polynomial of(double coefficientN, double... coefficients) {
         Preconditions.checkArgument(coefficientN != 0);
@@ -74,11 +74,11 @@ public final class Polynomial {
      * Auxiliary recursive method applying horner's scheme
      *
      * @param x (double) point to interpret
-     * @param currDegree (int) degree of subpolynomial
+     * @param currentDeg (int) degree of subpolynomial
      * @return (double)
      */
-    private double atRecur(final double x, final int currDegree) {
-        return currDegree == 0 ? coefficients[0] : atRecur(x, currDegree - 1) * x + coefficients[currDegree];
+    private double atRecur(final double x, final int currentDeg) {
+        return currentDeg == 0 ? coefficients[0] : atRecur(x, currentDeg - 1) * x + coefficients[currentDeg];
     }
 
     /**
@@ -114,7 +114,7 @@ public final class Polynomial {
                     if k = 2: checks whether next number is a zero or not in order to add a sign if it's not the case
           ... and then repeat by going down the list of coefficients (get(2) gets the resulting substring for this iteration).
 
-           *we define "term" by the String [-](value!=1^0)x(^power!=1^0), ex: -5x^3, 1, x^2, x. */
+           *we define "term" by the String [-](magnitude!=1^0)x(^power!=1^0), ex: -5x^3, 1, x^2, x. */
     }
 
     /**

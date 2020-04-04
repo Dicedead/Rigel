@@ -21,12 +21,12 @@ public final class Sun extends CelestialObject {
     /**
      * Constructor for the Sun at a given time
      *
-     * @param eclipticPos (EclipticCoordinates) object's ecliptic coordinates
+     * @param eclipticPos   (EclipticCoordinates) object's ecliptic coordinates
      * @param equatorialPos (EquatorialCoordinates) object's equatorial coordinates
-     * @param angularSize (float) object's angular size
-     * @param meanAnomaly (float) object's mean anomaly
+     * @param angularSize   (float) object's angular size
+     * @param meanAnomaly   (float) object's mean anomaly
      * @throws IllegalArgumentException if angularSize < 0
-     * @throws NullPointerException if name, eclipticPos or equatorialPos are null
+     * @throws NullPointerException     if name, eclipticPos or equatorialPos are null
      */
     public Sun(EclipticCoordinates eclipticPos, EquatorialCoordinates equatorialPos, float angularSize, float meanAnomaly) {
         super(NAME, equatorialPos, angularSize, MAGNITUDE);
@@ -36,12 +36,16 @@ public final class Sun extends CelestialObject {
     }
 
     /**
-     * @return Sun's ecliptic coordinates
+     * @return (EclipticCoordinates) Sun's ecliptic coordinates
      */
-    public EclipticCoordinates eclipticPos(){ return eclipticPos; }
+    public EclipticCoordinates eclipticPos() {
+        return eclipticPos;
+    }
 
     /**
-     * @return Sun's current mean anomaly
+     * @return (double) Sun's current mean anomaly
      */
-    public double meanAnomaly(){ return meanAnomaly; }
+    public double meanAnomaly() {
+        return meanAnomaly;
+    }
 }

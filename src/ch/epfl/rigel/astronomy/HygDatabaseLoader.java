@@ -45,19 +45,19 @@ public enum HygDatabaseLoader implements StarCatalogue.Loader {
             reader.lines().forEach(lineInFile -> {
                 final String[] line = lineInFile.split(",");
                 builder.addStar(
-                    new Star(
-                            /*hipparcos*/ buildWithDefault(line[Column.HIP.ordinal()], 0, Integer::parseInt),
+                        new Star(
+                                /*hipparcos*/ buildWithDefault(line[Column.HIP.ordinal()], 0, Integer::parseInt),
 
-                            /*name*/ buildWithDefault(line[Column.PROPER.ordinal()], buildWithDefault(line[Column.BAYER.ordinal()],
-                            "? " + line[Column.CON.ordinal()], x -> (x + " " + line[Column.CON.ordinal()])), Function.identity()),
+                                /*name*/ buildWithDefault(line[Column.PROPER.ordinal()], buildWithDefault(line[Column.BAYER.ordinal()],
+                                "? " + line[Column.CON.ordinal()], x -> (x + " " + line[Column.CON.ordinal()])), Function.identity()),
 
-                            /*EquatorialCoords*/ EquatorialCoordinates.of(Double.parseDouble(line[Column.RARAD.ordinal()]),
-                            Double.parseDouble(line[Column.DECRAD.ordinal()])),
+                                /*EquatorialCoords*/ EquatorialCoordinates.of(Double.parseDouble(line[Column.RARAD.ordinal()]),
+                                Double.parseDouble(line[Column.DECRAD.ordinal()])),
 
-                            /*magnitude*/ buildWithDefault(line[Column.MAG.ordinal()], 0, Float::parseFloat).floatValue(),
+                                /*magnitude*/ buildWithDefault(line[Column.MAG.ordinal()], 0, Float::parseFloat).floatValue(),
 
-                            /*colorIndex*/ buildWithDefault(line[Column.CI.ordinal()], 0, Float::parseFloat).floatValue()
-                    ));
+                                /*colorIndex*/ buildWithDefault(line[Column.CI.ordinal()], 0, Float::parseFloat).floatValue()
+                        ));
             });
 
         }

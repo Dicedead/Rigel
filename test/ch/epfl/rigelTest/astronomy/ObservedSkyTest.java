@@ -47,6 +47,7 @@ public class ObservedSkyTest {
     void init() throws IOException {
 
         if (catalogue == null) {
+            long time0 = System.nanoTime();
             StarCatalogue.Builder builder;
             try (InputStream hygStream = getClass()
                     .getResourceAsStream(HYG_CATALOGUE_NAME)) {
@@ -73,7 +74,6 @@ public class ObservedSkyTest {
 
             convEcltoEqu = new EclipticToEquatorialConversion(time);
 
-            long time0 = System.nanoTime();
             sky = new ObservedSky(time, geoCoords, stereo, catalogue);
             //System.out.println(System.nanoTime()-time0);
         }
@@ -91,7 +91,7 @@ public class ObservedSkyTest {
             for (Star star : asterism.stars()) {
                 time0 = System.nanoTime();
                 if(!star.name().equals("Xi UMa"))
-                assertEquals(star, sky.objectClosestTo(stereo.apply(convEquToHor.apply(star.equatorialPos())),
+                assertEquals(star,sky.objectClosestTo(stereo.apply(convEquToHor.apply(star.equatorialPos())),
                         Double.MAX_VALUE).get());
 
                 timeAvg += System.nanoTime() - time0;
@@ -102,7 +102,6 @@ public class ObservedSkyTest {
 
                 assertEquals(Optional.empty(), sky.objectClosestTo(stereo.apply(convEquToHor.apply(star.equatorialPos())),
                         -10));
-
 
             }
 
@@ -134,25 +133,26 @@ public class ObservedSkyTest {
         double memory = sky.starsPosition()[0];
         sky.starsPosition()[0] = Double.MAX_VALUE;
         assertEquals(memory, sky.starsPosition()[0]);
+        assertEquals(5067*2, sky.starsPosition().length);
     }
 
     @Test
     void planets() throws IOException {
         init();
-        assertEquals(14, sky.planetPosition().length);
+        assertEquals(14, sky.planetsPosition().length);
 
         int i = 0;
         for (Planet planet : sky.planets()) {
                 assertEquals(stereo.apply(convEquToHor.apply(planet.equatorialPos())).x(),
-                        sky.planetPosition()[i++]);
+                        sky.planetsPosition()[i++]);
                 assertEquals(stereo.apply(convEquToHor.apply(planet.equatorialPos())).y(),
-                        sky.planetPosition()[i++]);
+                        sky.planetsPosition()[i++]);
         }
 
         //Si fail: Cloner le tableau
-        double memory = sky.planetPosition()[0];
-        sky.planetPosition()[0] = Double.MAX_VALUE;
-        assertEquals(memory, sky.planetPosition()[0]);
+        double memory = sky.planetsPosition()[0];
+        sky.planetsPosition()[0] = Double.MAX_VALUE;
+        assertEquals(memory, sky.planetsPosition()[0]);
     }
 
     @Test

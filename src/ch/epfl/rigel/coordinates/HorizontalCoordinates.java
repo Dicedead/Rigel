@@ -18,10 +18,10 @@ import java.util.stream.IntStream;
  */
 public final class HorizontalCoordinates extends SphericalCoordinates {
 
-    private final static RightOpenInterval LON_INTERVAL_RAD_0toTAU = RightOpenInterval.of(0,Angle.TAU);
+    private final static RightOpenInterval LON_INTERVAL_RAD_0toTAU = RightOpenInterval.of(0, Angle.TAU);
     private final static ClosedInterval LAT_INTERVAL_RAD_SYM_PI = ClosedInterval.symmetric(Math.PI);
 
-    private final static RightOpenInterval LON_INTERVAL_DEG_0to360 = RightOpenInterval.of(0,360);
+    private final static RightOpenInterval LON_INTERVAL_DEG_0to360 = RightOpenInterval.of(0, 360);
     private final static ClosedInterval LAT_INTERVAL_DEG_SYM_180 = ClosedInterval.symmetric(180);
 
     private final static Function<Integer, Double> DEFINE_OCTANT_EDGE = A -> A * Math.PI / 4 - Math.PI / 8;
@@ -29,18 +29,18 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
     /**
      * Constructor for HorizontalCoordinates
      *
-     * @param az  input in radians for azimuth
-     * @param alt input in radians for altitude
+     * @param az  (double) input in radians for azimuth
+     * @param alt (double) input in radians for altitude
      */
     private HorizontalCoordinates(double az, double alt) {
         super(az, alt);
     }
 
     /**
-     * Constructs a HorizontalCoordinates
+     * Constructs a HorizontalCoordinates (factory constructor)
      *
-     * @param az  input in radians for azimuth
-     * @param alt input in radians for altitude
+     * @param az  (double) input in radians for azimuth
+     * @param alt (double) input in radians for altitude
      */
     public static HorizontalCoordinates of(double az, double alt) {
 
@@ -53,8 +53,8 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
     /**
      * Constructs a HorizontalCoordinates
      *
-     * @param azDeg  input in degrees for azimuth
-     * @param altDeg input in degrees for altitude
+     * @param azDeg  (double) input in degrees for azimuth
+     * @param altDeg (double) input in degrees for altitude
      */
     public static HorizontalCoordinates ofDeg(double azDeg, double altDeg) {
         Preconditions.checkInInterval(LON_INTERVAL_DEG_0to360, azDeg);
@@ -64,27 +64,43 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
     }
 
     /**
-     * @return azimuth in radians
+     * @return (double) azimuth in radians
      */
     public double az() {
         return super.lon();
     }
 
     /**
-     * @return azimuth in degrees
+     * @return (double) azimuth in degrees
      */
     public double azDeg() {
         return super.lonDeg();
     }
 
     /**
+     * @return (double) altitude in radians
+     */
+    public double alt() {
+        return super.lat();
+    }
+
+    /**
+     * @return (double) altitude in degrees
+     */
+    public double altDeg() {
+        return super.latDeg();
+    }
+
+    /**
      * Computes and outputs azimuth's octant in desired string format
+     * <p>
+     * n,e,s & w are Strings:
      *
-     * @param n (desired) placeholder for North
+     * @param n placeholder for North
      * @param e placeholder for East
      * @param s placeholder for South
      * @param w placeholder for West
-     * @return String with concatenated octant representation
+     * @return (String) String with concatenated octant representation
      */
     public String azOctantName(String n, String e, String s, String w) {
         return List.of(n, n + e, e, s + e, s, s + w, w, n + w)
@@ -99,37 +115,23 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
      */
     private int azOctantRecur(int current) {
         return RightOpenInterval.of(
-                    DEFINE_OCTANT_EDGE.apply(current),
-                    DEFINE_OCTANT_EDGE.apply(current + 1))
+                DEFINE_OCTANT_EDGE.apply(current),
+                DEFINE_OCTANT_EDGE.apply(current + 1))
                 .contains(az()) ?
                 current : azOctantRecur(current + 1);
     }
 
     /**
-     * @return altitude in radians
-     */
-    public double alt() {
-        return super.lat();
-    }
-
-    /**
-     * @return altitude in degrees
-     */
-    public double altDeg() {
-        return super.latDeg();
-    }
-
-    /**
      * Compute angular distance between two points
      *
-     * @param that the HorizontalCoordinates which's distance to this will be computed
+     * @param that (HorizontalCoordinates) the HorizontalCoordinates which's distance to this will be computed
      * @return (double) angular distance between this and (HorizCoords) that
      */
     public double angularDistanceTo(HorizontalCoordinates that) {
         return
-               Math.acos(Math.sin(this.alt()) * Math.sin(that.alt())
-             +
-               Math.cos(this.alt()) * Math.cos(that.alt()) * Math.cos(this.az() - that.az()));
+                Math.acos(Math.sin(this.alt()) * Math.sin(that.alt())
+                        +
+                        Math.cos(this.alt()) * Math.cos(that.alt()) * Math.cos(this.az() - that.az()));
     }
 
     /**

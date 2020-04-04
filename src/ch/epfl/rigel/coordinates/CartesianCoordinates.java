@@ -17,26 +17,25 @@ public final class CartesianCoordinates {
     }
 
     /**
-     * Constructs a cartesian system
+     * Constructs a cartesian system (factory constructor)
      *
-     * @param x coordinate
-     * @param y coordinate
-     * @return a cartesian coordinates
+     * @param x (double) x coordinate
+     * @param y (double) y coordinate
+     * @return (CartesianCoordinates)
      */
-    public static CartesianCoordinates of(double x, double y)
-    {
+    public static CartesianCoordinates of(double x, double y) {
         return new CartesianCoordinates(x, y);
     }
 
     /**
-     * @return x coordinate
+     * @return (double) x coordinate
      */
     public double x() {
         return x;
     }
 
     /**
-     * @return y coordinate
+     * @return (double) y coordinate
      */
     public double y() {
         return y;
@@ -47,12 +46,12 @@ public final class CartesianCoordinates {
      */
     @Override
     public String toString() {
-        return "CartesianCoordinates : ("+x+" ; "+y+")";
+        return "CartesianCoordinates : (" + x + " ; " + y + ")";
     }
 
     /**
-     * @see Object#equals(Object)
      * @throws UnsupportedOperationException (double precision does not allow for equals)
+     * @see Object#equals(Object)
      */
     @Override
     public final boolean equals(Object o) {
@@ -62,8 +61,8 @@ public final class CartesianCoordinates {
     }
 
     /**
-     * @see Object#hashCode()
      * @throws UnsupportedOperationException (double precision does not allow for hashcode)
+     * @see Object#hashCode()
      */
     @Override
     public final int hashCode() {

@@ -1,6 +1,7 @@
 package ch.epfl.rigel.math;
 
 import ch.epfl.rigel.Preconditions;
+
 import java.util.Locale;
 
 /**
@@ -11,35 +12,44 @@ import java.util.Locale;
  */
 public final class ClosedInterval extends Interval {
     /**
-     * @param inf lower bound of the interval
-     * @param sup higher bound of the interval
+     * @param inf (double) lower bound of the interval
+     * @param sup (double) higher bound of the interval
      * @throws IllegalArgumentException if interval is empty
      */
     private ClosedInterval(double inf, double sup) {
         super(inf, sup);
     }
 
+    /**
+     * Constructs a closed interval [low;high] (factory constructor)
+     *
+     * @param low  (double) lower bound of the interval
+     * @param high (double) higher bound of the interval
+     * @return (ClosedInterval)
+     * @throws IllegalArgumentException if low >= high
+     */
     public static ClosedInterval of(double low, double high) {
         Preconditions.checkArgument(high > low);
         return new ClosedInterval(low, high);
     }
 
     /**
-     * Returns a closed interval starting at zero, stopping at size if size is positive
+     * Returns a closed interval starting at zero, stopping at size if size is positive (factory constructor)
      *
-     * @param size is un unsigned double specifying the size of the interval
-     * @return IllegalArgumentException if size is negative, the desired interval in the other case
+     * @param size (double) is un unsigned double specifying the size of the interval
+     * @return (ClosedInterval) the desired interval if size is positive
+     * @throws IllegalArgumentException if size is <= 0
      */
     public static ClosedInterval symmetric(double size) {
         Preconditions.checkArgument(size > 0);
-        return new ClosedInterval(-size/2.0, size/2.0);
+        return new ClosedInterval(-size / 2.0, size / 2.0);
     }
 
     /**
      * Clipping sends number to itself if it is in the interval, and else at the nearest bound
      *
-     * @param v the number to clip
-     * @return the clipped number
+     * @param v (double) the number to clip
+     * @return (double) the clipped number
      */
     public double clip(double v) {
         /*This can be understood in this way : if v is smaller than the upper bound it may be in the interval so we
@@ -63,8 +73,8 @@ public final class ClosedInterval extends Interval {
     /**
      * Checks whether a number is in the current interval
      *
-     * @param v number to be checked
-     * @return whether it is or not in the interval
+     * @param v (double) number to be checked
+     * @return (boolean) whether it is or not in the interval
      */
     @Override
     public boolean contains(double v) {
