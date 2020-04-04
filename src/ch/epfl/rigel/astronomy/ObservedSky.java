@@ -32,8 +32,8 @@ public final class ObservedSky {
     private final Map<CelestialObject, CartesianCoordinates> celestObjToCoordsMap;
 
     private final List<Planet> planetList;
-    private final double[] starsPositions;
-    private final double[] planetPositions;
+    private final List<Double> starsPositions;
+    private final List<Double> planetPositions;
 
     private final StereographicProjection stereoProj;
     private final EquatorialToHorizontalConversion eqToHor;
@@ -80,19 +80,19 @@ public final class ObservedSky {
                 starToIndexMap::get);
 
         final Map<Planet, CartesianCoordinates> planetMap = transform(Arrays.stream(PlanetModel.values())
-                        .filter(i -> i.ordinal() != 2).collect(Collectors.toList()),
-                this::applyModel, i -> PLANET_NAMES.indexOf(i.name()));
+                        .filter(i -> i.ordinal() != 2).collect(Collectors.toList()), this::applyModel,
+                i -> PLANET_NAMES.indexOf(i.name()));
 
         sunMap = mapObjectToPosition(List.of(SunModel.SUN), this::applyModel);
         moonMap = mapObjectToPosition(List.of(MoonModel.MOON), this::applyModel);
 
         planetList = List.copyOf(planetMap.keySet());
-        planetPositions = positionsToArray(planetMap);
-        starsPositions = positionsToArray(starMap);
+        planetPositions = positionsToList(planetMap);
+        starsPositions = positionsToList(starMap);
 
         celestObjToCoordsMap = Stream.of(starMap, planetMap, sunMap, moonMap)
                 .flatMap(l -> l.entrySet().stream())
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (u, v) -> v, HashMap::new));
+                .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue, (u, v) -> v));
 
     }
 
@@ -113,10 +113,17 @@ public final class ObservedSky {
         Constructing celestObjToCoordsMap beforehand allows this method to run in linear time - all it does is search
         for the "minimum" of the CartesianCoordinates, comparing their distances to point at line (*), then check if
         its distance to point is <= maxDistance at (**). parallelStream proved to greatly shorten the execution time on
-        testing (at least 33%), making the map worthwhile when compared to 2 identically ordered lists.
+        testing (at least 33%), making the map worthwhile when compared to 2 identically ordered lists. You can uncomment
+        the following function to tests it in ObservedSkyTest.speed
          */
     }
-
+/*
+    public Optional<CelestialObject> objectClosestTo_NoP(final CartesianCoordinates point, final double maxDistance) {
+        return celestObjToCoordsMap.keySet().stream().min((celestObj1, celestObj2) -> CLOSEST_TO_C.apply(point)
+                .apply(celestObjToCoordsMap.get(celestObj1), celestObjToCoordsMap.get(celestObj2))) //(*)
+                .filter(celestObj -> Math.sqrt(euclideanDistSquared(celestObjToCoordsMap.get(celestObj), point)) <= maxDistance); //(**)
+    }
+*/
     /**
      * @return (List < Star >) list of stars in current observed sky
      */
@@ -129,7 +136,7 @@ public final class ObservedSky {
      * the same order as returned by stars()
      */
     public double[] starsPosition() {
-        return starsPositions.clone();
+        return starsPositions.stream().mapToDouble(Double::doubleValue).toArray();
     }
 
     /**
@@ -144,7 +151,7 @@ public final class ObservedSky {
      * the same order as returned by planets()
      */
     public double[] planetsPosition() {
-        return planetPositions.clone();
+        return planetPositions.stream().mapToDouble(Double::doubleValue).toArray();
     }
 
     /**
@@ -228,9 +235,8 @@ public final class ObservedSky {
      * @return (double[]) array of doubles: even indices contain x coordinates, odd indices the y coordinates;
      * arranged in the same order as objectsMap's keys
      */
-    private static <K extends CelestialObject> double[] positionsToArray(final Map<K, CartesianCoordinates> objectsMap) {
-        return objectsMap.values().stream().flatMap(celestObj -> List.of(celestObj.x(), celestObj.y()).stream())
-                .mapToDouble(Double::doubleValue).toArray(); //conversion from Double[] to double[]
+    private static <K extends CelestialObject> List<Double> positionsToList(final Map<K, CartesianCoordinates> objectsMap) {
+        return objectsMap.values().stream().flatMap(celestObj -> List.of(celestObj.x(), celestObj.y()).stream()).collect(Collectors.toUnmodifiableList());
     }
 
     /**

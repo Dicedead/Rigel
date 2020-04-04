@@ -36,13 +36,13 @@ public final class StarCatalogue {
     public StarCatalogue(List<Star> stars, List<Asterism> asterisms) {
 
         final Map<Star, Integer> starToIndexMap = IntStream.range(0,stars.size()).boxed()
-                .collect(Collectors.toMap(stars::get,Function.identity(), (o1,o2)->o1, HashMap::new));
+                .collect(Collectors.toUnmodifiableMap(stars::get,Function.identity(), (o1,o2)->o1));
         //Although this map causes some spatial complexity, it avoids an O(n*m) call to indexOf below
 
-        this.asterismMap = asterisms.stream().collect(Collectors.toMap(Function.identity(),
+        this.asterismMap = asterisms.stream().collect(Collectors.toUnmodifiableMap(Function.identity(),
                 asterism -> { Preconditions.checkArgument(starToIndexMap.keySet().containsAll(asterism.stars())); //(*)
-                return List.copyOf(asterism.stars().stream().map(starToIndexMap::get).collect(Collectors.toCollection(ArrayList::new)));},
-                (v, u) -> u, HashMap::new)); //the method ref is equivalent to: star -> starToIndexMap.get(star)
+                return asterism.stars().stream().map(starToIndexMap::get).collect(Collectors.toUnmodifiableList());},
+                (v, u) -> u)); //the method ref is equivalent to: star -> starToIndexMap.get(star)
 
         /* (*): starToIndexMap is a HashMap, therefore calling containsAll upon its keySet may be better but no worse
                 than upon a List - depends of the hash. In this case, it proved to speed up the construction of
@@ -164,6 +164,6 @@ public final class StarCatalogue {
          * @param builder     (StarCatalogue.Builder)
          * @throws IOException (I/O method)
          */
-        public abstract void load(InputStream inputStream, Builder builder) throws IOException;
+        void load(InputStream inputStream, Builder builder) throws IOException;
     }
 }

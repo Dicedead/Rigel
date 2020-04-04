@@ -1,19 +1,22 @@
 package ch.epfl.rigelTest.astronomy;
 
 import ch.epfl.rigel.astronomy.Epoch;
+import ch.epfl.test.Chronometer;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.Month;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class MyEpochTest {
 
-    private final static double EPSILON   = 0;
+    private final static double EPSILON   = 1e-6;
 
 
     @Test
@@ -42,4 +45,5 @@ class MyEpochTest {
         assertEquals(2.25 /36525.0 ,Epoch.J2000.julianCenturiesUntil(d));
         //assertEquals(-0.196947296,Epoch.J2000.julianCenturiesUntil(d2));
     }
+
 }

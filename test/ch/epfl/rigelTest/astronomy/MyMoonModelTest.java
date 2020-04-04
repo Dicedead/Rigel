@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MyMoonModelTest {
 
-    final private double  delta = 0;
+    final private double  delta = 1e-1;
     @Test
     void atRaHr() {
 

@@ -25,7 +25,7 @@ class MySiderealTimeTest {
 
         assertEquals( 1.9883078130455532,SiderealTime.greenwich(ZonedDateTime.of(2001,9,11,8,14,0,0, ZoneId.of("UTC"))),EPSILON);
         assertEquals(1.7456607003719964,SiderealTime.local(ZonedDateTime.of(1980,4,22,14,36,51,27,ZoneOffset.UTC),
-                GeographicCoordinates.ofDeg(30,45)),EPSILON);
+                GeographicCoordinates.ofDeg(30,45)),EPSILON2);
     }
 
     @Test
