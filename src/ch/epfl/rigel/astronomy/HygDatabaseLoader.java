@@ -7,7 +7,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Utility class for loading the HYG database
@@ -23,7 +27,7 @@ public enum HygDatabaseLoader implements StarCatalogue.Loader {
         ID, HIP, HD, HR, GL, BF, PROPER, RA, DEC, DIST, PMRA, PMDEC,
         RV, MAG, ABSMAG, SPECT, CI, X, Y, Z, VX, VY, VZ,
         RARAD, DECRAD, PMRARAD, PMDECRAD, BAYER, FLAM, CON,
-        COMP, COMP_PRIMARY, BASE, LUM, VAR, VAR_MIN, VAR_MAX;
+        COMP, COMP_PRIMARY, BASE, LUM, VAR, VAR_MIN, VAR_MAX
     }
 
     /**

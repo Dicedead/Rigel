@@ -38,7 +38,7 @@ public enum PlanetModel implements CelestialObjectModel<Planet> {
     private final double Tp, epsilon, lonPer, excent, a, inc, lonN, theta0, V0;
     private final String name;
 
-    private PlanetModel(String name, double v, double v1, double v2, double v3, double v4, double v5, double v6, double v7, double v8) {
+    PlanetModel(String name, double v, double v1, double v2, double v3, double v4, double v5, double v6, double v7, double v8) {
         this.name = name;
         this.Tp = v;
         this.epsilon = Angle.ofDeg(v1);
@@ -87,16 +87,14 @@ public enum PlanetModel implements CelestialObjectModel<Planet> {
                 Angle.normalizePositive(helioLon_Pr + Math.atan2(distanceToSun_E * sinl_Pr_L,
                         distanceToSun_Pr - distanceToSun_E * Math.cos(helioLon_Pr - helioLon_E)));
 
-        final double beta = Math.atan((distanceToSun_Pr * Math.tan(psi) * Math.sin(lambda - helioLon_Pr)) / (distanceToSun_E * sinl_Pr_L));
-
         //ANGULAR SIZE & MAGNITUDE
         final double rho = Math.sqrt(distanceToSun_E * distanceToSun_E + distanceToSun * distanceToSun - 2 * distanceToSun_E *
                 distanceToSun * Math.cos(helioLon - helioLon_E) * Math.cos(psi));
 
-        final double sqrtOfPhase = Math.sqrt((1 + Math.cos(lambda - helioLon)) / 2);
-
         return new Planet(name,
-                eclipToEquaConversion.apply(EclipticCoordinates.of(lambda, beta)), (float) (theta0 / rho),
-                (float) (V0 + 5 * Math.log10(distanceToSun * rho / sqrtOfPhase)));
+                eclipToEquaConversion.apply(EclipticCoordinates.of(lambda,
+                        Math.atan((distanceToSun_Pr * Math.tan(psi) * Math.sin(lambda - helioLon_Pr)) / (distanceToSun_E * sinl_Pr_L)))),
+                (float) (theta0 / rho),
+                (float) (V0 + 5 * Math.log10(distanceToSun * rho / Math.sqrt((1 + Math.cos(lambda - helioLon)) / 2))));
     }
 }

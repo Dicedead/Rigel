@@ -49,15 +49,20 @@ public class Chronometer
         Map<Integer, Long> results = new HashMap<>(func.size());
         for (int j = 0; j < func.size(); ++j) {
             var t1 = System.nanoTime();
-            for (int i = 0; i < repetition; i++) {
-                if (from == null)
-                    func.get(j).invoke(null, args.get(j));
-                else
-                    func.get(j).invoke(from[j], args.get(j ));
+            if (! (from == null)) {
+                for (int i = 0; i < repetition; i++) {
+                    func.get(j).invoke(from[j], args.get(j));
+                }
+                var t2 = System.nanoTime();
+                results.put(j, (t2 - t1));
             }
-            var t2 = System.nanoTime();
-            results.put(j, (t2 - t1));
-
+            else{
+                for (int i = 0; i < repetition; i++) {
+                    func.get(j).invoke(null, args.get(j));
+                }
+                var t2 = System.nanoTime();
+                results.put(j, (t2 - t1));
+            }
         }
         return results;
     }
@@ -65,7 +70,7 @@ public class Chronometer
     static public String prettyPrint (Map<Integer, Long> k)
     {
         return "Results \n******************* \n" +
-                k.entrySet().stream().map(E -> "Function " + E.getKey().toString() + " scored " + E.getValue()).collect(Collectors.joining());
+                k.entrySet().stream().map(E -> "\n Function " + E.getKey().toString() + " scored " + E.getValue()).collect(Collectors.joining());
     }
 
 }

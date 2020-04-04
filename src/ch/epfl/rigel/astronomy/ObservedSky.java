@@ -1,9 +1,9 @@
 package ch.epfl.rigel.astronomy;
 
 import ch.epfl.rigel.coordinates.*;
-import ch.epfl.rigel.math.ClosedInterval;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
@@ -82,8 +81,8 @@ public final class ObservedSky {
                 starToIndexMap::get);
 
         final Map<Planet, CartesianCoordinates> planetMap = transform(Arrays.stream(PlanetModel.values())
-                        .filter(i -> i.ordinal() != 2).collect(Collectors.toList()),
-                this::applyModel, i -> PLANET_NAMES.indexOf(i.name()));
+                        .filter(i -> i.ordinal() != 2).collect(Collectors.toList()), this::applyModel,
+                i -> PLANET_NAMES.indexOf(i.name()));
 
         sunMap = mapObjectToPosition(List.of(SunModel.SUN), this::applyModel);
         moonMap = mapObjectToPosition(List.of(MoonModel.MOON), this::applyModel);
@@ -113,10 +112,10 @@ public final class ObservedSky {
                 .filter(celestObj -> Math.sqrt(euclideanDistSquared(celestObjToCoordsMap.get(celestObj), point)) <= maxDistance); //(**)
         /*
         Constructing celestObjToCoordsMap beforehand allows this method to run in linear time - all it does is search
-        for the "minimum" of the CartesianCoordinates, comparing their distances^2 to point at line (*), then check if
+        for the "minimum" of the CartesianCoordinates, comparing their distances to point at line (*), then check if
         its distance to point is <= maxDistance at (**). parallelStream proved to greatly shorten the execution time on
-        testing, especially for 10k+ iterations of the method after threads were initialised, even more so than applying
-        a first cheap filter or searching in two identically indexed lists.
+        testing (at least 33%), making the map worthwhile when compared to 2 identically ordered lists. You can uncomment
+        the following function to tests it in ObservedSkyTest.speed
          */
     }
 
@@ -201,8 +200,8 @@ public final class ObservedSky {
      * @return (Map < S, CartesianCoordinates >) map associating CelestialObjects with their CartesianCoordinates
      */
     private <T, S extends CelestialObject> Map<S, CartesianCoordinates> mapObjectToPosition(final List<T> data, final Function<T, S> f) {
-        return data.stream().map(f).collect(Collectors.toUnmodifiableMap(
-                Function.identity(), celestObj -> stereoProj.apply(eqToHor.apply(celestObj.equatorialPos())), (u, v) -> v));
+        return data.stream().map(f).collect(Collectors.toMap(Function.identity(),
+                celestObj -> stereoProj.apply(eqToHor.apply(celestObj.equatorialPos())), (u, v) -> v, HashMap::new));
         //In our uses, f is either the identity -when data already contains CelestialObjects of type S-
         //or applyModel via method reference    -when data contains CelestialObjectModels<S>.
     }
@@ -233,7 +232,7 @@ public final class ObservedSky {
      */
     private static <K extends CelestialObject> double[] positionsToArray(final Map<K, CartesianCoordinates> objectsMap) {
         return objectsMap.values().stream().flatMap(celestObj -> List.of(celestObj.x(), celestObj.y()).stream())
-                .mapToDouble(Double::doubleValue).toArray(); //conversion from Double[] to double[]
+                .mapToDouble(Double::doubleValue).toArray();
     }
 
     /**

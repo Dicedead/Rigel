@@ -3,6 +3,8 @@ package ch.epfl.rigel.astronomy;
 import ch.epfl.rigel.coordinates.GeographicCoordinates;
 import ch.epfl.rigel.math.Polynomial;
 
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -45,7 +47,7 @@ public final class SiderealTime {
         ZonedDateTime dayOfWhen = when.withZoneSameInstant(ZoneOffset.UTC).truncatedTo(ChronoUnit.DAYS);
 
         final double T = J2000.julianCenturiesUntil(dayOfWhen);
-        final double t = dayOfWhen.until(when, ChronoUnit.MILLIS) * COEFF_TO_HOURS;
+        final double t = until(dayOfWhen, when) * COEFF_TO_HOURS;
 
         return normalizePositive(ofHr(POLYNOM.at(T) + S_ONE_COEFF * t));
     }
@@ -59,5 +61,22 @@ public final class SiderealTime {
      */
     public static double local(ZonedDateTime when, GeographicCoordinates where) {
         return normalizePositive(greenwich(when) + where.lon());
+    }
+    /**
+     * Custom made until function from Java sources, this implementation is ~3x faster than the classic Java function
+     * This function will be deleted in part 7 as the public interface may be changed from now on
+     *
+     * @param now  (ZonedDateTime) the time we want to know the distance from
+     * @param when (ZonedDateTime) the time we want to know the distance of
+     * @return (double) the distance in days from now to when
+     */
+    static private double until (final ZonedDateTime now, final ZonedDateTime when)
+    {
+        final OffsetDateTime you = now.withZoneSameInstant(when.getZone()).toOffsetDateTime();
+        final LocalDateTime end = LocalDateTime.from(when);
+        final long amount = end.toLocalDate().toEpochDay() - you.toLocalDate().toEpochDay();
+
+        return ((amount-Long.signum(amount))*86_400_000L+(end.toLocalTime().toNanoOfDay() - you.toLocalTime().toNanoOfDay()
+                + Long.signum(amount)* 86_400_000_000_000L)/ 1_000_000.);
     }
 }
