@@ -5,24 +5,28 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ThreadFactory;
 
+/**
+ * Managing the multithreaded environment
+ *
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public final class ThreadManager {
 
     private final ExecutorService gui;
     private final ExecutorService astronomy;
 
-    private static final class RigelFactory implements ThreadFactory
-    {
-        final String name;
-        final int priority;
-        final ThreadGroup group;
-        int count;
+    private static final class RigelFactory implements ThreadFactory {
+        private final String name;
+        private final int priority;
+        private final ThreadGroup group;
+        private int count;
 
-        RigelFactory(final String n, final int prio, final ThreadGroup group)
-        {
-            name = n;
-            priority = prio;
+        private RigelFactory(final String n, final int prio, final ThreadGroup group) {
+            this.name = n;
+            this.priority = prio;
             this.group = group;
-            count = 0;
+            this.count = 0;
         }
 
         @Override
@@ -34,17 +38,11 @@ public final class ThreadManager {
         }
     }
 
-    public ThreadManager()
-    {
+    public ThreadManager() {
         ThreadGroup backend = new ThreadGroup("BACKEND");
         ThreadGroup frontend = new ThreadGroup("FRONTEND");
 
-
-         astronomy = Executors.newCachedThreadPool(new RigelFactory("astronomy", 1, backend));
-         gui = Executors.newCachedThreadPool(new RigelFactory("gui", 1, frontend));
-
-
+        astronomy = Executors.newCachedThreadPool(new RigelFactory("astronomy", 1, backend));
+        gui = Executors.newCachedThreadPool(new RigelFactory("gui", 1, frontend));
     }
-
-
 }
