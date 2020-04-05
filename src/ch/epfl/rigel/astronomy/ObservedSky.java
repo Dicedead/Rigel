@@ -1,6 +1,7 @@
 package ch.epfl.rigel.astronomy;
 
 import ch.epfl.rigel.coordinates.*;
+import ch.epfl.rigel.logging.RigelLogger;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -63,7 +64,8 @@ public final class ObservedSky {
      */
     public ObservedSky(final ZonedDateTime date, final GeographicCoordinates geoCoords,
                        final StereographicProjection projection, final StarCatalogue catalogue) {
-
+        RigelLogger.getAstronomyLogger().entering("ObservedSky", "ObservedSky");
+        RigelLogger.getAstronomyLogger().info("Constructing sky at date " + date + " and position " + geoCoords.toString());
         this.stereoProj = projection;
         this.eqToHor = new EquatorialToHorizontalConversion(date, geoCoords);
         this.eclToEqu = new EclipticToEquatorialConversion(date);
@@ -94,6 +96,8 @@ public final class ObservedSky {
         celestObjToCoordsMap = Stream.of(starMap, planetMap, sunMap, moonMap)
                 .flatMap(l -> l.entrySet().stream())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (u, v) -> v, HashMap::new));
+        RigelLogger.getAstronomyLogger().fine("Sky finished initialisationi");
+        RigelLogger.getAstronomyLogger().exiting("ObservedSky", "ObservedSky");
 
     }
 

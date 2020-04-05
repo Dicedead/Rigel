@@ -1,5 +1,6 @@
 package ch.epfl.rigel.gui;
 
+import ch.epfl.rigel.logging.RigelLogger;
 import ch.epfl.rigel.math.ClosedInterval;
 import javafx.scene.paint.Color;
 
@@ -53,12 +54,18 @@ public final class BlackBodyColor {
                 final List<String> linesOfInterest = reader.lines().filter(line -> line.length() > SKIP_LINES_FILTERINT)
                         .collect(Collectors.toUnmodifiableList());
 
+                RigelLogger.getGuiLogger().fine("COLOR_LIST has been successfully initialised");
+
                 return IntStream.range(0, FILE_USABLE_LENGTH / 2).mapToObj(
                         i -> Color.web(linesOfInterest.get(i * 2 + 1).substring(81, 87))).collect(Collectors.toUnmodifiableList());
 
+
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
+
             }
+
+
         }
 
         private static List<Color> getInstance() {
@@ -66,13 +73,11 @@ public final class BlackBodyColor {
         }
     }
 
-    public static int init() {
-        return colorListSingleton.getInstance().size();
-    }
     /**
      * @return (int) Size of list of colors, a way to initialise and (eventually) debug
      */
     public static int initSize() {
+        RigelLogger.getGuiLogger().info("Building COLOR_LIST");
         return ColorListSingleton.getInstance().size();
     }
 

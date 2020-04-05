@@ -1,5 +1,7 @@
 package ch.epfl.rigel.parallelism;
 
+import ch.epfl.rigel.logging.RigelLogger;
+
 import java.util.concurrent.ThreadFactory;
 
 
@@ -26,7 +28,8 @@ public final class RigelThreadFactory implements ThreadFactory
         final Thread t = new Thread(group, name + ++count);
         t.setPriority(priority);
 
-        System.out.println("====== Thread " + name + ++count + " has been created ======");
+        RigelLogger.getBackendLogger().info("Thread " + name + ++count + " has been created");
+
         return t;
     }
 }

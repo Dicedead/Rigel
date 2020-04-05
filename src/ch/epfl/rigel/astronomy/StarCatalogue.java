@@ -1,6 +1,7 @@
 package ch.epfl.rigel.astronomy;
 
 import ch.epfl.rigel.Preconditions;
+import ch.epfl.rigel.logging.RigelLogger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,6 +35,7 @@ public final class StarCatalogue {
      */
     public StarCatalogue(List<Star> stars, List<Asterism> asterisms) {
 
+        RigelLogger.getAstronomyLogger().info("Constructing star catalogue");
         final Map<Star, Integer> starToIndexMap = IntStream.range(0,stars.size()).boxed()
                 .collect(Collectors.toMap(stars::get,Function.identity(), (o1,o2)->o1));
         //Although this map causes some spatial complexity, it avoids an O(n*m) call to indexOf below
@@ -51,6 +53,8 @@ public final class StarCatalogue {
         this.immutableAsterismSet = Collections.unmodifiableSet(asterismMap.keySet());
         //keySet allows for retain & retainAll, need to make it immutable; as the map's visibility is restrained to this
         //class and the Asterisms are immutable objects, this O(1) call suffices.
+        RigelLogger.getAstronomyLogger().info("Finished star catalogue");
+
     }
 
     /**

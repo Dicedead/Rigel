@@ -3,12 +3,8 @@ package ch.epfl.rigel.logging;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.logging.FileHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
+import java.util.logging.*;
 
 
 public class RigelLogger {
@@ -24,8 +20,7 @@ public class RigelLogger {
     private RigelLogger() {throw new UnsupportedOperationException();}
 
     public enum runType {
-        DEBUG, REALEASE;
-        runType() {}
+        DEBUG, RELEASE
     }
 
     public static void init(File save, runType type)
@@ -40,27 +35,40 @@ public class RigelLogger {
         SimpleDateFormat format = new SimpleDateFormat("M-d_HHmmss");
         try {
 
-            FileHandler fileHandler = new FileHandler(save.getAbsolutePath()
+            FileHandler backendHandler = new FileHandler(save.getAbsolutePath() + "_backend_"
                     + format.format(Calendar.getInstance().getTime()) + ".log");
 
-            fileHandler.setFormatter(new SimpleFormatter());
+            FileHandler guiHandler = new FileHandler(save.getAbsolutePath() + "_gui_"
+                    + format.format(Calendar.getInstance().getTime()) + ".log");
 
+            backendHandler.setFormatter(new SimpleFormatter());
+            guiHandler.setFormatter(new SimpleFormatter());
 
-            backendLogger.addHandler(fileHandler);
-            guiLogger.addHandler(fileHandler);
+            backendLogger.addHandler(backendHandler);
+            guiLogger.addHandler(guiHandler);
+
+            backendLogger.config("Logging files has been found");
 
         } catch (Exception e) {
-            e.printStackTrace();
+
+            backendLogger.config("Logging files not found relying on standard output");
+            StreamHandler sh = new StreamHandler(System.out, new SimpleFormatter());
+
+            backendLogger.addHandler(sh);
+            guiLogger.addHandler(sh);
+
         }
 
         switch (type) {
             case DEBUG:
                 loggerList.forEach(l -> l.setLevel(Level.ALL));
                 break;
-            case REALEASE:
+            case RELEASE:
                 loggerList.forEach(l -> l.setLevel(Level.WARNING));
                 break;
         }
+
+        backendLogger.exiting("RigelLogger", "init");
 
     }
 
