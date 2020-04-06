@@ -98,9 +98,9 @@ public class SkyCanvasPainter {
         positions.forEach(e ->
         {
             synchronized (graphicsContext) {
+                final double size = 3500 * diameter.apply(e.getKey());
                 graphicsContext.setFill(color.apply(e.getKey()));
-                graphicsContext.fillOval(e.getValue().x(), e.getValue().y(), 2500 * diameter.apply(e.getKey()),
-                        2500 * diameter.apply(e.getKey()));
+                graphicsContext.fillOval(e.getValue().x()-size/2, e.getValue().y()-size/2, size, size);
             }
         });
     }
