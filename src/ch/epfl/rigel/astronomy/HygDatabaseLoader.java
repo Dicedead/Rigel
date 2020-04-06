@@ -66,8 +66,8 @@ public enum HygDatabaseLoader implements StarCatalogue.Loader {
                         ));
 
             });
-            RigelLogger.getFileLogger().fine("Finished loading Star file " );
-        }
+            RigelLogger.getFileLogger().fine("Finished loading Star file ");
+        } catch (IOException ignored) {}
     }
 
     /**

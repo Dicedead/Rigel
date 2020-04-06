@@ -2,6 +2,7 @@ package ch.epfl.rigel.astronomy;
 
 import ch.epfl.rigel.coordinates.*;
 import ch.epfl.rigel.logging.RigelLogger;
+import com.sun.tools.javac.Main;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -32,6 +33,9 @@ public final class ObservedSky {
     private final Map<Moon, CartesianCoordinates> moonMap;
 
     private final Map<CelestialObject, CartesianCoordinates> celestObjToCoordsMap;
+
+    private final Map<Star, CartesianCoordinates> starMap;
+    private final Map<Planet, CartesianCoordinates> planetMap;
 
     private final List<Planet> planetList;
     private final double[] starsPositions;
@@ -93,10 +97,14 @@ public final class ObservedSky {
         planetPositions = positionsToArray(planetMap);
         starsPositions = positionsToArray(starMap);
 
+        this.planetMap = planetMap;
+        this.starMap = starMap;
+
         celestObjToCoordsMap = Stream.of(starMap, planetMap, sunMap, moonMap)
                 .flatMap(l -> l.entrySet().stream())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (u, v) -> v, HashMap::new));
-        RigelLogger.getAstronomyLogger().fine("Sky finished initialisationi");
+
+        RigelLogger.getAstronomyLogger().info("Sky finished initialisationi");
         RigelLogger.getAstronomyLogger().exiting("ObservedSky", "ObservedSky");
 
     }
@@ -122,6 +130,10 @@ public final class ObservedSky {
         the following function to tests it in ObservedSkyTest.speed
          */
     }
+
+    public Map<Star, CartesianCoordinates> starCartesianCoordinatesMap(){return starMap;}
+
+    public Map<Planet, CartesianCoordinates> planetCartesianCoordinatesMap(){return planetMap;}
 
     /**
      * @return (List < Star >) list of stars in current observed sky
