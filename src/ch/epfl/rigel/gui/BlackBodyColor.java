@@ -67,7 +67,7 @@ public final class BlackBodyColor {
     }
 
     public static int init() {
-        return colorListSingleton.getInstance().size();
+        return ColorListSingleton.getInstance().size();
     }
     /**
      * @return (int) Size of list of colors, a way to initialise and (eventually) debug

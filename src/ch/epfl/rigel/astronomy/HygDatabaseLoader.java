@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,8 +44,7 @@ public enum HygDatabaseLoader implements StarCatalogue.Loader {
                 StandardCharsets.US_ASCII))) {
 
             //Skipping the first line
-            if (reader.ready())
-                reader.readLine();
+            reader.readLine();
 
             reader.lines().forEach(lineInFile -> {
                 final String[] line = lineInFile.split(",");
@@ -64,6 +64,8 @@ public enum HygDatabaseLoader implements StarCatalogue.Loader {
                         ));
             });
 
+        } catch (UncheckedIOException e) { //Streams throw UncheckedIOExceptions, and need not to modify the API
+            throw e.getCause();
         }
     }
 

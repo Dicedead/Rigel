@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,6 +47,8 @@ public enum AsterismLoader implements StarCatalogue.Loader {
                                     Collectors.toCollection(ArrayList::new))))); //(**)
             //Mapping each line in inputStream to a List of stars via their hipparcos
 
+        } catch (UncheckedIOException e) { //Streams throw UncheckedIOExceptions, and need not to modify the API
+            throw e.getCause();
         }
     }
     /* (*) Even though, upon source code inspection, HashMap is the default return type of Collectors.toMap, the

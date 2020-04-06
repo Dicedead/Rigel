@@ -70,7 +70,7 @@ public enum MoonModel implements CelestialObjectModel<Moon> {
                 EclipticCoordinates.of(
                         Angle.normalizePositive(atan2(sin(lonOrb_lonCorrAsc) * cos(INC), cos(lonOrb_lonCorrAsc)) + lonCorrAsc),
                         asin(sin(lonOrb_lonCorrAsc) * sin(INC)))),
-                (float) (((1 + EXC * cos(anomaly + CorrC)) / (1 - pow(EXC, 2))) * c[9]),
+                (float) (((1 + EXC * cos(anomaly + CorrC)) / (1 - EXC * EXC)) * c[9]),
                 0, (float) ((1 - cos(lonOrb - sunLon)) / 2));
     }
 }
