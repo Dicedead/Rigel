@@ -80,7 +80,8 @@ public class SkyCanvasPainter {
                                                       final Function<T, Double> diameter,
                                                       final Function<T, Paint> color,
                                                       final Transform t) {
-        RigelLogger.getGuiLogger().info("Using : " + java.lang.Thread.activeCount() + " threads for drawing");
+
+        RigelLogger.getBackendLogger().info("Using : " + java.lang.Thread.activeCount() + " threads for drawing");
         drawCelestial(applyTransform(mask(positions.entrySet().parallelStream()), t), diameter, color);
     }
 

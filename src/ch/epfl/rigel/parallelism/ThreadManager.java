@@ -8,32 +8,41 @@ import java.util.concurrent.ThreadFactory;
 public final class ThreadManager {
 
     private final static int cores = Runtime.getRuntime().availableProcessors();
-    private ExecutorService io;
-    private ExecutorService astronomy;
-    private ExecutorService gui;
+    private static ExecutorService io;
+    private static ExecutorService astronomy;
+    private static ExecutorService gui;
+    private static ExecutorService logger;
 
-    public ThreadManager()
+    public static void initThreads()
     {
-        ThreadGroup backend = new ThreadGroup("BACKEND");
-        ThreadGroup frontend = new ThreadGroup("FRONTEND");
-        ThreadGroup IO = new ThreadGroup(backend, "BACKEND");
+        final ThreadGroup backend = new ThreadGroup("BACKEND");
+        final ThreadGroup frontend = new ThreadGroup("FRONTEND");
+        final ThreadGroup IO = new ThreadGroup(backend, "BACKEND");
 
         io = Executors.newCachedThreadPool(new RigelThreadFactory("io", 3, IO));
         astronomy = Executors.newCachedThreadPool(new RigelThreadFactory("astronomy", 1, backend));
         gui = Executors.newCachedThreadPool(new RigelThreadFactory("gui", 2, frontend));
+        logger = Executors.newSingleThreadExecutor(new RigelThreadFactory("logger", 2, frontend));
 
     }
+    private ThreadManager()
+    { throw new UnsupportedOperationException();}
 
 
-    public ExecutorService getIo() {
+    public static ExecutorService getIo() {
         return io;
     }
 
-    public ExecutorService getAstronomy() {
+    public static ExecutorService getAstronomy() {
         return astronomy;
     }
 
-    public ExecutorService getGui() {
+    public static ExecutorService getGui() {
         return gui;
     }
+
+    public static ExecutorService getLogger() {
+        return logger;
+    }
+
 }
