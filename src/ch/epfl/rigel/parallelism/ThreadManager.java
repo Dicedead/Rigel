@@ -1,21 +1,48 @@
 package ch.epfl.rigel.parallelism;
 
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 public final class ThreadManager {
-/*
+
     private final static int cores = Runtime.getRuntime().availableProcessors();
+    private static ExecutorService io;
+    private static ExecutorService astronomy;
+    private static ExecutorService gui;
+    private static ExecutorService logger;
 
-
-    public ThreadManager()
+    public static void initThreads()
     {
-        ThreadGroup backend = new ThreadGroup("BACKEND");
-        ThreadGroup frontend = new ThreadGroup("FRONTEND");
-        ThreadGroup IO = new ThreadGroup(backend, "BACKEND");
+        final ThreadGroup backend = new ThreadGroup("BACKEND");
+        final ThreadGroup frontend = new ThreadGroup("FRONTEND");
+        final ThreadGroup IO = new ThreadGroup(backend, "BACKEND");
 
+        io = Executors.newCachedThreadPool();
+        astronomy = Executors.newCachedThreadPool();
+        gui = Executors.newCachedThreadPool();
+        logger = Executors.newSingleThreadExecutor();
 
     }
-*/
+    private ThreadManager()
+    { throw new UnsupportedOperationException();}
+
+
+    public static ExecutorService getIo() {
+        return io;
+    }
+
+    public static ExecutorService getAstronomy() {
+        return astronomy;
+    }
+
+    public static ExecutorService getGui() {
+        return gui;
+    }
+
+    public static ExecutorService getLogger() {
+        return logger;
+    }
 
 }
