@@ -44,7 +44,7 @@ public final class DrawSky extends Application {
 
 
                 try (InputStream hs = resourceStream("/hygdata_v3.csv"); InputStream ast = resourceStream("/asterisms.txt")) {
-
+                    BlackBodyColor.init();
 
                     final Future<StarCatalogue> catalogue = ThreadManager.getGui().submit(() -> new StarCatalogue.Builder()
                             .loadFrom(hs, HygDatabaseLoader.INSTANCE).loadFrom(ast, AsterismLoader.INSTANCE)
@@ -62,12 +62,12 @@ public final class DrawSky extends Application {
 
                     final Future<SkyCanvasPainter> painterFuture = ThreadManager.getGui().submit(() -> new SkyCanvasPainter(canvasFuture.get()));
 
-                    RigelLogger.getBackendLogger().info("Beggining gui");
+                    RigelLogger.getBackendLogger().info("Beginning gui");
                     var a = ThreadManager.getGui().submit(()-> {
 
                         try {
                             painterFuture.get().clear();
-                            painterFuture.get().drawAsterisms(skyFuture.get(), projection.get(), transformFutureFuture.get());
+                            painterFuture.get().drawAsterisms(skyFuture.get(), transformFutureFuture.get());
                             painterFuture.get().drawSun(skyFuture.get(), projection.get(), transformFutureFuture.get());
                             painterFuture.get().drawStars(skyFuture.get(), projection.get(), transformFutureFuture.get());
                             painterFuture.get().drawPlanets(skyFuture.get(), projection.get(), transformFutureFuture.get());
