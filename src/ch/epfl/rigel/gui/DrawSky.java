@@ -8,29 +8,20 @@ import ch.epfl.rigel.coordinates.GeographicCoordinates;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.coordinates.StereographicProjection;
 import ch.epfl.rigel.logging.RigelLogger;
-import ch.epfl.rigel.parallelism.RigelThreadFactory;
 import ch.epfl.rigel.parallelism.ThreadManager;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.image.WritableImage;
 import javafx.scene.transform.Transform;
 import javafx.stage.Stage;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.*;
-import java.util.function.Function;
 
 public final class DrawSky extends Application {
     public static void main(String[] args) { launch(args); }
@@ -38,7 +29,6 @@ public final class DrawSky extends Application {
     private InputStream resourceStream(final String file) {
         return getClass().getResourceAsStream(file);
     }
-
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -48,7 +38,7 @@ public final class DrawSky extends Application {
         ThreadManager.getLogger().execute(() -> RigelLogger.init(new File("logs/Step8"), RigelLogger.runType.DEBUG));
 
         try (InputStream hs = resourceStream("/hygdata_v3.csv"); InputStream ast = resourceStream("/asterisms.txt")) {
-
+            BlackBodyColor.init();
             final Future<StarCatalogue> catalogue = ThreadManager.getIo().submit(() -> new StarCatalogue.Builder()
                     .loadFrom(hs, HygDatabaseLoader.INSTANCE).loadFrom(ast, AsterismLoader.INSTANCE).build());
 
@@ -91,5 +81,6 @@ public final class DrawSky extends Application {
             e.printStackTrace();
         }
         Platform.exit();
+
     }
 }
