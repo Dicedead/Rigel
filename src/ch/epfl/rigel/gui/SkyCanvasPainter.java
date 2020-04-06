@@ -91,7 +91,7 @@ public class SkyCanvasPainter {
     }
 
     private <T extends CelestialObject> Stream<Map.Entry<T, CartesianCoordinates>> applyTransform(final Stream<Map.Entry<T, CartesianCoordinates>> positions, Transform t) {
-        return positions.map(e ->
+        return positions.parallel().map(e ->
         {
             final double x = e.getValue().x();
             final double y = e.getValue().y();
@@ -102,13 +102,16 @@ public class SkyCanvasPainter {
         });
     }
 
-    private <T extends CelestialObject> void drawCelestial(final Stream<Map.Entry<T, CartesianCoordinates>> positions, final Function<T, Double> diameter, final Function<T, Paint> color) {
+    private <T extends CelestialObject> void drawCelestial(final Stream<Map.Entry<T, CartesianCoordinates>> positions,
+                                                           final Function<T, Double> diameter,
+                                                           final Function<T, Paint> color) {
         positions.forEach(e ->
         {
-            Paint c = color.apply(e.getKey());
-            graphicsContext.setFill(c);
-            final double d = 2000 * diameter.apply(e.getKey());
-            graphicsContext.fillOval(e.getValue().x(), e.getValue().y(), d, d);
+            synchronized (graphicsContext) {
+                graphicsContext.setFill(color.apply(e.getKey()));
+                graphicsContext.fillOval(e.getValue().x(), e.getValue().y(),  2000 * diameter.apply(e.getKey()),  2000 * diameter.apply(e.getKey()));
+            }
+
         });
     }
 
