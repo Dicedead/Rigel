@@ -1,5 +1,6 @@
 package ch.epfl.rigel.gui;
 
+import ch.epfl.rigel.astronomy.AsterismLoader;
 import ch.epfl.rigel.astronomy.HygDatabaseLoader;
 import ch.epfl.rigel.astronomy.ObservedSky;
 import ch.epfl.rigel.astronomy.StarCatalogue;
@@ -18,22 +19,26 @@ import javafx.stage.Stage;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.ZonedDateTime;
 
 public final class DrawSky extends Application {
-    public static void main(String[] args) { launch(args); }
+    public static void main(String[] args) {
+        launch(args);
+    }
 
-    private InputStream resourceStream() {
-        return getClass().getResourceAsStream("/hygdata_v3.csv");
+    private InputStream resourceStream(final String file) {
+        return getClass().getResourceAsStream(file);
     }
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
-        try (InputStream hs = resourceStream()){
+    public void start(Stage primaryStage) throws IOException {
+        try (InputStream hs = resourceStream("/hygdata_v3.csv");
+             InputStream ast = resourceStream("/asterisms.txt")) {
             RigelLogger.init(new File("logs/Step8"), RigelLogger.runType.DEBUG);
             StarCatalogue catalogue = new StarCatalogue.Builder()
-                    .loadFrom(hs, HygDatabaseLoader.INSTANCE)
+                    .loadFrom(hs, HygDatabaseLoader.INSTANCE).loadFrom(ast, AsterismLoader.INSTANCE)
                     .build();
 
             ZonedDateTime when =
@@ -56,9 +61,11 @@ public final class DrawSky extends Application {
 
             painter.clear();
 
+            painter.drawAsterisms(sky, projection, planeToCanvas);
             painter.drawStars(sky, projection, planeToCanvas);
             painter.drawPlanets(sky, projection, planeToCanvas);
             painter.drawSun(sky, projection, planeToCanvas);
+            painter.drawMoon(sky, projection, planeToCanvas);
 
             WritableImage fxImage =
                     canvas.snapshot(null, null);

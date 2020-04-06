@@ -13,9 +13,13 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.transform.Transform;
 
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -28,26 +32,27 @@ public class SkyCanvasPainter {
     final private GraphicsContext graphicsContext;
     final static private Function<Star, Paint> starColor = s -> BlackBodyColor.colorForTemperature(s.colorTemperature());
 
-    public SkyCanvasPainter(Canvas canevas) {
-        this.canvas = canevas;
-        this.graphicsContext = canvas.getGraphicsContext2D();
+    public SkyCanvasPainter(Canvas canvas) {
+        this.canvas = canvas;
+        this.graphicsContext = this.canvas.getGraphicsContext2D();
         RigelLogger.getGuiLogger().info("Canvas initialised ready to draw");
     }
 
     public void clear() {
         graphicsContext.setFill(Color.BLACK);
         graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        graphicsContext.setStroke(Color.DARKBLUE);
+        graphicsContext.setLineWidth(2);
     }
 
     public void drawAsterisms(ObservedSky sky, StereographicProjection projection, Transform T) {
         sky.asterisms().forEach(
-                asterism -> IntStream.range(0, sky.asterismIndices(asterism).size()).boxed().forEach(
+                asterism -> IntStream.range(0, sky.asterismIndices(asterism).size()-2).boxed().forEach(
                         i -> {
-                            if ((i != sky.asterismIndices(asterism).size() - 1)) {
-                                final Map<Star, CartesianCoordinates> duoMap = new HashMap<>();
-                                duoMap.put(sky.stars().get(i),sky.starCartesianCoordinatesMap().get(sky.stars().get(i)));
-                                duoMap.put(sky.stars().get(i+1),sky.starCartesianCoordinatesMap().get(sky.stars().get(i+1)));
-                            }
+                                final Map<Star, CartesianCoordinates> duoMap = new TreeMap<>(Comparator.comparingInt(asterism.stars()::indexOf));
+                                duoMap.put(sky.stars().get(sky.asterismIndices(asterism).get(i)),sky.starCartesianCoordinatesMap().get(sky.stars().get(sky.asterismIndices(asterism).get(i))));
+                                duoMap.put(sky.stars().get(sky.asterismIndices(asterism).get(i+1)),sky.starCartesianCoordinatesMap().get(sky.stars().get(sky.asterismIndices(asterism).get(i+1))));
+                                drawLine(applyTransform(mask(duoMap.entrySet().stream()), T));
                         }
                 )
         );
@@ -102,6 +107,12 @@ public class SkyCanvasPainter {
             final double d = 2000 * diameter.apply(e.getKey());
             graphicsContext.fillOval(e.getValue().x(), e.getValue().y(), d, d);
         });
+    }
+
+    private <T extends CelestialObject> void drawLine(final Stream<Map.Entry<T, CartesianCoordinates>> positions) {
+        List<CartesianCoordinates> coords = positions.map(Map.Entry::getValue).collect(Collectors.toList());
+        graphicsContext.strokeLine(coords.get(0).x(),coords.get(0).y(),
+                coords.get(1).x(), coords.get(1).y());
     }
 
     private <T extends CelestialObject> Stream<Map.Entry<T, CartesianCoordinates>> mask(final Stream<Map.Entry<T, CartesianCoordinates>> list) {
