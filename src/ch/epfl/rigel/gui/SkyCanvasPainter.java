@@ -22,7 +22,7 @@ import static java.lang.Math.tan;
 public class SkyCanvasPainter {
 
     private final static double COEFF = 2 * tan(Angle.ofDeg(0.5) / 4) / 140;
-    private final static Color YELLOW_HALO = Color.color(1, 1, 0, 0.25);
+    private final static Color YELLOW_HALO = Color.YELLOW.deriveColor(0, 0, 0, -0.75);
 
     private final Canvas canvas;
     private final GraphicsContext graphicsContext;
@@ -41,14 +41,14 @@ public class SkyCanvasPainter {
         graphicsContext.setFill(Color.BLACK);
         graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
         graphicsContext.setStroke(Color.BLUE);
-        graphicsContext.setLineWidth(1.5);
+        graphicsContext.setLineWidth(1);
     }
 
     public boolean drawAsterisms(ObservedSky sky, Transform T) {
         sky.asterisms().forEach(
-            asterism -> IntStream.range(0, sky.asterismIndices(asterism).size() - 1).boxed().forEach(
-                i -> asterismLine(getCartesFromIndex(sky, asterism, i),
-                     getCartesFromIndex(sky, asterism, i + 1), T)));
+                asterism -> IntStream.range(0, sky.asterismIndices(asterism).size() - 1).boxed().forEach(
+                        i -> asterismLine(getCartesFromIndex(sky, asterism, i),
+                                getCartesFromIndex(sky, asterism, i + 1), T)));
         return true;
     }
 
@@ -75,6 +75,7 @@ public class SkyCanvasPainter {
     }
 
     public boolean drawHorizon(ObservedSky sky, StereographicProjection projection, Transform T) {
+        //projection.circleCenterForParallel()
         return true;
     }
 
@@ -98,10 +99,9 @@ public class SkyCanvasPainter {
         {
             synchronized (graphicsContext) {
                 graphicsContext.setFill(color.apply(e.getKey()));
-                graphicsContext.fillOval(e.getValue().x(), e.getValue().y(), 2000 * diameter.apply(e.getKey()),
-                        2000 * diameter.apply(e.getKey()));
+                graphicsContext.fillOval(e.getValue().x(), e.getValue().y(), 2500 * diameter.apply(e.getKey()),
+                        2500 * diameter.apply(e.getKey()));
             }
-
         });
     }
 
@@ -109,8 +109,9 @@ public class SkyCanvasPainter {
         return list.filter(e -> isInCanvas.apply(e.getValue()));
     }
 
+    //TODO: can be redone with beginPath, moveTo, lineTo, stroke - but would it be better?
     private void asterismLine(final CartesianCoordinates c1, final CartesianCoordinates c2, final Transform t) {
-        if (isInCanvas.apply(c1) && isInCanvas.apply(c2)) {
+        if (isInCanvas.apply(c1) || isInCanvas.apply(c2)) {
             final CartesianCoordinates c1S = transformedCartesCoords(c1, t);
             final CartesianCoordinates c2S = transformedCartesCoords(c2, t);
             graphicsContext.strokeLine(c1S.x(), c1S.y(), c2S.x(), c2S.y());
