@@ -7,6 +7,7 @@ import ch.epfl.rigel.coordinates.StereographicProjection;
 import ch.epfl.rigel.logging.RigelLogger;
 import ch.epfl.rigel.math.Angle;
 import ch.epfl.rigel.math.ClosedInterval;
+import ch.epfl.rigel.parallelism.RigelThreadFactory;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -79,7 +80,8 @@ public class SkyCanvasPainter {
                                                       final Function<T, Double> diameter,
                                                       final Function<T, Paint> color,
                                                       final Transform t) {
-        drawCelestial(applyTransform(mask(positions.entrySet().stream()), t), diameter, color);
+        RigelLogger.getGuiLogger().info("Using : " + java.lang.Thread.activeCount() + " threads for drawing");
+        drawCelestial(applyTransform(mask(positions.entrySet().parallelStream()), t), diameter, color);
     }
 
     private <T extends CelestialObject> Stream<Map.Entry<T, CartesianCoordinates>> applyTransform(final Stream<Map.Entry<T, CartesianCoordinates>> positions, Transform t) {

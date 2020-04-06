@@ -7,6 +7,7 @@ import ch.epfl.rigel.coordinates.GeographicCoordinates;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.coordinates.StereographicProjection;
 import ch.epfl.rigel.logging.RigelLogger;
+import ch.epfl.rigel.parallelism.ThreadManager;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
@@ -16,10 +17,14 @@ import javafx.scene.transform.Transform;
 import javafx.stage.Stage;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.ZonedDateTime;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 public final class DrawSky extends Application {
     public static void main(String[] args) { launch(args); }
@@ -30,41 +35,49 @@ public final class DrawSky extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+
+        ThreadManager T = new ThreadManager();
+
         try (InputStream hs = resourceStream()){
-            RigelLogger.init(new File("logs/Step8"), RigelLogger.runType.DEBUG);
-            StarCatalogue catalogue = new StarCatalogue.Builder()
+
+            T.getGui().execute(() -> RigelLogger.init(new File("logs/Step8"), RigelLogger.runType.DEBUG));
+
+            final Future<StarCatalogue> catalogue = T.getGui().submit(() -> new StarCatalogue.Builder()
                     .loadFrom(hs, HygDatabaseLoader.INSTANCE)
-                    .build();
+                    .build());
 
-            ZonedDateTime when =
-                    ZonedDateTime.parse("2020-02-17T20:15:00+01:00");
-            GeographicCoordinates where =
-                    GeographicCoordinates.ofDeg(6.57, 46.52);
-            HorizontalCoordinates projCenter =
-                    HorizontalCoordinates.ofDeg(180, 45);
-            StereographicProjection projection =
-                    new StereographicProjection(projCenter);
-            ObservedSky sky =
-                    new ObservedSky(when, where, projection, catalogue);
+            final Future<ZonedDateTime> when = T.getGui().submit( () -> ZonedDateTime.parse("2020-02-17T20:15:00+01:00"));
+            final Future<GeographicCoordinates> where = T.getAstronomy().submit(() ->  GeographicCoordinates.ofDeg(6.57, 46.52));
+            final Future<HorizontalCoordinates> projCenter = T.getAstronomy().submit(() ->  HorizontalCoordinates.ofDeg(180, 45));
+            final Future<StereographicProjection> projection = T.getAstronomy().submit(() -> new StereographicProjection(projCenter.get()));
 
-            Canvas canvas =
-                    new Canvas(800, 600);
-            Transform planeToCanvas =
-                    Transform.affine(1300, 0, 0, -1300, 400, 300);
-            SkyCanvasPainter painter =
-                    new SkyCanvasPainter(canvas);
+            final Future<Canvas> canvasFuture = T.getGui().submit(() -> new Canvas(800, 600));
+            final Future<ObservedSky> skyFuture = T.getAstronomy().submit(() -> new ObservedSky(when.get(), where.get(), projection.get(), catalogue.get()));
+            final Future<Transform> transformFutureFuture = T.getGui().submit(() -> Transform.affine(1300, 0, 0, -1300, 400, 300));
+            final Future<SkyCanvasPainter> painterFuture = T.getGui().submit(() -> new SkyCanvasPainter(canvasFuture.get()));
 
-            painter.clear();
+            T.getGui().execute(() ->
+            {
 
-            painter.drawStars(sky, projection, planeToCanvas);
-            painter.drawPlanets(sky, projection, planeToCanvas);
-            painter.drawSun(sky, projection, planeToCanvas);
+                try {
+                    painterFuture.get().clear();
 
-            WritableImage fxImage =
-                    canvas.snapshot(null, null);
-            BufferedImage swingImage =
-                    SwingFXUtils.fromFXImage(fxImage, null);
-            ImageIO.write(swingImage, "png", new File("sky.png"));
+                    painterFuture.get().drawStars(skyFuture.get(), projection.get(), transformFutureFuture.get());
+                    painterFuture.get().drawPlanets(skyFuture.get(), projection.get(), transformFutureFuture.get());
+                    painterFuture.get().drawSun(skyFuture.get(), projection.get(), transformFutureFuture.get());
+
+                    ImageIO.write(SwingFXUtils.fromFXImage(canvasFuture.get().snapshot(null, null),
+                            null), "png", new File("sky.png"));
+
+                } catch (InterruptedException | ExecutionException | IOException e) {
+                    e.printStackTrace();
+                }
+            });
+
+        T.getGui().shutdownNow();
+        T.getAstronomy().shutdownNow();
+        T.getIo().shutdown();
+
         }
         Platform.exit();
     }

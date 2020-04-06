@@ -4,11 +4,12 @@ import ch.epfl.rigel.coordinates.CartesianCoordinates;
 import ch.epfl.test.TestRandomizer;
 import org.junit.jupiter.api.Test;
 
+import static junit.framework.TestCase.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class CartesianCoordinatesTest {
-    @Test
+    @org.junit.Test
     void ofAndGettersWork() {
         var rng = TestRandomizer.newRandom();
         for (int i = 0; i < TestRandomizer.RANDOM_ITERATIONS; i++) {
