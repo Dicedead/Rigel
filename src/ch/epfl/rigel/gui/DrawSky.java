@@ -1,5 +1,6 @@
 package ch.epfl.rigel.gui;
 
+import ch.epfl.rigel.astronomy.AsterismLoader;
 import ch.epfl.rigel.astronomy.HygDatabaseLoader;
 import ch.epfl.rigel.astronomy.ObservedSky;
 import ch.epfl.rigel.astronomy.StarCatalogue;
@@ -30,8 +31,8 @@ import java.util.concurrent.*;
 public final class DrawSky extends Application {
     public static void main(String[] args) { launch(args); }
 
-    private InputStream resourceStream() {
-        return getClass().getResourceAsStream("/hygdata_v3.csv");
+    private InputStream resourceStream(final String file) {
+        return getClass().getResourceAsStream(file);
     }
 
     @Override
@@ -42,11 +43,11 @@ public final class DrawSky extends Application {
         ThreadManager.getLogger().execute(() -> RigelLogger.init(new File("logs/Step8"), RigelLogger.runType.DEBUG));
 
 
-                try (InputStream hs = resourceStream()) {
+                try (InputStream hs = resourceStream("/hygdata_v3.csv"); InputStream ast = resourceStream("/asterisms.txt")) {
 
 
                     final Future<StarCatalogue> catalogue = ThreadManager.getGui().submit(() -> new StarCatalogue.Builder()
-                            .loadFrom(hs, HygDatabaseLoader.INSTANCE)
+                            .loadFrom(hs, HygDatabaseLoader.INSTANCE).loadFrom(ast, AsterismLoader.INSTANCE)
                             .build());
                     final Future<ZonedDateTime> when = ThreadManager.getGui().submit( () -> ZonedDateTime.parse("2020-02-17T20:15:00+01:00"));
 
@@ -66,9 +67,12 @@ public final class DrawSky extends Application {
 
                         try {
                             painterFuture.get().clear();
+                            painterFuture.get().drawAsterisms(skyFuture.get(), projection.get(), transformFutureFuture.get());
                             painterFuture.get().drawSun(skyFuture.get(), projection.get(), transformFutureFuture.get());
                             painterFuture.get().drawStars(skyFuture.get(), projection.get(), transformFutureFuture.get());
                             painterFuture.get().drawPlanets(skyFuture.get(), projection.get(), transformFutureFuture.get());
+                            painterFuture.get().drawMoon(skyFuture.get(), projection.get(), transformFutureFuture.get());
+                            painterFuture.get().drawHorizon(skyFuture.get(), projection.get(), transformFutureFuture.get());
                         } catch (InterruptedException | ExecutionException e) {
                             e.printStackTrace();
                         }

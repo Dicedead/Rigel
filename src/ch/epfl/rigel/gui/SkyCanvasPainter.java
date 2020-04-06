@@ -46,9 +46,9 @@ public class SkyCanvasPainter {
         graphicsContext.setLineWidth(2);
     }
 
-    public void drawAsterisms(ObservedSky sky, StereographicProjection projection, Transform T) {
+    public boolean drawAsterisms(ObservedSky sky, StereographicProjection projection, Transform T) {
         sky.asterisms().forEach(
-                asterism -> IntStream.range(0, sky.asterismIndices(asterism).size()-2).boxed().forEach(
+                asterism -> IntStream.range(0, sky.asterismIndices(asterism).size()-1).boxed().forEach(
                         i -> {
                                 final Map<Star, CartesianCoordinates> duoMap = new TreeMap<>(Comparator.comparingInt(asterism.stars()::indexOf));
                                 duoMap.put(sky.stars().get(sky.asterismIndices(asterism).get(i)),sky.starCartesianCoordinatesMap().get(sky.stars().get(sky.asterismIndices(asterism).get(i))));
@@ -57,6 +57,7 @@ public class SkyCanvasPainter {
                         }
                 )
         );
+        return true;
     }
 
     public boolean drawStars(ObservedSky sky, StereographicProjection projection, Transform T) {
@@ -70,20 +71,18 @@ public class SkyCanvasPainter {
 
     }
 
-    //TODO: INSTEAD OF MAP.OF -> GETTERS FOR THE SUN AND MOON MAPS IN OBSERVEDSKY
     public boolean drawSun(ObservedSky sky, StereographicProjection projection, Transform T) {
-        pipeline(Map.of(sky.sun(), sky.sunPosition()), sun -> projection.applyToAngle(sun.angularSize()), sun -> Color.WHITE, T);
+        pipeline(sky.sunMap(), sun -> projection.applyToAngle(sun.angularSize()), sun -> Color.WHITE, T);
         return true;
-
     }
 
-    public void drawMoon(ObservedSky sky, StereographicProjection projection, Transform T) {
-        pipeline(Map.of(sky.moon(), sky.moonPosition()), moon -> projection.applyToAngle(moon.angularSize()), moon -> Color.WHITE, T);
-
-
+    public boolean drawMoon(ObservedSky sky, StereographicProjection projection, Transform T) {
+        pipeline(sky.moonMap(), moon -> projection.applyToAngle(moon.angularSize()), moon -> Color.WHITE, T);
+        return true;
     }
 
-    public void drawHorizon(ObservedSky sky, StereographicProjection projection, Transform T) {
+    public boolean drawHorizon(ObservedSky sky, StereographicProjection projection, Transform T) {
+        return true;
     }
 
 
@@ -119,8 +118,7 @@ public class SkyCanvasPainter {
 
     private <T extends CelestialObject> void drawLine(final Stream<Map.Entry<T, CartesianCoordinates>> positions) {
         List<CartesianCoordinates> coords = positions.map(Map.Entry::getValue).collect(Collectors.toList());
-        graphicsContext.strokeLine(coords.get(0).x(),coords.get(0).y(),
-                coords.get(1).x(), coords.get(1).y());
+        graphicsContext.strokeLine(coords.get(0).x(),coords.get(0).y(), coords.get(1).x(), coords.get(1).y());
     }
 
     private <T extends CelestialObject> Stream<Map.Entry<T, CartesianCoordinates>> mask(final Stream<Map.Entry<T, CartesianCoordinates>> list) {
