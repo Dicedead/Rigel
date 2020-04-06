@@ -61,10 +61,10 @@ public final class DrawSky extends Application {
             ThreadManager.getGui().execute(
                     () ->
                     {
-                        //paint.drawAsterisms(sky, transform);
-                        paint.drawSun(sky, proj, transform);
+                        paint.drawAsterisms(sky, transform);
                         paint.drawStars(sky, proj, transform);
                         paint.drawPlanets(sky, proj, transform);
+                        paint.drawSun(sky, proj, transform);
                         paint.drawMoon(sky, proj, transform);
                         paint.drawHorizon(sky, proj, transform);});
 

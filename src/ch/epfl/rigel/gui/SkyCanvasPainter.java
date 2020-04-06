@@ -89,7 +89,7 @@ public class SkyCanvasPainter {
     }
 
     private <T extends CelestialObject> Stream<Map.Entry<T, CartesianCoordinates>> applyTransform(final Stream<Map.Entry<T, CartesianCoordinates>> positions, Transform t) {
-        return positions.parallel().map(e -> Map.entry(e.getKey(), transformedCartesCoords(e.getValue(), t)));
+        return positions.map(e -> Map.entry(e.getKey(), transformedCartesCoords(e.getValue(), t)));
     }
 
     private <T extends CelestialObject> void drawCelestial(final Stream<Map.Entry<T, CartesianCoordinates>> positions,
