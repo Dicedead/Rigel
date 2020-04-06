@@ -47,10 +47,9 @@ public final class EquatorialToHorizontalConversion implements Function<Equatori
           /*Same playing around with trigonometry as for EclipticToEquatorialConversion in order to perform less
             computation.*/
 
-        final double h = asin(term1);
-        final double A = atan2(-cosPhi * cos(dec) * sin(H), sinDec - sinPhi * term1);
-
-        return HorizontalCoordinates.of(normalizePositive(A), h);
+        return HorizontalCoordinates.of(
+                normalizePositive(atan2(-cosPhi * cos(dec) * sin(H), sinDec - sinPhi * term1)),
+                asin(term1));
     }
 
     /**

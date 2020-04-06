@@ -57,7 +57,7 @@ public final class DrawSky extends Application {
 
             final var sky = skyFuture.get();
 
-            RigelLogger.getBackendLogger().info("Beggining Celestial object drawing");
+            RigelLogger.getBackendLogger().info("Beginning Celestial object drawing");
             ThreadManager.getGui().execute(
                     () ->
                     {

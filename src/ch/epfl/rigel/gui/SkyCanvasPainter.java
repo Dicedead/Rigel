@@ -2,6 +2,7 @@ package ch.epfl.rigel.gui;
 
 import ch.epfl.rigel.astronomy.*;
 import ch.epfl.rigel.coordinates.CartesianCoordinates;
+import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.coordinates.StereographicProjection;
 import ch.epfl.rigel.logging.RigelLogger;
 import ch.epfl.rigel.math.Angle;
@@ -22,7 +23,10 @@ import static java.lang.Math.tan;
 public class SkyCanvasPainter {
 
     private final static double COEFF = 2 * tan(Angle.ofDeg(0.5) / 4) / 140;
+    private final static int SCALE_FACTOR = 3500;
+    private final static ClosedInterval CLIP_INTERVAL = ClosedInterval.of(-2, 5);
     private final static Color YELLOW_HALO = Color.YELLOW.deriveColor(0, 0, 0, -0.75);
+    private final static HorizontalCoordinates PARALLEL = HorizontalCoordinates.ofDeg(0,0);
 
     private final Canvas canvas;
     private final GraphicsContext graphicsContext;
@@ -40,11 +44,13 @@ public class SkyCanvasPainter {
     public void clear() {
         graphicsContext.setFill(Color.BLACK);
         graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        graphicsContext.setStroke(Color.BLUE);
-        graphicsContext.setLineWidth(1);
     }
 
     public boolean drawAsterisms(ObservedSky sky, Transform T) {
+        synchronized (graphicsContext) {
+            graphicsContext.setStroke(Color.BLUE);
+            graphicsContext.setLineWidth(1);
+        }
         sky.asterisms().forEach(
                 asterism -> IntStream.range(0, sky.asterismIndices(asterism).size() - 1).boxed().forEach(
                         i -> asterismLine(getCartesFromIndex(sky, asterism, i),
@@ -75,7 +81,15 @@ public class SkyCanvasPainter {
     }
 
     public boolean drawHorizon(ObservedSky sky, StereographicProjection projection, Transform T) {
-        //projection.circleCenterForParallel()
+        synchronized (graphicsContext) {
+            final double size = SCALE_FACTOR * projection.circleRadiusForParallel(PARALLEL)/2;
+            graphicsContext.setStroke(Color.RED);
+            graphicsContext.setLineWidth(2);
+            graphicsContext.strokeOval(
+                    transformedCartesCoords(projection.circleCenterForParallel(PARALLEL),T).x() - size/2,
+                    transformedCartesCoords(projection.circleCenterForParallel(PARALLEL),T).y() - size/2,
+                    size, size);
+        }
         return true;
     }
 
@@ -98,7 +112,7 @@ public class SkyCanvasPainter {
         positions.forEach(e ->
         {
             synchronized (graphicsContext) {
-                final double size = 3500 * diameter.apply(e.getKey());
+                final double size = SCALE_FACTOR * diameter.apply(e.getKey());
                 graphicsContext.setFill(color.apply(e.getKey()));
                 graphicsContext.fillOval(e.getValue().x()-size/2, e.getValue().y()-size/2, size, size);
             }
@@ -123,7 +137,7 @@ public class SkyCanvasPainter {
     }
 
     private static <T extends CelestialObject> Double celestialSize(final T s) {
-        return (99 - 17 * ClosedInterval.of(-2, 5).clip(s.magnitude())) * COEFF;
+        return (99 - 17 * CLIP_INTERVAL.clip(s.magnitude())) * COEFF;
     }
 
     private static CartesianCoordinates transformedCartesCoords(final CartesianCoordinates cartesCoord, final Transform t) {
