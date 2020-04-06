@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class BlackBodyColorTest {
     @Test
     void colorForTemperatureWorks() {
-        BlackBodyColor.initSize();
+        BlackBodyColor.init();
 
         long time0 = System.nanoTime();
         assertEquals(Color.rgb(0xb3,0xcc,0xff), BlackBodyColor.colorForTemperature(14849.149));

@@ -1,6 +1,7 @@
 package ch.epfl.rigel.astronomy;
 
 import ch.epfl.rigel.coordinates.EquatorialCoordinates;
+import ch.epfl.rigel.logging.RigelLogger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,11 +9,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * Utility class for loading the HYG database
@@ -40,6 +37,8 @@ public enum HygDatabaseLoader implements StarCatalogue.Loader {
      */
     @Override
     public void load(InputStream inputStream, StarCatalogue.Builder builder) throws IOException {
+
+        RigelLogger.getFileLogger().info("Loading star file");
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream,
                 StandardCharsets.US_ASCII))) {
 
@@ -63,6 +62,7 @@ public enum HygDatabaseLoader implements StarCatalogue.Loader {
                                 /*colorIndex*/ buildWithDefault(line[Column.CI.ordinal()], 0, Float::parseFloat).floatValue()
                         ));
             });
+            RigelLogger.getFileLogger().fine("Finished loading Star file " );
 
         } catch (UncheckedIOException e) { //Streams throw UncheckedIOExceptions, and need not to modify the API
             throw e.getCause();
