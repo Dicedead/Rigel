@@ -36,12 +36,12 @@ public final class DrawSky extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Platform.runLater(() -> {
+
         ThreadManager.initThreads();
 
         ThreadManager.getLogger().execute(() -> RigelLogger.init(new File("logs/Step8"), RigelLogger.runType.DEBUG));
 
-            try {
+
                 try (InputStream hs = resourceStream()) {
 
 
@@ -62,13 +62,22 @@ public final class DrawSky extends Application {
                     final Future<SkyCanvasPainter> painterFuture = ThreadManager.getGui().submit(() -> new SkyCanvasPainter(canvasFuture.get()));
 
                     RigelLogger.getBackendLogger().info("Beggining gui");
-                    painterFuture.get().clear();
+                    var a = ThreadManager.getGui().submit(()-> {
 
-                    painterFuture.get().drawStars(skyFuture.get(), projection.get(), transformFutureFuture.get());
-                    painterFuture.get().drawPlanets(skyFuture.get(), projection.get(), transformFutureFuture.get());
-                    painterFuture.get().drawSun(skyFuture.get(), projection.get(), transformFutureFuture.get());
+                        try {
+                            painterFuture.get().clear();
+                            painterFuture.get().drawSun(skyFuture.get(), projection.get(), transformFutureFuture.get());
+                            painterFuture.get().drawStars(skyFuture.get(), projection.get(), transformFutureFuture.get());
+                            painterFuture.get().drawPlanets(skyFuture.get(), projection.get(), transformFutureFuture.get());
+                        } catch (InterruptedException | ExecutionException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    );
+                    a.get();
 
-                    RigelLogger.getBackendLogger().info("Saving file");
+                    while (!a.isDone())
+                        RigelLogger.getBackendLogger().info("drawing stars");
 
                     ImageIO.write(SwingFXUtils.fromFXImage(canvasFuture.get().snapshot(null, null),
                                     null), "png", new File("sky.png"));
@@ -78,14 +87,9 @@ public final class DrawSky extends Application {
                     ThreadManager.getIo().shutdown();
                     ThreadManager.getLogger().shutdownNow();
 
-                } catch (InterruptedException | ExecutionException e) {
+                } catch (InterruptedException | ExecutionException | IOException e) {
                     e.printStackTrace();
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-
         Platform.exit();
 
     }

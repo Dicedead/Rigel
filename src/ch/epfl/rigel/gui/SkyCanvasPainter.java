@@ -54,21 +54,27 @@ public class SkyCanvasPainter {
         );
     }
 
-    public void drawStars(ObservedSky sky, StereographicProjection projection, Transform T) {
+    public boolean drawStars(ObservedSky sky, StereographicProjection projection, Transform T) {
         pipeline(sky.starCartesianCoordinatesMap(), star -> projection.applyToAngle(celestialSize(star)), starColor, T);
+        return true;
     }
 
-    public void drawPlanets(ObservedSky sky, StereographicProjection projection, Transform T) {
+    public boolean drawPlanets(ObservedSky sky, StereographicProjection projection, Transform T) {
         pipeline(sky.planetCartesianCoordinatesMap(), planet -> projection.applyToAngle(celestialSize(planet)), planet -> Color.LIGHTGRAY, T);
+        return true;
+
     }
 
     //TODO: INSTEAD OF MAP.OF -> GETTERS FOR THE SUN AND MOON MAPS IN OBSERVEDSKY
-    public void drawSun(ObservedSky sky, StereographicProjection projection, Transform T) {
+    public boolean drawSun(ObservedSky sky, StereographicProjection projection, Transform T) {
         pipeline(Map.of(sky.sun(), sky.sunPosition()), sun -> projection.applyToAngle(sun.angularSize()), sun -> Color.WHITE, T);
+        return true;
+
     }
 
     public void drawMoon(ObservedSky sky, StereographicProjection projection, Transform T) {
         pipeline(Map.of(sky.moon(), sky.moonPosition()), moon -> projection.applyToAngle(moon.angularSize()), moon -> Color.WHITE, T);
+
 
     }
 
