@@ -81,8 +81,7 @@ public class SkyCanvasPainter {
                                                       final Function<T, Paint> color,
                                                       final Transform t) {
 
-        RigelLogger.getBackendLogger().info("Using : " + java.lang.Thread.activeCount() + " threads for drawing");
-        drawCelestial(applyTransform(mask(positions.entrySet().parallelStream()), t), diameter, color);
+        drawCelestial(applyTransform(mask(positions.entrySet().stream()), t), diameter, color);
     }
 
     private <T extends CelestialObject> Stream<Map.Entry<T, CartesianCoordinates>> applyTransform(final Stream<Map.Entry<T, CartesianCoordinates>> positions, Transform t) {

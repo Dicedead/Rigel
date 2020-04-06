@@ -19,10 +19,10 @@ public final class ThreadManager {
         final ThreadGroup frontend = new ThreadGroup("FRONTEND");
         final ThreadGroup IO = new ThreadGroup(backend, "BACKEND");
 
-        io = Executors.newCachedThreadPool(new RigelThreadFactory("io", 3, IO));
-        astronomy = Executors.newCachedThreadPool(new RigelThreadFactory("astronomy", 1, backend));
-        gui = Executors.newCachedThreadPool(new RigelThreadFactory("gui", 2, frontend));
-        logger = Executors.newSingleThreadExecutor(new RigelThreadFactory("logger", 2, frontend));
+        io = Executors.newCachedThreadPool();
+        astronomy = Executors.newCachedThreadPool();
+        gui = Executors.newCachedThreadPool();
+        logger = Executors.newSingleThreadExecutor();
 
     }
     private ThreadManager()
