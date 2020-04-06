@@ -44,7 +44,7 @@ public final class DrawSky extends Application {
 
         try (InputStream hs = resourceStream()) {
 
-            final Future<StarCatalogue> catalogue = ThreadManager.getGui().submit(() -> new StarCatalogue.Builder()
+            final Future<StarCatalogue> catalogue = ThreadManager.getIo().submit(() -> new StarCatalogue.Builder()
                     .loadFrom(hs, HygDatabaseLoader.INSTANCE)
                     .build());
             final Future<ZonedDateTime> when = ThreadManager.getGui().submit( () -> ZonedDateTime.parse("2020-02-17T20:15:00+01:00"));
