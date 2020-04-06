@@ -1,5 +1,6 @@
 package ch.epfl.rigel.gui;
 
+import ch.epfl.rigel.astronomy.AsterismLoader;
 import ch.epfl.rigel.astronomy.HygDatabaseLoader;
 import ch.epfl.rigel.astronomy.ObservedSky;
 import ch.epfl.rigel.astronomy.StarCatalogue;
@@ -11,6 +12,7 @@ import ch.epfl.rigel.parallelism.RigelThreadFactory;
 import ch.epfl.rigel.parallelism.ThreadManager;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.image.WritableImage;
@@ -25,14 +27,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.*;
+import java.util.function.Function;
 
 public final class DrawSky extends Application {
     public static void main(String[] args) { launch(args); }
 
-    private InputStream resourceStream() {
-        return getClass().getResourceAsStream("/hygdata_v3.csv");
+    private InputStream resourceStream(final String file) {
+        return getClass().getResourceAsStream(file);
     }
+
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -41,57 +47,49 @@ public final class DrawSky extends Application {
 
         ThreadManager.getLogger().execute(() -> RigelLogger.init(new File("logs/Step8"), RigelLogger.runType.DEBUG));
 
-        try (InputStream hs = resourceStream()) {
-
+        try (InputStream hs = resourceStream("/hygdata_v3.csv"); InputStream ast = resourceStream("/asterisms.txt")) {
 
             final Future<StarCatalogue> catalogue = ThreadManager.getIo().submit(() -> new StarCatalogue.Builder()
-                    .loadFrom(hs, HygDatabaseLoader.INSTANCE)
-                    .build());
-            final Future<ZonedDateTime> when = ThreadManager.getGui().submit( () -> ZonedDateTime.parse("2020-02-17T20:15:00+01:00"));
-            final Future<GeographicCoordinates> where = ThreadManager.getAstronomy().submit(() ->  GeographicCoordinates.ofDeg(6.57, 46.52));
-            final Future<HorizontalCoordinates> projCenter = ThreadManager.getAstronomy().submit(() ->  HorizontalCoordinates.ofDeg(180, 45));
-            final Future<StereographicProjection> projection = ThreadManager.getAstronomy().submit(() -> new StereographicProjection(projCenter.get()));
+                    .loadFrom(hs, HygDatabaseLoader.INSTANCE).loadFrom(ast, AsterismLoader.INSTANCE).build());
 
-                    final Future<Canvas> canvasFuture = ThreadManager.getGui().submit(() -> new Canvas(800, 600));
+            final StereographicProjection proj = new StereographicProjection(HorizontalCoordinates.ofDeg(180, 45));
 
-                    final Future<ObservedSky> skyFuture = ThreadManager.getAstronomy().submit(() -> new ObservedSky(when.get(), where.get(), projection.get(), catalogue.get()));
-                    final Future<Transform> transformFutureFuture = ThreadManager.getGui().submit(() -> Transform.affine(1300, 0, 0, -1300, 400, 300));
+            final Canvas canvasFuture = new Canvas(800, 600);
 
-                    final Future<SkyCanvasPainter> painterFuture = ThreadManager.getGui().submit(() -> new SkyCanvasPainter(canvasFuture.get()));
+            final Transform transform =   Transform.affine(1300, 0, 0, -1300, 400, 300);
 
-                    RigelLogger.getBackendLogger().info("Beggining gui");
-                    var a = ThreadManager.getGui().submit(()-> {
+            final SkyCanvasPainter paint = new SkyCanvasPainter(canvasFuture);
 
-                        try {
-                            painterFuture.get().clear();
-                            painterFuture.get().drawAsterisms(skyFuture.get(), projection.get(), transformFutureFuture.get());
-                            painterFuture.get().drawSun(skyFuture.get(), projection.get(), transformFutureFuture.get());
-                            painterFuture.get().drawStars(skyFuture.get(), projection.get(), transformFutureFuture.get());
-                            painterFuture.get().drawPlanets(skyFuture.get(), projection.get(), transformFutureFuture.get());
-                            painterFuture.get().drawMoon(skyFuture.get(), projection.get(), transformFutureFuture.get());
-                            painterFuture.get().drawHorizon(skyFuture.get(), projection.get(), transformFutureFuture.get());
-                        } catch (InterruptedException | ExecutionException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    );
-                    a.get();
+            paint.clear();
 
-                    while (!a.isDone())
-                        RigelLogger.getBackendLogger().info("drawing stars");
+            final Future<ObservedSky> skyFuture = ThreadManager.getAstronomy().submit(() -> new ObservedSky(
+                    ZonedDateTime.parse("2020-02-17T20:15:00+01:00"), GeographicCoordinates.ofDeg(6.57, 46.52), proj, catalogue.get()));
 
-                    ImageIO.write(SwingFXUtils.fromFXImage(canvasFuture.get().snapshot(null, null),
-                                    null), "png", new File("sky.png"));
+            final var sky = skyFuture.get();
 
-                    ThreadManager.getGui().shutdownNow();
-                    ThreadManager.getAstronomy().shutdownNow();
-                    ThreadManager.getIo().shutdown();
-                    ThreadManager.getLogger().shutdownNow();
+            RigelLogger.getBackendLogger().info("Beggining Celestial object drawing");
+            ThreadManager.getGui().execute(
+                    () ->
+                    {
+                        //paint.drawAsterisms(sky, proj, transform);
+                        paint.drawSun(sky, proj, transform);
+                        paint.drawStars(sky, proj, transform);
+                        paint.drawPlanets(sky, proj, transform);
+                        paint.drawMoon(sky, proj, transform);
+                        paint.drawHorizon(sky, proj, transform);});
 
-                } catch (InterruptedException | ExecutionException | IOException e) {
-                    e.printStackTrace();
-                }
+            RigelLogger.getBackendLogger().info("Finished drawing stars");
+            ImageIO.write(SwingFXUtils.fromFXImage(canvasFuture.snapshot(null, null),
+                    null), "png", new File("sky.png"));
+
+            ThreadManager.getGui().shutdownNow();
+            ThreadManager.getAstronomy().shutdownNow();
+            ThreadManager.getIo().shutdown();
+            ThreadManager.getLogger().shutdownNow();
+
+        } catch (InterruptedException | ExecutionException | IOException e) {
+            e.printStackTrace();
+        }
         Platform.exit();
-
     }
 }
