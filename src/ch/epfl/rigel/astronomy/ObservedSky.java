@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -90,8 +91,8 @@ public final class ObservedSky {
                         .filter(i -> i.ordinal() != 2).collect(Collectors.toList()), this::applyModel,
                 i -> PLANET_NAMES.indexOf(i.name()));
 
-        sunMap = mapObjectToPosition(List.of(SunModel.SUN), this::applyModel);
-        moonMap = mapObjectToPosition(List.of(MoonModel.MOON), this::applyModel);
+        sunMap = Map.copyOf(mapObjectToPosition(List.of(SunModel.SUN), this::applyModel));
+        moonMap = Map.copyOf(mapObjectToPosition(List.of(MoonModel.MOON), this::applyModel));
 
         planetList = List.copyOf(planetMap.keySet());
         planetPositions = positionsToArray(planetMap);
@@ -104,7 +105,7 @@ public final class ObservedSky {
                 .flatMap(l -> l.entrySet().stream())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (u, v) -> v, HashMap::new));
 
-        RigelLogger.getAstronomyLogger().info("Sky finished initialisationi");
+        RigelLogger.getAstronomyLogger().info("Sky finished initialisation");
         RigelLogger.getAstronomyLogger().exiting("ObservedSky", "ObservedSky");
 
     }
@@ -142,6 +143,10 @@ public final class ObservedSky {
         return catalogue.stars();
     }
 
+    public Set<Asterism> asterisms() { return catalogue.asterisms(); }
+
+    public List<Integer> asterismIndices(Asterism asterism) { return catalogue.asterismIndices(asterism); }
+
     /**
      * @return (double[]) array of doubles containing the stars' x coords in even indices, y coords in odd indices, in
      * the same order as returned by stars()
@@ -165,6 +170,10 @@ public final class ObservedSky {
         return planetPositions.clone();
     }
 
+    public Map<Sun, CartesianCoordinates> sunMap() {
+        return sunMap;
+    }
+
     /**
      * @return (Sun) Sun object in current observed sky
      */
@@ -177,6 +186,10 @@ public final class ObservedSky {
      */
     public CartesianCoordinates sunPosition() {
         return (CartesianCoordinates) sunMap.values().toArray()[0];
+    }
+
+    public Map<Moon, CartesianCoordinates> moonMap() {
+        return moonMap;
     }
 
     /**
