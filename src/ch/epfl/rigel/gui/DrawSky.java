@@ -42,7 +42,7 @@ public final class DrawSky extends Application {
             final Future<StarCatalogue> catalogue = ThreadManager.getIo().submit(() -> new StarCatalogue.Builder()
                     .loadFrom(hs, HygDatabaseLoader.INSTANCE).loadFrom(ast, AsterismLoader.INSTANCE).build());
 
-            final StereographicProjection proj = new StereographicProjection(HorizontalCoordinates.ofDeg(180, 45));
+            final StereographicProjection proj = new StereographicProjection(HorizontalCoordinates.ofDeg(270, 15));
 
             final Canvas canvasFuture = new Canvas(800, 600);
 
@@ -53,9 +53,9 @@ public final class DrawSky extends Application {
             paint.clear();
 
             final Future<ObservedSky> skyFuture = ThreadManager.getAstronomy().submit(() -> new ObservedSky(
-                    ZonedDateTime.parse("2020-02-17T20:15:00+01:00"), GeographicCoordinates.ofDeg(6.57, 46.52), proj, catalogue.get()));
+                    ZonedDateTime.parse("2021-10-05T10:15:00+05:00"), GeographicCoordinates.ofDeg(27, 78), proj, catalogue.get()));
 
-            final var sky = skyFuture.get();
+            final ObservedSky sky = skyFuture.get();
 
             RigelLogger.getBackendLogger().info("Beginning Celestial object drawing");
             ThreadManager.getGui().execute(
@@ -66,7 +66,8 @@ public final class DrawSky extends Application {
                         paint.drawPlanets(sky, proj, transform);
                         paint.drawSun(sky, proj, transform);
                         paint.drawMoon(sky, proj, transform);
-                        paint.drawHorizon(sky, proj, transform);});
+                        //paint.drawHorizon(sky, proj, transform);
+                        });
 
             RigelLogger.getBackendLogger().info("Finished drawing stars");
             ImageIO.write(SwingFXUtils.fromFXImage(canvasFuture.snapshot(null, null),

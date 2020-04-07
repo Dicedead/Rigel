@@ -4,34 +4,31 @@ import ch.epfl.rigel.astronomy.Asterism;
 import ch.epfl.rigel.astronomy.AsterismLoader;
 import ch.epfl.rigel.astronomy.Epoch;
 import ch.epfl.rigel.astronomy.HygDatabaseLoader;
+import ch.epfl.rigel.astronomy.Moon;
 import ch.epfl.rigel.astronomy.MoonModel;
 import ch.epfl.rigel.astronomy.ObservedSky;
 import ch.epfl.rigel.astronomy.Planet;
+import ch.epfl.rigel.astronomy.PlanetModel;
 import ch.epfl.rigel.astronomy.Star;
 import ch.epfl.rigel.astronomy.StarCatalogue;
+import ch.epfl.rigel.astronomy.Sun;
 import ch.epfl.rigel.astronomy.SunModel;
 import ch.epfl.rigel.coordinates.*;
-import ch.epfl.test.Chronometer;
-import ch.epfl.test.TestRandomizer;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.Month;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
-import java.util.SplittableRandom;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.TreeMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ObservedSkyTest {
 
@@ -125,57 +122,59 @@ public class ObservedSkyTest {
     @Test
     void stars() throws IOException {
         init();
-        int i = 0;
-        for (Star star : sky.stars()) {
-            assertEquals(stereo.apply(convEquToHor.apply(star.equatorialPos())).x(),
-                    sky.starsPosition()[i]);
-            i += 2;
-        }
-        assertEquals(catalogue.stars().size(),sky.stars().size());
+        assertEquals(5067, sky.starsMap().size());
 
-        //Si fail: Cloner le tableau
-        double memory = sky.starsPosition()[0];
-        sky.starsPosition()[0] = Double.MAX_VALUE;
-        assertEquals(memory, sky.starsPosition()[0]);
-        assertEquals(5067*2, sky.starsPosition().length);
+        assertThrows(UnsupportedOperationException.class, () -> sky.starsMap().clear());
+        assertThrows(UnsupportedOperationException.class, () -> sky.starsMap().put(
+                new Star(25,"lul", EquatorialCoordinates.of(0,0),0f,0f),
+                CartesianCoordinates.of(0,0))
+        );
+        assertEquals(sky.stars().size(), sky.starsMap().size());
+
+        for(Star star : sky.stars()) {
+            assertEquals(stereo.apply(convEquToHor.apply(star.equatorialPos())).x(),
+                    sky.starsMap().get(star).x());
+            assertEquals(stereo.apply(convEquToHor.apply(star.equatorialPos())).y(),
+                    sky.starsMap().get(star).y());
+        }
     }
 
     @Test
     void planets() throws IOException {
         init();
-        assertEquals(14, sky.planetsPosition().length);
+        assertEquals(7, sky.planetsMap().size());
 
-        int i = 0;
-        for (Planet planet : sky.planets()) {
-                assertEquals(stereo.apply(convEquToHor.apply(planet.equatorialPos())).x(),
-                        sky.planetsPosition()[i++]);
-                assertEquals(stereo.apply(convEquToHor.apply(planet.equatorialPos())).y(),
-                        sky.planetsPosition()[i++]);
+        assertThrows(UnsupportedOperationException.class, () -> sky.planetsMap().clear());
+        assertThrows(UnsupportedOperationException.class, () -> sky.planetsMap().put(
+                new Planet("lul",EquatorialCoordinates.of(0,0),0f,0f),
+                CartesianCoordinates.of(0,0))
+        );
+
+        for(Planet planetM : sky.planetsMap().keySet()) {
+            assertEquals(stereo.apply(convEquToHor.apply(planetM.equatorialPos())).x(),
+                    sky.planetsMap().get(planetM).x());
+            assertEquals(stereo.apply(convEquToHor.apply(planetM.equatorialPos())).y(),
+                    sky.planetsMap().get(planetM).y());
         }
-
-        //Si fail: Cloner le tableau
-        double memory = sky.planetsPosition()[0];
-        sky.planetsPosition()[0] = Double.MAX_VALUE;
-        assertEquals(memory, sky.planetsPosition()[0]);
     }
 
     @Test
     void moonAndSun() throws IOException {
         init();
         assertEquals(SunModel.SUN.at(Epoch.J2010.daysUntil(time),convEcltoEqu).eclipticPos().lon(),
-                sky.sun().eclipticPos().lon());
+                ((Sun)sky.sunMap().keySet().toArray()[0]).eclipticPos().lon());
         //Sun possède le getter equatorialPos mais autant tester la précision avec 2 conversions successives...
         assertEquals(stereo.apply(convEquToHor.apply(convEcltoEqu.apply(SunModel.SUN.at(Epoch.J2010.daysUntil(time),convEcltoEqu).eclipticPos()))).x(),
-                sky.sunPosition().x());
+                sky.sunMap().get(sky.sunMap().keySet().toArray()[0]).x());
         assertEquals(stereo.apply(convEquToHor.apply(convEcltoEqu.apply(SunModel.SUN.at(Epoch.J2010.daysUntil(time),convEcltoEqu).eclipticPos()))).y(),
-                sky.sunPosition().y());
+                sky.sunMap().get(sky.sunMap().keySet().toArray()[0]).y());
 
         assertEquals(MoonModel.MOON.at(Epoch.J2010.daysUntil(time),convEcltoEqu).equatorialPos().dec(),
-                sky.moon().equatorialPos().dec());
+                ((Moon)sky.moonMap().keySet().toArray()[0]).equatorialPos().dec());
         assertEquals(stereo.apply(convEquToHor.apply(MoonModel.MOON.at(Epoch.J2010.daysUntil(time),convEcltoEqu).equatorialPos())).x(),
-                sky.moonPosition().x());
+                sky.moonMap().get(sky.moonMap().keySet().toArray()[0]).x());
         assertEquals(stereo.apply(convEquToHor.apply(MoonModel.MOON.at(Epoch.J2010.daysUntil(time),convEcltoEqu).equatorialPos())).y(),
-                sky.moonPosition().y());
+                sky.moonMap().get(sky.moonMap().keySet().toArray()[0]).y());
     }
 /*
     @Test

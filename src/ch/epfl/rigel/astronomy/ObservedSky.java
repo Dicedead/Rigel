@@ -7,6 +7,7 @@ import com.sun.tools.javac.Main;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -32,15 +33,10 @@ public final class ObservedSky {
 
     private final Map<Sun, CartesianCoordinates> sunMap;
     private final Map<Moon, CartesianCoordinates> moonMap;
-
-    private final Map<CelestialObject, CartesianCoordinates> celestObjToCoordsMap;
-
     private final Map<Star, CartesianCoordinates> starMap;
     private final Map<Planet, CartesianCoordinates> planetMap;
 
-    private final List<Planet> planetList;
-    private final double[] starsPositions;
-    private final double[] planetPositions;
+    private final Map<CelestialObject, CartesianCoordinates> celestObjToCoordsMap;
 
     private final StereographicProjection stereoProj;
     private final EquatorialToHorizontalConversion eqToHor;
@@ -75,33 +71,15 @@ public final class ObservedSky {
         this.eqToHor = new EquatorialToHorizontalConversion(date, geoCoords);
         this.eclToEqu = new EclipticToEquatorialConversion(date);
         this.daysUntilJ2010 = Epoch.J2010.daysUntil(date);
-        this.catalogue = catalogue; //kept for its precious list of Stars
+        this.catalogue = catalogue;
 
-        final Map<Star, Integer> starToIndexMap = IntStream.range(0, catalogue.stars().size()).boxed()
-                .collect(Collectors.toMap(catalogue.stars()::get, Function.identity(), (o1, o2) -> o1, HashMap::new));
-        // Extensive comment about this choice of implementation at the bottom of the class.
-        // In short, it seemed like the best compromise between time and space complexity & cleanness.
+        this.sunMap = Collections.unmodifiableMap(mapObjectToPosition(List.of(SunModel.SUN), this::applyModel));
+        this.moonMap = Collections.unmodifiableMap(mapObjectToPosition(List.of(MoonModel.MOON), this::applyModel));
+        this.planetMap = Collections.unmodifiableMap(transform(Arrays.stream(PlanetModel.values()).filter(i -> i.ordinal() != 2)
+                .collect(Collectors.toList()), this::applyModel, i -> PLANET_NAMES.indexOf(i.name())));
+        this.starMap = Collections.unmodifiableMap(transform(catalogue.stars(), Function.identity(), catalogue.starIndexMap()::get));
 
-        //starMap and planetMap are constructed as TreeMaps, both ordering by index in a base list; again, this
-        //implementation choice is argued at the bottom of the class for starMap.
-        final Map<Star, CartesianCoordinates> starMap = transform(catalogue.stars(), Function.identity(),
-                starToIndexMap::get);
-
-        final Map<Planet, CartesianCoordinates> planetMap = transform(Arrays.stream(PlanetModel.values())
-                        .filter(i -> i.ordinal() != 2).collect(Collectors.toList()), this::applyModel,
-                i -> PLANET_NAMES.indexOf(i.name()));
-
-        sunMap = Map.copyOf(mapObjectToPosition(List.of(SunModel.SUN), this::applyModel));
-        moonMap = Map.copyOf(mapObjectToPosition(List.of(MoonModel.MOON), this::applyModel));
-
-        planetList = List.copyOf(planetMap.keySet());
-        planetPositions = positionsToArray(planetMap);
-        starsPositions = positionsToArray(starMap);
-
-        this.planetMap = planetMap;
-        this.starMap = starMap;
-
-        celestObjToCoordsMap = Stream.of(starMap, planetMap, sunMap, moonMap)
+        this.celestObjToCoordsMap = Stream.of(starMap, planetMap, sunMap, moonMap)
                 .flatMap(l -> l.entrySet().stream())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (u, v) -> v, HashMap::new));
 
@@ -126,84 +104,60 @@ public final class ObservedSky {
         /*
         Constructing celestObjToCoordsMap beforehand allows this method to run in linear time - all it does is search
         for the "minimum" of the CartesianCoordinates, comparing their distances to point at line (*), then check if
-        its distance to point is <= maxDistance at (**). parallelStream proved to greatly shorten the execution time on
-        testing (at least 33%), making the map worthwhile when compared to 2 identically ordered lists. You can uncomment
-        the following function to tests it in ObservedSkyTest.speed
+        its distance to point is <= maxDistance at (**). Finding the minimum of each map then comparing them all proved
+        to be a lot slower (5 times). parallelStream proved to greatly shorten the execution time on testing
+        (at least 33%), making the map worthwhile when compared to 2 identically ordered lists, especially after
+        the initial expensive threads' initialisation.
          */
     }
 
-    public Map<Star, CartesianCoordinates> starCartesianCoordinatesMap(){return starMap;}
-
-    public Map<Planet, CartesianCoordinates> planetCartesianCoordinatesMap(){return planetMap;}
+    /**
+     * @return (Map<Star, CartesianCoordinates>) the stars associated to their Cartesian Coordinates
+     */
+    public Map<Star, CartesianCoordinates> starsMap() {
+        return starMap;
+    }
 
     /**
-     * @return (List < Star >) list of stars in current observed sky
+     * @return (List <Star>) list of stars in current observed sky
      */
     public List<Star> stars() {
         return catalogue.stars();
     }
 
-    public Set<Asterism> asterisms() { return catalogue.asterisms(); }
-
-    public List<Integer> asterismIndices(Asterism asterism) { return catalogue.asterismIndices(asterism); }
-
     /**
-     * @return (double[]) array of doubles containing the stars' x coords in even indices, y coords in odd indices, in
-     * the same order as returned by stars()
+     * @return (Set<Asterism>) set of asterisms in current observed sky
      */
-    public double[] starsPosition() {
-        return starsPositions.clone();
+    public Set<Asterism> asterisms() {
+        return catalogue.asterisms();
     }
 
     /**
-     * @return (List < Planet >) list of planets in current observed sky
+     * @see StarCatalogue#asterismIndices(Asterism)
      */
-    public List<Planet> planets() {
-        return planetList;
+    public List<Integer> asterismIndices(Asterism asterism) {
+        return catalogue.asterismIndices(asterism);
     }
 
     /**
-     * @return (double[]) array of doubles containing the planets' x coords in even indices, y coords in odd indices, in
-     * the same order as returned by planets()
+     * @return (Map<Planet, CartesianCoordinates>) the planets associated to their Cartesian Coordinates
      */
-    public double[] planetsPosition() {
-        return planetPositions.clone();
+    public Map<Planet, CartesianCoordinates> planetsMap() {
+        return planetMap;
     }
 
+    /**
+     * @return (Map<Sun, CartesianCoordinates>) the Sun associated to its Cartesian Coordinates
+     */
     public Map<Sun, CartesianCoordinates> sunMap() {
         return sunMap;
     }
 
     /**
-     * @return (Sun) Sun object in current observed sky
+     * @return (Map<Moon, CartesianCoordinates>) the Moon associated to its Cartesian Coordinates
      */
-    public Sun sun() {
-        return (Sun) sunMap.keySet().toArray()[0]; //note that the keySet's size is only 1, hence toArray costs 1 flop,
-    }                                              //and one more to get [0]
-
-    /**
-     * @return (CartesianCoordinates) Sun's CartesianCoordinates
-     */
-    public CartesianCoordinates sunPosition() {
-        return (CartesianCoordinates) sunMap.values().toArray()[0];
-    }
-
     public Map<Moon, CartesianCoordinates> moonMap() {
         return moonMap;
-    }
-
-    /**
-     * @return (Moon) Moon object in current observed sky
-     */
-    public Moon moon() {
-        return (Moon) moonMap.keySet().toArray()[0];
-    }
-
-    /**
-     * @return (CartesianCoordinates) Moon's CartesianCoordinates
-     */
-    public CartesianCoordinates moonPosition() {
-        return (CartesianCoordinates) moonMap.values().toArray()[0];
     }
 
     /**
@@ -236,7 +190,7 @@ public final class ObservedSky {
     }
 
     /**
-     * Helper creating a Treemap with cartesian coordinates from a list of Celestial Objects
+     * Helper creating a TreeMap with cartesian coordinates from a list of Celestial Objects
      *
      * @param inList List to draw the celestial object from
      * @param func   Function to apply in mapObjectToPosition
@@ -252,19 +206,6 @@ public final class ObservedSky {
     }
 
     /**
-     * Transfers values of a Map<K extends CelestialObject,CartesianCoordinates> into an array of doubles.
-     *
-     * @param <K>        (extends CelestialObject) map's keys' type
-     * @param objectsMap (Map<K,CartesianCoordinates) input map
-     * @return (double[]) array of doubles: even indices contain x coordinates, odd indices the y coordinates;
-     * arranged in the same order as objectsMap's keys
-     */
-    private static <K extends CelestialObject> double[] positionsToArray(final Map<K, CartesianCoordinates> objectsMap) {
-        return objectsMap.values().stream().flatMap(celestObj -> List.of(celestObj.x(), celestObj.y()).stream())
-                .mapToDouble(Double::doubleValue).toArray();
-    }
-
-    /**
      * Computes the square of the euclidean norm of the vector joining coord1 to coord2
      *
      * @param coord1 (CartesianCoordinates)
@@ -275,24 +216,4 @@ public final class ObservedSky {
         return (coord1.x() - coord2.x()) * (coord1.x() - coord2.x()) + (coord1.y() - coord2.y()) * (coord1.y() - coord2.y());
         //Math.pow(n,2) is just a tad slower than n*n for squaring, so was Math.hyp compared to this method
     }
-
-    // COMMENT ON STARTOINDEXMAP:
-    /*     starToIndexMap's used to order the stars injected in starMap below in some way.
-           Unlike in StarCatalogue, any order could have been used, as long as the Stars returned in stars() were
-           ordered the same way as their coordinates in starsPosition(), and in fact, there is a way to order the stars
-           with zero collisions using this IntFunction for example:
-           star -> (int)(star.equatorialPos().ra()*1e7) + star.hipparcos() + star.colorTemperature() [¤]
-           (None of the three terms suffices alone). It is messy though and relies on uncontrollable resources.
-
-           The main advantage of creating this map Star->index of Star in catalogue.stars() is the ability to keep the
-           catalogue as an attribute, avoiding an expensive copy of its list of stars. On top of that, this solution runs
-           only 2 milliseconds on average slower than the messier one suggested above (at [¤]).
-           It is also a 5 to 6-fold time gain compared to simply using catalogue.stars().indexOf which runs in O(n),
-           resulting in an O(n2) iteration when building the TreeMap.
-
-           We felt the need to properly argue this choice of implementation, as it has a significant but only temporary
-           cost on memory usage (creating then disposing of a Map) while reducing time complexity, while other solutions
-           had either significantly greater time complexity (indexOf) or unnecessary spatial complexity
-           (creating and saving a new List<Star>).
-         */
 }

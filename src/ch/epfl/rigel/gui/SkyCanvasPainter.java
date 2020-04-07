@@ -22,7 +22,7 @@ import static java.lang.Math.tan;
 
 public class SkyCanvasPainter {
 
-    private final static double COEFF = 2 * tan(Angle.ofDeg(0.5) / 4) / 140;
+    private final static double CELEST_SIZE_COEFF = 2 * tan(Angle.ofDeg(0.5) / 4) / 140;
     private final static int SCALE_FACTOR = 3500;
     private final static ClosedInterval CLIP_INTERVAL = ClosedInterval.of(-2, 5);
     private final static Color YELLOW_HALO = Color.YELLOW.deriveColor(0, 0, 0, -0.75);
@@ -59,19 +59,19 @@ public class SkyCanvasPainter {
     }
 
     public boolean drawStars(ObservedSky sky, StereographicProjection projection, Transform T) {
-        pipeline(sky.starCartesianCoordinatesMap(), star -> projection.applyToAngle(celestialSize(star)), STAR_COLOR, T);
+        pipeline(sky.starsMap(), star -> projection.applyToAngle(celestialSize(star)), STAR_COLOR, T);
         return true;
     }
 
     public boolean drawPlanets(ObservedSky sky, StereographicProjection projection, Transform T) {
-        pipeline(sky.planetCartesianCoordinatesMap(), planet -> projection.applyToAngle(celestialSize(planet)), planet -> Color.LIGHTGRAY, T);
+        pipeline(sky.planetsMap(), planet -> projection.applyToAngle(celestialSize(planet)), planet -> Color.LIGHTGRAY, T);
         return true;
     }
 
     public boolean drawSun(ObservedSky sky, StereographicProjection projection, Transform T) {
-        pipeline(sky.sunMap(), sun -> projection.applyToAngle(sun.angularSize() * 2.2), sun -> YELLOW_HALO, T);
-        pipeline(sky.sunMap(), sun -> projection.applyToAngle(sun.angularSize() + 2), sun -> Color.YELLOW, T);
-        pipeline(sky.sunMap(), sun -> projection.applyToAngle(sun.angularSize()), sun -> Color.WHITE, T);
+        pipeline(sky.sunMap(), sun -> projection.applyToAngle(celestialSize(sun)*2.2), sun -> YELLOW_HALO, T);
+        pipeline(sky.sunMap(), sun -> projection.applyToAngle(celestialSize(sun)+2), sun -> Color.YELLOW, T);
+        pipeline(sky.sunMap(), sun -> projection.applyToAngle(celestialSize(sun)), sun -> Color.WHITE, T);
         return true;
     }
 
@@ -133,11 +133,11 @@ public class SkyCanvasPainter {
     }
 
     private CartesianCoordinates getCartesFromIndex(ObservedSky sky, Asterism aster, int index) {
-        return sky.starCartesianCoordinatesMap().get(sky.stars().get(sky.asterismIndices(aster).get(index)));
+        return sky.starsMap().get(sky.stars().get(sky.asterismIndices(aster).get(index)));
     }
 
     private static <T extends CelestialObject> Double celestialSize(final T s) {
-        return (99 - 17 * CLIP_INTERVAL.clip(s.magnitude())) * COEFF;
+        return (99 - 17 * CLIP_INTERVAL.clip(s.magnitude())) * CELEST_SIZE_COEFF;
     }
 
     private static CartesianCoordinates transformedCartesCoords(final CartesianCoordinates cartesCoord, final Transform t) {
