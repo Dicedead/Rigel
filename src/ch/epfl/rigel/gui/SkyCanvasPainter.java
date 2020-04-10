@@ -6,7 +6,6 @@ import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.coordinates.StereographicProjection;
 import ch.epfl.rigel.logging.RigelLogger;
 import ch.epfl.rigel.math.ClosedInterval;
-import javafx.geometry.Point2D;
 import javafx.geometry.VPos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -149,8 +148,8 @@ public class SkyCanvasPainter {
     }
 
     private double computeScreenRadius(final double initialRadius, final Transform T) {
-        final Point2D transformedPoint = T.deltaTransform(initialRadius, initialRadius);
-        return Math.abs(transformedPoint.getX()) + Math.abs(transformedPoint.getY());
+        return Math.abs(T.getMxx() * initialRadius + T.getMxy() * initialRadius)
+             + Math.abs(T.getMyx() * initialRadius + T.getMyy() * initialRadius);
     }
 
     private <T extends CelestialObject> Stream<Map.Entry<T, CartesianCoordinates>> mask(

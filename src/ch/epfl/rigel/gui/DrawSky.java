@@ -45,7 +45,7 @@ public final class DrawSky extends Application {
             final Future<StarCatalogue> catalogue = ThreadManager.getIo().submit(() -> new StarCatalogue.Builder()
                     .loadFrom(hs, HygDatabaseLoader.INSTANCE).loadFrom(ast, AsterismLoader.INSTANCE).build());
 
-            final StereographicProjection proj = new StereographicProjection(HorizontalCoordinates.ofDeg(277, -33));
+            final StereographicProjection proj = new StereographicProjection(HorizontalCoordinates.ofDeg(180, 45));
 
             final Canvas canvasFuture = new Canvas(800, 600);
 
