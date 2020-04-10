@@ -161,20 +161,16 @@ public class ObservedSkyTest {
     @Test
     void moonAndSun() throws IOException {
         init();
-        assertEquals(SunModel.SUN.at(Epoch.J2010.daysUntil(time),convEcltoEqu).eclipticPos().lon(),
-                ((Sun)sky.sunMap().keySet().toArray()[0]).eclipticPos().lon());
         //Sun possède le getter equatorialPos mais autant tester la précision avec 2 conversions successives...
         assertEquals(stereo.apply(convEquToHor.apply(convEcltoEqu.apply(SunModel.SUN.at(Epoch.J2010.daysUntil(time),convEcltoEqu).eclipticPos()))).x(),
-                sky.sunMap().get(sky.sunMap().keySet().toArray()[0]).x());
+                sky.sunPosition().x());
         assertEquals(stereo.apply(convEquToHor.apply(convEcltoEqu.apply(SunModel.SUN.at(Epoch.J2010.daysUntil(time),convEcltoEqu).eclipticPos()))).y(),
-                sky.sunMap().get(sky.sunMap().keySet().toArray()[0]).y());
+                sky.sunPosition().y());
 
-        assertEquals(MoonModel.MOON.at(Epoch.J2010.daysUntil(time),convEcltoEqu).equatorialPos().dec(),
-                ((Moon)sky.moonMap().keySet().toArray()[0]).equatorialPos().dec());
         assertEquals(stereo.apply(convEquToHor.apply(MoonModel.MOON.at(Epoch.J2010.daysUntil(time),convEcltoEqu).equatorialPos())).x(),
-                sky.moonMap().get(sky.moonMap().keySet().toArray()[0]).x());
+                sky.moonPosition().x());
         assertEquals(stereo.apply(convEquToHor.apply(MoonModel.MOON.at(Epoch.J2010.daysUntil(time),convEcltoEqu).equatorialPos())).y(),
-                sky.moonMap().get(sky.moonMap().keySet().toArray()[0]).y());
+                sky.moonPosition().y());
     }
 /*
     @Test

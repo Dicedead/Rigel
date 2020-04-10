@@ -7,10 +7,13 @@ import ch.epfl.rigel.coordinates.StereographicProjection;
 import ch.epfl.rigel.logging.RigelLogger;
 import ch.epfl.rigel.math.Angle;
 import ch.epfl.rigel.math.ClosedInterval;
+import javafx.geometry.Point2D;
+import javafx.geometry.VPos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.text.TextAlignment;
 import javafx.scene.transform.Transform;
 
 import java.util.Map;
@@ -18,14 +21,15 @@ import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static java.lang.Math.tan;
+import static ch.epfl.rigel.coordinates.StereographicProjection.applyToAngle;
+import static ch.epfl.rigel.math.Angle.ofDeg;
 
 public class SkyCanvasPainter {
 
-    private final static double CELEST_SIZE_COEFF = 2 * tan(Angle.ofDeg(0.5) / 4) / 140;
-    private final static int SCALE_FACTOR = 3500;
+    private final static double CELEST_SIZE_COEFF = applyToAngle(ofDeg(0.5)) / 140;
+    private final static double SUN_SIZE = CELEST_SIZE_COEFF * 140;
     private final static ClosedInterval CLIP_INTERVAL = ClosedInterval.of(-2, 5);
-    private final static Color YELLOW_HALO = Color.YELLOW.deriveColor(0, 0, 0, -0.75);
+    private final static Color YELLOW_HALO = Color.YELLOW.deriveColor(1, 1, 1, 0.25);
     private final static HorizontalCoordinates PARALLEL = HorizontalCoordinates.ofDeg(0,0);
 
     private final Canvas canvas;
@@ -46,7 +50,7 @@ public class SkyCanvasPainter {
         graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
     }
 
-    public boolean drawAsterisms(ObservedSky sky, Transform T) {
+    public boolean drawAsterisms(ObservedSky sky, Transform transform) {
         synchronized (graphicsContext) {
             graphicsContext.setStroke(Color.BLUE);
             graphicsContext.setLineWidth(1);
@@ -54,73 +58,98 @@ public class SkyCanvasPainter {
         sky.asterisms().forEach(
                 asterism -> IntStream.range(0, sky.asterismIndices(asterism).size() - 1).boxed().forEach(
                         i -> asterismLine(getCartesFromIndex(sky, asterism, i),
-                                getCartesFromIndex(sky, asterism, i + 1), T)));
+                                getCartesFromIndex(sky, asterism, i + 1), transform)));
         return true;
     }
 
-    public boolean drawStars(ObservedSky sky, StereographicProjection projection, Transform T) {
-        pipeline(sky.starsMap(), star -> projection.applyToAngle(celestialSize(star)), STAR_COLOR, T);
+    public boolean drawStars(final ObservedSky sky, final Transform transform) {
+        pipeline(sky.starsMap(), SkyCanvasPainter::celestialSize, STAR_COLOR, transform);
         return true;
     }
 
-    public boolean drawPlanets(ObservedSky sky, StereographicProjection projection, Transform T) {
-        pipeline(sky.planetsMap(), planet -> projection.applyToAngle(celestialSize(planet)), planet -> Color.LIGHTGRAY, T);
+    public boolean drawPlanets(final ObservedSky sky, final Transform transform) {
+        pipeline(sky.planetsMap(), SkyCanvasPainter::celestialSize, planet -> Color.LIGHTGRAY, transform);
         return true;
     }
 
-    public boolean drawSun(ObservedSky sky, StereographicProjection projection, Transform T) {
-        pipeline(sky.sunMap(), sun -> projection.applyToAngle(celestialSize(sun)*2.2), sun -> YELLOW_HALO, T);
-        pipeline(sky.sunMap(), sun -> projection.applyToAngle(celestialSize(sun)+2), sun -> Color.YELLOW, T);
-        pipeline(sky.sunMap(), sun -> projection.applyToAngle(celestialSize(sun)), sun -> Color.WHITE, T);
+    public boolean drawSun(final ObservedSky sky, final Transform transform) {
+        if (isInCanvas.apply(sky.sunPosition())) {
+            final CartesianCoordinates transformedCoords = transformedCartesCoords(sky.sunPosition(), transform);
+            final double innerSize = computeScreenRadius(SUN_SIZE, transform);
+            drawOval(YELLOW_HALO, transformedCoords, innerSize*2.2);
+            drawOval(Color.YELLOW, transformedCoords, innerSize + 2);
+            drawOval(Color.WHITE, transformedCoords, innerSize);
+        }
         return true;
     }
 
-    public boolean drawMoon(ObservedSky sky, StereographicProjection projection, Transform T) {
-        pipeline(sky.moonMap(), moon -> projection.applyToAngle(moon.angularSize()), moon -> Color.WHITE, T);
+    public boolean drawMoon(final ObservedSky sky, final Transform transform) {
+        pipeline(sky.moonMap(), CelestialObject::angularSize, moon -> Color.WHITE, transform);
         return true;
     }
 
-    public boolean drawHorizon(ObservedSky sky, StereographicProjection projection, Transform T) {
+    public boolean drawHorizon(final StereographicProjection projection, final Transform T) {
+        final double size = computeScreenRadius(projection.circleRadiusForParallel(PARALLEL), T);
+        final CartesianCoordinates transformedCenter = transformedCartesCoords(projection.circleCenterForParallel(PARALLEL),T);
         synchronized (graphicsContext) {
-            final double size = SCALE_FACTOR * projection.circleRadiusForParallel(PARALLEL)/2;
             graphicsContext.setStroke(Color.RED);
             graphicsContext.setLineWidth(2);
-            graphicsContext.strokeOval(
-                    transformedCartesCoords(projection.circleCenterForParallel(PARALLEL),T).x() - size/2,
-                    transformedCartesCoords(projection.circleCenterForParallel(PARALLEL),T).y() - size/2,
-                    size, size);
+            graphicsContext.strokeOval(transformedCenter.x() - size/2, transformedCenter.y() - size/2, size, size);
+
+            graphicsContext.setFill(Color.RED);
+            graphicsContext.setTextBaseline(VPos.TOP);
         }
+        IntStream.range(0,8).boxed().forEach(
+            i -> {
+                final HorizontalCoordinates octantHorizCoords = HorizontalCoordinates.ofDeg(45*i, -0.5);
+                final CartesianCoordinates octantTransCoords = transformedCartesCoords(projection.apply(octantHorizCoords), T);
+                graphicsContext.fillText(octantHorizCoords.azOctantName("N","E", "S", "O"),
+                        octantTransCoords.x(), octantTransCoords.y());
+            }
+        );
         return true;
     }
 
 
     private <T extends CelestialObject> void pipeline(final Map<T, CartesianCoordinates> positions,
-                                                      final Function<T, Double> diameter,
+                                                      final Function<T, Double> radiusFunction,
                                                       final Function<T, Paint> color,
-                                                      final Transform t) {
+                                                      final Transform transform) {
 
-        drawCelestial(applyTransform(mask(positions.entrySet().stream()), t), diameter, color);
+        drawCelestial(applyTransform(mask(positions.entrySet().stream()), transform), transform,  radiusFunction, color);
     }
 
-    private <T extends CelestialObject> Stream<Map.Entry<T, CartesianCoordinates>> applyTransform(final Stream<Map.Entry<T, CartesianCoordinates>> positions, Transform t) {
-        return positions.map(e -> Map.entry(e.getKey(), transformedCartesCoords(e.getValue(), t)));
+    private <E extends CelestialObject> Stream<Map.Entry<E, CartesianCoordinates>> applyTransform(
+            final Stream<Map.Entry<E, CartesianCoordinates>> positions, Transform transform) {
+        return positions.map(e -> Map.entry(e.getKey(), transformedCartesCoords(e.getValue(), transform)));
     }
 
     private <T extends CelestialObject> void drawCelestial(final Stream<Map.Entry<T, CartesianCoordinates>> positions,
-                                                           final Function<T, Double> diameter,
+                                                           final Transform transform,
+                                                           final Function<T, Double> radiusFunction,
                                                            final Function<T, Paint> color) {
         positions.forEach(e ->
         {
-            synchronized (graphicsContext) {
-                final double size = SCALE_FACTOR * diameter.apply(e.getKey());
-                graphicsContext.setFill(color.apply(e.getKey()));
-                graphicsContext.fillOval(e.getValue().x()-size/2, e.getValue().y()-size/2, size, size);
-            }
+            final double size = computeScreenRadius(radiusFunction.apply(e.getKey()), transform);
+            drawOval(color.apply(e.getKey()), e.getValue(), size);
         });
     }
 
-    private <T extends CelestialObject> Stream<Map.Entry<T, CartesianCoordinates>> mask(final Stream<Map.Entry<T, CartesianCoordinates>> list) {
-        return list.filter(e -> isInCanvas.apply(e.getValue()));
+    private void drawOval(Paint color, CartesianCoordinates cartesCoords, double size) {
+        synchronized (graphicsContext) {
+            graphicsContext.setFill(color);
+            graphicsContext.fillOval(cartesCoords.x() - size / 2, cartesCoords.y() - size / 2, size, size);
+        }
+    }
+
+    private double computeScreenRadius(final double initialRadius, final Transform T) {
+        final Point2D transformedPoint = T.deltaTransform(initialRadius, initialRadius);
+        return Math.abs(transformedPoint.getX()) + Math.abs(transformedPoint.getY());
+    }
+
+    private <T extends CelestialObject> Stream<Map.Entry<T, CartesianCoordinates>> mask(
+            final Stream<Map.Entry<T, CartesianCoordinates>> cartesStream) {
+        return cartesStream.filter(e -> isInCanvas.apply(e.getValue()));
     }
 
     //TODO: can be redone with beginPath, moveTo, lineTo, stroke - but would it be better?

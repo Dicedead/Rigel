@@ -44,6 +44,11 @@ public final class ObservedSky {
     private final double daysUntilJ2010;
     private final StarCatalogue catalogue;
 
+    private final CartesianCoordinates sunPosition;
+    private final CartesianCoordinates moonPosition;
+    private final Moon moon;
+    private final Sun sun;
+
     private static final List<String> PLANET_NAMES = List.of("Mercure", "Vénus", "Mars", "Jupiter", "Saturne", "Uranus", "Neptune");
     //Sadly, PlanetModel does not offer any way to compare instances of Planet - a getter for such a list would have
     //done but pre-step 7 classes' API need not to be modified.
@@ -83,6 +88,11 @@ public final class ObservedSky {
                 .flatMap(l -> l.entrySet().stream())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (u, v) -> v, HashMap::new));
 
+        this.sunPosition = (CartesianCoordinates) sunMap.values().toArray()[0];
+        this.sun = (Sun) sunMap.keySet().toArray()[0];
+        this.moonPosition = (CartesianCoordinates) moonMap.values().toArray()[0];
+        this.moon = (Moon) moonMap.keySet().toArray()[0];
+
         RigelLogger.getAstronomyLogger().info("Sky finished initialisation");
         RigelLogger.getAstronomyLogger().exiting("ObservedSky", "ObservedSky");
 
@@ -102,11 +112,15 @@ public final class ObservedSky {
                 .apply(celestObjToCoordsMap.get(celestObj1), celestObjToCoordsMap.get(celestObj2))) //(*)
                 .filter(celestObj -> Math.sqrt(euclideanDistSquared(celestObjToCoordsMap.get(celestObj), point)) <= maxDistance); //(**)
         /*
-        Constructing celestObjToCoordsMap beforehand allows this method to run in linear time - all it does is search
-        for the "minimum" of the CartesianCoordinates, comparing their distances to point at line (*), then check if
-        its distance to point is <= maxDistance at (**). Finding the minimum of each map then comparing them all proved
-        to be a lot slower (5 times). parallelStream proved to greatly shorten the execution time on testing
-        (at least 33%), making the map worthwhile when compared to 2 identically ordered lists, especially after
+        Constructing celestObjToCoordsMap beforehand allows this method to run in linear time, and although it causes
+        spatial complexity, finding the minimum of each map then comparing them all proved to be a lot slower (5 times).
+        (*) is a linear scan, comparing keySet's elements by their distance (squared) to the target, and (**) checks
+        whether the closest object found (ie the 'minimum') is within a maxDistance radius of the target.
+        Applying a first approximate filter to the celestial objects before running the linear scan has also proven to
+        be slower, for a Stream.
+
+        parallelStream proved to greatly shorten the execution time on testing (at least 33%),
+        making the map worthwhile when compared to 2 identically ordered lists, especially after
         the initial expensive threads' initialisation.
          */
     }
@@ -147,10 +161,17 @@ public final class ObservedSky {
     }
 
     /**
-     * @return (Map<Sun, CartesianCoordinates>) the Sun associated to its Cartesian Coordinates
+     * @return (Sun) Sun object in current observed sky
      */
-    public Map<Sun, CartesianCoordinates> sunMap() {
-        return sunMap;
+    public Sun sun() {
+        return sun;
+    }
+
+    /**
+     * @return (CartesianCoordinates) Sun's CartesianCoordinates
+     */
+    public CartesianCoordinates sunPosition() {
+        return sunPosition;
     }
 
     /**
@@ -158,6 +179,20 @@ public final class ObservedSky {
      */
     public Map<Moon, CartesianCoordinates> moonMap() {
         return moonMap;
+    }
+
+    /**
+     * @return (Moon) Moon object in current observed sky
+     */
+    public Moon moon() {
+        return moon;
+    }
+
+    /**
+     * @return (CartesianCoordinates) Moon's CartesianCoordinates
+     */
+    public CartesianCoordinates moonPosition() {
+        return moonPosition;
     }
 
     /**
