@@ -6,7 +6,12 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.logging.*;
 
-
+/**
+ * Fancy logging class, helpful for debugging
+ *
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public class RigelLogger {
 
     private static final Logger guiLogger = Logger.getLogger("GUI Logger");
