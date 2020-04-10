@@ -51,6 +51,7 @@ public final class SkyCanvasPainter {
         this.canvas = canvas;
         this.graphicsContext = this.canvas.getGraphicsContext2D();
         this.isInCanvas = coord -> coord.x() <= canvas.getWidth() && coord.y() <= canvas.getHeight();
+        //getInBounds creates Bounds object, unneeded.
         this.transform = transform;
         RigelLogger.getGuiLogger().info("Canvas initialised ready to draw");
     }

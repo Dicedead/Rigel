@@ -16,7 +16,7 @@ public final class PlanarTransformation implements Function<CartesianCoordinates
     /*
       JavaFX's Transform class has to go through many processes and intermediate types (Scale, Rotate, Point2D,...)
       which are of no use for this project, therefore we've remade Transform which greatly improved efficiency and
-      possibly -for once in this project...- code readability in SkyCanvasPainter.
+      possibly -for once in our project...- code readability in SkyCanvasPainter.
      */
 
     private final double Mxx, Mxy, Myy, Myx, Tx, Ty;
@@ -116,7 +116,7 @@ public final class PlanarTransformation implements Function<CartesianCoordinates
      * [ myx myy ty ] [ y ]  = [ myx * x + myy * y + ty ]
      *                [ 1 ]
      *
-     * @param cartesCoords (CartesianCoordinates) Input 2x1 vector
+     * @param cartesCoords (CartesianCoordinates) Input 2x1 vector, treated as a 2D point
      * @return (CartesianCoordinates) 2x1 vector resulting of the product
      */
     @Override
@@ -140,13 +140,13 @@ public final class PlanarTransformation implements Function<CartesianCoordinates
      * Computes the product this * cartesCoords; let cartesCoords = (x,y):
      * [ mxx mxy ] [ x ]    [ mxx * x + mxy * y ]
      * [ myx myy ] [ y ]  = [ myx * x + myy * y ]
-     * This method thus does not add any translation
+     * This method thus does not add any translation to the input vector
      *
      * @param cartesianCoordinates (CartesianCoordinates) Input 2x1 vector
      * @return (CartesianCoordinates) 2x1 vector resulting of the product
      */
-    public CartesianCoordinates applyVectorial(final CartesianCoordinates cartesianCoordinates) {
-        return applyVectorial(cartesianCoordinates.x(), cartesianCoordinates.y());
+    public CartesianCoordinates applyVector(final CartesianCoordinates cartesianCoordinates) {
+        return applyVector(cartesianCoordinates.x(), cartesianCoordinates.y());
     }
 
     /**
@@ -157,7 +157,7 @@ public final class PlanarTransformation implements Function<CartesianCoordinates
      * @param y (double) 2nd coefficient of input 2x1 vector
      * @return (CartesianCoordinates) 2x1 vector resulting of the product
      */
-    public CartesianCoordinates applyVectorial(final double x, final double y) {
+    public CartesianCoordinates applyVector(final double x, final double y) {
         return CartesianCoordinates.of(Mxx * x + Mxy * y, Myx * x + Myy * y);
     }
 
@@ -176,5 +176,25 @@ public final class PlanarTransformation implements Function<CartesianCoordinates
      */
     public double getDeterminant() {
         return determinant;
+    }
+
+    /**
+     * @throws UnsupportedOperationException (double precision does not allow for equals)
+     * @see Object#equals(Object)
+     */
+    @Override
+    public final boolean equals(Object o) {
+        //System.err.println("Fatal error : tried to test equality but double precision does not \n" +
+        //        "allow it.");
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @throws UnsupportedOperationException (double precision does not allow for hashcode)
+     * @see Object#hashCode()
+     */
+    @Override
+    public final int hashCode() {
+        throw new UnsupportedOperationException();
     }
 }
