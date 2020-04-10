@@ -97,7 +97,9 @@ public class SkyCanvasPainter {
     public boolean drawHorizon(final StereographicProjection projection, final Transform T) {
         final double size = computeScreenRadius(projection.circleRadiusForParallel(PARALLEL), T);
         final CartesianCoordinates transformedCenter = transformedCartesCoords(projection.circleCenterForParallel(PARALLEL), T);
+
         synchronized (graphicsContext) {
+
             graphicsContext.setStroke(Color.RED);
             graphicsContext.setLineWidth(2);
             graphicsContext.strokeOval(transformedCenter.x() - size / 2, transformedCenter.y() - size / 2, size, size);
