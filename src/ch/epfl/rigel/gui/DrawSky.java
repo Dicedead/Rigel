@@ -45,7 +45,7 @@ public final class DrawSky extends Application {
             final Future<StarCatalogue> catalogue = ThreadManager.getIo().submit(() -> new StarCatalogue.Builder()
                     .loadFrom(hs, HygDatabaseLoader.INSTANCE).loadFrom(ast, AsterismLoader.INSTANCE).build());
 
-            final StereographicProjection proj = new StereographicProjection(HorizontalCoordinates.ofDeg(180, 45));
+            final StereographicProjection proj = new StereographicProjection(HorizontalCoordinates.ofDeg(277, -33));
 
             final Canvas canvasFuture = new Canvas(800, 600);
 
@@ -64,13 +64,13 @@ public final class DrawSky extends Application {
             /*ThreadManager.getGui().execute(
                     () ->
                     {*/
-                        paint.drawAsterisms(sky, transform);
-                        paint.drawStars(sky, transform);
-                        paint.drawPlanets(sky, transform);
-                        paint.drawSun(sky, transform);
-                        paint.drawMoon(sky, transform);
-                        paint.drawHorizon(proj, transform);
-                        //});
+                paint.drawAsterisms(sky, transform);
+                paint.drawStars(sky, transform);
+                paint.drawPlanets(sky, transform);
+                paint.drawSun(sky, transform);
+                paint.drawMoon(sky, transform);
+                paint.drawHorizon(proj, transform);
+                //});
 
             RigelLogger.getBackendLogger().info("Finished drawing stars");
             ImageIO.write(SwingFXUtils.fromFXImage(canvasFuture.snapshot(null, null),

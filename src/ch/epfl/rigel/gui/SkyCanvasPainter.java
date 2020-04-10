@@ -5,7 +5,6 @@ import ch.epfl.rigel.coordinates.CartesianCoordinates;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.coordinates.StereographicProjection;
 import ch.epfl.rigel.logging.RigelLogger;
-import ch.epfl.rigel.math.Angle;
 import ch.epfl.rigel.math.ClosedInterval;
 import javafx.geometry.Point2D;
 import javafx.geometry.VPos;
@@ -13,7 +12,6 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
-import javafx.scene.text.TextAlignment;
 import javafx.scene.transform.Transform;
 
 import java.util.Map;
@@ -26,11 +24,10 @@ import static ch.epfl.rigel.math.Angle.ofDeg;
 
 public class SkyCanvasPainter {
 
-    private final static double CELEST_SIZE_COEFF = applyToAngle(ofDeg(0.5)) / 140;
-    private final static double SUN_SIZE = CELEST_SIZE_COEFF * 140;
+    private final static double CELEST_SIZE_COEFF = applyToAngle(ofDeg(0.5)) / 280;
     private final static ClosedInterval CLIP_INTERVAL = ClosedInterval.of(-2, 5);
     private final static Color YELLOW_HALO = Color.YELLOW.deriveColor(1, 1, 1, 0.25);
-    private final static HorizontalCoordinates PARALLEL = HorizontalCoordinates.ofDeg(0,0);
+    private final static HorizontalCoordinates PARALLEL = HorizontalCoordinates.ofDeg(0, 0);
 
     private final Canvas canvas;
     private final GraphicsContext graphicsContext;
@@ -46,19 +43,29 @@ public class SkyCanvasPainter {
     }
 
     public void clear() {
-        graphicsContext.setFill(Color.BLACK);
-        graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        synchronized (graphicsContext) {
+            graphicsContext.setFill(Color.BLACK);
+            graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        }
     }
 
     public boolean drawAsterisms(ObservedSky sky, Transform transform) {
         synchronized (graphicsContext) {
             graphicsContext.setStroke(Color.BLUE);
             graphicsContext.setLineWidth(1);
+
+            sky.asterisms().forEach(
+                    asterism -> {
+                        graphicsContext.beginPath();
+                        final CartesianCoordinates cartesStar0 =
+                                transformedCartesCoords(getCartesFromIndex(sky, asterism, 0), transform);
+                        graphicsContext.moveTo(cartesStar0.x(), cartesStar0.y());
+                        asterismLineRecurr(cartesStar0, transformedCartesCoords(getCartesFromIndex(sky, asterism, 1), transform),
+                                transform, 0, asterism.stars().size() - 1, asterism, sky);
+
+                    }
+            );
         }
-        sky.asterisms().forEach(
-                asterism -> IntStream.range(0, sky.asterismIndices(asterism).size() - 1).boxed().forEach(
-                        i -> asterismLine(getCartesFromIndex(sky, asterism, i),
-                                getCartesFromIndex(sky, asterism, i + 1), transform)));
         return true;
     }
 
@@ -75,8 +82,8 @@ public class SkyCanvasPainter {
     public boolean drawSun(final ObservedSky sky, final Transform transform) {
         if (isInCanvas.apply(sky.sunPosition())) {
             final CartesianCoordinates transformedCoords = transformedCartesCoords(sky.sunPosition(), transform);
-            final double innerSize = computeScreenRadius(SUN_SIZE, transform);
-            drawOval(YELLOW_HALO, transformedCoords, innerSize*2.2);
+            final double innerSize = computeScreenRadius(applyToAngle(sky.sun().angularSize()) / 2, transform);
+            drawOval(YELLOW_HALO, transformedCoords, innerSize * 2.2);
             drawOval(Color.YELLOW, transformedCoords, innerSize + 2);
             drawOval(Color.WHITE, transformedCoords, innerSize);
         }
@@ -84,28 +91,27 @@ public class SkyCanvasPainter {
     }
 
     public boolean drawMoon(final ObservedSky sky, final Transform transform) {
-        pipeline(sky.moonMap(), CelestialObject::angularSize, moon -> Color.WHITE, transform);
+        pipeline(sky.moonMap(), moon -> moon.angularSize() / 2, moon -> Color.WHITE, transform);
         return true;
     }
 
     public boolean drawHorizon(final StereographicProjection projection, final Transform T) {
         final double size = computeScreenRadius(projection.circleRadiusForParallel(PARALLEL), T);
-        final CartesianCoordinates transformedCenter = transformedCartesCoords(projection.circleCenterForParallel(PARALLEL),T);
+        final CartesianCoordinates transformedCenter = transformedCartesCoords(projection.circleCenterForParallel(PARALLEL), T);
         synchronized (graphicsContext) {
             graphicsContext.setStroke(Color.RED);
             graphicsContext.setLineWidth(2);
-            graphicsContext.strokeOval(transformedCenter.x() - size/2, transformedCenter.y() - size/2, size, size);
-
+            graphicsContext.strokeOval(transformedCenter.x() - size / 2, transformedCenter.y() - size / 2, size, size);
             graphicsContext.setFill(Color.RED);
             graphicsContext.setTextBaseline(VPos.TOP);
         }
-        IntStream.range(0,8).boxed().forEach(
-            i -> {
-                final HorizontalCoordinates octantHorizCoords = HorizontalCoordinates.ofDeg(45*i, -0.5);
-                final CartesianCoordinates octantTransCoords = transformedCartesCoords(projection.apply(octantHorizCoords), T);
-                graphicsContext.fillText(octantHorizCoords.azOctantName("N","E", "S", "O"),
-                        octantTransCoords.x(), octantTransCoords.y());
-            }
+        IntStream.range(0, 8).boxed().forEach(
+                i -> {
+                    final HorizontalCoordinates octantHorizCoords = HorizontalCoordinates.ofDeg(45 * i, -0.5);
+                    final CartesianCoordinates octantTransCoords = transformedCartesCoords(projection.apply(octantHorizCoords), T);
+                    graphicsContext.fillText(octantHorizCoords.azOctantName("N", "E", "S", "O"),
+                            octantTransCoords.x(), octantTransCoords.y());
+                }
         );
         return true;
     }
@@ -116,7 +122,7 @@ public class SkyCanvasPainter {
                                                       final Function<T, Paint> color,
                                                       final Transform transform) {
 
-        drawCelestial(applyTransform(mask(positions.entrySet().stream()), transform), transform,  radiusFunction, color);
+        drawCelestial(applyTransform(mask(positions.entrySet().stream()), transform), transform, radiusFunction, color);
     }
 
     private <E extends CelestialObject> Stream<Map.Entry<E, CartesianCoordinates>> applyTransform(
@@ -152,12 +158,16 @@ public class SkyCanvasPainter {
         return cartesStream.filter(e -> isInCanvas.apply(e.getValue()));
     }
 
-    //TODO: can be redone with beginPath, moveTo, lineTo, stroke - but would it be better?
-    private void asterismLine(final CartesianCoordinates c1, final CartesianCoordinates c2, final Transform t) {
+    private void asterismLineRecurr(final CartesianCoordinates c1, final CartesianCoordinates c2, final Transform transform,
+                                    final int currentStartStar, final int lastStar, final Asterism asterism, final ObservedSky sky) {
+
+        graphicsContext.lineTo(c2.x(), c2.y());
         if (isInCanvas.apply(c1) || isInCanvas.apply(c2)) {
-            final CartesianCoordinates c1S = transformedCartesCoords(c1, t);
-            final CartesianCoordinates c2S = transformedCartesCoords(c2, t);
-            graphicsContext.strokeLine(c1S.x(), c1S.y(), c2S.x(), c2S.y());
+            graphicsContext.stroke();
+        }
+        if (currentStartStar < lastStar) {
+            asterismLineRecurr(c2, transformedCartesCoords(getCartesFromIndex(sky, asterism, currentStartStar + 1)
+                    , transform), transform, currentStartStar + 1, lastStar, asterism, sky);
         }
     }
 
@@ -174,4 +184,3 @@ public class SkyCanvasPainter {
                 t.getMyx() * cartesCoord.x() + t.getMyy() * cartesCoord.y() + t.getTy());
     }
 }
-
