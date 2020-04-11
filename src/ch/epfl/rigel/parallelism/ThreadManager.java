@@ -1,11 +1,13 @@
 package ch.epfl.rigel.parallelism;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import javafx.concurrent.Task;
+import javafx.util.Pair;
+
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.IntStream;
+
+import static java.util.concurrent.ForkJoinPool.defaultForkJoinWorkerThreadFactory;
 
 /**
  * Multithreaded environment manager
@@ -15,18 +17,60 @@ import java.util.stream.IntStream;
  */
 public final class ThreadManager {
 
-    private final List<ThreadGroup> threadGroups = new ArrayList<>();;
-    private final static int cores = Runtime.getRuntime().availableProcessors();
-    private Map<String, ExecutorService> executorServiceMap;
-    private Map<String, ForkJoinPool> forkJoinPoolMap;
+    public enum serviceType {
+        CACHED, SINGLE, FIXED
+    }
 
-    public ThreadManager(List<String> threadGroupNames)
+    private final static int CPU_CORES = Runtime.getRuntime().availableProcessors();
+
+    private final Map<String, ExecutorService> executorServiceMap = new HashMap<>();
+    private final Map<String, ForkJoinPool> forkJoinPoolMap = new HashMap<>();
+    private final ThreadFactory factory;
+    private Deque< Runnable> tasks;
+
+    public void addService(String name, serviceType type, int nthreads)
     {
-        IntStream.of(0, threadGroupNames.size()).forEach(
-                i-> threadGroups.add(new ThreadGroup(threadGroupNames.get(i))));
+        switch (type){
+            case FIXED:
+                executorServiceMap.put(name, Executors.newFixedThreadPool(nthreads, factory));
+                break;
+            case CACHED:
+                executorServiceMap.put(name, Executors.newCachedThreadPool(factory));
+                break;
+            case SINGLE:
+                executorServiceMap.put(name, Executors.newSingleThreadExecutor(factory));
+                break;
+        }
+    }
 
-        forkJoinPoolMap.put("default", new ForkJoinPool(cores));
-        executorServiceMap.put("default", Executors.newCachedThreadPool());
+    public void addForkJoinPool(String name, String threadGroup, int thread, boolean async)
+    {
+        forkJoinPoolMap.put(name, new ForkJoinPool(thread, defaultForkJoinWorkerThreadFactory, new ThreadGroup(threadGroup), async));
+    }
+
+    public void addForkJoinPool(String name)
+    {
+        forkJoinPoolMap.put(name, new ForkJoinPool());
+    }
+
+    void addTask(Runnable r)
+    {
+        executorServiceMap.get("background").submit(r);
+    }
+
+    void addTask(Runnable r, String name)
+    {
+        executorServiceMap.get(name).submit(r);
+    }
+
+
+    public ThreadManager(List<String> threadGroupNames, ThreadFactory factory)
+    {
+        this.factory = factory;
+
+        forkJoinPoolMap.put("default", new ForkJoinPool(1));
+        executorServiceMap.put("default", Executors.newSingleThreadExecutor(factory));
+        executorServiceMap.put("background", Executors.newWorkStealingPool());
     }
 
     public void shutdown(boolean force)
@@ -42,5 +86,18 @@ public final class ThreadManager {
         }
     }
 
+    public static int getCpuCores() {
+        return CPU_CORES;
+    }
+
+    public ForkJoinPool getFJ(String name)
+    {
+        return forkJoinPoolMap.get(name);
+    }
+
+    public ExecutorService getES(String name)
+    {
+        return executorServiceMap.get(name);
+    }
 
 }
