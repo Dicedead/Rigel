@@ -7,9 +7,12 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.logging.*;
 
-import static ch.epfl.rigel.logging.RigelLogger.runType.DEBUG;
-
-
+/**
+ * Fancy logging class, helpful for debugging
+ *
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public class RigelLogger extends LogManager{
 
     public enum runType {
@@ -21,7 +24,7 @@ public class RigelLogger extends LogManager{
 
         final boolean b = super.addLogger(logger);
 
-        if ((getProperty("BuildType").equals(DEBUG.name()))) {
+        if ((getProperty("BuildType").equals(runType.DEBUG.name()))) {
             logger.setLevel(Level.ALL);
         } else {
             logger.setLevel(Level.WARNING);

@@ -4,19 +4,16 @@ import ch.epfl.rigel.astronomy.AsterismLoader;
 import ch.epfl.rigel.astronomy.HygDatabaseLoader;
 import ch.epfl.rigel.astronomy.ObservedSky;
 import ch.epfl.rigel.astronomy.StarCatalogue;
-import ch.epfl.rigel.coordinates.EquatorialCoordinates;
-import ch.epfl.rigel.coordinates.EquatorialToHorizontalConversion;
 import ch.epfl.rigel.coordinates.GeographicCoordinates;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.coordinates.StereographicProjection;
+import ch.epfl.rigel.coordinates.PlanarTransformation;
 import ch.epfl.rigel.logging.RigelLogger;
-import ch.epfl.rigel.math.Angle;
 import ch.epfl.rigel.parallelism.ThreadManager;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.transform.Transform;
 import javafx.stage.Stage;
 
 import javax.imageio.ImageIO;
@@ -26,6 +23,12 @@ import java.io.InputStream;
 import java.time.ZonedDateTime;
 import java.util.concurrent.*;
 
+/**
+ * Main GUI class
+ *
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public final class DrawSky extends Application {
     public static void main(String[] args) { launch(args); }
 
@@ -45,7 +48,7 @@ public final class DrawSky extends Application {
             final Future<StarCatalogue> catalogue = ThreadManager.getIo().submit(() -> new StarCatalogue.Builder()
                     .loadFrom(hs, HygDatabaseLoader.INSTANCE).loadFrom(ast, AsterismLoader.INSTANCE).build());
 
-            final StereographicProjection proj = new StereographicProjection(HorizontalCoordinates.ofDeg(277, -33));
+            final StereographicProjection proj = new StereographicProjection(HorizontalCoordinates.ofDeg(277, -23));
 
             final Future<ObservedSky> skyFuture = ThreadManager.getAstronomy().submit(() -> new ObservedSky(
                     ZonedDateTime.parse("2020-02-17T20:15:00+01:00"), GeographicCoordinates.ofDeg(6.57, 46.52), proj, catalogue.get()));
@@ -53,9 +56,9 @@ public final class DrawSky extends Application {
 
             final Canvas canvasFuture = new Canvas(800, 600);
 
-            final Transform transform =   Transform.affine(1300, 0, 0, -1300, 400, 300);
+            final PlanarTransformation transform = PlanarTransformation.ofDilatAndTrans(1300, 400, 300);
 
-            final SkyCanvasPainter paint = new SkyCanvasPainter(canvasFuture);
+            final SkyCanvasPainter paint = new SkyCanvasPainter(canvasFuture, transform);
 
             paint.clear();
 
@@ -66,12 +69,12 @@ public final class DrawSky extends Application {
             /*ThreadManager.getGui().execute(
                     () ->
                     {*/
-                paint.drawAsterisms(sky, transform);
-                paint.drawStars(sky, transform);
-                paint.drawPlanets(sky, transform);
-                paint.drawSun(sky, transform);
-                paint.drawMoon(sky, transform);
-                paint.drawHorizon(proj, transform);
+                paint.drawAsterisms(sky);
+                paint.drawStars(sky);
+                paint.drawPlanets(sky);
+                paint.drawSun(sky);
+                paint.drawMoon(sky);
+                paint.drawHorizon(proj);
                 //});
 
             RigelLogger.getBackendLogger().info("Finished drawing stars");

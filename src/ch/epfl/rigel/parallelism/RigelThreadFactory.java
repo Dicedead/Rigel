@@ -4,7 +4,12 @@ import ch.epfl.rigel.logging.RigelLogger;
 
 import java.util.concurrent.ThreadFactory;
 
-
+/**
+ * Thread creator
+ *
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public final class RigelThreadFactory implements ThreadFactory
 {
     private final String name;
