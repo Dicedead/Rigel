@@ -2,9 +2,10 @@ package ch.epfl.rigel.logging;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.lang.module.Configuration;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.List;
+import java.util.*;
 import java.util.logging.*;
 
 /**
@@ -19,14 +20,31 @@ public class RigelLogger extends LogManager{
         DEBUG, RELEASE
     }
 
+    public void fromConfiguration(InputStream c)
+    {
+        final Properties prop = new Properties();
+
+        try {
+            prop.load(c);
+            Arrays.stream(prop.getProperty("loggerlist").split(",")).forEach(l -> addLogger(Logger.getLogger(l)));
+
+        } catch (IOException | NullPointerException ex) {
+
+            ex.printStackTrace();
+        }
+    }
+
     @Override
     public boolean addLogger(Logger logger) {
 
         final boolean b = super.addLogger(logger);
 
         if ((getProperty("BuildType").equals(runType.DEBUG.name()))) {
+
             logger.setLevel(Level.ALL);
+
         } else {
+
             logger.setLevel(Level.WARNING);
         }
 
@@ -45,10 +63,6 @@ public class RigelLogger extends LogManager{
             logger.addHandler(sh);
 
         }
-
-
         return b;
-
-
     }
 }

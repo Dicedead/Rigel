@@ -1,7 +1,11 @@
 package ch.epfl.rigel.parallelism;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.*;
+import java.util.stream.IntStream;
 
 /**
  * Multithreaded environment manager
@@ -11,42 +15,32 @@ import java.util.concurrent.Executors;
  */
 public final class ThreadManager {
 
+    private final List<ThreadGroup> threadGroups = new ArrayList<>();;
     private final static int cores = Runtime.getRuntime().availableProcessors();
-    private static ExecutorService io;
-    private static ExecutorService astronomy;
-    private static ExecutorService gui;
-    private static ExecutorService logger;
+    private Map<String, ExecutorService> executorServiceMap;
+    private Map<String, ForkJoinPool> forkJoinPoolMap;
 
-    public static void initThreads()
+    public ThreadManager(List<String> threadGroupNames)
     {
-        final ThreadGroup backend = new ThreadGroup("BACKEND");
-        final ThreadGroup frontend = new ThreadGroup("FRONTEND");
-        final ThreadGroup IO = new ThreadGroup(backend, "BACKEND");
+        IntStream.of(0, threadGroupNames.size()).forEach(
+                i-> threadGroups.add(new ThreadGroup(threadGroupNames.get(i))));
 
-        io = Executors.newCachedThreadPool();
-        astronomy = Executors.newCachedThreadPool();
-        gui = Executors.newCachedThreadPool();
-        logger = Executors.newSingleThreadExecutor();
-
-    }
-    private ThreadManager()
-    { throw new UnsupportedOperationException();}
-
-
-    public static ExecutorService getIo() {
-        return io;
+        forkJoinPoolMap.put("default", new ForkJoinPool(cores));
+        executorServiceMap.put("default", Executors.newCachedThreadPool());
     }
 
-    public static ExecutorService getAstronomy() {
-        return astronomy;
+    public void shutdown(boolean force)
+    {
+        if (!force) {
+            forkJoinPoolMap.values().forEach(ForkJoinPool::shutdown);
+            executorServiceMap.values().forEach(ExecutorService::shutdown);
+
+        } else {
+
+            forkJoinPoolMap.values().forEach(ForkJoinPool::shutdownNow);
+            executorServiceMap.values().forEach(ExecutorService::shutdownNow);
+        }
     }
 
-    public static ExecutorService getGui() {
-        return gui;
-    }
-
-    public static ExecutorService getLogger() {
-        return logger;
-    }
 
 }

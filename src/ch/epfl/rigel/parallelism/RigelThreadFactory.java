@@ -1,8 +1,11 @@
 package ch.epfl.rigel.parallelism;
 
-import ch.epfl.rigel.logging.RigelLogger;
 
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ThreadFactory;
+import java.util.stream.Collectors;
 
 /**
  * Thread creator
@@ -16,12 +19,14 @@ public final class RigelThreadFactory implements ThreadFactory
     private final int priority;
     private final ThreadGroup group;
     private int count;
+    private final List<String> stats;
 
-    public RigelThreadFactory (final String name, final int priority, final ThreadGroup group)
+    public RigelThreadFactory(final String name, final int priority, final ThreadGroup group, List<String> stats)
     {
         this.name = name;
         this.priority = priority;
         this.group = group;
+        this.stats = stats;
         count = 0;
     }
 
@@ -30,9 +35,15 @@ public final class RigelThreadFactory implements ThreadFactory
 
         final Thread t = new Thread(group, name + ++count);
         t.setPriority(priority);
-
-        RigelLogger.getBackendLogger().info("Thread " + name + ++count + " has been created");
+        stats.add(String.format("Le thread %s a été créé à %s \n", t.getName() + count, new Date()));
 
         return t;
     }
+
+    public String getStats()
+    {
+        return String.join("\n", stats);
+    }
+
+
 }

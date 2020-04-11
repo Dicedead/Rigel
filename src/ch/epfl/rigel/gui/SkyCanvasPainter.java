@@ -5,15 +5,12 @@ import ch.epfl.rigel.coordinates.CartesianCoordinates;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.coordinates.StereographicProjection;
 import ch.epfl.rigel.coordinates.PlanarTransformation;
-import ch.epfl.rigel.logging.RigelLogger;
 import ch.epfl.rigel.math.ClosedInterval;
-import javafx.geometry.Point2D;
 import javafx.geometry.VPos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
-import javafx.scene.transform.Transform;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -41,6 +38,7 @@ public final class SkyCanvasPainter {
 
     private final static Function<Star, Paint> STAR_COLOR = s -> BlackBodyColor.colorForTemperature(s.colorTemperature());
     private final Function<CartesianCoordinates, Boolean> isInCanvas;
+    private final PlanarTransformation transform;
 
     /**
      * SkyCanvasPainter Constructor
@@ -54,7 +52,6 @@ public final class SkyCanvasPainter {
         this.isInCanvas = coord -> coord.x() <= canvas.getWidth() && coord.y() <= canvas.getHeight();
         //getInBounds creates Bounds object, unneeded.
         this.transform = transform;
-        RigelLogger.getGuiLogger().info("Canvas initialised ready to draw");
     }
 
     /**
@@ -88,7 +85,6 @@ public final class SkyCanvasPainter {
                     }
             );
         }
-        return true;
     }
 
     /**
