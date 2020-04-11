@@ -43,10 +43,8 @@ public class SkyCanvasPainter {
     }
 
     public void clear() {
-        synchronized (graphicsContext) {
             graphicsContext.setFill(Color.BLACK);
             graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        }
     }
 
     public boolean drawAsterisms(ObservedSky sky, Transform transform) {
@@ -63,7 +61,7 @@ public class SkyCanvasPainter {
                         asterismLineRecurr(cartesStar0, transformedCartesCoords(getCartesFromIndex(sky, asterism, 1), transform),
                                 transform, 0, asterism.stars().size() - 1, asterism, sky);
 
-                    }
+                       }
             );
         }
         return true;

@@ -47,6 +47,10 @@ public final class DrawSky extends Application {
 
             final StereographicProjection proj = new StereographicProjection(HorizontalCoordinates.ofDeg(277, -33));
 
+            final Future<ObservedSky> skyFuture = ThreadManager.getAstronomy().submit(() -> new ObservedSky(
+                    ZonedDateTime.parse("2020-02-17T20:15:00+01:00"), GeographicCoordinates.ofDeg(6.57, 46.52), proj, catalogue.get()));
+
+
             final Canvas canvasFuture = new Canvas(800, 600);
 
             final Transform transform =   Transform.affine(1300, 0, 0, -1300, 400, 300);
@@ -55,8 +59,6 @@ public final class DrawSky extends Application {
 
             paint.clear();
 
-            final Future<ObservedSky> skyFuture = ThreadManager.getAstronomy().submit(() -> new ObservedSky(
-                    ZonedDateTime.parse("2020-02-17T20:15:00+01:00"), GeographicCoordinates.ofDeg(6.57, 46.52), proj, catalogue.get()));
 
             final ObservedSky sky = skyFuture.get();
 
