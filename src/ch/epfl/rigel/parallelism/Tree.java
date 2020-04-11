@@ -91,9 +91,11 @@ public class Tree<T> {
 
 
 
-        public void link(final T value)
+        public Node<T> link(final T value)
         {
-            children.add(new Node<T>(value, this));
+            var a = new Node<T>(value, this);
+            children.add(a);
+            return a;
         }
 
         public Node(final T t)
