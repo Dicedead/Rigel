@@ -36,7 +36,7 @@ public enum AsterismLoader implements StarCatalogue.Loader {
     @Override
     public void load(InputStream inputStream, StarCatalogue.Builder builder) throws IOException {
 
-        RigelLogger.getFileLogger().info("Loading asterism file ");
+        //##RigelLogger.getFileLogger().info("Loading asterism file ");
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream,
                 StandardCharsets.US_ASCII))) {
 

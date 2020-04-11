@@ -39,20 +39,24 @@ public final class DrawSky extends Application {
     @Override
     public void start(Stage primaryStage) {
 
-        ThreadManager.initThreads();
+        //££ThreadManager.initThreads();
 
-        ThreadManager.getLogger().execute(() -> RigelLogger.init(new File("logs/Step8"), RigelLogger.runType.DEBUG));
+        //££ThreadManager.getLogger().execute(() -> RigelLogger.init(new File("logs/Step8"), RigelLogger.runType.DEBUG));
 
         try (InputStream hs = resourceStream("/hygdata_v3.csv"); InputStream ast = resourceStream("/asterisms.txt")) {
             BlackBodyColor.init();
-            final Future<StarCatalogue> catalogue = ThreadManager.getIo().submit(() -> new StarCatalogue.Builder()
-                    .loadFrom(hs, HygDatabaseLoader.INSTANCE).loadFrom(ast, AsterismLoader.INSTANCE).build());
+            //££final Future<StarCatalogue> catalogue = ThreadManager.getIo().submit(() -> new StarCatalogue.Builder()
+            //££        .loadFrom(hs, HygDatabaseLoader.INSTANCE).loadFrom(ast, AsterismLoader.INSTANCE).build());
+            final StarCatalogue catalogue = new StarCatalogue.Builder()
+                    .loadFrom(hs, HygDatabaseLoader.INSTANCE).loadFrom(ast, AsterismLoader.INSTANCE).build();
 
             final StereographicProjection proj = new StereographicProjection(HorizontalCoordinates.ofDeg(277, -23));
 
-            final Future<ObservedSky> skyFuture = ThreadManager.getAstronomy().submit(() -> new ObservedSky(
-                    ZonedDateTime.parse("2020-02-17T20:15:00+01:00"), GeographicCoordinates.ofDeg(6.57, 46.52), proj, catalogue.get()));
-
+            //££final Future<ObservedSky> skyFuture = ThreadManager.getAstronomy().submit(() -> new ObservedSky(
+            //££        ZonedDateTime.parse("2020-02-17T20:15:00+01:00"), GeographicCoordinates.ofDeg(6.57, 46.52), proj, catalogue.get()));
+            //££final ObservedSky sky = skyFuture.get();
+            final ObservedSky sky = new ObservedSky(ZonedDateTime.parse("2020-02-17T20:15:00+01:00"),
+                    GeographicCoordinates.ofDeg(6.57, 46.52), proj, catalogue);
 
             final Canvas canvasFuture = new Canvas(800, 600);
 
@@ -62,31 +66,29 @@ public final class DrawSky extends Application {
 
             paint.clear();
 
-
-            final ObservedSky sky = skyFuture.get();
-
-            RigelLogger.getBackendLogger().info("Beginning Celestial object drawing");
-            /*ThreadManager.getGui().execute(
-                    () ->
-                    {*/
+            //##RigelLogger.getBackendLogger().info("Beginning Celestial object drawing");
+            //££ThreadManager.getGui().execute(
+                //££    () ->
+                    //££{
                 paint.drawAsterisms(sky);
                 paint.drawStars(sky);
                 paint.drawPlanets(sky);
                 paint.drawSun(sky);
                 paint.drawMoon(sky);
                 paint.drawHorizon(proj);
-                //});
+                //££});
 
-            RigelLogger.getBackendLogger().info("Finished drawing stars");
+            //##RigelLogger.getBackendLogger().info("Finished drawing stars");
             ImageIO.write(SwingFXUtils.fromFXImage(canvasFuture.snapshot(null, null),
                     null), "png", new File("sky.png"));
 
-            ThreadManager.getGui().shutdownNow();
-            ThreadManager.getAstronomy().shutdownNow();
-            ThreadManager.getIo().shutdown();
-            ThreadManager.getLogger().shutdownNow();
+            //££ThreadManager.getGui().shutdownNow();
+            //££ThreadManager.getAstronomy().shutdownNow();
+            //££ThreadManager.getIo().shutdown();
+            //££ThreadManager.getLogger().shutdownNow();
 
-        } catch (InterruptedException | ExecutionException | IOException e) {
+        } //££catch (InterruptedException | ExecutionException | IOException e) {
+        catch (IOException e) {
             e.printStackTrace();
         }
         Platform.exit();

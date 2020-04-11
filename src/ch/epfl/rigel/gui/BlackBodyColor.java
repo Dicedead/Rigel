@@ -54,7 +54,7 @@ public final class BlackBodyColor {
                 final List<String> linesOfInterest = reader.lines().filter(line -> line.length() > SKIP_LINES_FILTERINT)
                         .collect(Collectors.toUnmodifiableList());
 
-                RigelLogger.getGuiLogger().fine("COLOR_LIST has been successfully initialised");
+                //##RigelLogger.getGuiLogger().fine("COLOR_LIST has been successfully initialised");
                 return IntStream.range(0, FILE_USABLE_LENGTH / 2).mapToObj(
                         i -> Color.web(linesOfInterest.get(i * 2 + 1).substring(81, 87))).collect(Collectors.toUnmodifiableList());
 
@@ -72,7 +72,7 @@ public final class BlackBodyColor {
      * @return (int) Size of list of colors, a way to initialise and (eventually) debug the colors list
      */
     public static int init() {
-        RigelLogger.getGuiLogger().info("Building COLOR_LIST");
+        //##RigelLogger.getGuiLogger().info("Building COLOR_LIST");
         return ColorListSingleton.getInstance().size();
     }
 

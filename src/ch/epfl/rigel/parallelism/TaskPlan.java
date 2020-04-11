@@ -1,6 +1,8 @@
 package ch.epfl.rigel.parallelism;
 
-public class TaskPlan {
+import ch.epfl.rigel.parallelism.graphs.Tree;
+
+public final class TaskPlan {
     final private Tree<Runnable> plan;
 
     public TaskPlan(Tree<Runnable> plan) {

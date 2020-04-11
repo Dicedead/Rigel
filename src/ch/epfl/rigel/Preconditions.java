@@ -37,7 +37,7 @@ public final class Preconditions {
      */
     public static double checkInInterval(Interval interval, double value) {
         if (!interval.contains(value)) {
-            RigelLogger.getBackendLogger().severe("Value : " + value + " is not in interval " + interval.toString());
+            //##RigelLogger.getBackendLogger().severe("Value : " + value + " is not in interval " + interval.toString());
             throw new IllegalArgumentException();
         }
         return value;

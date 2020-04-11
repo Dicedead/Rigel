@@ -38,7 +38,7 @@ public enum HygDatabaseLoader implements StarCatalogue.Loader {
     @Override
     public void load(InputStream inputStream, StarCatalogue.Builder builder) throws IOException {
 
-        RigelLogger.getFileLogger().info("Loading star file");
+        //##RigelLogger.getFileLogger().info("Loading star file");
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream,
                 StandardCharsets.US_ASCII))) {
 
@@ -62,7 +62,7 @@ public enum HygDatabaseLoader implements StarCatalogue.Loader {
                                 /*colorIndex*/ buildWithDefault(line[Column.CI.ordinal()], 0, Float::parseFloat).floatValue()
                         ));
             });
-            RigelLogger.getFileLogger().fine("Finished loading Star file " );
+            //##RigelLogger.getFileLogger().fine("Finished loading Star file " );
 
         } catch (UncheckedIOException e) { //Streams throw UncheckedIOExceptions, and need not to modify the API
             throw e.getCause();

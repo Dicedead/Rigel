@@ -127,7 +127,7 @@ public final class SkyCanvasPainter {
      * @param sky (ObservedSky) current sky
      */
     public void drawMoon(final ObservedSky sky) {
-        pipeline(sky.moonMap().entrySet().stream(), moon -> moon.angularSize() / 2, moon -> Color.WHITE);
+        pipeline(sky.moonMap().entrySet().stream(), moon -> applyToAngle(moon.angularSize()) / 2, moon -> Color.WHITE);
     }
 
     /**
