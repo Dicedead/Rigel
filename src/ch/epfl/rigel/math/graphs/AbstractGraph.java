@@ -1,6 +1,7 @@
 package ch.epfl.rigel.math.graphs;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -35,7 +36,8 @@ abstract class AbstractGraph<T, U extends Arrow<T> > {
     }
 
     public AbstractGraph<T, U> component(final T point) {
-        return on(vertexSet.stream().map(v -> isConnectedTo(point, v)).flatMap(p -> p.getPointSet().stream()).collect(Collectors.toSet()));
+        return on(vertexSet.stream().map(v -> isConnectedTo(point, v)).flatMap(p -> p.getPointSet().stream())
+                .collect(Collectors.toCollection(HashSet::new)));
     }
 
     public abstract AbstractGraph<T, U> on(final Set<T> points);
@@ -91,8 +93,8 @@ abstract class AbstractGraph<T, U extends Arrow<T> > {
 
     public AbstractGraph(List<AbstractGraph<T, U> > l)
     {
-        vertexSet = l.stream().flatMap(i -> i.getPointSet().stream()).collect(Collectors.toSet());
-        edgeSet = l.stream().flatMap(i -> i.getEdgeSet().stream()).collect(Collectors.toSet());
+        vertexSet = l.stream().flatMap(i -> i.getPointSet().stream()).collect(Collectors.toCollection(HashSet::new));
+        edgeSet = l.stream().flatMap(i -> i.getEdgeSet().stream()).collect(Collectors.toCollection(HashSet::new));
     }
 
 

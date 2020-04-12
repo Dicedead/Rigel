@@ -1,6 +1,10 @@
 package ch.epfl.rigel.math.graphs;
 
-public class DirectedLink<T> extends Link<T> implements Arrow<T>{
+/**
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
+public final class DirectedLink<T> extends Link<T> implements Arrow<T>{
 
     private final T start, end;
 

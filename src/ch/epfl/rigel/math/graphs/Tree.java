@@ -1,16 +1,21 @@
 package ch.epfl.rigel.math.graphs;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public final class Tree<T> extends AbstractGraph<Node<T>, DirectedLink<Node<T>>> {
 
     private final Node<T> root;
 
     public Tree(Collection<Node<T>> leaves)
     {
-        super(leaves.stream().map(Node::hierarchy).collect(Collectors.toList()));
+        super(leaves.stream().map(Node::hierarchy).collect(Collectors.toCollection(ArrayList::new)));
         root = super.getPoint().hierarchy().tail();
     }
     public Tree(Set<Node<T>> childs, Set<DirectedLink<Node<T>>> collect) {

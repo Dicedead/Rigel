@@ -1,5 +1,7 @@
 package ch.epfl.rigel.math.graphs;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -7,7 +9,11 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class Path<T> extends AbstractGraph<T, DirectedLink<T>>{
+/**
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
+public final class Path<T> extends AbstractGraph<T, DirectedLink<T>>{
 
     final private List<T> points;
     final private int length;
@@ -21,9 +27,9 @@ public class Path<T> extends AbstractGraph<T, DirectedLink<T>>{
     private static <T> Set<DirectedLink<T>> link(final List<T> points)
     {
 
-        return IntStream.of(0, points.size())
+        return IntStream.range(0, points.size() - 1)
                 .mapToObj(i -> new DirectedLink<T>(points.get(i), points.get(i + 1)))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toCollection(HashSet::new));
 
     }
 
@@ -35,7 +41,9 @@ public class Path<T> extends AbstractGraph<T, DirectedLink<T>>{
     @Override
     public AbstractGraph<T, DirectedLink<T>> on(final Set<T> points) {
         if (this.points.containsAll(points))
-            return new Path<>(IntStream.of(0, length).filter(i -> points.contains(this.points.get(i)) || points.contains(this.points.get(i - 1))).mapToObj(this.points::get).collect(Collectors.toList()));
+            return new Path<>(IntStream.range(0, length - 1).filter(i -> points
+                    .contains(this.points.get(i)) || points.contains(this.points.get(i - 1))).mapToObj(this.points::get)
+                    .collect(Collectors.toCollection(ArrayList::new)));
         else throw new NoSuchElementException();
     }
 

@@ -1,10 +1,15 @@
 package ch.epfl.rigel.math.graphs;
 
+import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class Graph<T> extends AbstractGraph<T,Link<T>> {
+/**
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
+public final class Graph<T> extends AbstractGraph<T,Link<T>> {
 
     public Graph(Set<T> points)
     {
@@ -12,7 +17,7 @@ public class Graph<T> extends AbstractGraph<T,Link<T>> {
                 .map(l -> points.stream()
                         .map(j -> new Link<T>(l, j)).collect(Collectors.toSet()))
                 .flatMap(Set::stream)
-                .collect(Collectors.toSet()));
+                .collect(Collectors.toCollection(HashSet::new)));
 
     }
 

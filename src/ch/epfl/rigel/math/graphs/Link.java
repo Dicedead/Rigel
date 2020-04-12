@@ -4,6 +4,10 @@ import javafx.util.Pair;
 
 import java.util.Set;
 
+/**
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public class Link<T> implements Arrow<T>{
 
     protected final Set<T> p;
