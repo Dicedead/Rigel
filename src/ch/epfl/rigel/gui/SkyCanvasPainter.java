@@ -32,12 +32,14 @@ public final class SkyCanvasPainter {
     private final static ClosedInterval CLIP_INTERVAL = ClosedInterval.of(-2, 5);
     private final static Color YELLOW_HALO = Color.YELLOW.deriveColor(1, 1, 1, 0.25);
     private final static HorizontalCoordinates PARALLEL = HorizontalCoordinates.ofDeg(0, 0);
+    public static int i = 0;
 
     private final Canvas canvas;
     private final GraphicsContext graphicsContext;
 
     private final static Function<Star, Paint> STAR_COLOR = s -> BlackBodyColor.colorForTemperature(s.colorTemperature());
     private final Function<CartesianCoordinates, Boolean> isInCanvas;
+    private final Function<CartesianCoordinates, Boolean> isInCanvasTransformed;
     private final PlanarTransformation transform;
 
     /**
@@ -49,9 +51,13 @@ public final class SkyCanvasPainter {
     public SkyCanvasPainter(final Canvas canvas, final PlanarTransformation transform) {
         this.canvas = canvas;
         this.graphicsContext = this.canvas.getGraphicsContext2D();
-        this.isInCanvas = coord -> coord.x() <= canvas.getWidth() && coord.y() <= canvas.getHeight();
-        //getInBounds creates Bounds object, unneeded.
         this.transform = transform;
+        final CartesianCoordinates invertedCanvasSizes = transform.invert().apply(canvas.getWidth(), canvas.getHeight());
+        final double absInvertedX = Math.abs(invertedCanvasSizes.x());
+        final double absInvertedY = Math.abs(invertedCanvasSizes.y());
+        this.isInCanvas = coord -> Math.abs(coord.x()) <= absInvertedX && Math.abs(coord.y()) <= absInvertedY;
+        //getInBounds creates Bounds object, unneeded.
+        this.isInCanvasTransformed = coord -> coord.x() <= canvas.getWidth() && coord.y() <= canvas.getHeight();
     }
 
     /**
@@ -167,7 +173,7 @@ public final class SkyCanvasPainter {
      */
     private <T extends CelestialObject> void pipeline(final Stream<Map.Entry<T, CartesianCoordinates>> positions,
     final Function<T, Double> radiusFunction, final Function<T, Paint> color) {
-        drawCelestial(checkInCanvas(applyTransform(positions)), radiusFunction, color);
+        drawCelestial(applyTransform(checkInCanvas(positions)), radiusFunction, color);
     }
 
     /**
@@ -238,7 +244,7 @@ public final class SkyCanvasPainter {
     final int currentStartStar, final Asterism asterism, final ObservedSky sky) {
 
         graphicsContext.lineTo(c2.x(), c2.y());
-        if (isInCanvas.apply(c1) || isInCanvas.apply(c2)) {
+        if (isInCanvasTransformed.apply(c1) || isInCanvasTransformed.apply(c2)) {
             graphicsContext.stroke();
         }
         if (currentStartStar <= asterism.stars().size() - 2) {

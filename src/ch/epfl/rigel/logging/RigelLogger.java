@@ -14,7 +14,7 @@ import java.util.logging.*;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-public class RigelLogger extends LogManager{
+public final class RigelLogger extends LogManager{
 
     public enum runType {
         DEBUG, RELEASE

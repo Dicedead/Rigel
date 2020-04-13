@@ -1,13 +1,10 @@
 package ch.epfl.rigelTest.astronomy;
 
 import ch.epfl.rigel.astronomy.Epoch;
-import ch.epfl.rigel.astronomy.Sun;
 import ch.epfl.rigel.astronomy.SunModel;
 import ch.epfl.rigel.coordinates.EclipticToEquatorialConversion;
 import ch.epfl.rigel.coordinates.EquatorialCoordinates;
 import ch.epfl.rigel.math.Angle;
-import ch.epfl.rigelTest.math.UsefulMathTestingMethods;
-import ch.epfl.rigelTest.math.UsefulMathTestingMethods.*;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
