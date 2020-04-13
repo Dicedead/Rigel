@@ -1,11 +1,11 @@
 package ch.epfl.rigel.parallelism;
 
-import javafx.concurrent.Task;
-import javafx.util.Pair;
+import ch.epfl.rigel.math.graphs.Node;
+import ch.epfl.rigel.math.graphs.Tree;
 
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.stream.IntStream;
+import java.util.stream.Collectors;
 
 import static java.util.concurrent.ForkJoinPool.defaultForkJoinWorkerThreadFactory;
 
@@ -20,13 +20,17 @@ public final class ThreadManager {
     public enum serviceType {
         CACHED, SINGLE, FIXED
     }
-
     private final static int CPU_CORES = Runtime.getRuntime().availableProcessors();
 
     private final Map<String, ExecutorService> executorServiceMap = new HashMap<>();
     private final Map<String, ForkJoinPool> forkJoinPoolMap = new HashMap<>();
     private final ThreadFactory factory;
-    private Deque< Runnable> tasks;
+    private Tree<RigelTask> taskTree;
+
+    public void assign(RigelTask.Difficulty forkjoinLimit)
+    {
+        taskTree.getLeaves().stream().forEach();
+    }
 
     public void addService(String name, serviceType type, int nthreads)
     {
@@ -64,10 +68,9 @@ public final class ThreadManager {
     }
 
 
-    public ThreadManager(List<String> threadGroupNames, ThreadFactory factory)
+    public ThreadManager(ThreadFactory factory)
     {
         this.factory = factory;
-
         forkJoinPoolMap.put("default", new ForkJoinPool(1));
         executorServiceMap.put("default", Executors.newSingleThreadExecutor(factory));
         executorServiceMap.put("background", Executors.newWorkStealingPool());

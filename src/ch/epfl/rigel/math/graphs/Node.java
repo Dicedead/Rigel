@@ -6,7 +6,7 @@ import java.util.*;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-public final class Node<T> {
+public class Node<T> {
 
     final private T t;
     final private Node<T> parent;

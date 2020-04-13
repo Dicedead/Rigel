@@ -1,9 +1,6 @@
 package ch.epfl.rigel.math.graphs;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -11,24 +8,10 @@ import java.util.stream.Collectors;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-abstract class AbstractGraph<T, U extends Arrow<T> > {
-/*
-    protected static <T> List<Node<T>> recursList(final Function<List<Node<T>>, Node<T>> chooser, Node<T> root)
-    {
-        final Node<T> selected = chooser.apply(root.getChildren());
+class AbstractGraph<T, U extends Arrow<T> > {
 
-        if (selected.isLeaf())
-            return List.of(selected);
-
-        List<Node<T>> prev = recursList(chooser, selected);
-        prev.add(selected);
-        return prev;
-    }*/
-
-
-
-    protected final Set<T> vertexSet;
-    protected final Set<U> edgeSet;
+    private final Set<T> vertexSet;
+    private final Set<U> edgeSet;
     public T getPoint()
     {
         return vertexSet.stream().findAny().orElseThrow();
@@ -37,9 +20,15 @@ abstract class AbstractGraph<T, U extends Arrow<T> > {
     public AbstractGraph<T, U> component(final T point) {
         return on(vertexSet.stream().map(v -> isConnectedTo(point, v)).flatMap(p -> p.getPointSet().stream()).collect(Collectors.toSet()));
     }
+    public Set<AbstractGraph<T, U>> components() {
+        return vertexSet.stream().map(this::component).distinct().map(m -> this.on(m.getPointSet())).collect(Collectors.toSet());
+    }
+    public AbstractGraph<T, U> on(Set<T> points) {
+        if (vertexSet.containsAll(points))
+            return new AbstractGraph<T, U>(points, edgeSet.stream().filter(l -> points.containsAll(l.getPoints())).collect(Collectors.toSet()));
 
-    public abstract AbstractGraph<T, U> on(final Set<T> points);
-
+        else throw new NoSuchElementException();
+    }
     public U of(final T t, final T u)
     {
         return edgeSet.stream().filter(e -> e.getPoints().containsAll(Set.of(t, u))).findFirst().orElseThrow();
@@ -50,10 +39,40 @@ abstract class AbstractGraph<T, U extends Arrow<T> > {
         return new Path<>(List.of(t, u));
     }
 
+    public boolean contains(final T v){return vertexSet.contains(v);}
+    public boolean containsEdge(final U v){return edgeSet.contains(v);}
+
     public AbstractGraph(final Set<T> points,final Set<U> lines)
     {
         vertexSet = points;
         edgeSet = lines;
+    }
+    public static <T> Set<T> intersectionVertex(AbstractGraph<T, ?> a, AbstractGraph<T, ?> b){
+        return a.getPointSet().stream().filter(b::contains).collect(Collectors.toSet());
+    }
+    public static <T, U extends Arrow<T>> Set<U> intersectionEdges(AbstractGraph<T, U> a, AbstractGraph<T, U> b){
+        return a.getEdgeSet().stream().filter(b::containsEdge).collect(Collectors.toSet());
+    }
+    public static <T, U extends Arrow<T>> AbstractGraph<T, U> intersection(AbstractGraph<T, U> a, AbstractGraph<T, U> b){
+        return new AbstractGraph<T, U>(intersectionVertex(a, b),intersectionEdges(a, b));
+    }
+
+
+    public AbstractGraph<T, U> minus(Set<T> points)
+    {
+        var c = new HashSet<T>(getPointSet());
+        c.removeAll(points);
+        return on(c);
+    }
+
+    public static <T, U extends Arrow<T>> Set<AbstractGraph<T, U>> eclat (AbstractGraph<T, U> a, AbstractGraph<T, U> b)
+    {
+        var I =intersection(a, b);
+        var res = a.minus(I.getPointSet()).components();
+        res.addAll(b.minus(I.getPointSet()).components());
+        res.add(I);
+        return res;
+
     }
 
     public Set<U> getEdgeSet()

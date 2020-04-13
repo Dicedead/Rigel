@@ -19,12 +19,4 @@ public class Graph<T> extends AbstractGraph<T,Link<T>> {
     public Graph(Set<T> points, Set<Link<T>> lines) {
         super(points, lines);
     }
-
-    @Override
-    public AbstractGraph<T, Link<T>> on(Set<T> points) {
-        if (vertexSet.containsAll(points))
-            return new Graph<>(points, edgeSet.stream().filter(l -> points.containsAll(l.getPoints())).collect(Collectors.toSet()));
-
-        else throw new NoSuchElementException();
-    }
 }

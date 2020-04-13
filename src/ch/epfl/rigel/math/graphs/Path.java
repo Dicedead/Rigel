@@ -11,12 +11,14 @@ public class Path<T> extends AbstractGraph<T, DirectedLink<T>>{
 
     final private List<T> points;
     final private int length;
+
     public Path(List<T> points) {
         super(Set.copyOf(points), link(points));
 
         this.points = List.copyOf(points);
         this.length = points.size();
     }
+
 
     private static <T> Set<DirectedLink<T>> link(final List<T> points)
     {
@@ -25,6 +27,10 @@ public class Path<T> extends AbstractGraph<T, DirectedLink<T>>{
                 .mapToObj(i -> new DirectedLink<T>(points.get(i), points.get(i + 1)))
                 .collect(Collectors.toSet());
 
+    }
+    public List<T> toList()
+    {
+        return points;
     }
 
     @Override
@@ -35,7 +41,10 @@ public class Path<T> extends AbstractGraph<T, DirectedLink<T>>{
     @Override
     public AbstractGraph<T, DirectedLink<T>> on(final Set<T> points) {
         if (this.points.containsAll(points))
-            return new Path<>(IntStream.of(0, length).filter(i -> points.contains(this.points.get(i)) || points.contains(this.points.get(i - 1))).mapToObj(this.points::get).collect(Collectors.toList()));
+            return new Path<>(IntStream.of(0, length)
+                    .filter(i -> points.contains(this.points.get(i)) || points.contains(this.points.get(i - 1)))
+                    .mapToObj(this.points::get).collect(Collectors.toList()));
+
         else throw new NoSuchElementException();
     }
 
@@ -61,11 +70,8 @@ public class Path<T> extends AbstractGraph<T, DirectedLink<T>>{
     {
         return new Path<>(points.subList(n, length));
     }
-
     public T head(){return points.get(0);}
-
     public T tail(){return points.get(length);}
-
     public int getLength() {
         return length;
     }

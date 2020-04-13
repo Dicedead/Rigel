@@ -1,21 +1,28 @@
 package ch.epfl.rigel.math.graphs;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public final class Tree<T> extends AbstractGraph<Node<T>, DirectedLink<Node<T>>> {
 
     private final Node<T> root;
+    private final Set<Node<T>> leaves;
 
     public Tree(Collection<Node<T>> leaves)
     {
+
         super(leaves.stream().map(Node::hierarchy).collect(Collectors.toList()));
+        assert (leaves.stream().map(n -> n.hierarchy().tail()).distinct().count() == 1);
         root = super.getPoint().hierarchy().tail();
+        this.leaves = Set.copyOf(leaves);
     }
+
     public Tree(Set<Node<T>> childs, Set<DirectedLink<Node<T>>> collect) {
         super(childs, collect);
         root = super.getPoint().hierarchy().tail();
+        leaves = childs;
 
     }
 
@@ -44,4 +51,7 @@ public final class Tree<T> extends AbstractGraph<Node<T>, DirectedLink<Node<T>>>
         }
     }
 
+    public Set<Node<T>> getLeaves() {
+        return leaves;
+    }
 }
