@@ -25,13 +25,16 @@ public final class Path<T> extends AbstractGraph<T, DirectedLink<T>> implements 
     final private List<T> points;
     final private int length;
 
+    /**
+     * Main constructor
+     * @param points the list of point on wich to construct a path, the order being derived from the one in the list
+     */
     public Path(List<T> points) {
         super(Set.copyOf(points), link(points));
 
         this.points = List.copyOf(points);
         this.length = points.size();
     }
-
 
     private static <T> Set<DirectedLink<T>> link(final List<T> points)
     {
@@ -41,6 +44,11 @@ public final class Path<T> extends AbstractGraph<T, DirectedLink<T>> implements 
                 .collect(Collectors.toSet());
 
     }
+
+    /**
+     *
+     * @return the path in the form of a list
+     */
     public List<T> toList()
     {
         return points;

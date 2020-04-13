@@ -19,7 +19,7 @@ public final class Tree<T> extends AbstractGraph<Node<T>, DirectedLink<Node<T>>>
 
     /**
      * Main Constructor of Tree using parameter Nodes' inner hierarchy to construct the directed graph
-     *
+     *Supposes a connected tree AKA not a forest
      * @param leaves (Collection<Node<T>>)
      */
     public Tree(Collection<Node<T>> leaves) {
@@ -55,7 +55,9 @@ public final class Tree<T> extends AbstractGraph<Node<T>, DirectedLink<Node<T>>>
         return new Tree<>(points);
 
     }
-
+    /**
+     * @return (Node<T>) gets the first object of the tree
+     */
     @Override
     public Node<T> getPoint() {
         return getRoot();
@@ -68,13 +70,22 @@ public final class Tree<T> extends AbstractGraph<Node<T>, DirectedLink<Node<T>>>
         return root;
     }
 
-    //TODO: doc
+    /**
+     * The component in wich a point lies, in case of a tree, the tree itself
+     * @param point the point to test
+     * @return its connected component
+     */
     @Override
     public AbstractGraph<Node<T>, DirectedLink<Node<T>>> component(Node<T> point) {
         return this;
     }
 
-    //TODO: doc
+    /**
+     *
+     * @param node1 from where the path should start
+     * @param node2 where it should end
+     * @return the shortest path in the graph from point a to b
+     */
     @Override
     public Path<Node<T>> isConnectedTo(Node<T> node1, Node<T> node2) {
         try {
@@ -84,6 +95,9 @@ public final class Tree<T> extends AbstractGraph<Node<T>, DirectedLink<Node<T>>>
         }
     }
 
+    /**
+     * @return the points that have a parent but no childs
+     */
     public Set<Node<T>> getLeaves() {
         return leaves;
     }
