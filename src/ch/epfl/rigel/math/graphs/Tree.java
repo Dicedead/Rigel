@@ -1,5 +1,7 @@
 package ch.epfl.rigel.math.graphs;
 
+import ch.epfl.rigel.Preconditions;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
@@ -90,13 +92,14 @@ public final class Tree<T> extends Graph<Node<T>, DirectedLink<Node<T>>> {
     /**
      * Finds the shortest path between two nodes
      *
-     * @param node1 from where the path should start
-     * @param node2 where it should end
-     * @return the shortest path in the graph from point a to b
+     * @param node1 (Node<T>) from where the path should start
+     * @param node2 (Node<T>) where it should end
+     * @return (Path<Node<T>>) the shortest path in the graph from point a to b
      * @throws IllegalArgumentException if the two nodes are not in the same hierarchical branch.
      */
     @Override
     public Path<Node<T>> findPathBetween(Node<T> node1, Node<T> node2) {
+        Preconditions.checkArgument(getPointSet().contains(node1) && getPointSet().contains(node2));
         final Path<Node<T>> nodeOneHierarchy = node1.hierarchy();
         if (nodeOneHierarchy.contains(node2)) {
             return nodeOneHierarchy.subpathTo(node2);

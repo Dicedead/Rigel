@@ -50,6 +50,9 @@ public final class UndirectedGraph<T> extends Graph<T, UndirectedLink<T>> {
         return intersection(new UndirectedGraph<>(points));
     }
 
+    /**
+     * @throws UnsupportedOperationException as finding a directed path in this context can be deemed invalid.
+     */
     @Override
     public Path<T> findPathBetween(T t, T u) {
         throw new UnsupportedOperationException("Finding a directed path does not make sense in an undirected graph.");

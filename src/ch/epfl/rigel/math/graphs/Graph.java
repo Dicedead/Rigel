@@ -92,7 +92,14 @@ abstract class Graph<T, U extends Link<T>> {
         return edgeSet.stream().filter(e -> e.getPoints().containsAll(Set.of(value1, value2))).findFirst().orElseThrow();
     }
 
-    public abstract Path<T> findPathBetween(final T t, final T u);
+    /**
+     * Find a path between 2 parameter vertices of the graph
+     *
+     * @param v1 (T)
+     * @param v2 (T)
+     * @return (Path<T>) said path
+     */
+    public abstract Path<T> findPathBetween(final T v1, final T v2);
 
     /**
      * @param v (T) the vertex to test
@@ -285,9 +292,13 @@ abstract class Graph<T, U extends Link<T>> {
             else throw new NoSuchElementException();
         }
 
+        /**
+         * @see Graph#findPathBetween(Object, Object)
+         */
         @Override
-        public Path<T> findPathBetween(final T t, final T u) {
-            return new Path<>(points.subList(points.indexOf(t), points.indexOf(u)));
+        public Path<T> findPathBetween(final T v1, final T v2) {
+            Preconditions.checkArgument(points.contains(v1) && points.contains(v2));
+            return new Path<>(points.subList(points.indexOf(v1), points.indexOf(v2)));
         }
 
         /**
