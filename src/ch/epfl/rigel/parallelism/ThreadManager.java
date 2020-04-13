@@ -29,7 +29,7 @@ public final class ThreadManager {
 
     public void assign(RigelTask.Difficulty forkjoinLimit)
     {
-        taskTree.getLeaves().stream().forEach();
+        //taskTree.getLeaves().stream().forEach();
     }
 
     public void addService(String name, serviceType type, int nthreads)
