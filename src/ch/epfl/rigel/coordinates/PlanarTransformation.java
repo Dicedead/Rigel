@@ -72,7 +72,7 @@ public final class PlanarTransformation implements Function<CartesianCoordinates
      * [ dilat     0      tx ]
      * [   0    -dilat    ty ]
      *
-     * @param dilat (double) dilatation coefficient, position (1,1)
+     * @param dilat (double) dilatation coefficient, with same sign at position (1,1), opposite sign at (2,2)
      * @param tx    (double) position (1,3) - translation coefficient, set to 0 if no translation on x axis wanted
      * @param ty    (double) position (2,3) - translation coefficient, set to 0 if no translation on y axis wanted
      * @return (PlanarTransformation) loaded diagonal matrix

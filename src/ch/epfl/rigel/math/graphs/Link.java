@@ -11,26 +11,26 @@ import java.util.Set;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-public abstract class AbstractLink<T> {
+public abstract class Link<T> {
 
     private final Set<T> unorderedPair;
 
     /**
-     * AbstractLink constructor: ties 2 elements together
+     * Link constructor: ties 2 elements together
      *
      * @param t (T)
      * @param u (T)
      */
-    public AbstractLink(final T t, final T u) {
+    public Link(final T t, final T u) {
         this.unorderedPair = Set.of(t, u);
     }
 
     /**
-     * AbstractLink constructor: ties the 2 elements in a pair together (with no order)
+     * Link constructor: ties the 2 elements in a pair together (with no order)
      *
      * @param p (Pair<T,T>)
      */
-    public AbstractLink(final Pair<T, T> p) {
+    public Link(final Pair<T, T> p) {
         this.unorderedPair = Set.of(p.getKey(), p.getValue());
     }
 

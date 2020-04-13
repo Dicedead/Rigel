@@ -5,9 +5,7 @@ package ch.epfl.rigel.parallelism;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-public class RigelTask implements Runnable {
-
-
+public final class RigelTask implements Runnable {
 
     /**
      * A scale of difficulty for a task, prompting more ressources from the system

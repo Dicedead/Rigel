@@ -12,7 +12,7 @@ import java.util.Objects;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-public class Node<T> {
+public final class Node<T> {
 
     final private T value;
     final private Node<T> parent;
@@ -55,8 +55,8 @@ public class Node<T> {
      * @return (Path<Node<T>>) a Path of all the nodes higher than this node; ie its parent and (recursively) the parent
      * of its parent
      */
-    public Path<Node<T>> hierarchy() {
-        return new Path<>(new ArrayList<>(hierarchyRecur(new ArrayDeque<>(Collections.singleton(this)))));
+    public Graph.Path<Node<T>> hierarchy() {
+        return new Graph.Path<>(new ArrayList<>(hierarchyRecur(new ArrayDeque<>(Collections.singleton(this)))));
     }
 
     /**
