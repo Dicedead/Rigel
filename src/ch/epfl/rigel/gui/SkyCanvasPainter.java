@@ -32,7 +32,6 @@ public final class SkyCanvasPainter {
     private final static ClosedInterval CLIP_INTERVAL = ClosedInterval.of(-2, 5);
     private final static Color YELLOW_HALO = Color.YELLOW.deriveColor(1, 1, 1, 0.25);
     private final static HorizontalCoordinates PARALLEL = HorizontalCoordinates.ofDeg(0, 0);
-    public static int i = 0;
 
     private final Canvas canvas;
     private final GraphicsContext graphicsContext;
