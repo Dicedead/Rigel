@@ -162,13 +162,15 @@ public final class PlanarTransformation implements Function<CartesianCoordinates
     }
 
     /**
-     * Stretches a distance after application to this transformation
+     * Stretches a distance after application to this transformation, computing the euclidean norm of
+     * [ initialDistance ]  after transformation (translation-less).
+     * [       0         ]
      *
      * @param initialDistance (double) distance before transformation
      * @return (double) distance after transformation
      */
     public double applyDistance(final double initialDistance) {
-        return euclideanNormOf(2 * initialDistance * Mxx, Myx * 2 * initialDistance);
+        return euclideanNormOf(Mxx * initialDistance, Myx * initialDistance);
     }
 
     /**

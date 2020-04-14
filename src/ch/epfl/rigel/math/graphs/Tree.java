@@ -22,13 +22,15 @@ public final class Tree<T> extends Graph<Node<T>, DirectedLink<Node<T>>> {
     /**
      * Main Constructor of Tree using parameter Nodes' inner hierarchy to construct the directed graph
      * Supposes a connected tree AKA not a forest
+     *
      * @param leaves (Collection<Node<T>>)
+     * @throws IllegalArgumentException if given leaves aren't all connected to the same root
      */
     public Tree(Collection<Node<T>> leaves) {
         super(leaves.stream().map(Node::hierarchy).collect(Collectors.toCollection(ArrayList::new)));
         Preconditions.checkArgument(leaves.stream().map(n -> n.hierarchy().tail()).distinct().count() == 1);
 
-        root = super.getPoint().hierarchy().tail();
+        this.root = super.getPoint().hierarchy().tail();
         this.leaves = Set.copyOf(leaves);
     }
 
@@ -41,9 +43,8 @@ public final class Tree<T> extends Graph<Node<T>, DirectedLink<Node<T>>> {
      */
     public Tree(Set<Node<T>> childs, Set<DirectedLink<Node<T>>> collect) {
         super(childs, collect);
-        root = super.getPoint().hierarchy().tail();
-        leaves = childs;
-
+        this.root = super.getPoint().hierarchy().tail();
+        this.leaves = childs;
     }
 
     /**
@@ -55,8 +56,8 @@ public final class Tree<T> extends Graph<Node<T>, DirectedLink<Node<T>>> {
     @Override
     public Graph<Node<T>, DirectedLink<Node<T>>> on(Set<Node<T>> points) {
         return new Tree<>(points);
-
     }
+
     /**
      * @return (Node<T>) gets the first object of the tree
      */
@@ -96,7 +97,7 @@ public final class Tree<T> extends Graph<Node<T>, DirectedLink<Node<T>>> {
      * @param node1 (Node<T>) from where the path should start
      * @param node2 (Node<T>) where it should end
      * @return (Path<Node<T>>) the shortest path in the graph from point a to b
-     * @throws IllegalArgumentException if the two nodes are not in the same hierarchical branch.
+     * @throws IllegalArgumentException if either of the two nodes is not in the tree
      */
     @Override
     public Path<Node<T>> findPathBetween(Node<T> node1, Node<T> node2) {

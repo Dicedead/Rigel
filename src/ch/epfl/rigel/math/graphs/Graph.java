@@ -173,14 +173,14 @@ abstract class Graph<T, U extends Link<T>> {
     }
 
     /**
-     * @return (Set < U >) getter for immutable set of edges
+     * @return (Set <U>) getter for immutable set of edges
      */
     public Set<U> getEdgeSet() {
         return edgeSet;
     }
 
     /**
-     * @return (Set < T >) getter for immutable set of vertices
+     * @return (Set <T>) getter for immutable set of vertices
      */
     public Set<T> getPointSet() {
         return vertexSet;
@@ -210,7 +210,7 @@ abstract class Graph<T, U extends Link<T>> {
      * Gets the set of points linked to given point
      *
      * @param point (T) given point
-     * @return (Set < T >) said set
+     * @return (Set <T>) said set
      * @throws NoSuchElementException if point is not in set of vertices
      */
     public Set<T> getNeighbors(final T point) {
@@ -224,7 +224,8 @@ abstract class Graph<T, U extends Link<T>> {
     }
 
     /**
-     * Implementation of a directed graph: a Path from a root object to a final object
+     * Implementation of a directed graph: a Path from a root object to a final object.
+     * A directed path can be seen as a sub-graph of any directed graph, making it a useful analysis tool.
      *
      * @author Alexandre Sallinen (303162)
      * @author Salim Najib (310003)
@@ -235,9 +236,10 @@ abstract class Graph<T, U extends Link<T>> {
         final private int length;
 
         /**
-         * Main constructor
+         * Main Path constructor
          *
-         * @param points the list of point on which to construct a path, the order being derived from the one in the list
+         * @param points (List<T>) the list of point on which to construct a path,
+         *        the order being derived from the list's order
          */
         public Path(List<T> points) {
             super(Set.copyOf(points), link(points));
@@ -266,7 +268,7 @@ abstract class Graph<T, U extends Link<T>> {
          * Path<T> is immutable iff T is immutable
          *
          * @param value (T)
-         * @return (Path < T >) said Path
+         * @return (Path <T>) said Path
          * @throws IllegalArgumentException if value isn't in this path's vertices set
          */
         public Path<T> subpathTo(final T value) {
@@ -314,10 +316,10 @@ abstract class Graph<T, U extends Link<T>> {
         }
 
         /**
-         * Creates a subpath of this path from value at index n to end
+         * Creates a sub-path of this path from value at index n to end
          *
-         * @param n (int) start index of subpath
-         * @return (Path < T >) said subpath
+         * @param n (int) start index of sub-path
+         * @return (Path < T >) said sub-path
          * @throws IllegalArgumentException if n >= the size of this path
          */
         public Path<T> from(final int n) {
@@ -339,22 +341,21 @@ abstract class Graph<T, U extends Link<T>> {
             return points.get(n);
         }
         /**
-         * Creates a path begining at this path end's ending at the begining of this one
-         * @return a reversed path
+         * Creates a path beginning at this path end's ending at the beginning of this one
+         *
+         * @return (Path<T>) a reversed path
          */
-        public Path<T> inverse ()
-        {
+        public Path<T> inverse () {
             final var a = new ArrayList<>(toList());
             Collections.reverse(a);
             return new Path<>(a);
         }
         /**
          * Creates a path begining at this path and ending at the end of the other
-         * @param otherPath the path to append
-         * @return a path composed of an appending of the two paths
+         * @param otherPath (Path<T>) the path to append
+         * @return (Path<T>) a path composed of an appending of the two paths
          */
-        public Path<T> add (Path<T> otherPath)
-        {
+        public Path<T> add (Path<T> otherPath) {
             final var secondHalf = otherPath.toList();
             final var firstHalf = new ArrayList<>(toList());
 
