@@ -4,6 +4,7 @@ import ch.epfl.rigel.Preconditions;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -20,12 +21,12 @@ public final class Tree<T> extends Graph<Node<T>, DirectedLink<Node<T>>> {
 
     /**
      * Main Constructor of Tree using parameter Nodes' inner hierarchy to construct the directed graph
-     *Supposes a connected tree AKA not a forest
+     * Supposes a connected tree AKA not a forest
      * @param leaves (Collection<Node<T>>)
      */
     public Tree(Collection<Node<T>> leaves) {
         super(leaves.stream().map(Node::hierarchy).collect(Collectors.toCollection(ArrayList::new)));
-        assert (leaves.stream().map(n -> n.hierarchy().tail()).distinct().count() == 1);
+        Preconditions.checkArgument(leaves.stream().map(n -> n.hierarchy().tail()).distinct().count() == 1);
 
         root = super.getPoint().hierarchy().tail();
         this.leaves = Set.copyOf(leaves);
@@ -100,15 +101,23 @@ public final class Tree<T> extends Graph<Node<T>, DirectedLink<Node<T>>> {
     @Override
     public Path<Node<T>> findPathBetween(Node<T> node1, Node<T> node2) {
         Preconditions.checkArgument(getPointSet().contains(node1) && getPointSet().contains(node2));
+
         final Path<Node<T>> nodeOneHierarchy = node1.hierarchy();
-        if (nodeOneHierarchy.contains(node2)) {
-            return nodeOneHierarchy.subpathTo(node2);
-        } else {
-            final Path<Node<T>> nodeTwoHierarchy = node2.hierarchy();
+        final Path<Node<T>> nodeTwoHierarchy = node2.hierarchy();
+        final var aut = nodeOneHierarchy.intersection(nodeTwoHierarchy);
+
+        if (aut.contains(node1) || aut.contains(node2))
+        {
             if (nodeTwoHierarchy.contains(node1)) {
                 return nodeTwoHierarchy.subpathTo(node1);
             }
-            throw new IllegalArgumentException("Argument nodes not in the same branch");
+
+            return nodeOneHierarchy.subpathTo(node2);
+
+        } else {
+
+            final Node<T> anchor = aut.getPoint();
+            return  nodeOneHierarchy.subpathTo(anchor).add(nodeTwoHierarchy.subpathTo(anchor).inverse());
         }
     }
 
