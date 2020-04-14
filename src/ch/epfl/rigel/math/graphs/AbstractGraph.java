@@ -81,17 +81,6 @@ class AbstractGraph<T, U extends AbstractLink<T>> {
     }
 
     /**
-     * If it exists, the edge between point t and u in this graph
-     * @param t the point on which the edge should start
-     * @param u the point on which the edge should end (order does not matter)
-     * @return the edge on t and u if it exists in this graph
-     */
-    public U of(final T t, final T u)
-    {
-        return edgeSet.stream().filter(e -> e.getPoints().containsAll(Set.of(t, u))).findFirst().orElseThrow();
-    }
-
-    /**
      * If it exists, the path between point t and u in this graph
      * @param t the point on which the path should start
      * @param u the point on which the path should end
