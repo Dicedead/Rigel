@@ -200,7 +200,7 @@ public final class ObservedSky {
      * @param <K>                  CelestialObject's type to be computed and returned
      * @param celestialObjectModel (CelestialObjectModel<K>) corresponding Model
      * @return (K extends CelestialObject) parametrized CelestialObject
-     * @see CelestialObjectModel#at(double, EclipticToEquatorialConversion) 
+     * @see CelestialObjectModel#at(double, EclipticToEquatorialConversion)
      */
     private <K extends CelestialObject> K applyModel(final CelestialObjectModel<K> celestialObjectModel) {
         return celestialObjectModel.at(daysUntilJ2010, eclToEqu);
