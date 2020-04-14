@@ -52,7 +52,7 @@ public final class Node<T> {
     }
 
     /**
-     * @return (Path<Node<T>>) a Path of all the nodes higher than this node; ie its parent and (recursively) the parent
+     * @return (Path<Node<T>>) a Path of all the nodes higher than this node; i.e its parent and (recursively) the parent
      * of its parent
      */
     public Graph.Path<Node<T>> hierarchy() {

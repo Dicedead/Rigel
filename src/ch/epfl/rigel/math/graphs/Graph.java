@@ -237,7 +237,7 @@ abstract class Graph<T, U extends Link<T>> {
         /**
          * Main constructor
          *
-         * @param points the list of point on wich to construct a path, the order being derived from the one in the list
+         * @param points the list of point on which to construct a path, the order being derived from the one in the list
          */
         public Path(List<T> points) {
             super(Set.copyOf(points), link(points));
@@ -310,7 +310,7 @@ abstract class Graph<T, U extends Link<T>> {
             Preconditions.checkArgument(otherGraph.getClass() == Path.class);
             final List<T> otherList = ((Path<T>) otherGraph).points;
             otherList.retainAll(this.points);
-            return new Path<T>(otherList);
+            return new Path<>(otherList);
         }
 
         /**
@@ -337,6 +337,29 @@ abstract class Graph<T, U extends Link<T>> {
         public T getAt(final int n) {
             Preconditions.checkArgument(n < length);
             return points.get(n);
+        }
+        /**
+         * Creates a path begining at this path end's ending at the begining of this one
+         * @return a reversed path
+         */
+        public Path<T> inverse ()
+        {
+            final var a = new ArrayList<>(toList());
+            Collections.reverse(a);
+            return new Path<>(a);
+        }
+        /**
+         * Creates a path begining at this path and ending at the end of the other
+         * @param otherPath the path to append
+         * @return a path composed of an appending of the two paths
+         */
+        public Path<T> add (Path<T> otherPath)
+        {
+            final var secondHalf = otherPath.toList();
+            final var firstHalf = new ArrayList<>(toList());
+
+            firstHalf.addAll(secondHalf);
+            return new Path<>(firstHalf);
         }
 
         /**
