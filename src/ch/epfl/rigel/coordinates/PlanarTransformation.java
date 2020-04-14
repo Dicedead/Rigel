@@ -93,7 +93,7 @@ public final class PlanarTransformation implements Function<CartesianCoordinates
      * @return (PlanarTransformation) inverse transformation of trans
      * @throws IllegalArgumentException if determinant of input matrix == 0 (ie input matrix isn't invertible)
      */
-    public static PlanarTransformation inverseOf(final PlanarTransformation trans) throws IllegalArgumentException{
+    public static PlanarTransformation inverseOf(final PlanarTransformation trans) {
         Preconditions.checkArgument(trans.determinant != 0);
         final double inversDet = 1/trans.determinant;
         return new PlanarTransformation(inversDet * trans.Myy, -inversDet * trans.Mxy, -inversDet * trans.Myx,
@@ -168,7 +168,7 @@ public final class PlanarTransformation implements Function<CartesianCoordinates
      * @return (double) distance after transformation
      */
     public double applyDistance(final double initialDistance) {
-        return Math.abs(Mxx * initialDistance + Mxy * initialDistance) + Math.abs(Myx * initialDistance + Myy * initialDistance);
+        return euclideanNormOf(2 * initialDistance * Mxx, Myx * 2 * initialDistance);
     }
 
     /**
@@ -176,6 +176,62 @@ public final class PlanarTransformation implements Function<CartesianCoordinates
      */
     public double getDeterminant() {
         return determinant;
+    }
+
+    /**
+     * Compute the Euclidean norm of a vector
+     *
+     * @param coords (CartesianCoordinates) input vector
+     * @return (double) coords' norm
+     */
+    public static double euclideanNormOf(final CartesianCoordinates coords) {
+        return euclideanNormOf(coords.x(), coords.y());
+    }
+
+    /**
+     * Compute the Euclidean norm of a vector
+     *
+     * @param x (double) first coordinate of input vector
+     * @param y (double) second coordinate of input vector
+     * @return (double) vector's norm
+     */
+    public static double euclideanNormOf(final double x, final double y) {
+        return Math.sqrt(x*x + y*y);
+        //not implemented as the sqrt of the next method for minor efficiency purposes
+    }
+
+    /**
+     * Compute the square of the Euclidean norm of a vector
+     *
+     * @param x (double) first coordinate of input vector
+     * @param y (double) second coordinate of input vector
+     * @return (double) vector's norm squared
+     */
+    public static double euclideanNormSquared(final double x, final double y) {
+        return x*x + y*y;
+    }
+
+    /**
+     * Computes the square of the euclidean norm of the vector joining coord1 to coord2
+     *
+     * @param coord1 (CartesianCoordinates)
+     * @param coord2 (CartesianCoordinates)
+     * @return (double)
+     */
+    public static double euclideanDistSquared(final CartesianCoordinates coord1, final CartesianCoordinates coord2) {
+        return euclideanNormSquared(coord1.x() - coord2.x(), coord1.y() - coord2.y());
+        //Math.pow(n,2) is just a tad slower than n*n for squaring, so was Math.hyp compared to this method
+    }
+
+    /**
+     * Computes the euclidean norm of the vector joining coord1 to coord2
+     *
+     * @param coord1 (CartesianCoordinates)
+     * @param coord2 (CartesianCoordinates)
+     * @return (double)
+     */
+    public static double euclideanDistance(CartesianCoordinates coord1, CartesianCoordinates coord2) {
+        return euclideanNormOf(coord1.x() - coord2.x(), coord1.y() - coord2.y());
     }
 
     /**
