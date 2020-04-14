@@ -1,8 +1,9 @@
 package ch.epfl.rigel.math.graphs;
 
+import ch.epfl.rigel.Preconditions;
+
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -12,7 +13,7 @@ import java.util.stream.Collectors;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-public final class Tree<T> extends AbstractGraph<Node<T>, DirectedLink<Node<T>>> {
+public final class Tree<T> extends Graph<Node<T>, DirectedLink<Node<T>>> {
 
     private final Node<T> root;
     private final Set<Node<T>> leaves;
@@ -48,10 +49,10 @@ public final class Tree<T> extends AbstractGraph<Node<T>, DirectedLink<Node<T>>>
      * Constructs a Tree ON given set of points, returns it as supertype
      *
      * @param points (Set<T>) said set
-     * @return (AbstractGraph<Node<T>, DirectedLink<Node<T>>>) implemented as Tree
+     * @return (Graph<Node<T>, DirectedLink<Node<T>>>) implemented as Tree
      */
     @Override
-    public AbstractGraph<Node<T>, DirectedLink<Node<T>>> on(Set<Node<T>> points) {
+    public Graph<Node<T>, DirectedLink<Node<T>>> on(Set<Node<T>> points) {
         return new Tree<>(points);
 
     }
@@ -71,34 +72,54 @@ public final class Tree<T> extends AbstractGraph<Node<T>, DirectedLink<Node<T>>>
     }
 
     /**
-     * The component in wich a point lies, in case of a tree, the tree itself
-     * @param point the point to test
-     * @return its connected component
+     * @return the points that have a parent but no children
+     */
+    public Set<Node<T>> getLeaves() {
+        return leaves;
+    }
+
+    /**
+     * The component in which a point lies, in case of a tree, the tree itself
+     *
+     * @param point (Node<T>) the point to test
+     * @return (Graph<Node<T>, DirectedLink<Node<T>>>) its connected component
      */
     @Override
-    public AbstractGraph<Node<T>, DirectedLink<Node<T>>> component(Node<T> point) {
+    public Graph<Node<T>, DirectedLink<Node<T>>> component(Node<T> point) {
         return this;
     }
 
     /**
+     * Finds the shortest path between two nodes
      *
-     * @param node1 from where the path should start
-     * @param node2 where it should end
-     * @return the shortest path in the graph from point a to b
+     * @param node1 (Node<T>) from where the path should start
+     * @param node2 (Node<T>) where it should end
+     * @return (Path<Node<T>>) the shortest path in the graph from point a to b
+     * @throws IllegalArgumentException if the two nodes are not in the same hierarchical branch.
      */
     @Override
-    public Path<Node<T>> isConnectedTo(Node<T> node1, Node<T> node2) {
-        try {
-            return node1.hierarchy().subpathTo(node2);
-        } catch (Exception e) {
-            return node2.hierarchy().subpathTo(node1);
+    public Path<Node<T>> findPathBetween(Node<T> node1, Node<T> node2) {
+        Preconditions.checkArgument(getPointSet().contains(node1) && getPointSet().contains(node2));
+        final Path<Node<T>> nodeOneHierarchy = node1.hierarchy();
+        if (nodeOneHierarchy.contains(node2)) {
+            return nodeOneHierarchy.subpathTo(node2);
+        } else {
+            final Path<Node<T>> nodeTwoHierarchy = node2.hierarchy();
+            if (nodeTwoHierarchy.contains(node1)) {
+                return nodeTwoHierarchy.subpathTo(node1);
+            }
+            throw new IllegalArgumentException("Argument nodes not in the same branch");
         }
     }
 
     /**
-     * @return the points that have a parent but no childs
+     * @see Graph#intersection(Graph)
      */
-    public Set<Node<T>> getLeaves() {
-        return leaves;
+    @Override
+    public Graph<Node<T>, DirectedLink<Node<T>>> intersection(Graph<Node<T>, DirectedLink<Node<T>>> otherGraph) {
+        final Set<Node<T>> interNodes = otherGraph.getPointSet();
+        interNodes.retainAll(this.getPointSet());
+        final Set<DirectedLink<Node<T>>> interLinks = otherGraph.getEdgeSet();
+        return new Tree<T>(interNodes, interLinks);
     }
 }

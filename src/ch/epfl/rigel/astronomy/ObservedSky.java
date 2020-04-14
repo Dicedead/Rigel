@@ -1,11 +1,8 @@
 package ch.epfl.rigel.astronomy;
 
 import ch.epfl.rigel.coordinates.*;
-import ch.epfl.rigel.logging.RigelLogger;
-import com.sun.tools.javac.Main;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -19,8 +16,10 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import static ch.epfl.rigel.coordinates.PlanarTransformation.euclideanDistSquared;
+import static ch.epfl.rigel.coordinates.PlanarTransformation.euclideanDistance;
 
 /**
  * Pooling all the models and corresponding celestial objects, creating a representation of the Observed Sky at a
@@ -80,9 +79,9 @@ public final class ObservedSky {
 
         this.sunMap = Collections.unmodifiableMap(mapObjectToPosition(List.of(SunModel.SUN), this::applyModel));
         this.moonMap = Collections.unmodifiableMap(mapObjectToPosition(List.of(MoonModel.MOON), this::applyModel));
-        this.planetMap = Collections.unmodifiableMap(transform(Arrays.stream(PlanetModel.values()).filter(i -> i.ordinal() != 2)
+        this.planetMap = Collections.unmodifiableMap(toTreeMap(Arrays.stream(PlanetModel.values()).filter(i -> i.ordinal() != 2)
                 .collect(Collectors.toList()), this::applyModel, i -> PLANET_NAMES.indexOf(i.name())));
-        this.starMap = Collections.unmodifiableMap(transform(catalogue.stars(), Function.identity(), catalogue.starIndexMap()::get));
+        this.starMap = Collections.unmodifiableMap(toTreeMap(catalogue.stars(), Function.identity(), catalogue.starIndexMap()::get));
 
         this.celestObjToCoordsMap = Stream.of(starMap, planetMap, sunMap, moonMap)
                 .flatMap(l -> l.entrySet().stream())
@@ -110,7 +109,7 @@ public final class ObservedSky {
     public Optional<CelestialObject> objectClosestTo(final CartesianCoordinates point, final double maxDistance) {
         return celestObjToCoordsMap.keySet().parallelStream().min((celestObj1, celestObj2) -> CLOSEST_TO_C.apply(point)
                 .apply(celestObjToCoordsMap.get(celestObj1), celestObjToCoordsMap.get(celestObj2))) //(*)
-                .filter(celestObj -> Math.sqrt(euclideanDistSquared(celestObjToCoordsMap.get(celestObj), point)) <= maxDistance); //(**)
+                .filter(celestObj -> euclideanDistance(celestObjToCoordsMap.get(celestObj), point) <= maxDistance); //(**)
         /*
         Constructing celestObjToCoordsMap beforehand allows this method to run in linear time, and although it causes
         spatial complexity, finding the minimum of each map then comparing them all proved to be a lot slower (5 times).
@@ -201,7 +200,7 @@ public final class ObservedSky {
      * @param <K>                  CelestialObject's type to be computed and returned
      * @param celestialObjectModel (CelestialObjectModel<K>) corresponding Model
      * @return (K extends CelestialObject) parametrized CelestialObject
-     * @see CelestialObjectModel<K>.at() documentation
+     * @see CelestialObjectModel#at(double, EclipticToEquatorialConversion) 
      */
     private <K extends CelestialObject> K applyModel(final CelestialObjectModel<K> celestialObjectModel) {
         return celestialObjectModel.at(daysUntilJ2010, eclToEqu);
@@ -235,20 +234,8 @@ public final class ObservedSky {
      * @return Map containing the position of each Celestial object
      */
     private <T, S extends CelestialObject> Map<S, CartesianCoordinates>
-    transform(final List<T> inList, final Function<T, S> func, final ToIntFunction<S> comp) {
+    toTreeMap(final List<T> inList, final Function<T, S> func, final ToIntFunction<S> comp) {
         return mapObjectToPosition(inList, func).entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
                 Map.Entry::getValue, (o1, o2) -> o1, () -> new TreeMap<>(Comparator.comparingInt(comp))));
-    }
-
-    /**
-     * Computes the square of the euclidean norm of the vector joining coord1 to coord2
-     *
-     * @param coord1 (CartesianCoordinates)
-     * @param coord2 (CartesianCoordinates)
-     * @return (double)
-     */
-    private static double euclideanDistSquared(CartesianCoordinates coord1, CartesianCoordinates coord2) {
-        return (coord1.x() - coord2.x()) * (coord1.x() - coord2.x()) + (coord1.y() - coord2.y()) * (coord1.y() - coord2.y());
-        //Math.pow(n,2) is just a tad slower than n*n for squaring, so was Math.hyp compared to this method
     }
 }

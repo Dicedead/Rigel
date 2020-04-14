@@ -11,6 +11,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.text.TextAlignment;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -150,6 +151,7 @@ public final class SkyCanvasPainter {
             graphicsContext.setLineWidth(2);
             graphicsContext.strokeOval(transformedCenter.x() - size / 2, transformedCenter.y() - size / 2, size, size);
             graphicsContext.setFill(Color.RED);
+            graphicsContext.setTextAlign(TextAlignment.CENTER);
             graphicsContext.setTextBaseline(VPos.TOP);
         }
         IntStream.range(0, 8).boxed().forEach(

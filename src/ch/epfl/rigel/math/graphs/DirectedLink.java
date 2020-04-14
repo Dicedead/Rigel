@@ -8,7 +8,7 @@ import javafx.util.Pair;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-public final class DirectedLink<T> extends AbstractLink<T> {
+public final class DirectedLink<T> extends Link<T> {
 
     private final T start, end;
 
