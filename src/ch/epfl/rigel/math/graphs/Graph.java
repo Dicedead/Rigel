@@ -240,7 +240,7 @@ import java.util.stream.IntStream;
 
         private static <T> Set<DirectedLink<T>> link(final List<T> points) {
 
-            return IntStream.range(0, points.size() - 2)
+            return IntStream.range(0, points.size() - 1)
                     .mapToObj(i -> new DirectedLink<T>(points.get(i), points.get(i + 1)))
                     .collect(Collectors.toSet());
 

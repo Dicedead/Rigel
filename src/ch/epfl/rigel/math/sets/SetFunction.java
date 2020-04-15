@@ -12,6 +12,7 @@ public class SetFunction<T, U> implements Function<MathSet<T>, MathSet<U>> {
         this.f = (S ->  S.stream().map(f).collect(MathSet.toSet()));
         precise = f;
     }
+
     @Override
     public MathSet<U> apply(MathSet<T> set) {
         return f.apply(set);

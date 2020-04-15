@@ -2,24 +2,25 @@ package ch.epfl.rigel.math.sets;
 
 import javafx.util.Pair;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class MathSet<T>
-{
+public class MathSet<T> {
 
     private final Set<T> data;
 
-    public MathSet(Collection<T> t)
-    {
+    public MathSet(Collection<T> t) {
         data = Set.copyOf(t);
     }
-    public MathSet<T> intersection (final MathSet<T> others)
-    {
+
+    public MathSet<T> intersection(final MathSet<T> others) {
         return intersection(Collections.singleton(others));
     }
     public <U> MathSet<Pair<T, U>> product (final MathSet<U> other)
@@ -81,12 +82,19 @@ public class MathSet<T>
         return intersection(Collections.singleton(complement(other)));
     }
 
-    public Stream<T> stream(){return data.stream();}
-    public int cardinality(){return getData().size();}
-    public Set<T> getData(){return data;}
+    public Stream<T> stream() {
+        return data.stream();
+    }
 
-    public Predicate<T> isIn()
-    {
+    public int cardinality() {
+        return getData().size();
+    }
+
+    public Set<T> getData() {
+        return data;
+    }
+
+    public Predicate<T> isIn() {
         return this::in;
     }
     public <U> MathSet<U> image (Function<T, U> f) {
@@ -139,7 +147,6 @@ public class MathSet<T>
         return sets.iterator().next().union(sets);
     }
 
-
     public static <T> MathSet<T> intersectionOf (final Collection<MathSet<T>> sets)
     {
         return sets.iterator().next().intersection(sets);
@@ -165,4 +172,5 @@ public class MathSet<T>
     {
         return unionOf(set).suchThat(t);
     }
+
 }

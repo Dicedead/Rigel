@@ -28,4 +28,3 @@ public class IntegerSet extends PointedSet<Integer>{
                 super.image(f).stream().max(Comparator.comparingInt(Integer::valueOf)).orElseThrow());
     }
 }
-

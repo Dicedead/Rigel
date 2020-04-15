@@ -18,14 +18,12 @@ public class OrderedPair<T> extends IndexedSet<T, Integer> implements Iterable<T
         super(List.of(t), new SetFunction<>((Integer i) -> t[i]));
     }
 
-    public List<T> toList()
-    {
-        return IntStream.rangeClosed(0, getData().size()).mapToObj(this::at).collect(Collectors.toList());
+    public List<T> toList() {
+        return IntStream.range(0, getData().size()).mapToObj(this::at).collect(Collectors.toList());
     }
 
     @Override
-    public Stream<T> stream()
-    {
+    public Stream<T> stream() {
         return toList().stream();
     }
 
