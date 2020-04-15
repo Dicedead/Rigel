@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
  */
 public final class UndirectedGraph<T> extends Graph<T, UndirectedLink<T>> {
     /*
-     Although unused, this class has been left for completeness.
+     Although most likely not used in this project, this class has been left for completeness.
      */
 
     /**

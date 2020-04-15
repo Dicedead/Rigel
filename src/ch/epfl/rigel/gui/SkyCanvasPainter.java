@@ -29,7 +29,7 @@ import static ch.epfl.rigel.math.Angle.ofDeg;
  */
 public final class SkyCanvasPainter {
 
-    private final static double CELEST_SIZE_COEFF = applyToAngle(ofDeg(0.5)) / 280;
+    private final static double CELEST_SIZE_COEFF = applyToAngle(ofDeg(0.5)) / 140;
     private final static ClosedInterval CLIP_INTERVAL = ClosedInterval.of(-2, 5);
     private final static Color YELLOW_HALO = Color.YELLOW.deriveColor(1, 1, 1, 0.25);
     private final static HorizontalCoordinates PARALLEL = HorizontalCoordinates.ofDeg(0, 0);
@@ -76,10 +76,9 @@ public final class SkyCanvasPainter {
      * @param sky (ObservedSky) current sky
      */
     public void drawAsterisms(ObservedSky sky) {
+        graphicsContext.setStroke(Color.BLUE);
+        graphicsContext.setLineWidth(1);
         synchronized (graphicsContext) {
-            graphicsContext.setStroke(Color.BLUE);
-            graphicsContext.setLineWidth(1);
-
             sky.asterisms().forEach(
                 asterism -> {
                     graphicsContext.beginPath();
@@ -120,7 +119,7 @@ public final class SkyCanvasPainter {
     public void drawSun(final ObservedSky sky) {
         if (isInCanvas.apply(sky.sunPosition())) {
             final CartesianCoordinates transformedCoords = transform.apply(sky.sunPosition());
-            final double innerSize = transform.applyDistance(applyToAngle(sky.sun().angularSize())/2);
+            final double innerSize = transform.applyDistance(applyToAngle(sky.sun().angularSize()));
             drawCircle(YELLOW_HALO, transformedCoords, innerSize * 2.2);
             drawCircle(Color.YELLOW, transformedCoords, innerSize + 2);
             drawCircle(Color.WHITE, transformedCoords, innerSize);
@@ -133,7 +132,7 @@ public final class SkyCanvasPainter {
      * @param sky (ObservedSky) current sky
      */
     public void drawMoon(final ObservedSky sky) {
-        pipeline(sky.moonMap().entrySet().stream(), moon -> applyToAngle(moon.angularSize()) / 2, moon -> Color.WHITE);
+        pipeline(sky.moonMap().entrySet().stream(), moon -> applyToAngle(moon.angularSize()), moon -> Color.WHITE);
     }
 
     /**
@@ -142,7 +141,7 @@ public final class SkyCanvasPainter {
      * @param projection (StereographicProjection) centered projection to the 2D plane
      */
     public void drawHorizon(final StereographicProjection projection) {
-        final double size = transform.applyDistance(projection.circleRadiusForParallel(PARALLEL));
+        final double size = transform.applyDistance(2 * projection.circleRadiusForParallel(PARALLEL));
         final CartesianCoordinates transformedCenter = transform.apply(projection.circleCenterForParallel(PARALLEL));
 
         synchronized (graphicsContext) {
