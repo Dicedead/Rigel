@@ -9,7 +9,8 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class MathSet<T> {
+public class MathSet<T>
+{
 
     private final Set<T> data;
 
@@ -37,6 +38,18 @@ public class MathSet<T> {
     public <U> MathSet<Pair<T, U>> product (final Collection<MathSet<U>> other)
     {
         return stream().map(t -> unionOf(other).image(u -> new Pair<>(t, u))).collect(MathSet.union());
+    }
+
+    public <U> MathSet<Pair<T, U>> directSum (final MathSet<U> other, T tP, U uP)
+    {
+        return unionOf(Set.of(image(t -> new Pair<>(t, uP)),
+                other.image(u -> new Pair<T, U>(tP, u))));
+    }
+
+    public <U> MathSet<Pair<T, U>> directSum (final Collection<MathSet<U>> other, T tP, U uP)
+    {
+        return unionOf(Set.of(image(t -> new Pair<>(t, uP)),
+                other.stream().map(s -> s.image(u -> new Pair<T, U>(tP, u))).collect(MathSet.union())));
     }
 
     public MathSet<T> union(final Collection<MathSet<T>> others)
@@ -126,6 +139,7 @@ public class MathSet<T> {
         return sets.iterator().next().union(sets);
     }
 
+
     public static <T> MathSet<T> intersectionOf (final Collection<MathSet<T>> sets)
     {
         return sets.iterator().next().intersection(sets);
@@ -151,5 +165,4 @@ public class MathSet<T> {
     {
         return unionOf(set).suchThat(t);
     }
-
 }

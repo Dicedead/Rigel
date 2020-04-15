@@ -6,6 +6,7 @@ import java.util.function.Function;
 public class SetFunction<T, U> implements Function<MathSet<T>, MathSet<U>> {
     private final Function<MathSet<T>, MathSet<U>> f;
     private final Function<T, U> precise;
+
     public SetFunction(Function<T, U> f)
     {
         this.f = (S ->  S.stream().map(f).collect(MathSet.toSet()));
@@ -19,4 +20,5 @@ public class SetFunction<T, U> implements Function<MathSet<T>, MathSet<U>> {
     public U applyOn(T t) {
         return precise.apply(t);
     }
+
 }

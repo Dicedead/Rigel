@@ -1,13 +1,14 @@
 package ch.epfl.rigel.math.graphs;
 
 import ch.epfl.rigel.Preconditions;
+import ch.epfl.rigel.math.sets.MathSet;
+import ch.epfl.rigel.math.sets.PointedSet;
+import javafx.util.Pair;
 
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 /**
  * Abstraction of a graph, a set of a set of edges and a set of vertices
@@ -15,30 +16,36 @@ import java.util.stream.Stream;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-abstract class Graph<T, U extends Link<T>> {
+ class Graph<T> extends PointedSet<Pair<T, Link<T>>> implements AbstractGraph<T, MathSet<T>, MathSet<Link<T>>>
+{
 
-    private final Set<T> vertexSet;
-    private final Set<U> edgeSet;
 
+    /**
+     * @return (MathSet <T>) getter for immutable set of vertices
+     */
+
+    @Override
+    public MathSet<T> vertexSet()
+    {
+        return suchThat(p -> getSpecial().getValue() == p.getValue()).stream().map(Pair::getKey).collect(MathSet.toSet());
+    }
+
+    /**
+     * @return (MathSet <U>) getter for immutable set of edges
+     */
+    @Override
+    public MathSet<Link<T>> edgeSet()
+    {
+        return suchThat(p -> getSpecial().getKey() == p.getKey()).stream().map(Pair::getValue).collect(MathSet.toSet());
+    }
     /**
      * Main Graph constructor
      *
      * @param points (Set<T>) set of vertices
      * @param lines  (Set<U>) set of edges
      */
-    public Graph(final Set<T> points, final Set<U> lines) {
-        vertexSet = Set.copyOf(points);
-        edgeSet = Set.copyOf(lines);
-    }
-
-    /**
-     * Compositing Graph constructor, putting many graphs into one
-     *
-     * @param coll (List<Graph<T, U>>) collection of graphs to be united
-     */
-    public Graph(Collection<Graph<T, U>> coll) {
-        vertexSet = Set.copyOf(coll.stream().flatMap(i -> i.getPointSet().stream()).collect(Collectors.toCollection(HashSet::new)));
-        edgeSet = Set.copyOf(coll.stream().flatMap(i -> i.getEdgeSet().stream()).collect(Collectors.toCollection(HashSet::new)));
+    public Graph(final PointedSet<T> points, final PointedSet<Link<T>> lines) {
+        super(points.directSum(lines));
     }
 
     /**
@@ -47,25 +54,24 @@ abstract class Graph<T, U extends Link<T>> {
      * @param point the point on which we want the compponent
      * @return the component onn which this point lies
      */
-    public Graph<T, U> component(final T point) {
-        return on(vertexSet.stream().map(v -> findPathBetween(point, v)).flatMap(p -> p.getPointSet().stream())
-                .collect(Collectors.toCollection(HashSet::new)));
+    @Override
+    public Graph<T> component(final T point) {
+
+        return on(suchThat(x -> findPathBetween(point, x.getKey()) != null).image(Pair::getKey));
+        /*
+        return on(stream().map(v -> findPathBetween(point, v)).flatMap(p -> p.getPointSet().stream())
+                .collect(Collectors.toCollection(HashSet::new)));*/
     }
 
     /**
      * @return the Set of connected components of this graph
      */
-    public Set<Graph<T, U>> components() {
-        return vertexSet.stream().map(this::component).distinct().map(m -> this.on(m.getPointSet())).collect(Collectors.toSet());
-    }
-
     /**
      * Creates a graph ON given set of vertices
      *
      * @param points (Set<T>)
      * @return (Graph < T, U >) some implementation of Graph<T,U>
      */
-    public abstract Graph<T, U> on(Set<T> points);
 
     /**
      * Gets any Link connecting the arguments - if arguments do not override equals then Link is either unique or
@@ -77,8 +83,8 @@ abstract class Graph<T, U extends Link<T>> {
      * @throws NoSuchElementException if linked1 and linked2 are not linked by any edge of the graph
      */
     public Link<T> linkOf(final T linked1, final T linked2) {
-        return edgeSet.stream().filter(link -> link.getPoints().containsAll(Set.of(linked1, linked2)))
-                .findAny().orElseThrow(() -> new NoSuchElementException("No edge connecting arguments."));
+        return edgeSet().suchThat(link -> link.getPoints().containsAll(Set.of(linked1, linked2)))
+                .stream().findAny().orElseThrow(() -> new NoSuchElementException("No edge connecting arguments."));
     }
 
     /**
@@ -88,34 +94,39 @@ abstract class Graph<T, U extends Link<T>> {
      * @param value2 (T) the point on which the edge should end (order does not matter)
      * @return (U) the edge on value1 and value2 if it exists in this graph
      */
-    public U of(final T value1, final T value2) {
-        return edgeSet.stream().filter(e -> e.getPoints().containsAll(Set.of(value1, value2))).findFirst().orElseThrow();
+    public Link<T> of(final T value1, final T value2) {
+        return edgeSet().suchThat(e -> e.getPoints().containsAll(Set.of(value1, value2))).stream().findFirst().orElseThrow();
     }
+
+    @Override
+    public AbstractGraph<T, MathSet<T>, MathSet<Link<T>>> on(AbstractGraph<T, MathSet<T>, MathSet<Link<T>>> points) {
+        return suchThat(p -> points.contains(p.getKey()));
+    }
+
+    @Override
+    public MathSet<AbstractGraph<T, MathSet<T>, MathSet<Link<T>>>> components() {
+        return vertexSet().image(this::component).stream().distinct().map(m -> this.on(m.vertexSet())).collect(MathSet.toSet());
+    }
+
 
     /**
      * Find a path between 2 parameter vertices of the graph
      *
      * @param v1 (T)
      * @param v2 (T)
-     * @return (Path<T>) said path
+     * @return (Path < T >) said path
      */
-    public abstract Path<T> findPathBetween(final T v1, final T v2);
-
     /**
      * @param v (T) the vertex to test
      * @return (boolean) whether the graph contains this vertex or not
      */
     public boolean contains(final T v) {
-        return vertexSet.contains(v);
+        return vertexSet().in(v);
     }
-
     /**
      * @param e (U) the edge to test
      * @return (boolean) whether the graph contains this edge or not
      */
-    public boolean containsEdge(final U e) {
-        return edgeSet.contains(e);
-    }
 
     /**
      * UndirectedGraph theoric minus, the graph on the points not selected
@@ -123,11 +134,15 @@ abstract class Graph<T, U extends Link<T>> {
      * @param points the points to remove
      * @return the graph obtained from this graph by removing the points passed
      */
-    public Graph<T, U> minus(Set<T> points) {
-        final Set<T> c = new HashSet<>(getPointSet());
-        c.removeAll(points);
-        return on(c);
-    }
+
+
+    /**
+     * Applies intersection operation on two graphs: this and otherGraph
+     *
+     * @param otherGraph (Graph<T, U, SV, SE>)
+     * @return (Graph<T, U, SV, SE>) graph with intersected sets of edges and vertices
+     */
+    //Although this creates some similar code, it avoids really ugly casts and type checking
 
     /**
      * Applies intersection operation on two graphs: this and otherGraph
@@ -135,8 +150,8 @@ abstract class Graph<T, U extends Link<T>> {
      * @param otherGraph (Graph<T, U>)
      * @return (Graph<T, U>) graph with intersected sets of edges and vertices
      */
-    public abstract Graph<T, U> intersection(Graph<T, U> otherGraph);
     //Although this creates some similar code, it avoids really ugly casts and type checking
+
 
     /**
      * Intersects two graphs, take their intersection as a component and return the other newly created components
@@ -147,14 +162,13 @@ abstract class Graph<T, U extends Link<T>> {
      * @param <V> the type of vertices the graph holds
      * @param <E> the type of the links
      * @return the described structure dubbed "explosion product"
-     */
-    public static <V, E extends UndirectedLink<V>> Set<Graph<V, E>> eclat(Graph<V, E> a, Graph<V, E> b) {
+     *//*
+    public static <V, E extends UndirectedLink<V>> MathSet<Graph<V, E>> eclat(Graph<V, E> a, Graph<V, E> b) {
         final Graph<V, E> inter = a.intersection(b);
-        final Set<Graph<V, E>> res = a.minus(inter.getPointSet()).components();
-        res.addAll(b.minus(inter.getPointSet()).components());
-        res.add(inter);
-        return res;
-    }
+        return inter.components()
+                .union(a.minus(inter).components())
+                .union(b.minus(inter).components());
+    }*/
 
     /**
      * Allows to navigate the graph by making a choice at each step
@@ -163,35 +177,6 @@ abstract class Graph<T, U extends Link<T>> {
      * @param point   the point to begin with
      * @return the List of points traversed by the choice function
      */
-    public List<T> flow(final Function<Set<T>, T> chooser, final T point) {
-        if (!hasNeighbors(point))
-            return List.of(point);
-        final List<T> flowList = flow(chooser, chooser.apply(getNeighbors(point)));
-        flowList.add(point);
-        Collections.reverse(flowList);
-        return flowList;
-    }
-
-    /**
-     * @return (Set <U>) getter for immutable set of edges
-     */
-    public Set<U> getEdgeSet() {
-        return edgeSet;
-    }
-
-    /**
-     * @return (Set <T>) getter for immutable set of vertices
-     */
-    public Set<T> getPointSet() {
-        return vertexSet;
-    }
-
-    /**
-     * @return (T) gets any point in the set of vertices
-     */
-    public T getPoint() {
-        return vertexSet.stream().findAny().orElseThrow(() -> new NoSuchElementException("Set of vertices is empty."));
-    }
 
     /**
      * Checks whether given point is linked to other points
@@ -201,9 +186,27 @@ abstract class Graph<T, U extends Link<T>> {
      * @throws NoSuchElementException if point is not in set of vertices
      */
     public boolean hasNeighbors(final T point) {
-        if (vertexSet.contains(point)) {
-            return edgeSet.stream().anyMatch(link -> link.getPoints().contains(point));
+        if (vertexSet().in(point)) {
+            return edgeSet().suchThat(link -> link.getPoints().contains(point)).cardinality() != 0;
         } else throw new NoSuchElementException("Given point is not in set of vertices.");
+    }
+
+    @Override
+    public MathSet<T> getNeighbors(T point) {
+        if (vertexSet().in(point))
+            return  edgeSet().suchThat(l -> l.getPoints().contains(point)).image(p -> p.next(point));
+
+        else throw new NoSuchElementException("Given point is not in set of vertices.");
+    }
+
+    @Override
+    public Iterable<T> flow(Function<MathSet<T>, T> chooser, T point) {
+        if (!hasNeighbors(point))
+            return List.of(point);
+        final List<T> flowList = (List<T>) flow(chooser, chooser.apply(getNeighbors(point)));
+        flowList.add(point);
+        Collections.reverse(flowList);
+        return flowList;
     }
 
     /**
@@ -213,15 +216,6 @@ abstract class Graph<T, U extends Link<T>> {
      * @return (Set <T>) said set
      * @throws NoSuchElementException if point is not in set of vertices
      */
-    public Set<T> getNeighbors(final T point) {
-        if (vertexSet.contains(point))
-            return edgeSet.stream()
-                    .filter(l -> l.getPoints().contains(point))
-                    .flatMap(l -> l.getPoints().stream())
-                    .collect(Collectors.toCollection(HashSet::new));
-
-        else throw new NoSuchElementException("Given point is not in set of vertices.");
-    }
 
     /**
      * Implementation of a directed graph: a Path from a root object to a final object.
@@ -230,11 +224,9 @@ abstract class Graph<T, U extends Link<T>> {
      * @author Alexandre Sallinen (303162)
      * @author Salim Najib (310003)
      */
-    public static final class Path<T> extends Graph<T, DirectedLink<T>> implements Iterable<T> {
+    public static final class Path<T> extends Graph<T, DirectedLink<T>> {
 
         final private List<T> points;
-        final private int length;
-
         /**
          * Main Path constructor
          *
@@ -242,10 +234,8 @@ abstract class Graph<T, U extends Link<T>> {
          *        the order being derived from the list's order
          */
         public Path(List<T> points) {
-            super(Set.copyOf(points), link(points));
-
+            super(new PointedSet<T>(points, points.get(0)), new PointedSet<>(link(points), new DirectedLink<>(points.get(0),points.get(0))));
             this.points = List.copyOf(points);
-            this.length = points.size();
         }
 
         private static <T> Set<DirectedLink<T>> link(final List<T> points) {
@@ -287,11 +277,21 @@ abstract class Graph<T, U extends Link<T>> {
         @Override
         public Graph<T, DirectedLink<T>> on(final Set<T> points) {
             if (this.points.containsAll(points))
-                return new Path<>(IntStream.of(0, length)
+                return new Path<>(IntStream.of(0, cardinality())
                         .filter(i -> points.contains(this.points.get(i)) || points.contains(this.points.get(i - 1)))
                         .mapToObj(this.points::get).collect(Collectors.toList()));
 
             else throw new NoSuchElementException();
+        }
+
+        @Override
+        public Graph<T, DirectedLink<T>> on(MathSet<T> points) {
+            return null;
+        }
+
+        @Override
+        public Graph<T, DirectedLink<T>> on(Graph<T, DirectedLink<T>> points) {
+            return null;
         }
 
         /**
@@ -323,8 +323,8 @@ abstract class Graph<T, U extends Link<T>> {
          * @throws IllegalArgumentException if n >= the size of this path
          */
         public Path<T> from(final int n) {
-            Preconditions.checkArgument(n < length);
-            return new Path<>(points.subList(n, length));
+            Preconditions.checkArgument(n < cardinality());
+            return new Path<>(points.subList(n, cardinality()));
         }
 
         public T getPoint() {
@@ -337,7 +337,7 @@ abstract class Graph<T, U extends Link<T>> {
          * @throws IllegalArgumentException if n is bigger than this' length
          */
         public T getAt(final int n) {
-            Preconditions.checkArgument(n < length);
+            Preconditions.checkArgument(n < cardinality());
             return points.get(n);
         }
         /**
@@ -374,45 +374,7 @@ abstract class Graph<T, U extends Link<T>> {
          * @return (T) gets last object in this path
          */
         public T tail() {
-            return points.get(length - 1);
-        }
-
-        /**
-         * @return (int) gets path's length
-         */
-        public int getLength() {
-            return length;
-        }
-
-        /**
-         * @see List#stream()
-         */
-        public Stream<T> stream() {
-            return points.stream();
-        }
-
-        /**
-         * @see List#iterator()
-         */
-        @Override
-        public Iterator<T> iterator() {
-            return points.iterator();
-        }
-
-        /**
-         * @see List#forEach(Consumer)
-         */
-        @Override
-        public void forEach(Consumer<? super T> action) {
-            points.forEach(action);
-        }
-
-        /**
-         * @see List#spliterator()
-         */
-        @Override
-        public Spliterator<T> spliterator() {
-            return points.spliterator();
+            return points.get(cardinality() - 1);
         }
     }
 }

@@ -1,14 +1,13 @@
 package ch.epfl.rigel.math.sets;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class OrderedPair<T> extends IndexedSet<T, Integer> {
+public class OrderedPair<T> extends IndexedSet<T, Integer> implements Iterable<T>{
 
     public OrderedPair(Collection<T> t, SetFunction<Integer, T> indexer) {
         super(t, indexer);
@@ -29,4 +28,20 @@ public class OrderedPair<T> extends IndexedSet<T, Integer> {
     {
         return toList().stream();
     }
+
+    @Override
+    public Iterator<T> iterator() {
+        return toList().iterator();
+    }
+
+    @Override
+    public void forEach(Consumer<? super T> action) {
+        toList().forEach(action);
+    }
+
+    @Override
+    public Spliterator<T> spliterator() {
+        return toList().spliterator();
+    }
+
 }
