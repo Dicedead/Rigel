@@ -1,11 +1,9 @@
 package ch.epfl.rigel.parallelism;
 
-import ch.epfl.rigel.math.graphs.Node;
-import ch.epfl.rigel.math.graphs.Tree;
+import ch.epfl.rigel.math.graphs.poubelle.Tree;
 
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.stream.Collectors;
 
 import static java.util.concurrent.ForkJoinPool.defaultForkJoinWorkerThreadFactory;
 

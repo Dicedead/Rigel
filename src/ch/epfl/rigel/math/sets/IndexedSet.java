@@ -11,12 +11,19 @@ public class IndexedSet<T, I> extends MathSet<T> {
         super(t);
         this.indexer = indexer;
     }
+
+    public IndexedSet(final MathSet<T> t, final SetFunction<I, T> indexer) {
+        super(t);
+        this.indexer = indexer;
+    }
+
     public T at(I i) {
         return indexer.applyOn(i);
     }
     public IndexedSet<T, I> indexedUnion(Collection<I> i) {
         return new IndexedSet<>(i.stream().map(this::at).collect(Collectors.toSet()), indexer);
     }
+
 
     public <U> IndexedSet<U, I> image(Function<T, U> f) {
         return new IndexedSet<>(stream().map(f).collect(Collectors.toSet()), new SetFunction<>(lift(f)));

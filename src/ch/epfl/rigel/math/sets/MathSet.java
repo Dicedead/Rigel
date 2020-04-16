@@ -12,14 +12,17 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class MathSet<T> {
+public class MathSet<T>
+{
 
     private final Set<T> data;
 
     public MathSet(Collection<T> t) {
         data = Set.copyOf(t);
     }
-
+    public MathSet(MathSet<T> t) {
+        data = t.getData();
+    }
     public MathSet<T> intersection(final MathSet<T> others) {
         return intersection(Collections.singleton(others));
     }

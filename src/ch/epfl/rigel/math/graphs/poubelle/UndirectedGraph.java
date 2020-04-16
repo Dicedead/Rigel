@@ -1,4 +1,4 @@
-package ch.epfl.rigel.math.graphs;
+package ch.epfl.rigel.math.graphs.poubelle;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-public final class UndirectedGraph<T> extends Graph<T, UndirectedLink<T>> {
+public final class UndirectedGraph<T> extends GraphComms<T, UndirectedLink<T>> {
     /*
      Although most likely not used in this project, this class has been left for completeness.
      */
@@ -46,7 +46,7 @@ public final class UndirectedGraph<T> extends Graph<T, UndirectedLink<T>> {
      * @return (Graph<T, UndirectedLink<T>>) implemented as an UndirectedGraph<T>
      */
     @Override
-    public Graph<T, UndirectedLink<T>> on(Set<T> points) {
+    public GraphComms<T, UndirectedLink<T>> on(Set<T> points) {
         return intersection(new UndirectedGraph<>(points));
     }
 
@@ -59,10 +59,10 @@ public final class UndirectedGraph<T> extends Graph<T, UndirectedLink<T>> {
     }
 
     /**
-     * @see Graph#intersection(Graph)
+     * @see GraphComms#intersection(GraphComms)
      */
     @Override
-    public Graph<T, UndirectedLink<T>> intersection(Graph<T, UndirectedLink<T>> otherGraph) {
+    public GraphComms<T, UndirectedLink<T>> intersection(GraphComms<T, UndirectedLink<T>> otherGraph) {
         final Set<T> interNodes = otherGraph.getPointSet();
         interNodes.retainAll(this.getPointSet());
         final Set<UndirectedLink<T>> interLinks = otherGraph.getEdgeSet();

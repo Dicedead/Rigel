@@ -1,5 +1,7 @@
 package ch.epfl.rigel.math.graphs;
 
+import ch.epfl.rigel.math.graphs.poubelle.GraphComms;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,8 +57,8 @@ public final class Node<T> {
      * @return (Path<Node<T>>) a Path of all the nodes higher than this node; i.e its parent and (recursively) the parent
      * of its parent
      */
-    public Graph.Path<Node<T>> hierarchy() {
-        return new Graph.Path<>(new ArrayList<>(hierarchyRecur(new ArrayDeque<>(Collections.singleton(this)))));
+    public GraphComms.Path<Node<T>> hierarchy() {
+        return new GraphComms.Path<>(new ArrayList<>(hierarchyRecur(new ArrayDeque<>(Collections.singleton(this)))));
     }
 
     /**

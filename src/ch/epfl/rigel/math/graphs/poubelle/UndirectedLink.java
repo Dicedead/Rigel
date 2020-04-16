@@ -1,5 +1,6 @@
-package ch.epfl.rigel.math.graphs;
+package ch.epfl.rigel.math.graphs.poubelle;
 
+import ch.epfl.rigel.math.graphs.Link;
 import javafx.util.Pair;
 
 /**

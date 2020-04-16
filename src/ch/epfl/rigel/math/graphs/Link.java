@@ -1,7 +1,9 @@
 package ch.epfl.rigel.math.graphs;
 
+import ch.epfl.rigel.math.sets.OrderedPair;
 import javafx.util.Pair;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -11,9 +13,7 @@ import java.util.Set;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-public abstract class Link<T> {
-
-    private final Set<T> unorderedPair;
+public class Link<T> extends OrderedPair<T> {
 
     /**
      * Link constructor: ties 2 elements together
@@ -22,7 +22,7 @@ public abstract class Link<T> {
      * @param u (T)
      */
     public Link(final T t, final T u) {
-        this.unorderedPair = Set.of(t, u);
+        super(t, u);
     }
 
     /**
@@ -31,7 +31,8 @@ public abstract class Link<T> {
      * @param p (Pair<T,T>)
      */
     public Link(final Pair<T, T> p) {
-        this.unorderedPair = Set.of(p.getKey(), p.getValue());
+
+        super(p.getKey(), p.getValue());
     }
 
     /**
@@ -42,13 +43,6 @@ public abstract class Link<T> {
      * @throws NoSuchElementException if 'start' is not in the link
      */
     public T next(final T start) {
-        return unorderedPair.stream().filter(l -> !l.equals(start)).findFirst().orElseThrow(NoSuchElementException::new);
-    }
-
-    /**
-     * @return (Set<T>) gets the two linked elements
-     */
-    public Set<T> getPoints() {
-        return unorderedPair;
+        return stream().filter(l -> !l.equals(start)).findFirst().orElseThrow(NoSuchElementException::new);
     }
 }

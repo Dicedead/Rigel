@@ -2,7 +2,6 @@ package ch.epfl.rigel.math.sets;
 
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -14,12 +13,36 @@ public class OrderedPair<T> extends IndexedSet<T, Integer> implements Iterable<T
     }
 
     @SafeVarargs
-    public OrderedPair(T... t) {
+    public OrderedPair(final T... t) {
         super(List.of(t), new SetFunction<>((Integer i) -> t[i]));
+    }
+
+
+    public OrderedPair(final List<T> t) {
+        super(t, new SetFunction<>(t::get));
+    }
+
+    public OrderedPair(MathSet<T> points, SetFunction<Integer, T> integerTSetFunction) {
+        super(points, integerTSetFunction);
     }
 
     public List<T> toList() {
         return IntStream.range(0, getData().size()).mapToObj(this::at).collect(Collectors.toList());
+    }
+
+    public T next (T t)
+    {
+        return at(toList().indexOf(t) + 1);
+    }
+
+    public T prev (T t)
+    {
+        return at(toList().indexOf(t) - 1);
+    }
+
+    public int indexOf(T t)
+    {
+        return toList().indexOf(t);
     }
 
     @Override
