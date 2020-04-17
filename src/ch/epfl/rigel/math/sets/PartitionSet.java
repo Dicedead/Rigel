@@ -1,5 +1,6 @@
 package ch.epfl.rigel.math.sets;
 
+import ch.epfl.rigel.Preconditions;
 import javafx.util.Pair;
 
 import java.util.Collection;
@@ -38,6 +39,12 @@ public class PartitionSet<T> extends MathSet<T> {
         return components;
     }
 
+    public T representant (MathSet<T> component)
+    {
+        Preconditions.checkArgument(components.in(component));
+        return component.stream().findFirst().orElseThrow();
+
+    }
     @Override
     public <U> PartitionSet<U> image(Function<T, U> f) {
         return new PartitionSet<U>(components.stream().map(C -> C.image(f)).collect(Collectors.toSet()));

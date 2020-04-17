@@ -80,7 +80,16 @@ public class MathSet<T>
     {
         return stream().filter(l -> t.stream().allMatch(r -> r.test(l))).collect(MathSet.toSet());
     }
+    public MathSet<T> complement(final T other)
+    {
+        return suchThat(p -> !p.equals(other));
+    }
+
     public MathSet<T> minus(final MathSet<T> other)
+    {
+        return intersection(Collections.singleton(complement(other)));
+    }
+    public MathSet<T> minus(final T other)
     {
         return intersection(Collections.singleton(complement(other)));
     }
