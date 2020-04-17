@@ -4,7 +4,9 @@ import ch.epfl.rigel.math.sets.MathSet;
 import ch.epfl.rigel.math.sets.OrderedSet;
 import ch.epfl.rigel.math.sets.PartitionSet;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -13,6 +15,12 @@ public final class Path<T> extends OrderedSet<T> implements Graph<T, OrderedSet<
 
     public Path(OrderedSet<T> vertices) {
         super(vertices.toList());
+    }
+    public Path(List<T> vertices) {
+        super(vertices);
+    }
+    public Path(Iterable<T> vertices) {
+        super(vertices);
     }
 
 
@@ -56,5 +64,25 @@ public final class Path<T> extends OrderedSet<T> implements Graph<T, OrderedSet<
     @Override
     public OrderedSet<T> vertexSet() {
         return this;
+    }
+
+    public Path<T> reverse()
+    {
+        final List<T> copy = new ArrayList<>(toList());
+        Collections.reverse(copy);
+        return new Path<T>((copy));
+    }
+
+    /**
+     * Creates a path begining at this path and ending at the end of the other
+     * @param otherPath (Path<T>) the path to append
+     * @return (Path<T>) a path composed of an appending of the two paths
+     */
+    public Path<T> add (Path<T> otherPath) {
+        final var secondHalf = otherPath.toList();
+        final var firstHalf = new ArrayList<>(toList());
+
+        firstHalf.addAll(secondHalf);
+        return new Path<>(firstHalf);
     }
 }
