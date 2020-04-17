@@ -1,23 +1,23 @@
 package ch.epfl.rigel.math.graphs;
 
 import ch.epfl.rigel.math.sets.MathSet;
-import ch.epfl.rigel.math.sets.OrderedPair;
+import ch.epfl.rigel.math.sets.OrderedSet;
 import ch.epfl.rigel.math.sets.PartitionSet;
 import javafx.util.Pair;
 
 import java.util.*;
 import java.util.function.Function;
 
-public class ConcreteGraph<T> extends MathSet<Pair<T, Link<T>>> implements Graph<T, PartitionSet<T>>
+public final class ConcreteGraph<T> extends MathSet<Pair<T, Link<T>>> implements Graph<T, PartitionSet<T>>
 {
 
-    private final PartitionSet<T> vertexes;
+    private final PartitionSet<T> vertices;
     private final MathSet<Link<T>> edges;
 
     public ConcreteGraph(PartitionSet<T> points, MathSet<Link<T>> edges, T t)
     {
         super(points.directSum(edges, t, new Link<T>(t, t)));
-        vertexes = points;
+        vertices = points;
         this.edges = edges;
 
     }
@@ -26,7 +26,7 @@ public class ConcreteGraph<T> extends MathSet<Pair<T, Link<T>>> implements Graph
     {
         super(points.directSum(edges, t, new Link<T>(t, t)));
 
-        vertexes = new PartitionSet<>(points, (T v, T u) -> findPathBetween(u, v).isPresent());
+        vertices = new PartitionSet<>(points, (T v, T u) -> findPathBetween(u, v).isPresent());
         this.edges = edges;
 
     }
@@ -34,7 +34,7 @@ public class ConcreteGraph<T> extends MathSet<Pair<T, Link<T>>> implements Graph
     public ConcreteGraph(MathSet<Pair<T, Link<T>>> mathSet, T t)
     {
         super(mathSet);
-        vertexes = new PartitionSet<T>(suchThat(p -> p.getValue().equals(new Link<>(t, t))).image(Pair::getKey), (T v, T u) -> findPathBetween(u, v).isPresent());
+        vertices = new PartitionSet<T>(suchThat(p -> p.getValue().equals(new Link<>(t, t))).image(Pair::getKey), (T v, T u) -> findPathBetween(u, v).isPresent());
         this.edges = new MathSet<>(mathSet.image(Pair::getValue));
 
     }
@@ -47,14 +47,14 @@ public class ConcreteGraph<T> extends MathSet<Pair<T, Link<T>>> implements Graph
         else throw new NoSuchElementException("Given point is not in set of vertices.");
     }
 
-    public OrderedPair<T> flow(final Function<PartitionSet<T>, T> chooser, final T point)
+    public OrderedSet<T> flow(final Function<PartitionSet<T>, T> chooser, final T point)
     {
         if (getNeighbors(point).isEmpty())
-            return new OrderedPair<>(point);
+            return new OrderedSet<>(point);
         final List<T> flowList = flow(chooser, chooser.apply(getNeighbors(point).get())).toList();
         flowList.add(point);
         Collections.reverse(flowList);
-        return new OrderedPair<T>(flowList);
+        return new OrderedSet<T>(flowList);
     }
 
     @Override
@@ -69,7 +69,7 @@ public class ConcreteGraph<T> extends MathSet<Pair<T, Link<T>>> implements Graph
 
     @Override
     public Graph<T, PartitionSet<T>> connectedComponent(T point) {
-        return on(new PartitionSet<T>(vertexes.component(point)));    }
+        return on(new PartitionSet<T>(vertices.component(point)));    }
 
     @Override
     public MathSet<Graph<T, PartitionSet<T>>> connectedComponents() {
@@ -83,7 +83,7 @@ public class ConcreteGraph<T> extends MathSet<Pair<T, Link<T>>> implements Graph
 
     public PartitionSet<T> vertexSet()
     {
-        return vertexes;
+        return vertices;
     }
 
 }

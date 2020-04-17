@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 public class IndexedSet<T, I> extends MathSet<T> {
 
     private final SetFunction<I, T> indexer;
+
     public IndexedSet(final Collection<T> t, final SetFunction<I, T> indexer) {
         super(t);
         this.indexer = indexer;
@@ -20,6 +21,7 @@ public class IndexedSet<T, I> extends MathSet<T> {
     public T at(I i) {
         return indexer.applyOn(i);
     }
+
     public IndexedSet<T, I> indexedUnion(Collection<I> i) {
         return new IndexedSet<>(i.stream().map(this::at).collect(Collectors.toSet()), indexer);
     }

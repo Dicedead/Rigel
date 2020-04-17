@@ -67,6 +67,28 @@ public class Tree<T> extends PartitionSet<Node<T>> implements Graph<Node<T>, Tre
     public Tree<T> vertexSet() {
         return null;
     }
+    private final MathSet<Node<V>> leaves;
+    private final Node<V> root;
+    private final int depth;
+
+    public Tree(MathSet<Node<V>> nodes) {
+        super(nodes, Node::areRelated);
+        Preconditions.checkArgument(nodes.stream().map(n -> {
+            Path<Node<V>> pathN = n.hierarchy();
+            return pathN.at(pathN.size());})
+                .distinct().count() == 1);
+
+        this.root = suchThat(Node::isRoot).stream().findFirst().orElseThrow();
+        this.depth = nodes.stream().max(Comparator.comparingInt(Node::getDepth)).get().getDepth();
+        this.leaves = suchThat(node -> node.getDepth() == depth);
+    }
+
+    /**
+     * @return the points that have a parent but no children
+     */
+    public MathSet<Node<V>> getLeaves() {
+        return leaves;
+    }
 
     public Node<T> getRoot() {
         return root;

@@ -15,13 +15,14 @@ public class PartitionSet<T> extends MathSet<T> {
 
     public PartitionSet(Collection<MathSet<T>> t) {
         super(unionOf(t).getData());
-        components = new IndexedSet<>(t, new SetFunction<>(u -> t.stream().filter((s -> s.in(u))).findFirst().orElseThrow()));
+        components = new IndexedSet<>(t, new SetFunction<>(u -> t.stream().filter((s -> s.in(u)))
+                .findFirst().orElseThrow()));
     }
+
     public PartitionSet(IndexedSet<MathSet<T>, T> t) {
         super(unionOf(t.getData()));
         components = t;
     }
-
 
     public PartitionSet(final MathSet<T> t, BiFunction<T, T, Boolean> link) {
         this(t.stream().map(l -> t.suchThat(u -> link.apply(l,u))).collect(Collectors.toSet()));
@@ -47,6 +48,6 @@ public class PartitionSet<T> extends MathSet<T> {
     }
     @Override
     public <U> PartitionSet<U> image(Function<T, U> f) {
-        return new PartitionSet<U>(components.stream().map(C -> C.image(f)).collect(Collectors.toSet()));
+        return new PartitionSet<>(components.stream().map(C -> C.image(f)).collect(Collectors.toSet()));
     }
 }

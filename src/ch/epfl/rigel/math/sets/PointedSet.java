@@ -7,11 +7,14 @@ import java.util.Collections;
 import java.util.stream.DoubleStream;
 
 public class PointedSet<T> extends MathSet<T> {
+
     final private T special;
+
     public PointedSet(Collection<T> t, T special) {
         super(t);
         this.special = special;
     }
+
     public PointedSet(MathSet<T> t, T special) {
         super(t.getData());
         this.special = special;

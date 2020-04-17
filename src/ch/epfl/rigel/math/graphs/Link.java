@@ -1,11 +1,9 @@
 package ch.epfl.rigel.math.graphs;
 
-import ch.epfl.rigel.math.sets.OrderedPair;
+import ch.epfl.rigel.math.sets.OrderedSet;
 import javafx.util.Pair;
 
-import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Set;
 
 /**
  * Abstraction of an edge, or link between two elements of the same type on a graph
@@ -13,7 +11,7 @@ import java.util.Set;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-public class Link<T> extends OrderedPair<T> {
+public final class Link<T> extends OrderedSet<T> {
 
     /**
      * Link constructor: ties 2 elements together

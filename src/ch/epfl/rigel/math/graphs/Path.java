@@ -1,28 +1,28 @@
 package ch.epfl.rigel.math.graphs;
 
 import ch.epfl.rigel.math.sets.MathSet;
-import ch.epfl.rigel.math.sets.OrderedPair;
+import ch.epfl.rigel.math.sets.OrderedSet;
 import ch.epfl.rigel.math.sets.PartitionSet;
 
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class Path<T> extends OrderedPair<T> implements Graph<T, OrderedPair<T>> {
+public final class Path<T> extends OrderedSet<T> implements Graph<T, OrderedSet<T>> {
 
 
-    public Path(OrderedPair<T> vertexes) {
-        super(vertexes.toList());
+    public Path(OrderedSet<T> vertices) {
+        super(vertices.toList());
     }
 
 
     @Override
-    public Optional<OrderedPair<T>> getNeighbors(T point) {
-        return Optional.of(new OrderedPair<>(prev(point), point, next(point)));
+    public Optional<OrderedSet<T>> getNeighbors(T point) {
+        return Optional.of(new OrderedSet<>(prev(point), point, next(point)));
     }
 
     @Override
-    public OrderedPair<T> flow(Function<OrderedPair<T>, T> chooser, T point) {
+    public OrderedSet<T> flow(Function<OrderedSet<T>, T> chooser, T point) {
         return this;
     }
 
@@ -39,12 +39,12 @@ public class Path<T> extends OrderedPair<T> implements Graph<T, OrderedPair<T>> 
     }
 
     @Override
-    public Graph<T, OrderedPair<T>> connectedComponent(T point) {
+    public Graph<T, OrderedSet<T>> connectedComponent(T point) {
         return this;
     }
 
     @Override
-    public MathSet<Graph<T, OrderedPair<T>>> connectedComponents() {
+    public MathSet<Graph<T, OrderedSet<T>>> connectedComponents() {
         return new MathSet<>(Collections.singleton(this));
     }
 
@@ -54,7 +54,7 @@ public class Path<T> extends OrderedPair<T> implements Graph<T, OrderedPair<T>> 
     }
 
     @Override
-    public OrderedPair<T> vertexSet() {
+    public OrderedSet<T> vertexSet() {
         return this;
     }
 }
