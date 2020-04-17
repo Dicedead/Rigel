@@ -28,11 +28,6 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
     }
 
     @Override
-    public Optional<Tree<V>> getNeighbors(Node<V> point) {
-        return Optional.empty();
-    }
-
-    @Override
     public OrderedSet<Node<V>> flow(Function<Tree<V>, Node<V>> chooser, Node<V> point) {
         return null;
     }
@@ -73,4 +68,15 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
     public MathSet<Node<V>> getLeaves() {
         return leaves;
     }
+
+    @Override
+    public Optional<Tree<V>> getNeighbors(Node<V> point) {
+        return Optional.empty();
+    }
+
+    public MathSet<Node<V>> getNodesAtDepth(int targetDepth) {
+        return suchThat(node -> node.getDepth() == targetDepth);
+    }
+
+    public int getDepth() { return depth; }
 }

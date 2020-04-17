@@ -26,6 +26,8 @@ public final class Path<T> extends OrderedSet<T> implements Graph<T, OrderedSet<
         return this;
     }
 
+    public OrderedSet<T> flow() { return this; }
+
     @Override
     public Optional<Iterable<T>> findPathBetween(T v1, T v2) {
         if (! in(v1) || ! in(v2))

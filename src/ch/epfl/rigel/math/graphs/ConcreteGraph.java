@@ -42,11 +42,12 @@ public final class ConcreteGraph<T> extends MathSet<Pair<T, Link<T>>> implements
     public Optional<PartitionSet<T>> getNeighbors(final T point)
     {
         if (vertexSet().in(point))
-            return  Optional.of(new PartitionSet<T>(edges.suchThat(l -> l.in(point)).image(p -> p.next(point))));
+            return  Optional.of(new PartitionSet<>(edges.suchThat(l -> l.in(point)).image(p -> p.next(point))));
 
         else throw new NoSuchElementException("Given point is not in set of vertices.");
     }
 
+    @Override
     public OrderedSet<T> flow(final Function<PartitionSet<T>, T> chooser, final T point)
     {
         if (getNeighbors(point).isEmpty())
@@ -54,7 +55,7 @@ public final class ConcreteGraph<T> extends MathSet<Pair<T, Link<T>>> implements
         final List<T> flowList = flow(chooser, chooser.apply(getNeighbors(point).get())).toList();
         flowList.add(point);
         Collections.reverse(flowList);
-        return new OrderedSet<T>(flowList);
+        return new OrderedSet<>(flowList);
     }
 
     @Override

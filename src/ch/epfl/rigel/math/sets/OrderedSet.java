@@ -17,7 +17,6 @@ public class OrderedSet<T> extends IndexedSet<T, Integer> implements Iterable<T>
         super(List.of(t), new SetFunction<>((Integer i) -> t[i]));
     }
 
-
     public OrderedSet(final List<T> t) {
         super(t, new SetFunction<>(t::get));
     }
@@ -29,6 +28,10 @@ public class OrderedSet<T> extends IndexedSet<T, Integer> implements Iterable<T>
     public List<T> toList() {
         return IntStream.range(0, getData().size()).mapToObj(this::at).collect(Collectors.toList());
     }
+
+    /*public static <X> OrderedSet<X> reverse(final OrderedSet<X> setToReverse) {
+        return new OrderedSet<X>(setToReverse.getData(), new Set)
+    }*/
 
     public T next (T t)
     {
