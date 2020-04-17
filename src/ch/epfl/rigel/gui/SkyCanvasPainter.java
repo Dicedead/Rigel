@@ -45,7 +45,7 @@ public final class SkyCanvasPainter {
     /**
      * SkyCanvasPainter Constructor
      *
-     * @param canvas (Canvas) canvas to be drawn on
+     * @param canvas    (Canvas) canvas to be drawn on
      * @param transform (PlanarTransformation) transformation to be applied
      */
     public SkyCanvasPainter(final Canvas canvas, final PlanarTransformation transform) {
@@ -78,18 +78,13 @@ public final class SkyCanvasPainter {
     public void drawAsterisms(ObservedSky sky) {
         graphicsContext.setStroke(Color.BLUE);
         graphicsContext.setLineWidth(1);
-        synchronized (graphicsContext) {
-            sky.asterisms().forEach(
+        sky.asterisms().forEach(
                 asterism -> {
-                    graphicsContext.beginPath();
                     final CartesianCoordinates cartesStar0 = transform.apply(getCartesFromIndex(sky, asterism, 0));
-                    graphicsContext.moveTo(cartesStar0.x(), cartesStar0.y());
                     asterismLineRecurr(cartesStar0, transform.apply(getCartesFromIndex(sky, asterism, 1)),
                             0, asterism, sky);
-                    graphicsContext.closePath();
-                    }
-            );
-        }
+                }
+        );
     }
 
     /**
@@ -145,7 +140,6 @@ public final class SkyCanvasPainter {
         final CartesianCoordinates transformedCenter = transform.apply(projection.circleCenterForParallel(PARALLEL));
 
         synchronized (graphicsContext) {
-
             graphicsContext.setStroke(Color.RED);
             graphicsContext.setLineWidth(2);
             graphicsContext.strokeOval(transformedCenter.x() - size / 2, transformedCenter.y() - size / 2, size, size);
@@ -166,13 +160,13 @@ public final class SkyCanvasPainter {
     /**
      * Concatenation of operations, the last of which is the effective drawing
      *
-     * @param positions (Stream<Map.Entry<T, CartesianCoordinates>>) Stream or ParallelStream
+     * @param positions      (Stream<Map.Entry<T, CartesianCoordinates>>) Stream or ParallelStream
      * @param radiusFunction (Function<T, Double>) how to compute radii for given stream of celestial objects
-     * @param color (Function<T, Paint>) how to find the color for given stream of celestial objects
-     * @param <T> (extends CelestialObject)
+     * @param color          (Function<T, Paint>) how to find the color for given stream of celestial objects
+     * @param <T>            (extends CelestialObject)
      */
     private <T extends CelestialObject> void pipeline(final Stream<Map.Entry<T, CartesianCoordinates>> positions,
-    final Function<T, Double> radiusFunction, final Function<T, Paint> color) {
+                                                      final Function<T, Double> radiusFunction, final Function<T, Paint> color) {
         drawCelestial(applyTransform(checkInCanvas(positions)), radiusFunction, color);
     }
 
@@ -180,11 +174,11 @@ public final class SkyCanvasPainter {
      * Applies transformation on celestial objects' positions
      *
      * @param positions (Stream<Map.Entry<T, CartesianCoordinates>>)
-     * @param <T> (extends CelestialObject)
-     * @return (Stream<Map.Entry<T, CartesianCoordinates>>) transformed positions
+     * @param <T>       (extends CelestialObject)
+     * @return (Stream < Map.Entry < T, CartesianCoordinates > >) transformed positions
      */
     private <T extends CelestialObject> Stream<Map.Entry<T, CartesianCoordinates>> applyTransform(
-    final Stream<Map.Entry<T, CartesianCoordinates>> positions) {
+            final Stream<Map.Entry<T, CartesianCoordinates>> positions) {
         return positions.map(entry -> Map.entry(entry.getKey(), transform.apply(entry.getValue())));
     }
 
@@ -192,8 +186,8 @@ public final class SkyCanvasPainter {
      * Filters out celestial objects that are not within canvas' bounds after transformation
      *
      * @param positions (Stream<Map.Entry<T, CartesianCoordinates>>)
-     * @param <T> (extends CelestialObject)
-     * @return (Stream<Map.Entry<T, CartesianCoordinates>>) filtered positions
+     * @param <T>       (extends CelestialObject)
+     * @return (Stream < Map.Entry < T, CartesianCoordinates > >) filtered positions
      */
     private <T extends CelestialObject> Stream<Map.Entry<T, CartesianCoordinates>> checkInCanvas(
             final Stream<Map.Entry<T, CartesianCoordinates>> positions) {
@@ -203,14 +197,14 @@ public final class SkyCanvasPainter {
     /**
      * Draws circle shaped celestial objects on canvas
      *
-     * @param positions (Stream<Map.Entry<T, CartesianCoordinates>>) mapping celestial objects to their now transformed
-     *                  coordinates
+     * @param positions      (Stream<Map.Entry<T, CartesianCoordinates>>) mapping celestial objects to their now transformed
+     *                       coordinates
      * @param radiusFunction (Function<T, Double> radiusFunction) how to compute radii for given positions
-     * @param color (Function<T, Paint>) how to color given celestial objects
-     * @param <T> (extends CelestialObject)
+     * @param color          (Function<T, Paint>) how to color given celestial objects
+     * @param <T>            (extends CelestialObject)
      */
     private <T extends CelestialObject> void drawCelestial(final Stream<Map.Entry<T, CartesianCoordinates>> positions,
-    final Function<T, Double> radiusFunction, final Function<T, Paint> color) {
+                                                           final Function<T, Double> radiusFunction, final Function<T, Paint> color) {
         positions.forEach(e ->
         {
             final double size = transform.applyDistance(radiusFunction.apply(e.getKey()));
@@ -221,31 +215,30 @@ public final class SkyCanvasPainter {
     /**
      * Synchronized circle drawing helper method
      *
-     * @param color (Paint) color to apply
+     * @param color        (Paint) color to apply
      * @param cartesCoords (CartesianCoordinates) transformed coordinates
-     * @param size (double) radius
+     * @param size         (double) radius
      */
     private synchronized void drawCircle(Paint color, CartesianCoordinates cartesCoords, double size) {
-            graphicsContext.setFill(color);
-            graphicsContext.fillOval(cartesCoords.x() - size / 2, cartesCoords.y() - size / 2, size, size);
+        graphicsContext.setFill(color);
+        graphicsContext.fillOval(cartesCoords.x() - size / 2, cartesCoords.y() - size / 2, size, size);
         //Used in drawSun and drawCelestial
     }
 
     /**
      * Recursive asterism drawing method: follows its list of stars from stars to finish, drawing lines on the way
      *
-     * @param c1 (CartesianCoordinates) transformed
-     * @param c2 (CartesianCoordinates) transformed
+     * @param c1               (CartesianCoordinates) transformed
+     * @param c2               (CartesianCoordinates) transformed
      * @param currentStartStar (int) index of the current starting star at starting point in asterism.stars()
-     * @param asterism (Asterism) current asterism being drawn
-     * @param sky (ObservedSky) current sky
+     * @param asterism         (Asterism) current asterism being drawn
+     * @param sky              (ObservedSky) current sky
      */
     private void asterismLineRecurr(final CartesianCoordinates c1, final CartesianCoordinates c2,
-    final int currentStartStar, final Asterism asterism, final ObservedSky sky) {
+                                    final int currentStartStar, final Asterism asterism, final ObservedSky sky) {
 
-        graphicsContext.lineTo(c2.x(), c2.y());
         if (isInCanvasTransformed.apply(c1) || isInCanvasTransformed.apply(c2)) {
-            graphicsContext.stroke();
+            graphicsContext.strokeLine(c1.x(), c1.y(), c2.x(), c2.y());
         }
         if (currentStartStar <= asterism.stars().size() - 2) {
             asterismLineRecurr(c2, transform.apply(getCartesFromIndex(sky, asterism, currentStartStar + 1)),
@@ -256,7 +249,7 @@ public final class SkyCanvasPainter {
     /**
      * Shortcut method for finding a Star's CartesianCoordinates through the Asterism it is a part of
      *
-     * @param sky (ObservedSky) current sky
+     * @param sky   (ObservedSky) current sky
      * @param aster (Asterism) the star's asterism
      * @param index (int) star's index in the asterism's list of stars
      * @return (CartesianCoordinates) star's position (non transformed)

@@ -6,7 +6,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class IntegerSet extends PointedSet<Integer>{
+public final class IntegerSet extends PointedSet<Integer>{
 
     public Integer getMin() {
         return min;
@@ -23,6 +23,7 @@ public class IntegerSet extends PointedSet<Integer>{
         this.min = min;
         this.max = max;
     }
+
     public IntegerSet imageInt(Function<Integer, Integer> f) {
         return new IntegerSet(super.image(f).stream().min(Comparator.comparingInt(Integer::valueOf)).orElseThrow(),
                 super.image(f).stream().max(Comparator.comparingInt(Integer::valueOf)).orElseThrow());

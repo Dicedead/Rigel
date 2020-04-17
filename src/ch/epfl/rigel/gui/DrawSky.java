@@ -51,7 +51,7 @@ public final class DrawSky extends Application {
             final StarCatalogue catalogue = new StarCatalogue.Builder()
                     .loadFrom(hs, HygDatabaseLoader.INSTANCE).loadFrom(ast, AsterismLoader.INSTANCE).build();
 
-            final StereographicProjection proj = new StereographicProjection(HorizontalCoordinates.ofDeg(3.7, -65));
+            final StereographicProjection proj = new StereographicProjection(HorizontalCoordinates.ofDeg(277, -23));
 
             //££final Future<ObservedSky> skyFuture = ThreadManager.getAstronomy().submit(() -> new ObservedSky(
             //££        ZonedDateTime.parse("2020-02-17T20:15:00+01:00"), GeographicCoordinates.ofDeg(6.57, 46.52), proj, catalogue.get()));

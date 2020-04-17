@@ -6,23 +6,23 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class OrderedPair<T> extends IndexedSet<T, Integer> implements Iterable<T>{
+public class OrderedSet<T> extends IndexedSet<T, Integer> implements Iterable<T>{
 
-    public OrderedPair(Collection<T> t, SetFunction<Integer, T> indexer) {
+    public OrderedSet(Collection<T> t, SetFunction<Integer, T> indexer) {
         super(t, indexer);
     }
 
     @SafeVarargs
-    public OrderedPair(final T... t) {
+    public OrderedSet(final T... t) {
         super(List.of(t), new SetFunction<>((Integer i) -> t[i]));
     }
 
 
-    public OrderedPair(final List<T> t) {
+    public OrderedSet(final List<T> t) {
         super(t, new SetFunction<>(t::get));
     }
 
-    public OrderedPair(MathSet<T> points, SetFunction<Integer, T> integerTSetFunction) {
+    public OrderedSet(MathSet<T> points, SetFunction<Integer, T> integerTSetFunction) {
         super(points, integerTSetFunction);
     }
 

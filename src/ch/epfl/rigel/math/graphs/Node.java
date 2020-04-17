@@ -1,12 +1,16 @@
 package ch.epfl.rigel.math.graphs;
 
-import ch.epfl.rigel.math.graphs.poubelle.GraphComms;
+import ch.epfl.rigel.math.sets.MathSet;
+import ch.epfl.rigel.math.sets.OrderedSet;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Implementation of hierarchized nodes to be used in directed graphs
@@ -18,6 +22,7 @@ public final class Node<T> {
 
     final private T value;
     final private Node<T> parent;
+    final private int depth;
 
     /**
      * Root Node Constructor: creates a node with no parent node
@@ -28,6 +33,7 @@ public final class Node<T> {
     public Node(final T value) {
         this.value = value;
         this.parent = null;
+        this.depth = 0;
     }
 
     /**
@@ -38,9 +44,10 @@ public final class Node<T> {
      * @param parent (Node<T>) non null parent node
      * @throws NullPointerException if parent is null
      */
-    public Node(T value, Node<T> parent) {
+    private Node(T value, Node<T> parent) {
         this.value = value;
         this.parent = Objects.requireNonNull(parent);
+        this.depth = parent.depth + 1;
     }
 
     /**
@@ -50,15 +57,15 @@ public final class Node<T> {
      * @return (Node<T>) said node containing said value
      */
     public Node<T> createChild(final T childValue) {
-        return new Node<T>(childValue, this);
+        return new Node<>(childValue, this);
     }
 
     /**
      * @return (Path<Node<T>>) a Path of all the nodes higher than this node; i.e its parent and (recursively) the parent
      * of its parent
      */
-    public GraphComms.Path<Node<T>> hierarchy() {
-        return new GraphComms.Path<>(new ArrayList<>(hierarchyRecur(new ArrayDeque<>(Collections.singleton(this)))));
+    public Path<Node<T>> hierarchy() {
+         return new Path<>(new OrderedSet<>(new ArrayList<>(hierarchyRecur(new ArrayDeque<>(Collections.singleton(this))))));
     }
 
     /**
@@ -77,10 +84,29 @@ public final class Node<T> {
     }
 
     /**
+     * @return (int) this node's depth (number of nodes in hierarchy)
+     */
+    public int getDepth() { return depth; }
+
+    /**
      * @return (boolean) whether this node has a parent
      */
     public boolean isRoot() {
         return parent == null;
+    }
+
+    public static <X> boolean areRelated(Collection<Node<X>> nodes) {
+        return !nodes.stream().filter(node -> node.hierarchy().containsSet(new MathSet<>(nodes).without(node)))
+                .findFirst().equals(Optional.empty());
+    }
+
+    @SafeVarargs
+    public static <X> boolean areRelated(Node<X>... nodes) {
+        return areRelated(Arrays.asList(nodes));
+    }
+
+    public static <X> boolean areRelated(Node<X> node1, Node<X> node2) {
+        return node1.hierarchy().contains(node2) || node2.hierarchy().contains(node1);
     }
 
     private Deque<Node<T>> hierarchyRecur(final Deque<Node<T>> nodeDeque) {
