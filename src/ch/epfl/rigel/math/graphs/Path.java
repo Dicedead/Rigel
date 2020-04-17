@@ -16,16 +16,18 @@ public final class Path<T> extends OrderedSet<T> implements Graph<T, OrderedSet<
     public Path(OrderedSet<T> vertices) {
         super(vertices.toList());
     }
+
     public Path(List<T> vertices) {
         super(vertices);
     }
+
     public Path(Iterable<T> vertices) {
         super(vertices);
     }
 
 
     @Override
-    public Optional<OrderedSet<T>> getNeighbors(T point) {
+    public Optional<OrderedSet<T>> getNeighbours(T point) {
         return Optional.of(new OrderedSet<>(prev(point), point, next(point)));
     }
 
@@ -34,11 +36,13 @@ public final class Path<T> extends OrderedSet<T> implements Graph<T, OrderedSet<
         return this;
     }
 
-    public OrderedSet<T> flow() { return this; }
+    public OrderedSet<T> flow() {
+        return this;
+    }
 
     @Override
     public Optional<Iterable<T>> findPathBetween(T v1, T v2) {
-        if (! in(v1) || ! in(v2))
+        if (!(contains(v1) && contains(v2)))
             return Optional.empty();
         return Optional.of(toList().subList(indexOf(v1), indexOf(v2)));
     }
@@ -60,7 +64,7 @@ public final class Path<T> extends OrderedSet<T> implements Graph<T, OrderedSet<
 
     @Override
     public MathSet<Link<T>> edgeSet() {
-        return new MathSet<>( image(p -> new Link<>(p, next(p))));
+        return new MathSet<>(image(p -> new Link<>(p, next(p))));
     }
 
     @Override
@@ -68,19 +72,19 @@ public final class Path<T> extends OrderedSet<T> implements Graph<T, OrderedSet<
         return this;
     }
 
-    public Path<T> reverse()
-    {
+    public Path<T> reverse() {
         final List<T> copy = new ArrayList<>(toList());
         Collections.reverse(copy);
-        return new Path<T>((copy));
+        return new Path<>(copy);
     }
 
     /**
-     * Creates a path begining at this path and ending at the end of the other
+     * Creates a path beginning at this path and ending at the end of the other
+     *
      * @param otherPath (Path<T>) the path to append
-     * @return (Path<T>) a path composed of an appending of the two paths
+     * @return (Path < T >) a path composed of an appending of the two paths
      */
-    public Path<T> add (Path<T> otherPath) {
+    public Path<T> add(Path<T> otherPath) {
         final var secondHalf = otherPath.toList();
         final var firstHalf = new ArrayList<>(toList());
 

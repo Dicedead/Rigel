@@ -1,5 +1,7 @@
 package ch.epfl.rigel.math.sets;
 
+import ch.epfl.rigel.math.graphs.Path;
+
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -18,10 +20,10 @@ public class OrderedSet<T> extends IndexedSet<T, Integer> implements Iterable<T>
     }
 
     public OrderedSet(final Iterable<T> t) {
-        this(ittoList(t));
+        this(iterableToList(t));
     }
 
-    private  static<T>  List<T> ittoList (final Iterable<T> i)
+    private static<T> List<T> iterableToList(final Iterable<T> i)
     {
         final List<T> target = new ArrayList<>();
         i.forEach(target::add);
@@ -75,4 +77,8 @@ public class OrderedSet<T> extends IndexedSet<T, Integer> implements Iterable<T>
         return toList().spliterator();
     }
 
+    @Override
+    public String toString() {
+        return this.toList().toString();
+    }
 }

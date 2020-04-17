@@ -19,6 +19,10 @@ public class MathSet<T> {
     public MathSet(Collection<T> t) {
         data = Set.copyOf(t);
     }
+
+    @SafeVarargs
+    public MathSet(T... ts) { data = Set.of(ts); }
+
     public MathSet(MathSet<T> t) {
         data = t.getData();
     }
@@ -35,11 +39,11 @@ public class MathSet<T> {
     }
 
     public MathSet<T> intersection(final Collection<MathSet<T>> others) {
-        return suchThat(others.stream().map(MathSet::isIn).collect(Collectors.toSet()));
+        return suchThat(others.stream().map(MathSet::predicateContains).collect(Collectors.toSet()));
     }
 
     public <U> MathSet<Pair<T, U>> product(final Collection<MathSet<U>> other) {
-        return stream().map(t -> unionOf(other).image(u -> new Pair<>(t, u))).collect(MathSet.union());
+        return stream().map(t -> unionOf(other).image(u -> new Pair<>(t, u))).distinct().collect(MathSet.union());
     }
 
     public <U> MathSet<Pair<T, U>> directSum(final MathSet<U> other, T tP, U uP) {
@@ -49,15 +53,11 @@ public class MathSet<T> {
 
     public <U> MathSet<Pair<T, U>> directSum(final Collection<MathSet<U>> other, T tP, U uP) {
         return unionOf(Set.of(image(t -> new Pair<>(t, uP)),
-                other.stream().map(s -> s.image(u -> new Pair<T, U>(tP, u))).collect(MathSet.union())));
+                other.stream().map(s -> s.image(u -> new Pair<T, U>(tP, u))).distinct().collect(MathSet.union())));
     }
 
     public MathSet<T> union(final Collection<MathSet<T>> others) {
-        return others.stream().flatMap(s -> s.getData().stream()).collect(MathSet.toSet());
-    }
-
-    public boolean in(final T t) {
-        return data.contains(t);
+        return new MathSet<T>(others.stream().flatMap(s -> s.getData().stream()).collect(Collectors.toSet()));
     }
 
     public boolean containsSet(final MathSet<T> other) {
@@ -66,29 +66,30 @@ public class MathSet<T> {
 
     public boolean contains(final T t) { return data.contains(t); }
 
-    public MathSet<T> complement(final MathSet<T> other) {
-        return suchThat(Predicate.not(other::in));
+    public MathSet<T> without(final MathSet<T> other) {
+        return suchThat(Predicate.not(other::contains));
     }
 
     public MathSet<T> suchThat(final Predicate<T> t) {
-        return stream().filter(t).collect(MathSet.toSet());
+        return stream().filter(t).distinct().collect(MathSet.toSet());
     }
 
     public MathSet<T> suchThat(final Collection<Predicate<T>> t) {
-        return stream().filter(l -> t.stream().allMatch(r -> r.test(l))).collect(MathSet.toSet());
+        return stream().filter(l -> t.stream().allMatch(r -> r.test(l))).distinct().collect(MathSet.toSet());
     }
-    public MathSet<T> complement(final T other)
+    public MathSet<T> without(final T other)
     {
         return suchThat(p -> !p.equals(other));
     }
 
-    public MathSet<T> minus(final MathSet<T> other)
+    public MathSet<T> minusSet(final MathSet<T> other)
     {
-        return intersection(Collections.singleton(complement(other)));
+        return intersection(Collections.singleton(without(other)));
     }
+
     public MathSet<T> minus(final T other)
     {
-        return intersection(Collections.singleton(complement(other)));
+        return intersection(Collections.singleton(without(other)));
     }
 
     public Stream<T> stream() {
@@ -103,12 +104,8 @@ public class MathSet<T> {
         return data;
     }
 
-    public MathSet<T> without(T t) { return suchThat(i -> t!=i, this); }
-
-    public int size() { return data.size(); }
-
-    public Predicate<T> isIn() {
-        return this::in;
+    public Predicate<T> predicateContains() {
+        return this::contains;
     }
 
     public <U> MathSet<U> image(Function<T, U> f) {
@@ -138,8 +135,8 @@ public class MathSet<T> {
                 () -> new MathSet<>(new HashSet<>()),
                 MathSet::union,
                 MathSet::union,
-                Collector.Characteristics.CONCURRENT,
                 Collector.Characteristics.IDENTITY_FINISH,
+                Collector.Characteristics.CONCURRENT,
                 Collector.Characteristics.UNORDERED);
     }
 
@@ -148,8 +145,8 @@ public class MathSet<T> {
                 () -> new MathSet<>(new HashSet<>()),
                 MathSet::intersection,
                 MathSet::intersection,
-                Collector.Characteristics.CONCURRENT,
                 Collector.Characteristics.IDENTITY_FINISH,
+                Collector.Characteristics.CONCURRENT,
                 Collector.Characteristics.UNORDERED);
     }
 
@@ -161,7 +158,6 @@ public class MathSet<T> {
     public static <T> MathSet<T> intersectionOf(final Collection<MathSet<T>> sets) {
         return sets.iterator().next().intersection(sets);
     }
-
 
     public static <T> MathSet<T> suchThat(final Predicate<T> t, final MathSet<T> set) {
         return set.suchThat(t);
@@ -179,4 +175,8 @@ public class MathSet<T> {
         return unionOf(set).suchThat(t);
     }
 
+    @Override
+    public String toString() {
+        return data.toString();
+    }
 }

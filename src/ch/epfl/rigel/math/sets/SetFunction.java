@@ -8,7 +8,7 @@ public final class SetFunction<T, U> implements Function<MathSet<T>, MathSet<U>>
     private final Function<T, U> functionOfElement;
 
     public SetFunction(Function<T, U> f) {
-        this.functionOfSets = (S -> S.stream().map(f).collect(MathSet.toSet()));
+        this.functionOfSets = (S -> S.stream().map(f).distinct().collect(MathSet.toSet()));
         this.functionOfElement = f;
     }
 

@@ -5,9 +5,11 @@ import ch.epfl.rigel.math.sets.MathSet;
 import ch.epfl.rigel.math.sets.OrderedSet;
 import ch.epfl.rigel.math.sets.PartitionSet;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -22,25 +24,42 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
     }
 
     public Tree(MathSet<Node<V>> nodes) {
-        super(nodes, Node::areRelated);
-        Preconditions.checkArgument(nodes.stream().map(n -> {
-            Path<Node<V>> pathN = n.hierarchy();
-            return pathN.at(pathN.size());})
-                .distinct().count() == 1);
+        super(nodes, Node::areRelatedRootless);
+        Preconditions.checkArgument(nodes.image(
+                n -> { final Path<Node<V>> pathN = n.hierarchy();
+                    return pathN.at(pathN.cardinality() - 1);})
+                .cardinality() == 1);
 
-        this.root = suchThat(Node::isRoot).stream().findFirst().orElseThrow();
+        //this.root = suchThat(Node::isRoot, nodes).stream().findFirst().orElseThrow();
+        this.root = nodes.stream().filter(Node::isRoot).findFirst().orElseThrow();
         this.depth = nodes.stream().max(Comparator.comparingInt(Node::getDepth)).get().getDepth();
         this.leaves = suchThat(node -> node.getDepth() == depth);
     }
 
     @Override
-    public Optional<Tree<V>> getNeighbors(Node<V> point) {
+    public Optional<Tree<V>> getNeighbours(Node<V> point) {
         return Optional.of(new Tree<>(component(point).minus(point.getParent())));
+    }
+
+    public Optional<Tree<V>> getChildren(Node<V> point) {
+        return Optional.of(new Tree<>(getNodesAtDepth(point.getDepth() + 1).suchThat(point::isParentOf)));
     }
 
     @Override
     public OrderedSet<Node<V>> flow(Function<Tree<V>, Node<V>> chooser, Node<V> point) {
-        return null;
+        final List<Node<V>> flowList = flowRecur(chooser, chooser.apply(getChildren(point).get()), new ArrayList<>());
+        Collections.reverse(flowList);
+        return new OrderedSet<>(flowList);
+    }
+
+    private List<Node<V>> flowRecur(Function<Tree<V>, Node<V>> chooser, Node<V> point, List<Node<V>> workList) {
+        if (getChildren(point).isEmpty()) {
+            workList.add(point);
+            return workList;
+        }
+        flowRecur(chooser, chooser.apply(getChildren(point).get()), workList);
+        workList.add(point);
+        return workList;
     }
 
     @Override
@@ -80,6 +99,7 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
         return new MathSet<>(Collections.singleton(this));
     }
 
+    //TODO
     @Override
     public MathSet<Link<Node<V>>> edgeSet() {
         return null;
@@ -95,5 +115,9 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
      */
     public MathSet<Node<V>> getLeaves() {
         return leaves;
+    }
+
+    public MathSet<Node<V>> getNodesAtDepth(int targetDepth) {
+        return suchThat(node -> node.getDepth() == targetDepth);
     }
 }

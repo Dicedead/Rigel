@@ -1,7 +1,6 @@
 package ch.epfl.rigel.math.sets;
 
 import ch.epfl.rigel.Preconditions;
-import javafx.util.Pair;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -13,9 +12,9 @@ public class PartitionSet<T> extends MathSet<T> {
 
     private final IndexedSet<MathSet<T>, T> components;
 
-    public PartitionSet(Collection<MathSet<T>> t) {
-        super(unionOf(t).getData());
-        components = new IndexedSet<>(t, new SetFunction<>(u -> t.stream().filter((s -> s.in(u)))
+    public PartitionSet(Collection<MathSet<T>> data) {
+        super(unionOf(data).getData());
+        components = new IndexedSet<>(data, new SetFunction<>(elem -> data.stream().filter(subset -> subset.contains(elem))
                 .findFirst().orElseThrow()));
     }
 
@@ -24,8 +23,8 @@ public class PartitionSet<T> extends MathSet<T> {
         components = t;
     }
 
-    public PartitionSet(final MathSet<T> t, BiFunction<T, T, Boolean> link) {
-        this(t.stream().map(l -> t.suchThat(u -> link.apply(l,u))).collect(Collectors.toSet()));
+    public PartitionSet(final MathSet<T> data, BiFunction<T, T, Boolean> areInRelation) {
+        this(data.stream().map(elem1 -> data.suchThat(elem2 -> areInRelation.apply(elem1, elem2))).collect(Collectors.toSet()));
     }
 
     public PartitionSet(final MathSet<T> t) {
@@ -40,12 +39,11 @@ public class PartitionSet<T> extends MathSet<T> {
         return components;
     }
 
-    public T representant (MathSet<T> component)
-    {
-        Preconditions.checkArgument(components.in(component));
+    public T representant(MathSet<T> component) {
+        Preconditions.checkArgument(components.contains(component));
         return component.stream().findFirst().orElseThrow();
-
     }
+
     @Override
     public <U> PartitionSet<U> image(Function<T, U> f) {
         return new PartitionSet<>(components.stream().map(C -> C.image(f)).collect(Collectors.toSet()));
