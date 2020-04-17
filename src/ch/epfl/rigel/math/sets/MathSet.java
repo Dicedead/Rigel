@@ -19,11 +19,9 @@ public class MathSet<T> {
     public MathSet(Collection<T> t) {
         data = Set.copyOf(t);
     }
-
     public MathSet(MathSet<T> t) {
         data = t.getData();
     }
-
     public MathSet<T> intersection(final MathSet<T> others) {
         return intersection(Collections.singleton(others));
     }
@@ -79,8 +77,17 @@ public class MathSet<T> {
     public MathSet<T> suchThat(final Collection<Predicate<T>> t) {
         return stream().filter(l -> t.stream().allMatch(r -> r.test(l))).collect(MathSet.toSet());
     }
+    public MathSet<T> complement(final T other)
+    {
+        return suchThat(p -> !p.equals(other));
+    }
 
-    public MathSet<T> minus(final MathSet<T> other) {
+    public MathSet<T> minus(final MathSet<T> other)
+    {
+        return intersection(Collections.singleton(complement(other)));
+    }
+    public MathSet<T> minus(final T other)
+    {
         return intersection(Collections.singleton(complement(other)));
     }
 

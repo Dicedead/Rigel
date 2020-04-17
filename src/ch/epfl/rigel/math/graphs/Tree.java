@@ -1,10 +1,13 @@
 package ch.epfl.rigel.math.graphs;
 
 import ch.epfl.rigel.Preconditions;
+import ch.epfl.rigel.math.sets.IndexedSet;
 import ch.epfl.rigel.math.sets.MathSet;
 import ch.epfl.rigel.math.sets.OrderedSet;
 import ch.epfl.rigel.math.sets.PartitionSet;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.function.Function;
@@ -14,6 +17,10 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
     private final MathSet<Node<V>> leaves;
     private final Node<V> root;
     private final int depth;
+
+    public Tree(Collection<MathSet<Node<V>>> t) {
+        this(unionOf(t));
+    }
 
     public Tree(MathSet<Node<V>> nodes) {
         super(nodes, Node::areRelated);
@@ -28,28 +35,50 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
     }
 
     @Override
+    public Optional<Tree<V>> getNeighbors(Node<V> point) {
+        return Optional.of(new Tree<>(component(point).minus(point.getParent())));
+    }
+
+    @Override
     public OrderedSet<Node<V>> flow(Function<Tree<V>, Node<V>> chooser, Node<V> point) {
         return null;
     }
 
     @Override
-    public Optional<Iterable<Node<V>>> findPathBetween(Node<V> v1, Node<V> v2) {
-        return Optional.empty();
+    public Optional<Iterable<Node<V>>> findPathBetween(Node<V> node1, Node<V> node2) {
+        Preconditions.checkArgument(contains(node1) && contains(node2));
+
+        final Path<Node<V>> nodeOneHierarchy = node1.hierarchy();
+        final Path<Node<V>> nodeTwoHierarchy = node2.hierarchy();
+        final var aut = nodeOneHierarchy.intersection(nodeTwoHierarchy);
+
+        if (aut.contains(node1) || aut.contains(node2))
+        {
+            return nodeTwoHierarchy.findPathBetween(node1, node2);
+        } else {
+
+            final Node<V> anchor = aut.stream().findFirst().orElseThrow();
+            return  Optional.of(new Path<>(nodeOneHierarchy.findPathBetween(node1, anchor).orElseThrow())
+                    .add(new Path<>(nodeTwoHierarchy.findPathBetween(anchor, node2).orElseThrow()).reverse()));
+        }
     }
 
     @Override
     public Graph<Node<V>, ? extends MathSet<Node<V>>> on(MathSet<Node<V>> points) {
-        return null;
+        return new ConcreteGraph<>(new PartitionSet<>(intersection(points),
+                (a, b) -> points.containsSet(new OrderedSet<>(findPathBetween(a,b).orElseThrow()))),
+                edgeSet().suchThat(points::containsSet),
+                root);
     }
 
     @Override
     public Graph<Node<V>, Tree<V>> connectedComponent(Node<V> point) {
-        return null;
+        return this;
     }
 
     @Override
     public MathSet<Graph<Node<V>, Tree<V>>> connectedComponents() {
-        return null;
+        return new MathSet<>(Collections.singleton(this));
     }
 
     @Override
@@ -59,7 +88,7 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
 
     @Override
     public Tree<V> vertexSet() {
-        return null;
+        return this;
     }
 
     /**
@@ -68,15 +97,4 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
     public MathSet<Node<V>> getLeaves() {
         return leaves;
     }
-
-    @Override
-    public Optional<Tree<V>> getNeighbors(Node<V> point) {
-        return Optional.empty();
-    }
-
-    public MathSet<Node<V>> getNodesAtDepth(int targetDepth) {
-        return suchThat(node -> node.getDepth() == targetDepth);
-    }
-
-    public int getDepth() { return depth; }
 }
