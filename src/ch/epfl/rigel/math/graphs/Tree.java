@@ -1,7 +1,6 @@
 package ch.epfl.rigel.math.graphs;
 
 import ch.epfl.rigel.Preconditions;
-import ch.epfl.rigel.math.sets.IndexedSet;
 import ch.epfl.rigel.math.sets.MathSet;
 import ch.epfl.rigel.math.sets.OrderedSet;
 import ch.epfl.rigel.math.sets.PartitionSet;
