@@ -44,6 +44,7 @@ public class MathSet<T> {
         return union(Collections.singleton(others));
     }
 
+    //TODO: put back MathSet.toSet when fixed
     public MathSet<T> intersection(final Collection<MathSet<T>> others) {
         return suchThat(others.stream().map(MathSet::predicateContains).collect(Collectors.toSet()));
     }
@@ -62,8 +63,11 @@ public class MathSet<T> {
                 other.stream().map(s -> s.image(u -> new Pair<T, U>(tP, u))).collect(MathSet.union())));
     }
 
+    //TODO: put back MathSet.toSet when fixed
     public MathSet<T> union(final Collection<MathSet<T>> others) {
-        return new MathSet<>(others.stream().flatMap(s -> s.getData().stream()).collect(Collectors.toSet()));
+        final Set<T> unionSet = others.stream().flatMap(s -> s.getData().stream()).collect(Collectors.toSet());
+        unionSet.addAll(getData());
+        return new MathSet<T>(unionSet);
     }
 
     public boolean containsSet(final MathSet<T> other) {
@@ -76,12 +80,14 @@ public class MathSet<T> {
         return suchThat(Predicate.not(other::contains));
     }
 
+    //TODO: put back MathSet.toSet when fixed
     public MathSet<T> suchThat(final Predicate<T> t) {
-        return new MathSet<T>(stream().filter(t).collect(Collectors.toSet()));
+        return new MathSet<>(stream().filter(t).collect(Collectors.toSet()));
     }
 
+    //TODO: put back MathSet.toSet when fixed
     public MathSet<T> suchThat(final Collection<Predicate<T>> t) {
-        return stream().filter(l -> t.stream().allMatch(r -> r.test(l))).collect(MathSet.toSet());
+        return new MathSet<>(stream().filter(l -> t.stream().allMatch(r -> r.test(l))).collect(Collectors.toSet()));
     }
     public MathSet<T> without(final T other)
     {
