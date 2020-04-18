@@ -13,6 +13,7 @@ public final class SetFunction<T, U> implements Function<MathSet<T>, MathSet<U>>
     private final Function<MathSet<T>, MathSet<U>> functionOfSets;
     private final Function<T, U> functionOfElement;
 
+    //TODO: put back MathSet.toSet when fixed
     public SetFunction(Function<T, U> f) {
         this.functionOfSets = S -> new MathSet<U>(S.stream().map(f).collect(Collectors.toSet()));
         this.functionOfElement = f;

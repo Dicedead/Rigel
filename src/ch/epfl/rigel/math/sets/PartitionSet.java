@@ -49,7 +49,7 @@ public class PartitionSet<T> extends MathSet<T> {
 
     public T representant (MathSet<T> component)
     {
-        Preconditions.checkArgument(components.in(component));
+        Preconditions.checkArgument(components.contains(component));
         return component.getElement();
     }
 

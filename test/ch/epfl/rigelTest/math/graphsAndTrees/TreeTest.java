@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.Comparator;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -29,8 +30,11 @@ public class TreeTest {
     @Test
     void flowTest() {
         OrderedSet<Node<Integer>> set = intTree.flow(Comparator.comparingInt(Node::getValue),root);
-        for (Node<Integer> node : set) {
-            System.out.println(node.getValue());
-        }
+        assertEquals(Set.of(0,2,4), set.image(Node::getValue).getData());
+    }
+
+    @Test
+    void rootHasMinimalDepth() {
+
     }
 }

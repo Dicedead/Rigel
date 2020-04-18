@@ -179,20 +179,16 @@ public class MathSet<T> {
     }
 
 
-    public static <T> MathSet<T> unionOf(final Collection<MathSet<T>> sets) {
-        if (sets.size() <= 1) {
-            final Optional<MathSet<T>> potentialSet = sets.stream().findAny();
-            return (potentialSet.isEmpty()) ? emptySet() : new MathSet<>(potentialSet.get());
-        }
-        return sets.iterator().next().union(sets);
-    }
-
     public static <T> MathSet<T> unionOf(final MathSet<MathSet<T>> sets) {
         if (sets.cardinality() <= 1) {
             final Optional<MathSet<T>> potentialSet = sets.stream().findAny();
             return (potentialSet.isEmpty()) ? emptySet() : new MathSet<>(potentialSet.get());
         }
         return unionOf(sets.getData());
+    }
+
+    public static <T> MathSet<T> unionOf(final Collection<MathSet<T>> sets) {
+        return unionOf(new MathSet<MathSet<T>>(sets));
     }
 
     public static <T> MathSet<T> intersectionOf(final Collection<MathSet<T>> sets) {
@@ -204,7 +200,8 @@ public class MathSet<T> {
     }
 
 
-    public static <T> MathSet<T> emptySet (){return  new MathSet<>(Set.of());};
+    public static <T> MathSet<T> emptySet (){return  new MathSet<>(Set.of());}
+
     public static <T> MathSet<T> suchThat(final Predicate<T> t, final MathSet<T> set) {
         return set.suchThat(t);
     }

@@ -21,7 +21,6 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
 
     private final MathSet<Node<V>> leaves;
     private final Node<V> root;
-    private final Node<V> minDepthNode;
     private final int maxDepth;
 
     public Tree(Collection<MathSet<Node<V>>> t) {
@@ -35,10 +34,8 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
                     return pathN.at(pathN.cardinality() - 1);})
                 .cardinality() == 1);
 
-        this.minDepthNode = nodes.minOf(Node::getDepth);
         this.maxDepth = nodes.maxOf(Node::getDepth).getDepth();
-
-        this.root = nodes.getElement(node -> Node.areRelated(minDepthNode, node));
+        this.root = nodes.minOf(Node::getDepth);
         this.leaves = suchThat(node -> node.getDepth() == maxDepth);
     }
 
@@ -131,7 +128,7 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
     }
 
     public int getTotalDepth() {
-        return maxDepth - minDepthNode.getDepth();
+        return maxDepth - root.getDepth();
     }
 
     public int getMaxDepth() {
@@ -139,6 +136,6 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
     }
 
     public int getMinDepth() {
-        return minDepthNode.getDepth();
+        return root.getDepth();
     }
 }
