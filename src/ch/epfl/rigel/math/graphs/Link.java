@@ -25,7 +25,6 @@ public final class Link<T> extends OrderedSet<T> {
 
     /**
      * Link constructor: ties the 2 elements in a pair together (with no order)
-     *
      * @param p (Pair<T,T>)
      */
     public Link(final Pair<T, T> p) {

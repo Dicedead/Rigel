@@ -24,7 +24,7 @@ public final class ConcreteGraph<T> extends MathSet<Pair<T, Link<T>>> implements
 
     public ConcreteGraph(MathSet<T> points, MathSet<Link<T>> edges, T t)
     {
-        super(points.directSum(edges, t, new Link<T>(t, t)));
+        super(points.directSum(edges, t, new Link<>(t, t)));
 
         vertices = new PartitionSet<>(points, (T v, T u) -> findPathBetween(u, v).isPresent());
         this.edges = edges;
@@ -34,7 +34,7 @@ public final class ConcreteGraph<T> extends MathSet<Pair<T, Link<T>>> implements
     public ConcreteGraph(MathSet<Pair<T, Link<T>>> mathSet, T t)
     {
         super(mathSet);
-        vertices = new PartitionSet<T>(suchThat(p -> p.getValue().equals(new Link<>(t, t))).image(Pair::getKey), (T v, T u) -> findPathBetween(u, v).isPresent());
+        vertices = new PartitionSet<>(suchThat(p -> p.getValue().equals(new Link<>(t, t))).image(Pair::getKey), (T v, T u) -> findPathBetween(u, v).isPresent());
         this.edges = new MathSet<>(mathSet.image(Pair::getValue));
 
     }
@@ -74,7 +74,7 @@ public final class ConcreteGraph<T> extends MathSet<Pair<T, Link<T>>> implements
 
     @Override
     public MathSet<Graph<T, PartitionSet<T>>> connectedComponents() {
-        return vertexSet().components().stream().map(this::on).collect(MathSet.toSet());
+        return vertexSet().components().image(this::on);
     }
 
     public MathSet<Link<T>> edgeSet()

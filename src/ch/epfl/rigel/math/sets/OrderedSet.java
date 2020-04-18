@@ -12,6 +12,9 @@ public class OrderedSet<T> extends IndexedSet<T, Integer> implements Iterable<T>
         super(t, indexer);
     }
 
+    public OrderedSet(MathSet<T> points, SetFunction<Integer, T> integerTSetFunction) {
+        super(points, integerTSetFunction);
+    }
     @SafeVarargs
     public OrderedSet(final T... t) {
         super(List.of(t), new SetFunction<>((Integer i) -> t[i]));
@@ -32,9 +35,6 @@ public class OrderedSet<T> extends IndexedSet<T, Integer> implements Iterable<T>
         super(t, new SetFunction<>(t::get));
     }
 
-    public OrderedSet(MathSet<T> points, SetFunction<Integer, T> integerTSetFunction) {
-        super(points, integerTSetFunction);
-    }
 
     public List<T> toList() {
         return IntStream.range(0, getData().size()).mapToObj(this::at).collect(Collectors.toList());

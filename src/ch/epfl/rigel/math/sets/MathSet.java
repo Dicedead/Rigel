@@ -2,10 +2,8 @@ package ch.epfl.rigel.math.sets;
 
 import javafx.util.Pair;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collector;
@@ -21,6 +19,35 @@ public class MathSet<T> {
     }
     public MathSet(MathSet<T> t) {
         data = t.getData();
+    }
+    @SafeVarargs
+    public static <T> MathSet<T> of (T... t)
+    {
+        return new MathSet<T>(Set.of(t));
+    }
+    public MathSet<MathSet<T>> powerSet()
+    {
+        return powerSet(this);
+    }
+    private MathSet<MathSet<T>> powerSet(MathSet<T> set)
+    {
+        Set<T> Cset = set.getData();
+        if (Cset.isEmpty())
+            return new MathSet<>(Set.of());
+
+        final T firstElement = Cset.iterator().next();
+        Set<T> subset = new HashSet<>(Cset);
+        subset.remove(firstElement);
+        final Collection<Set<T>> subPowerSet = powerSet(new MathSet<T>(subset)).image(MathSet::getData).getData();
+        Set<Set<T>> powerSet = new HashSet<>();
+        for (Set<T> s : subPowerSet) {
+            Set<T> s1 = new HashSet<>(s);
+            s1.add(firstElement);
+            powerSet.add(s);
+            powerSet.add(s1);
+        }
+
+        return new MathSet<>(powerSet.stream().map(MathSet::new).collect(Collectors.toSet()));
     }
     public MathSet<T> intersection(final MathSet<T> others) {
         return intersection(Collections.singleton(others));
@@ -44,12 +71,12 @@ public class MathSet<T> {
 
     public <U> MathSet<Pair<T, U>> directSum(final MathSet<U> other, T tP, U uP) {
         return unionOf(Set.of(image(t -> new Pair<>(t, uP)),
-                other.image(u -> new Pair<T, U>(tP, u))));
+                other.image(u -> new Pair<>(tP, u))));
     }
 
     public <U> MathSet<Pair<T, U>> directSum(final Collection<MathSet<U>> other, T tP, U uP) {
         return unionOf(Set.of(image(t -> new Pair<>(t, uP)),
-                other.stream().map(s -> s.image(u -> new Pair<T, U>(tP, u))).collect(MathSet.union())));
+                other.stream().map(s -> s.image(u -> new Pair<>(tP, u))).collect(MathSet.union())));
     }
 
     public MathSet<T> union(final Collection<MathSet<T>> others) {
@@ -86,6 +113,7 @@ public class MathSet<T> {
     {
         return intersection(Collections.singleton(complement(other)));
     }
+
     public MathSet<T> minus(final T other)
     {
         return intersection(Collections.singleton(complement(other)));
@@ -104,8 +132,6 @@ public class MathSet<T> {
     }
 
     public MathSet<T> without(T t) { return suchThat(i -> t!=i, this); }
-
-    public int size() { return data.size(); }
 
     public Predicate<T> isIn() {
         return this::in;
@@ -178,5 +204,46 @@ public class MathSet<T> {
     public static <T> MathSet<T> suchThat(final Predicate<T> t, final Collection<MathSet<T>> set) {
         return unionOf(set).suchThat(t);
     }
+
+    public Iterator<MathSet<T>> setIterator() {
+        return powerSet().getData().iterator();
+    }
+    public void forEachSet(Consumer<? super MathSet<T>> action) {
+        powerSet().getData().forEach(action);
+    }
+
+    public MathSet<MathSet<T>> suchThatSet(final Predicate<MathSet<T>> t)
+    {
+        return powerSet().suchThat(t);
+    }
+
+    public MathSet<MathSet<T>> suchThatSet(final Collection<Predicate<MathSet<T>>> t)
+    {
+        return powerSet().suchThat(t);
+    }
+
+    public T getElement()
+    {
+        return stream().findFirst().orElseThrow();
+    }
+
+    public T getElement(final Predicate<T> t)
+    {
+        return stream().filter(t).findFirst().orElseThrow();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof MathSet)) return false;
+        MathSet<?> mathSet = (MathSet<?>) o;
+        return Objects.equals(data, mathSet.data);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(data);
+    }
+
 
 }

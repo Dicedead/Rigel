@@ -23,18 +23,19 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
 
     public Tree(MathSet<Node<V>> nodes) {
         super(nodes, Node::areRelated);
-        Preconditions.checkArgument(nodes.stream().map(n -> {
+
+        Preconditions.checkArgument(nodes.image(n -> {
             Path<Node<V>> pathN = n.hierarchy();
             return pathN.at(pathN.size());})
-                .distinct().count() == 1);
+                .cardinality() == 1);
 
         this.root = suchThat(Node::isRoot).stream().findFirst().orElseThrow();
-        this.depth = nodes.stream().max(Comparator.comparingInt(Node::getDepth)).get().getDepth();
+        this.depth = nodes.stream().max(Comparator.comparingInt(Node::getDepth)).orElseThrow().getDepth();
         this.leaves = suchThat(node -> node.getDepth() == depth);
     }
 
     @Override
-    public Optional<Tree<V>> getNeighbors(Node<V> point) {
+    public Optional<Tree<V>> getNeighbors(final Node<V> point) {
         return Optional.of(new Tree<>(component(point).minus(point.getParent())));
     }
 
@@ -50,7 +51,6 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
         final Path<Node<V>> nodeOneHierarchy = node1.hierarchy();
         final Path<Node<V>> nodeTwoHierarchy = node2.hierarchy();
         final var aut = nodeOneHierarchy.intersection(nodeTwoHierarchy);
-
         if (aut.contains(node1) || aut.contains(node2))
         {
             return nodeTwoHierarchy.findPathBetween(node1, node2);

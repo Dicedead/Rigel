@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-public final class Path<T> extends OrderedSet<T> implements Graph<T, OrderedSet<T>> {
+public final class Path<T> extends OrderedSet<T> implements Graph<T, Path<T>> {
 
 
     public Path(OrderedSet<T> vertices) {
@@ -22,18 +22,20 @@ public final class Path<T> extends OrderedSet<T> implements Graph<T, OrderedSet<
     public Path(Iterable<T> vertices) {
         super(vertices);
     }
-
-
-    @Override
-    public Optional<OrderedSet<T>> getNeighbors(T point) {
-        return Optional.of(new OrderedSet<>(prev(point), point, next(point)));
+    @SafeVarargs
+    public Path(T... vertices) {
+        super(vertices);
     }
 
     @Override
-    public OrderedSet<T> flow(Function<OrderedSet<T>, T> chooser, T point) {
+    public Optional<Path<T>> getNeighbors(T point) {
+        return Optional.of(new Path<>(prev(point), point, next(point)));
+    }
+
+    @Override
+    public OrderedSet<T> flow(Function<Path<T>, T> chooser, T point) {
         return this;
     }
-
     public OrderedSet<T> flow() { return this; }
 
     @Override
@@ -49,12 +51,12 @@ public final class Path<T> extends OrderedSet<T> implements Graph<T, OrderedSet<
     }
 
     @Override
-    public Graph<T, OrderedSet<T>> connectedComponent(T point) {
+    public Graph<T, Path<T>> connectedComponent(T point) {
         return this;
     }
 
     @Override
-    public MathSet<Graph<T, OrderedSet<T>>> connectedComponents() {
+    public MathSet<Graph<T, Path<T>>> connectedComponents() {
         return new MathSet<>(Collections.singleton(this));
     }
 
@@ -64,7 +66,7 @@ public final class Path<T> extends OrderedSet<T> implements Graph<T, OrderedSet<
     }
 
     @Override
-    public OrderedSet<T> vertexSet() {
+    public Path<T> vertexSet() {
         return this;
     }
 
