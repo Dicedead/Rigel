@@ -5,12 +5,9 @@ import ch.epfl.rigel.math.sets.OrderedSet;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * Implementation of hierarchized nodes to be used in directed graphs
@@ -89,24 +86,25 @@ public final class Node<T> {
     public int getDepth() { return depth; }
 
     /**
-     * @return (boolean) whether this node has a parent
+     * @return (boolean) whether this node has a parent or not
      */
     public boolean isRoot() {
         return parent == null;
     }
 
-    public static <X> boolean areRelated(Collection<Node<X>> nodes) {
-        return !nodes.stream().filter(node -> node.hierarchy().containsSet(new MathSet<>(nodes).without(node)))
-                .findFirst().equals(Optional.empty());
-    }
-
-    @SafeVarargs
-    public static <X> boolean areRelated(Node<X>... nodes) {
-        return areRelated(Arrays.asList(nodes));
+    public boolean isParentOf(Node<T> potentialChild) {
+        return this.equals(potentialChild.getParent());
     }
 
     public static <X> boolean areRelated(Node<X> node1, Node<X> node2) {
         return node1.hierarchy().contains(node2) || node2.hierarchy().contains(node1);
+    }
+
+    public static <X> boolean areRelatedRootless(Node<X> node1, Node<X> node2) {
+        final Path<Node<X>> node1Hier = node1.hierarchy();
+        final Path<Node<X>> node2Hier = node2.hierarchy();
+        return (node1Hier.contains(node2) && node1Hier.cardinality() > 1)
+                || (node2Hier.contains(node1) && node2Hier.cardinality() > 1);
     }
 
     private Deque<Node<T>> hierarchyRecur(final Deque<Node<T>> nodeDeque) {

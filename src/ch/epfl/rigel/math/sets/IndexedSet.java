@@ -4,6 +4,10 @@ import java.util.Collection;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public class IndexedSet<T, I> extends MathSet<T> {
 
     private final SetFunction<I, T> indexer;

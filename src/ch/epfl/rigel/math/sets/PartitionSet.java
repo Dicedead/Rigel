@@ -12,13 +12,17 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public class PartitionSet<T> extends MathSet<T> {
 
     private final IndexedSet<MathSet<T>, T> components;
 
-    public PartitionSet(Collection<MathSet<T>> t) {
-        super(unionOf(t).getData());
-        components = new IndexedSet<>(t, new SetFunction<>(u -> t.stream().filter((s -> s.in(u)))
+    public PartitionSet(Collection<MathSet<T>> data) {
+        super(unionOf(data).getData());
+        components = new IndexedSet<>(data, new SetFunction<>(elem -> data.stream().filter(subset -> subset.contains(elem))
                 .findFirst().orElseThrow()));
     }
 
@@ -27,8 +31,8 @@ public class PartitionSet<T> extends MathSet<T> {
         components = t;
     }
 
-    public PartitionSet(final MathSet<T> t, BiFunction<T, T, Boolean> link) {
-        this(t.stream().map(l -> t.suchThat(u -> link.apply(l,u))).collect(Collectors.toSet()));
+    public PartitionSet(final MathSet<T> data, BiFunction<T, T, Boolean> areInRelation) {
+        this(data.stream().map(elem1 -> data.suchThat(elem2 -> areInRelation.apply(elem1, elem2))).collect(Collectors.toSet()));
     }
 
     public PartitionSet(final MathSet<T> t) {

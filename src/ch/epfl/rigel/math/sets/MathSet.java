@@ -2,8 +2,10 @@ package ch.epfl.rigel.math.sets;
 
 import javafx.util.Pair;
 
-import java.util.*;
-import java.util.function.Consumer;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collector;
@@ -93,30 +95,30 @@ public class MathSet<T> {
 
     public boolean contains(final T t) { return data.contains(t); }
 
-    public MathSet<T> complement(final MathSet<T> other) {
-        return suchThat(Predicate.not(other::in));
+    public MathSet<T> without(final MathSet<T> other) {
+        return suchThat(Predicate.not(other::contains));
     }
 
     public MathSet<T> suchThat(final Predicate<T> t) {
-        return stream().filter(t).collect(MathSet.toSet());
+        return new MathSet<T>(stream().filter(t).collect(Collectors.toSet()));
     }
 
     public MathSet<T> suchThat(final Collection<Predicate<T>> t) {
         return stream().filter(l -> t.stream().allMatch(r -> r.test(l))).collect(MathSet.toSet());
     }
-    public MathSet<T> complement(final T other)
+    public MathSet<T> without(final T other)
     {
         return suchThat(p -> !p.equals(other));
     }
 
-    public MathSet<T> minus(final MathSet<T> other)
+    public MathSet<T> minusSet(final MathSet<T> other)
     {
-        return intersection(Collections.singleton(complement(other)));
+        return intersection(Collections.singleton(without(other)));
     }
 
     public MathSet<T> minus(final T other)
     {
-        return intersection(Collections.singleton(complement(other)));
+        return intersection(Collections.singleton(without(other)));
     }
 
     public Stream<T> stream() {
@@ -124,17 +126,19 @@ public class MathSet<T> {
     }
 
     public int cardinality() {
-        return getData().size();
+        return data.size();
+    }
+
+    public boolean isEmpty() {
+        return data.size() == 0;
     }
 
     public Set<T> getData() {
         return data;
     }
 
-    public MathSet<T> without(T t) { return suchThat(i -> t!=i, this); }
-
-    public Predicate<T> isIn() {
-        return this::in;
+    public Predicate<T> predicateContains() {
+        return this::contains;
     }
 
     public <U> MathSet<U> image(Function<T, U> f) {
@@ -181,10 +185,18 @@ public class MathSet<T> {
 
 
     public static <T> MathSet<T> unionOf(final Collection<MathSet<T>> sets) {
+        if (sets.size() <= 1) {
+            final Optional<MathSet<T>> potentialSet = sets.stream().findAny();
+            return (potentialSet.isEmpty()) ? new MathSet<>() : new MathSet<>(potentialSet.get());
+        }
         return sets.iterator().next().union(sets);
     }
 
     public static <T> MathSet<T> intersectionOf(final Collection<MathSet<T>> sets) {
+        if (sets.size() <= 1) {
+            final Optional<MathSet<T>> potentialSet = sets.stream().findAny();
+            return (potentialSet.isEmpty()) ? new MathSet<>() : new MathSet<>(potentialSet.get());
+        }
         return sets.iterator().next().intersection(sets);
     }
 
@@ -203,6 +215,11 @@ public class MathSet<T> {
 
     public static <T> MathSet<T> suchThat(final Predicate<T> t, final Collection<MathSet<T>> set) {
         return unionOf(set).suchThat(t);
+    }
+
+    @Override
+    public String toString() {
+        return data.toString();
     }
 
     public Iterator<MathSet<T>> setIterator() {

@@ -28,6 +28,6 @@ class PlanarTransformationTest {
     @Test
     void applyDistance() {
         PlanarTransformation lul = PlanarTransformation.ofDilatAndTrans(500, 8, 13);
-        assertEquals(2000, lul.applyDistance(2));
+        assertEquals(1000, lul.applyDistance(2));
     }
 }
