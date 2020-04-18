@@ -50,6 +50,7 @@ public class MathSet<T> {
 
         return new MathSet<>(powerSet.stream().map(MathSet::new).collect(Collectors.toSet()));
     }
+
     public MathSet<T> intersection(final MathSet<T> others) {
         return intersection(Collections.singleton(others));
     }
@@ -70,13 +71,12 @@ public class MathSet<T> {
         return unionOf(image(t -> unionOf(other).image(u -> new Pair<>(t, u))));
     }
 
-    public <U> MathSet<Pair<T, U>> directSum(final MathSet<U> other, T tP, U uP) {
-        return unionOf(of(image(t -> new Pair<>(t, uP)), other.image(u -> new Pair<>(tP, u))));
+    public <U> MathSet<Maybe<T, U>> directSum(final MathSet<U> other) {
+         return image(t -> new Maybe<T, U>(t, null)).union(other.image(v -> new Maybe<T, U>(null, v)));
     }
 
-    public <U> MathSet<Pair<T, U>> directSum(final Collection<MathSet<U>> other, T tP, U uP) {
-        return unionOf(of(image(t -> new Pair<>(t, uP)), other.stream().map(s -> s.image(u -> new Pair<>(tP, u)))
-                .collect(MathSet.union())));
+    public <U> MathSet<Maybe<T, U>> directSum(final Collection<MathSet<U>> other) {
+        return image(t -> new Maybe<T, U>(t, null)).union(other.stream().map(s -> s.image(u -> new Maybe<T, U>(null, u))).collect(Collectors.toList()));
     }
 
     public MathSet<T> union(final Collection<MathSet<T>> others) {
@@ -113,7 +113,7 @@ public class MathSet<T> {
 
     public MathSet<T> minus(final T other)
     {
-        return intersection(without(other));
+        return intersection(without(of(other)));
     }
 
     public Stream<T> stream() {
@@ -229,9 +229,11 @@ public class MathSet<T> {
     public Iterator<MathSet<T>> setIterator() {
         return powerSet().getData().iterator();
     }
+
     public void forEachSet(Consumer<? super MathSet<T>> action) {
         powerSet().getData().forEach(action);
     }
+
 
     public MathSet<MathSet<T>> suchThatSet(final Predicate<MathSet<T>> t)
     {
@@ -247,6 +249,7 @@ public class MathSet<T> {
     {
         return data.contains(t);
     }
+
     public T getElement()
     {
         return stream().findFirst().orElseThrow();
@@ -264,7 +267,7 @@ public class MathSet<T> {
 
     public T getElement(final Predicate<T> t)
     {
-        return stream().filter(t).findFirst().orElseThrow();
+        return suchThat(t).getElement();
     }
 
     @Override

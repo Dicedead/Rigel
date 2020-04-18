@@ -32,14 +32,4 @@ public class PointedSet<T> extends MathSet<T> {
     public T getElement()
     {return special;}
 
-    public <U> PointedSet<Pair<T, U>> directSum(PointedSet<U> other) {
-        return new PointedSet<>(super.directSum(other, special, other.getElement()), new Pair<>(special, other.getElement()));
-    }
-
-    public <U> PointedSet<Pair<T, U>> directSum(Collection<PointedSet<U>> other) {
-        return new PointedSet<>(
-                other.stream().map(s -> super.directSum(s, special, s.getElement())).collect(union()),
-                        new Pair<>(special, other.iterator().next().getElement()));
-    }
-
 }

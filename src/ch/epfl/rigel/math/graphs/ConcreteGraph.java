@@ -1,44 +1,43 @@
 package ch.epfl.rigel.math.graphs;
 
 import ch.epfl.rigel.math.sets.MathSet;
+import ch.epfl.rigel.math.sets.Maybe;
 import ch.epfl.rigel.math.sets.OrderedSet;
 import ch.epfl.rigel.math.sets.PartitionSet;
+import com.sun.javafx.geom.Edge;
 import javafx.util.Pair;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 
 /**
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-public final class ConcreteGraph<T> extends MathSet<Pair<T, Link<T>>> implements Graph<T, PartitionSet<T>> {
+public final class ConcreteGraph<T> extends MathSet<Maybe<T, Link<T>>> implements Graph<T, PartitionSet<T>> {
 
     private final PartitionSet<T> vertices;
     private final MathSet<Link<T>> edges;
 
-    public ConcreteGraph(PartitionSet<T> points, MathSet<Link<T>> edges, T t) {
-        super(points.directSum(edges, t, new Link<T>(t, t)));
+    public ConcreteGraph(PartitionSet<T> points, MathSet<Link<T>> edges) {
+        super(points.directSum(edges));
         vertices = points;
         this.edges = edges;
 
     }
 
-    public ConcreteGraph(MathSet<T> points, MathSet<Link<T>> edges, T t) {
-        super(points.directSum(edges, t, new Link<T>(t, t)));
+    public ConcreteGraph(MathSet<T> points, MathSet<Link<T>> edges) {
+        super(points.directSum(edges));
 
-        vertices = new PartitionSet<>(points, (T v, T u) -> findPathBetween(u, v).isPresent());
+        vertices = new PartitionSet<>(points, this::areConnected);
         this.edges = edges;
 
     }
 
-    public ConcreteGraph(MathSet<Pair<T, Link<T>>> mathSet, T t) {
-        super(mathSet);
-        vertices = new PartitionSet<T>(suchThat(p -> p.getValue().equals(new Link<>(t, t)))
-                .image(Pair::getKey), (T v, T u) -> findPathBetween(u, v).isPresent());
-        this.edges = new MathSet<>(mathSet.image(Pair::getValue));
+    public ConcreteGraph(MathSet<Maybe<T, Link<T>>> mathSet, T t) {
+        super(mathSet.getData());
+        vertices = new PartitionSet<T>(mathSet.image(p -> p.getKey().orElse(null)), (T v, T u) -> rec(of(u)).contains(v));
+        this.edges = new MathSet<>(mathSet.image(p -> p.getValue().orElse(null)));
 
     }
 
@@ -56,15 +55,20 @@ public final class ConcreteGraph<T> extends MathSet<Pair<T, Link<T>>> implements
         return new OrderedSet<>(flowList);
     }
 
-    //TODO
-    @Override
-    public Optional<Iterable<T>> findPathBetween(T v1, T v2) {
-        return Optional.empty();
+
+    private MathSet<T> rec(MathSet<T> t)
+    {
+        var a = t.suchThat((n -> getNeighbours(n).isPresent()));
+        if (a.cardinality() == 0)
+            return of();
+        //noinspection OptionalGetWithoutIsPresent
+        var b = a.image(n -> getNeighbours(n).get()).stream().collect(MathSet.union());
+        return a.union(rec(b));
     }
 
     @Override
     public Graph<T, PartitionSet<T>> on(MathSet<T> points) {
-        return new ConcreteGraph<>(suchThat(p -> points.contains(p.getKey())), getElement(p -> p.getValue().cardinality() != 1).getKey());
+        return new ConcreteGraph<T>(vertices.intersection(points), edges.suchThat(points::containsSet));
     }
 
     @Override

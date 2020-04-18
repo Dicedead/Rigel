@@ -35,8 +35,8 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
                     return pathN.at(pathN.cardinality() - 1);})
                 .cardinality() == 1);
 
-        this.minDepthNode = nodes.stream().min(Comparator.comparingInt(Node::getDepth)).get();
-        this.maxDepth = nodes.stream().max(Comparator.comparingInt(Node::getDepth)).get().getDepth();
+        this.minDepthNode = nodes.minOf(Node::getDepth);
+        this.maxDepth = nodes.maxOf(Node::getDepth).getDepth();
 
         this.root = nodes.getElement(node -> Node.areRelated(minDepthNode, node));
         this.leaves = suchThat(node -> node.getDepth() == maxDepth);
@@ -70,7 +70,6 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
         return workList;
     }
 
-    @Override
     public Optional<Iterable<Node<V>>> findPathBetween(Node<V> node1, Node<V> node2) {
         Preconditions.checkArgument(contains(node1) && contains(node2));
 
@@ -93,8 +92,7 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
     public Graph<Node<V>, ? extends MathSet<Node<V>>> on(MathSet<Node<V>> points) {
         return new ConcreteGraph<>(new PartitionSet<>(intersection(points),
                 (a, b) -> points.containsSet(new OrderedSet<>(findPathBetween(a,b).orElseThrow()))),
-                edgeSet().suchThat(points::containsSet),
-                root);
+                edgeSet().suchThat(points::containsSet));
     }
 
     @Override

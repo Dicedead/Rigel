@@ -85,4 +85,11 @@ public class OrderedSet<T> extends IndexedSet<T, Integer> implements Iterable<T>
     public String toString() {
         return this.toList().toString();
     }
+
+    public OrderedSet<T> identification(OrderedSet<OrderedSet<T>> t)
+    {
+        List<T> l = new ArrayList<>();
+        t.forEach(o -> l.addAll(o.toList()));
+        return new OrderedSet<T>(l);
+    }
 }

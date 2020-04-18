@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
+
 public final class SetFunction<T, U> implements Function<MathSet<T>, MathSet<U>> {
     private final Function<MathSet<T>, MathSet<U>> functionOfSets;
     private final Function<T, U> functionOfElement;

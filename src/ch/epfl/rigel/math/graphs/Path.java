@@ -49,7 +49,7 @@ public final class Path<T> extends OrderedSet<T> implements Graph<T, Path<T>> {
     {
         return new Path<T>(toList().subList(indexOf(v1), indexOf(v2)));
     }
-    @Override
+
     public Optional<Iterable<T>> findPathBetween(T v1, T v2) {
         if (!(contains(v1) && contains(v2)))
             return Optional.empty();
@@ -58,7 +58,7 @@ public final class Path<T> extends OrderedSet<T> implements Graph<T, Path<T>> {
 
     @Override
     public Graph<T, PartitionSet<T>> on(MathSet<T> points) {
-        return new ConcreteGraph<T>(this, edgeSet(), getElement()).on(points);
+        return new ConcreteGraph<T>(this, edgeSet()).on(points);
     }
 
     @Override
