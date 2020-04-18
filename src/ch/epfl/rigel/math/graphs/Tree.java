@@ -13,11 +13,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
+/**
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V>, Tree<V>> {
 
     private final MathSet<Node<V>> leaves;
     private final Node<V> root;
-    private final int depth;
+    private final Node<V> minDepthNode;
+    private final int maxDepth;
 
     public Tree(Collection<MathSet<Node<V>>> t) {
         this(unionOf(t));
@@ -26,28 +31,31 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
     public Tree(MathSet<Node<V>> nodes) {
         super(nodes, Node::areRelatedRootless);
         Preconditions.checkArgument(nodes.image(
-                n -> { final Path<Node<V>> pathN = n.hierarchy();
+                node -> { final Path<Node<V>> pathN = node.hierarchy();
                     return pathN.at(pathN.cardinality() - 1);})
                 .cardinality() == 1);
 
-        //this.root = suchThat(Node::isRoot, nodes).stream().findFirst().orElseThrow();
-        this.root = nodes.stream().filter(Node::isRoot).findFirst().orElseThrow();
-        this.depth = nodes.stream().max(Comparator.comparingInt(Node::getDepth)).get().getDepth();
-        this.leaves = suchThat(node -> node.getDepth() == depth);
-    }
+        this.minDepthNode = nodes.stream().min(Comparator.comparingInt(Node::getDepth)).get();
+        this.maxDepth = nodes.stream().max(Comparator.comparingInt(Node::getDepth)).get().getDepth();
 
+        this.root = nodes.suchThat(node -> Node.areRelated(minDepthNode, node)).stream().findFirst().orElseThrow();
+        this.leaves = suchThat(node -> node.getDepth() == maxDepth);
+    }
+    
     @Override
     public Optional<Tree<V>> getNeighbours(Node<V> point) {
         return Optional.of(new Tree<>(component(point).minus(point.getParent())));
     }
 
     public Optional<Tree<V>> getChildren(Node<V> point) {
-        return Optional.of(new Tree<>(getNodesAtDepth(point.getDepth() + 1).suchThat(point::isParentOf)));
+        MathSet<Node<V>> children = getNodesAtDepth(point.getDepth() + 1).suchThat(point::isParentOf);
+        return children.isEmpty() ? Optional.empty() : Optional.of(new Tree<>(children));
     }
 
     @Override
     public OrderedSet<Node<V>> flow(Function<Tree<V>, Node<V>> chooser, Node<V> point) {
         final List<Node<V>> flowList = flowRecur(chooser, chooser.apply(getChildren(point).get()), new ArrayList<>());
+        flowList.add(point);
         Collections.reverse(flowList);
         return new OrderedSet<>(flowList);
     }
@@ -119,5 +127,21 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
 
     public MathSet<Node<V>> getNodesAtDepth(int targetDepth) {
         return suchThat(node -> node.getDepth() == targetDepth);
+    }
+
+    public Node<V> getRoot() {
+        return root;
+    }
+
+    public int getTotalDepth() {
+        return maxDepth - minDepthNode.getDepth();
+    }
+
+    public int getMaxDepth() {
+        return maxDepth;
+    }
+
+    public int getMinDepth() {
+        return minDepthNode.getDepth();
     }
 }

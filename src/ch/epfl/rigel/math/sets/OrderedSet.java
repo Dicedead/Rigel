@@ -8,6 +8,10 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+/**
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public class OrderedSet<T> extends IndexedSet<T, Integer> implements Iterable<T>{
 
     public OrderedSet(Collection<T> t, SetFunction<Integer, T> indexer) {

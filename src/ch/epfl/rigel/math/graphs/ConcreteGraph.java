@@ -1,14 +1,19 @@
 package ch.epfl.rigel.math.graphs;
 
-import ch.epfl.rigel.Preconditions;
 import ch.epfl.rigel.math.sets.MathSet;
 import ch.epfl.rigel.math.sets.OrderedSet;
 import ch.epfl.rigel.math.sets.PartitionSet;
 import javafx.util.Pair;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
+/**
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public final class ConcreteGraph<T> extends MathSet<Pair<T, Link<T>>> implements Graph<T, PartitionSet<T>> {
 
     private final PartitionSet<T> vertices;

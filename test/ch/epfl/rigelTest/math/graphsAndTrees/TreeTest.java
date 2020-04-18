@@ -1,4 +1,4 @@
-package ch.epfl.rigelTest.math.graphs;
+package ch.epfl.rigelTest.math.graphsAndTrees;
 
 import ch.epfl.rigel.math.graphs.Node;
 import ch.epfl.rigel.math.graphs.Tree;
@@ -8,6 +8,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.Comparator;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TreeTest {
 
@@ -27,5 +29,8 @@ public class TreeTest {
     @Test
     void flowTest() {
         OrderedSet<Node<Integer>> set = intTree.flow(Comparator.comparingInt(Node::getValue),root);
+        for (Node<Integer> node : set) {
+            System.out.println(node.getValue());
+        }
     }
 }

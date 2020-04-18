@@ -10,6 +10,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
+/**
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public final class Path<T> extends OrderedSet<T> implements Graph<T, OrderedSet<T>> {
 
 

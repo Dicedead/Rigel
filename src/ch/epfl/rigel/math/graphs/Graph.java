@@ -8,6 +8,10 @@ import java.util.Comparator;
 import java.util.Optional;
 import java.util.function.Function;
 
+/**
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public interface Graph<V, E extends MathSet<V>> {
 
     Optional<E> getNeighbours(final V point);

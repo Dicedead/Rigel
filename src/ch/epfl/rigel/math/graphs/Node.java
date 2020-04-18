@@ -5,12 +5,9 @@ import ch.epfl.rigel.math.sets.OrderedSet;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * Implementation of hierarchized nodes to be used in directed graphs

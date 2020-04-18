@@ -5,6 +5,7 @@ import javafx.util.Pair;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -12,6 +13,10 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public class MathSet<T> {
 
     private final Set<T> data;
@@ -26,6 +31,7 @@ public class MathSet<T> {
     public MathSet(MathSet<T> t) {
         data = t.getData();
     }
+
     public MathSet<T> intersection(final MathSet<T> others) {
         return intersection(Collections.singleton(others));
     }
@@ -43,21 +49,21 @@ public class MathSet<T> {
     }
 
     public <U> MathSet<Pair<T, U>> product(final Collection<MathSet<U>> other) {
-        return stream().map(t -> unionOf(other).image(u -> new Pair<>(t, u))).distinct().collect(MathSet.union());
+        return stream().map(t -> unionOf(other).image(u -> new Pair<>(t, u))).collect(MathSet.union());
     }
 
     public <U> MathSet<Pair<T, U>> directSum(final MathSet<U> other, T tP, U uP) {
         return unionOf(Set.of(image(t -> new Pair<>(t, uP)),
-                other.image(u -> new Pair<T, U>(tP, u))));
+                other.image(u -> new Pair<>(tP, u))));
     }
 
     public <U> MathSet<Pair<T, U>> directSum(final Collection<MathSet<U>> other, T tP, U uP) {
         return unionOf(Set.of(image(t -> new Pair<>(t, uP)),
-                other.stream().map(s -> s.image(u -> new Pair<T, U>(tP, u))).distinct().collect(MathSet.union())));
+                other.stream().map(s -> s.image(u -> new Pair<T, U>(tP, u))).collect(MathSet.union())));
     }
 
     public MathSet<T> union(final Collection<MathSet<T>> others) {
-        return new MathSet<T>(others.stream().flatMap(s -> s.getData().stream()).collect(Collectors.toSet()));
+        return new MathSet<>(others.stream().flatMap(s -> s.getData().stream()).collect(Collectors.toSet()));
     }
 
     public boolean containsSet(final MathSet<T> other) {
@@ -71,11 +77,11 @@ public class MathSet<T> {
     }
 
     public MathSet<T> suchThat(final Predicate<T> t) {
-        return stream().filter(t).distinct().collect(MathSet.toSet());
+        return new MathSet<T>(stream().filter(t).collect(Collectors.toSet()));
     }
 
     public MathSet<T> suchThat(final Collection<Predicate<T>> t) {
-        return stream().filter(l -> t.stream().allMatch(r -> r.test(l))).distinct().collect(MathSet.toSet());
+        return stream().filter(l -> t.stream().allMatch(r -> r.test(l))).collect(MathSet.toSet());
     }
     public MathSet<T> without(final T other)
     {
@@ -97,7 +103,11 @@ public class MathSet<T> {
     }
 
     public int cardinality() {
-        return getData().size();
+        return data.size();
+    }
+
+    public boolean isEmpty() {
+        return data.size() == 0;
     }
 
     public Set<T> getData() {
@@ -152,10 +162,18 @@ public class MathSet<T> {
 
 
     public static <T> MathSet<T> unionOf(final Collection<MathSet<T>> sets) {
+        if (sets.size() <= 1) {
+            final Optional<MathSet<T>> potentialSet = sets.stream().findAny();
+            return (potentialSet.isEmpty()) ? new MathSet<>() : new MathSet<>(potentialSet.get());
+        }
         return sets.iterator().next().union(sets);
     }
 
     public static <T> MathSet<T> intersectionOf(final Collection<MathSet<T>> sets) {
+        if (sets.size() <= 1) {
+            final Optional<MathSet<T>> potentialSet = sets.stream().findAny();
+            return (potentialSet.isEmpty()) ? new MathSet<>() : new MathSet<>(potentialSet.get());
+        }
         return sets.iterator().next().intersection(sets);
     }
 

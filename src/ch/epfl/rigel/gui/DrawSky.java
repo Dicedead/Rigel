@@ -8,8 +8,6 @@ import ch.epfl.rigel.coordinates.GeographicCoordinates;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.coordinates.StereographicProjection;
 import ch.epfl.rigel.coordinates.PlanarTransformation;
-import ch.epfl.rigel.logging.RigelLogger;
-import ch.epfl.rigel.parallelism.ThreadManager;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
@@ -21,7 +19,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.ZonedDateTime;
-import java.util.concurrent.*;
 
 /**
  * Main GUI class

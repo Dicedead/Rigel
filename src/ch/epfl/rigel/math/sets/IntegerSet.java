@@ -1,11 +1,14 @@
 package ch.epfl.rigel.math.sets;
 
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+/**
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public final class IntegerSet extends PointedSet<Integer>{
 
     public Integer getMin() {
