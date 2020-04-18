@@ -2,10 +2,8 @@ package ch.epfl.rigel.math.sets;
 
 import javafx.util.Pair;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collector;
@@ -187,7 +185,7 @@ public class MathSet<T> {
     public static <T> MathSet<T> unionOf(final Collection<MathSet<T>> sets) {
         if (sets.size() <= 1) {
             final Optional<MathSet<T>> potentialSet = sets.stream().findAny();
-            return (potentialSet.isEmpty()) ? new MathSet<>() : new MathSet<>(potentialSet.get());
+            return (potentialSet.isEmpty()) ? emptySet() : new MathSet<>(potentialSet.get());
         }
         return sets.iterator().next().union(sets);
     }
@@ -195,12 +193,13 @@ public class MathSet<T> {
     public static <T> MathSet<T> intersectionOf(final Collection<MathSet<T>> sets) {
         if (sets.size() <= 1) {
             final Optional<MathSet<T>> potentialSet = sets.stream().findAny();
-            return (potentialSet.isEmpty()) ? new MathSet<>() : new MathSet<>(potentialSet.get());
+            return (potentialSet.isEmpty()) ? emptySet() : new MathSet<>(potentialSet.get());
         }
         return sets.iterator().next().intersection(sets);
     }
 
 
+    public static <T> MathSet<T> emptySet (){return  new MathSet<>(Set.of());};
     public static <T> MathSet<T> suchThat(final Predicate<T> t, final MathSet<T> set) {
         return set.suchThat(t);
     }
