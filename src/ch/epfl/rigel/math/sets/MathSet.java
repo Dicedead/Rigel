@@ -2,24 +2,15 @@ package ch.epfl.rigel.math.sets;
 
 import javafx.util.Pair;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.ToIntFunction;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**
- * @author Alexandre Sallinen (303162)
- * @author Salim Najib (310003)
- */
 public class MathSet<T> {
 
     private final Set<T> data;
@@ -27,14 +18,9 @@ public class MathSet<T> {
     public MathSet(Collection<T> t) {
         data = Set.copyOf(t);
     }
-
-    @SafeVarargs
-    public MathSet(T... ts) { data = Set.of(ts); }
-
     public MathSet(MathSet<T> t) {
         data = t.getData();
     }
-
     @SafeVarargs
     public static <T> MathSet<T> of (T... t)
     {
@@ -64,7 +50,6 @@ public class MathSet<T> {
 
         return new MathSet<>(powerSet.stream().map(MathSet::new).collect(Collectors.toSet()));
     }
-
     public MathSet<T> intersection(final MathSet<T> others) {
         return intersection(Collections.singleton(others));
     }
@@ -82,21 +67,24 @@ public class MathSet<T> {
     }
 
     public <U> MathSet<Pair<T, U>> product(final Collection<MathSet<U>> other) {
-        return stream().map(t -> unionOf(other).image(u -> new Pair<>(t, u))).collect(MathSet.union());
+        return unionOf(image(t -> unionOf(other).image(u -> new Pair<>(t, u))));
     }
 
     public <U> MathSet<Pair<T, U>> directSum(final MathSet<U> other, T tP, U uP) {
-        return unionOf(Set.of(image(t -> new Pair<>(t, uP)),
-                other.image(u -> new Pair<>(tP, u))));
+        return unionOf(of(image(t -> new Pair<>(t, uP)), other.image(u -> new Pair<>(tP, u))));
     }
 
     public <U> MathSet<Pair<T, U>> directSum(final Collection<MathSet<U>> other, T tP, U uP) {
-        return unionOf(Set.of(image(t -> new Pair<>(t, uP)),
-                other.stream().map(s -> s.image(u -> new Pair<T, U>(tP, u))).collect(MathSet.union())));
+        return unionOf(of(image(t -> new Pair<>(t, uP)), other.stream().map(s -> s.image(u -> new Pair<>(tP, u)))
+                .collect(MathSet.union())));
     }
 
     public MathSet<T> union(final Collection<MathSet<T>> others) {
-        return new MathSet<>(others.stream().flatMap(s -> s.getData().stream()).collect(Collectors.toSet()));
+        return others.stream().flatMap(s -> s.getData().stream()).collect(MathSet.toSet());
+    }
+
+    public boolean in(final T t) {
+        return data.contains(t);
     }
 
     public boolean containsSet(final MathSet<T> other) {
@@ -123,12 +111,12 @@ public class MathSet<T> {
 
     public MathSet<T> minusSet(final MathSet<T> other)
     {
-        return intersection(Collections.singleton(without(other)));
+        return intersection(without(other));
     }
 
     public MathSet<T> minus(final T other)
     {
-        return intersection(Collections.singleton(without(other)));
+        return intersection(without(other));
     }
 
     public Stream<T> stream() {
@@ -178,8 +166,8 @@ public class MathSet<T> {
                 () -> new MathSet<>(new HashSet<>()),
                 MathSet::union,
                 MathSet::union,
-                Collector.Characteristics.IDENTITY_FINISH,
                 Collector.Characteristics.CONCURRENT,
+                Collector.Characteristics.IDENTITY_FINISH,
                 Collector.Characteristics.UNORDERED);
     }
 
@@ -188,18 +176,22 @@ public class MathSet<T> {
                 () -> new MathSet<>(new HashSet<>()),
                 MathSet::intersection,
                 MathSet::intersection,
-                Collector.Characteristics.IDENTITY_FINISH,
                 Collector.Characteristics.CONCURRENT,
+                Collector.Characteristics.IDENTITY_FINISH,
                 Collector.Characteristics.UNORDERED);
     }
 
 
-    public static <T> MathSet<T> unionOf(final Collection<MathSet<T>> sets) {
-        if (sets.size() <= 1) {
+    public static <T> MathSet<T> unionOf(final MathSet<MathSet<T>> sets) {
+        if (sets.cardinality() <= 1) {
             final Optional<MathSet<T>> potentialSet = sets.stream().findAny();
             return (potentialSet.isEmpty()) ? emptySet() : new MathSet<>(potentialSet.get());
         }
-        return sets.iterator().next().union(sets);
+        return unionOf(sets.getData());
+    }
+
+    public static <T> MathSet<T> unionOf(final Collection<MathSet<T>> sets) {
+        return unionOf(new MathSet<MathSet<T>>(sets));
     }
 
     public static <T> MathSet<T> intersectionOf(final Collection<MathSet<T>> sets) {
@@ -210,7 +202,8 @@ public class MathSet<T> {
         return sets.iterator().next().intersection(sets);
     }
 
-    public static <T> MathSet<T> emptySet (){return  new MathSet<>(Set.of());};
+
+    public static <T> MathSet<T> emptySet (){return  new MathSet<>(Set.of());}
 
     public static <T> MathSet<T> suchThat(final Predicate<T> t, final MathSet<T> set) {
         return set.suchThat(t);
@@ -228,6 +221,11 @@ public class MathSet<T> {
         return unionOf(set).suchThat(t);
     }
 
+    @Override
+    public String toString() {
+        return data.toString();
+    }
+
     public Iterator<MathSet<T>> setIterator() {
         return powerSet().getData().iterator();
     }
@@ -243,6 +241,16 @@ public class MathSet<T> {
     public MathSet<MathSet<T>> suchThatSet(final Collection<Predicate<MathSet<T>>> t)
     {
         return powerSet().suchThat(t);
+    }
+
+    public T minOf(ToIntFunction<T> f)
+    {
+        return stream().min(Comparator.comparingInt(f)).orElseThrow();
+    }
+
+    public T maxOf(ToIntFunction<T> f)
+    {
+        return stream().max(Comparator.comparingInt(f)).orElseThrow();
     }
 
     public T getElement()
@@ -268,8 +276,5 @@ public class MathSet<T> {
         return Objects.hash(data);
     }
 
-    @Override
-    public String toString() {
-        return data.toString();
-    }
+
 }

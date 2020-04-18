@@ -44,7 +44,7 @@ public final class Node<T> {
     private Node(T value, Node<T> parent) {
         this.value = value;
         this.parent = Objects.requireNonNull(parent);
-        this.depth = parent.depth + 1;
+        this.depth = parent.getDepth() + 1;
     }
 
     /**

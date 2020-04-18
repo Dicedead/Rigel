@@ -64,8 +64,7 @@ public final class ConcreteGraph<T> extends MathSet<Pair<T, Link<T>>> implements
 
     @Override
     public Graph<T, PartitionSet<T>> on(MathSet<T> points) {
-        return new ConcreteGraph<>(suchThat(p -> points.contains(p.getKey())), stream()
-                .filter(p -> p.getValue().getData().size() != 1).findFirst().orElseThrow().getKey());
+        return new ConcreteGraph<>(suchThat(p -> points.contains(p.getKey())), getElement(p -> p.getValue().cardinality() != 1).getKey());
     }
 
     @Override
