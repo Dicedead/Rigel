@@ -14,32 +14,32 @@ import java.util.function.Function;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-public final class Path<T> extends OrderedSet<T> implements Graph<T, OrderedSet<T>> {
+public final class Path<T> extends OrderedSet<T> implements Graph<T, Path<T>> {
 
 
     public Path(OrderedSet<T> vertices) {
         super(vertices.toList());
     }
-
     public Path(List<T> vertices) {
         super(vertices);
     }
-
     public Path(Iterable<T> vertices) {
         super(vertices);
     }
-
-
-    @Override
-    public Optional<OrderedSet<T>> getNeighbours(T point) {
-        return Optional.of(new OrderedSet<>(prev(point), point, next(point)));
+    @SafeVarargs
+    public Path(T... vertices) {
+        super(vertices);
     }
 
     @Override
-    public OrderedSet<T> flow(Function<OrderedSet<T>, T> chooser, T point) {
+    public Optional<Path<T>> getNeighbours(T point) {
+        return Optional.of(new Path<>(prev(point), point, next(point)));
+    }
+
+    @Override
+    public OrderedSet<T> flow(Function<Path<T>, T> chooser, T point) {
         return this;
     }
-
     public OrderedSet<T> flow() {
         return this;
     }
@@ -57,22 +57,22 @@ public final class Path<T> extends OrderedSet<T> implements Graph<T, OrderedSet<
     }
 
     @Override
-    public Graph<T, OrderedSet<T>> connectedComponent(T point) {
+    public Graph<T, Path<T>> connectedComponent(T point) {
         return this;
     }
 
     @Override
-    public MathSet<Graph<T, OrderedSet<T>>> connectedComponents() {
+    public MathSet<Graph<T, Path<T>>> connectedComponents() {
         return new MathSet<>(Collections.singleton(this));
     }
 
     @Override
     public MathSet<Link<T>> edgeSet() {
-        return new MathSet<>(image(p -> new Link<>(p, next(p))));
+        return image(p -> new Link<>(p, next(p)));
     }
 
     @Override
-    public OrderedSet<T> vertexSet() {
+    public Path<T> vertexSet() {
         return this;
     }
 
@@ -84,7 +84,6 @@ public final class Path<T> extends OrderedSet<T> implements Graph<T, OrderedSet<
 
     /**
      * Creates a path beginning at this path and ending at the end of the other
-     *
      * @param otherPath (Path<T>) the path to append
      * @return (Path < T >) a path composed of an appending of the two paths
      */

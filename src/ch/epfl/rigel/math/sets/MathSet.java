@@ -5,8 +5,11 @@ import javafx.util.Pair;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collector;
@@ -32,6 +35,36 @@ public class MathSet<T> {
         data = t.getData();
     }
 
+    @SafeVarargs
+    public static <T> MathSet<T> of (T... t)
+    {
+        return new MathSet<T>(Set.of(t));
+    }
+    public MathSet<MathSet<T>> powerSet()
+    {
+        return powerSet(this);
+    }
+    private MathSet<MathSet<T>> powerSet(MathSet<T> set)
+    {
+        Set<T> Cset = set.getData();
+        if (Cset.isEmpty())
+            return new MathSet<>(Set.of());
+
+        final T firstElement = Cset.iterator().next();
+        Set<T> subset = new HashSet<>(Cset);
+        subset.remove(firstElement);
+        final Collection<Set<T>> subPowerSet = powerSet(new MathSet<T>(subset)).image(MathSet::getData).getData();
+        Set<Set<T>> powerSet = new HashSet<>();
+        for (Set<T> s : subPowerSet) {
+            Set<T> s1 = new HashSet<>(s);
+            s1.add(firstElement);
+            powerSet.add(s);
+            powerSet.add(s1);
+        }
+
+        return new MathSet<>(powerSet.stream().map(MathSet::new).collect(Collectors.toSet()));
+    }
+
     public MathSet<T> intersection(final MathSet<T> others) {
         return intersection(Collections.singleton(others));
     }
@@ -44,7 +77,6 @@ public class MathSet<T> {
         return union(Collections.singleton(others));
     }
 
-    //TODO: put back MathSet.toSet when fixed
     public MathSet<T> intersection(final Collection<MathSet<T>> others) {
         return suchThat(others.stream().map(MathSet::predicateContains).collect(Collectors.toSet()));
     }
@@ -63,11 +95,8 @@ public class MathSet<T> {
                 other.stream().map(s -> s.image(u -> new Pair<T, U>(tP, u))).collect(MathSet.union())));
     }
 
-    //TODO: put back MathSet.toSet when fixed
     public MathSet<T> union(final Collection<MathSet<T>> others) {
-        final Set<T> unionSet = others.stream().flatMap(s -> s.getData().stream()).collect(Collectors.toSet());
-        unionSet.addAll(getData());
-        return new MathSet<T>(unionSet);
+        return new MathSet<>(others.stream().flatMap(s -> s.getData().stream()).collect(Collectors.toSet()));
     }
 
     public boolean containsSet(final MathSet<T> other) {
@@ -80,14 +109,12 @@ public class MathSet<T> {
         return suchThat(Predicate.not(other::contains));
     }
 
-    //TODO: put back MathSet.toSet when fixed
     public MathSet<T> suchThat(final Predicate<T> t) {
-        return new MathSet<>(stream().filter(t).collect(Collectors.toSet()));
+        return new MathSet<T>(stream().filter(t).collect(Collectors.toSet()));
     }
 
-    //TODO: put back MathSet.toSet when fixed
     public MathSet<T> suchThat(final Collection<Predicate<T>> t) {
-        return new MathSet<>(stream().filter(l -> t.stream().allMatch(r -> r.test(l))).collect(Collectors.toSet()));
+        return stream().filter(l -> t.stream().allMatch(r -> r.test(l))).collect(MathSet.toSet());
     }
     public MathSet<T> without(final T other)
     {
@@ -170,7 +197,7 @@ public class MathSet<T> {
     public static <T> MathSet<T> unionOf(final Collection<MathSet<T>> sets) {
         if (sets.size() <= 1) {
             final Optional<MathSet<T>> potentialSet = sets.stream().findAny();
-            return (potentialSet.isEmpty()) ? new MathSet<>() : new MathSet<>(potentialSet.get());
+            return (potentialSet.isEmpty()) ? emptySet() : new MathSet<>(potentialSet.get());
         }
         return sets.iterator().next().union(sets);
     }
@@ -178,10 +205,12 @@ public class MathSet<T> {
     public static <T> MathSet<T> intersectionOf(final Collection<MathSet<T>> sets) {
         if (sets.size() <= 1) {
             final Optional<MathSet<T>> potentialSet = sets.stream().findAny();
-            return (potentialSet.isEmpty()) ? new MathSet<>() : new MathSet<>(potentialSet.get());
+            return (potentialSet.isEmpty()) ? emptySet() : new MathSet<>(potentialSet.get());
         }
         return sets.iterator().next().intersection(sets);
     }
+
+    public static <T> MathSet<T> emptySet (){return  new MathSet<>(Set.of());};
 
     public static <T> MathSet<T> suchThat(final Predicate<T> t, final MathSet<T> set) {
         return set.suchThat(t);
@@ -197,6 +226,46 @@ public class MathSet<T> {
 
     public static <T> MathSet<T> suchThat(final Predicate<T> t, final Collection<MathSet<T>> set) {
         return unionOf(set).suchThat(t);
+    }
+
+    public Iterator<MathSet<T>> setIterator() {
+        return powerSet().getData().iterator();
+    }
+    public void forEachSet(Consumer<? super MathSet<T>> action) {
+        powerSet().getData().forEach(action);
+    }
+
+    public MathSet<MathSet<T>> suchThatSet(final Predicate<MathSet<T>> t)
+    {
+        return powerSet().suchThat(t);
+    }
+
+    public MathSet<MathSet<T>> suchThatSet(final Collection<Predicate<MathSet<T>>> t)
+    {
+        return powerSet().suchThat(t);
+    }
+
+    public T getElement()
+    {
+        return stream().findFirst().orElseThrow();
+    }
+
+    public T getElement(final Predicate<T> t)
+    {
+        return stream().filter(t).findFirst().orElseThrow();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof MathSet)) return false;
+        MathSet<?> mathSet = (MathSet<?>) o;
+        return Objects.equals(data, mathSet.data);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(data);
     }
 
     @Override

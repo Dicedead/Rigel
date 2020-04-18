@@ -1,12 +1,16 @@
 package ch.epfl.rigel.math.sets;
 
 import ch.epfl.rigel.Preconditions;
+import javafx.util.Pair;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Alexandre Sallinen (303162)
@@ -43,13 +47,31 @@ public class PartitionSet<T> extends MathSet<T> {
         return components;
     }
 
-    public T representant(MathSet<T> component) {
+    public T representant (MathSet<T> component)
+    {
         Preconditions.checkArgument(components.contains(component));
-        return component.stream().findFirst().orElseThrow();
+        return component.getElement();
+    }
+
+    public MathSet<T> representants()
+    {
+        return components.image(this::representant);
     }
 
     @Override
     public <U> PartitionSet<U> image(Function<T, U> f) {
         return new PartitionSet<>(components.stream().map(C -> C.image(f)).collect(Collectors.toSet()));
     }
+
+    public void forEachComponent(Consumer<? super MathSet<T>> action) {
+        components.getData().forEach(action);
+    }
+
+    public int numberOfComponents(){return components.cardinality();}
+
+    public Stream<MathSet<T>> streamSet()
+    {
+        return components.stream();
+    }
+
 }

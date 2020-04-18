@@ -75,7 +75,7 @@ public final class ConcreteGraph<T> extends MathSet<Pair<T, Link<T>>> implements
 
     @Override
     public MathSet<Graph<T, PartitionSet<T>>> connectedComponents() {
-        return vertexSet().components().stream().map(this::on).collect(MathSet.toSet());
+        return vertexSet().components().image(this::on);
     }
 
     public MathSet<Link<T>> edgeSet() {

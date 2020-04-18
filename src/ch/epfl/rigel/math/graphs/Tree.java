@@ -104,7 +104,6 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
         return new MathSet<>(Collections.singleton(this));
     }
 
-    //TODO
     @Override
     public MathSet<Link<Node<V>>> edgeSet() {
         return null;
