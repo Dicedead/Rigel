@@ -69,7 +69,7 @@ public class PartitionSet<T> extends MathSet<T> {
 
     public int numberOfComponents(){return components.cardinality();}
 
-    public Stream<MathSet<T>> streamSet()
+    public Stream<MathSet<T>> streamComponents()
     {
         return components.stream();
     }

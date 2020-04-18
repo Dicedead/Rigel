@@ -40,6 +40,6 @@ public final class Link<T> extends OrderedSet<T> {
      * @throws NoSuchElementException if 'start' is not in the link
      */
     public T next(final T start) {
-        return stream().filter(l -> !l.equals(start)).findFirst().orElseThrow(NoSuchElementException::new);
+        return getElement(l -> !l.equals(start));
     }
 }

@@ -32,7 +32,7 @@ public final class Path<T> extends OrderedSet<T> implements Graph<T, Path<T>> {
     }
 
     @Override
-    public Optional<Path<T>> getNeighbors(T point) {
+    public Optional<Path<T>> getNeighbours(T point) {
         return Optional.of(new Path<>(prev(point), point, next(point)));
     }
 
@@ -40,20 +40,25 @@ public final class Path<T> extends OrderedSet<T> implements Graph<T, Path<T>> {
     public OrderedSet<T> flow(Function<Path<T>, T> chooser, T point) {
         return this;
     }
+
     public OrderedSet<T> flow() {
         return this;
     }
 
+    public Path<T> subPath(T v1, T v2)
+    {
+        return new Path<T>(toList().subList(indexOf(v1), indexOf(v2)));
+    }
     @Override
     public Optional<Iterable<T>> findPathBetween(T v1, T v2) {
         if (!(contains(v1) && contains(v2)))
             return Optional.empty();
-        return Optional.of(toList().subList(indexOf(v1), indexOf(v2)));
+        return Optional.of(subPath(v1, v2));
     }
 
     @Override
     public Graph<T, PartitionSet<T>> on(MathSet<T> points) {
-        return new ConcreteGraph<T>(this, edgeSet(), at(0)).on(points);
+        return new ConcreteGraph<T>(this, edgeSet(), getElement()).on(points);
     }
 
     @Override
@@ -63,7 +68,7 @@ public final class Path<T> extends OrderedSet<T> implements Graph<T, Path<T>> {
 
     @Override
     public MathSet<Graph<T, Path<T>>> connectedComponents() {
-        return new MathSet<>(Collections.singleton(this));
+        return of(this);
     }
 
     @Override

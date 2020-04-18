@@ -38,7 +38,7 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
         this.minDepthNode = nodes.stream().min(Comparator.comparingInt(Node::getDepth)).get();
         this.maxDepth = nodes.stream().max(Comparator.comparingInt(Node::getDepth)).get().getDepth();
 
-        this.root = nodes.suchThat(node -> Node.areRelated(minDepthNode, node)).stream().findFirst().orElseThrow();
+        this.root = nodes.getElement(node -> Node.areRelated(minDepthNode, node));
         this.leaves = suchThat(node -> node.getDepth() == maxDepth);
     }
 
@@ -48,7 +48,7 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
     }
 
     public Optional<Tree<V>> getChildren(Node<V> point) {
-        MathSet<Node<V>> children = getNodesAtDepth(point.getDepth() + 1).suchThat(point::isParentOf);
+        final MathSet<Node<V>> children = getNodesAtDepth(point.getDepth() + 1).suchThat(point::isParentOf);
         return children.isEmpty() ? Optional.empty() : Optional.of(new Tree<>(children));
     }
 
@@ -83,7 +83,7 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
             return nodeTwoHierarchy.findPathBetween(node1, node2);
         } else {
 
-            final Node<V> anchor = aut.stream().findFirst().orElseThrow();
+            final Node<V> anchor = aut.minOf(Node::getDepth);
             return  Optional.of(new Path<>(nodeOneHierarchy.findPathBetween(node1, anchor).orElseThrow())
                     .add(new Path<>(nodeTwoHierarchy.findPathBetween(anchor, node2).orElseThrow()).reverse()));
         }
