@@ -1,9 +1,6 @@
 package ch.epfl.rigel.math.graphs;
 
-import ch.epfl.rigel.math.sets.MathSet;
-import ch.epfl.rigel.math.sets.Maybe;
-import ch.epfl.rigel.math.sets.OrderedSet;
-import ch.epfl.rigel.math.sets.PartitionSet;
+import ch.epfl.rigel.math.sets.*;
 import com.sun.javafx.geom.Edge;
 import javafx.util.Pair;
 
@@ -58,11 +55,13 @@ public final class ConcreteGraph<T> extends MathSet<Maybe<T, Link<T>>> implement
 
     private MathSet<T> rec(MathSet<T> t)
     {
-        var a = t.suchThat((n -> getNeighbours(n).isPresent()));
+        SetFunction<T, Optional<PartitionSet<T>>> f = this::getNeighbours;
+
+        var a = f.andThen(Optional::isPresent).preImageOf(true).solveIn(t);
         if (a.cardinality() == 0)
             return of();
-        //noinspection OptionalGetWithoutIsPresent
-        var b = unionOf(a.image(n -> getNeighbours(n).get()));
+
+        var b = a.image(f.andThen(Optional::get)).stream().collect(MathSet.union());
         return a.union(rec(b));
     }
 

@@ -23,8 +23,7 @@ public class PartitionSet<T> extends MathSet<T> {
 
     public PartitionSet(Collection<MathSet<T>> data) {
         super(unionOf(data).getData());
-        components = new IndexedSet<>(data, new SetFunction<>(elem -> data.stream().filter(subset -> subset.contains(elem))
-                .findFirst().orElseThrow()));
+        components = new IndexedSet<>(data, elem -> data.stream().filter(subset -> subset.contains(elem)).findFirst().orElseThrow());
     }
 
     public PartitionSet(IndexedSet<MathSet<T>, T> t) {
@@ -32,8 +31,8 @@ public class PartitionSet<T> extends MathSet<T> {
         components = t;
     }
 
-    public PartitionSet(final MathSet<T> data, BiFunction<T, T, Boolean> areInRelation) {
-        this(data.stream().map(elem1 -> data.suchThat(elem2 -> areInRelation.apply(elem1, elem2))).collect(Collectors.toSet()));
+    public PartitionSet(final MathSet<T> data, Relation.Equivalence<T> areInRelation) {
+        this(data.stream().map(elem1 -> data.suchThat(elem2 -> areInRelation.areInRelation(elem1, elem2))).collect(Collectors.toSet()));
     }
 
     public PartitionSet(final MathSet<T> t) {
@@ -60,16 +59,14 @@ public class PartitionSet<T> extends MathSet<T> {
     }
 
     @Override
-    public <U> PartitionSet<U> image(Function<T, U> f) {
+    public <U> PartitionSet<U> image(SetFunction<T, U> f) {
         return new PartitionSet<>(components.stream().map(C -> C.image(f)).collect(Collectors.toSet()));
     }
 
     public void forEachComponent(Consumer<? super MathSet<T>> action) {
         components.getData().forEach(action);
     }
-
     public int numberOfComponents(){return components.cardinality();}
-
     public Stream<MathSet<T>> streamComponents()
     {
         return components.stream();

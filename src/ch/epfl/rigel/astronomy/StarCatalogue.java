@@ -1,7 +1,6 @@
 package ch.epfl.rigel.astronomy;
 
 import ch.epfl.rigel.Preconditions;
-import ch.epfl.rigel.logging.RigelLogger;
 
 import java.io.IOException;
 import java.io.InputStream;
