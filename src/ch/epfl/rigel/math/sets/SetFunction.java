@@ -3,6 +3,8 @@ package ch.epfl.rigel.math.sets;
 import java.util.Collection;
 import java.util.function.Function;
 
+import static ch.epfl.rigel.math.sets.MathSet.toMathSet;
+
 /**
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
@@ -16,7 +18,7 @@ public interface SetFunction<T, U> extends Function<T, U> {
 
     default Equation<T> preImageOf(final MathSet<U> u)
     {
-        return (t -> u.in(apply(t)));
+        return (t -> u.contains(apply(t)));
     }
 
     default Equation<T> preImageOf(final U u)
@@ -30,7 +32,7 @@ public interface SetFunction<T, U> extends Function<T, U> {
     }
 
     default MathSet<U> apply(MathSet<T> set) {
-        return set.stream().map(this).collect(MathSet.toSet());
+        return set.stream().map(this).collect(toMathSet());
     }
 
     @Override

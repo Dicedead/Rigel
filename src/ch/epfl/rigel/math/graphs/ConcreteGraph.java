@@ -61,7 +61,7 @@ public final class ConcreteGraph<T> extends MathSet<Maybe<T, Link<T>>> implement
         if (a.cardinality() == 0)
             return of();
 
-        var b = a.image(f.andThen(Optional::get)).stream().collect(MathSet.union());
+        var b = unionOf(a.image(f.andThen(Optional::get)));
         return a.union(rec(b));
     }
 

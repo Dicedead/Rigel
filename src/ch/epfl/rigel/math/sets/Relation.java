@@ -7,6 +7,7 @@ import java.util.Set;
 
 @FunctionalInterface
 public interface Relation<T> {
+
     boolean areInRelation(T t, T u);
 
     @FunctionalInterface

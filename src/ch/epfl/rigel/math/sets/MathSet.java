@@ -144,16 +144,12 @@ public class MathSet<T> {
         return this::contains;
     }
 
-    public <U> MathSet<U> image(Function<T, U> f) {
-        return new SetFunction<>(f).apply(this);
-    }
-
-    public final <U> MathSet<U> image(SetFunction<T, U> f) {
+    public <U> MathSet<U> image(SetFunction<T, U> f) {
         return f.apply(this);
     }
 
     public final <U> Function<T, U> lift(SetFunction<T, U> f) {
-        return f::applyOn;
+        return f;
     }
 
     static public <T> Collector<T, ?, MathSet<T>> toMathSet() {

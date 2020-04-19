@@ -32,7 +32,8 @@ public class PartitionSet<T> extends MathSet<T> {
     }
 
     public PartitionSet(final MathSet<T> data, Relation.Equivalence<T> areInRelation) {
-        this(data.stream().map(elem1 -> data.suchThat(elem2 -> areInRelation.areInRelation(elem1, elem2))).collect(Collectors.toSet()));
+        this(data.stream().map(elem1 -> data.suchThat(elem2 -> areInRelation.areInRelation(elem1, elem2)))
+                .collect(Collectors.toSet()));
     }
 
     public PartitionSet(final MathSet<T> t) {
