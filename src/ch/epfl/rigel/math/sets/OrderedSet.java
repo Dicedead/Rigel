@@ -41,7 +41,6 @@ public class OrderedSet<T> extends IndexedSet<T, Integer> implements Iterable<T>
         super(t, new SetFunction<>(t::get));
     }
 
-
     public List<T> toList() {
         return IntStream.range(0, getData().size()).mapToObj(this::at).collect(Collectors.toList());
     }

@@ -105,3 +105,13 @@ public class Tree<T> extends PartitionSet<Node<T>> implements Graph<Node<T>, Tre
         return new OrderedSet<>(flowList);
     }*/
 
+
+toSet collector
+/*return Collector.of(
+                () -> new MathSet<>(new HashSet<>()),
+                (res, t) -> res.union(new MathSet<>(Collections.singleton(t))),
+                MathSet::union,
+                Collector.Characteristics.CONCURRENT,
+                Collector.Characteristics.IDENTITY_FINISH,
+                Collector.Characteristics.UNORDERED);*/
+

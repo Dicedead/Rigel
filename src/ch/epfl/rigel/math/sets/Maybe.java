@@ -1,15 +1,13 @@
 package ch.epfl.rigel.math.sets;
 
-import ch.epfl.rigel.Preconditions;
 import javafx.util.Pair;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
 
-public class Maybe<U, V> extends Pair<Optional<U>, Optional<V>> {
-    public static enum Type {LEFT, RIGHT}
+public final class Maybe<U, V> extends Pair<Optional<U>, Optional<V>> {
+
+    public enum Type {LEFT, RIGHT}
     /**
      * Creates a new pair
      *

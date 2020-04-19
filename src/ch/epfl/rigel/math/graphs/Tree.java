@@ -8,7 +8,6 @@ import ch.epfl.rigel.math.sets.PartitionSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -19,6 +18,8 @@ import java.util.function.Function;
  */
 public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V>, Tree<V>> {
 
+    private final MathSet<Node<V>> nodes;
+    private final MathSet<Link<Node<V>>> edgeSet;
     private final MathSet<Node<V>> leaves;
     private final Node<V> root;
     private final int maxDepth;
@@ -28,25 +29,37 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
     }
 
     public Tree(MathSet<Node<V>> nodes) {
+        this(nodes, true, nodes.minOf(Node::getDepth));
+    }
+
+    private Tree(MathSet<Node<V>> nodes, boolean securityChecksActivated, Node<V> root) {
         super(nodes, Node::areRelatedRootless);
-        Preconditions.checkArgument(nodes.image(
-                node -> { final Path<Node<V>> pathN = node.hierarchy();
-                    return pathN.at(pathN.cardinality() - 1);})
-                .cardinality() == 1);
+
+        if (securityChecksActivated) {
+            Preconditions.checkArgument(nodes.image(
+                    node -> {
+                        final Path<Node<V>> pathN = node.hierarchy();
+                        return pathN.at(pathN.cardinality() - 1);
+                    })
+                    .cardinality() == 1);
+        }
 
         this.maxDepth = nodes.maxOf(Node::getDepth).getDepth();
-        this.root = nodes.minOf(Node::getDepth);
-        this.leaves = suchThat(node -> node.getDepth() == maxDepth);
+        this.root = root;
+        this.leaves = nodes.suchThat(node -> node.getDepth() == maxDepth);
+        final MathSet<Node<V>> nonRoots = nodes.suchThat(node -> !node.equals(root));
+        this.edgeSet = (nonRoots.cardinality() <= 1) ? emptySet() : nonRoots.image(n -> new Link<>(n, n.getParent().get()));
+        this.nodes = nodes;
     }
 
     @Override
     public Optional<Tree<V>> getNeighbours(Node<V> point) {
-        return Optional.of(new Tree<>(component(point).minus(point.getParent())));
+        return Optional.of(new Tree<>(component(point).minus(point.getParent().get())));
     }
 
     public Optional<Tree<V>> getChildren(Node<V> point) {
         final MathSet<Node<V>> children = getNodesAtDepth(point.getDepth() + 1).suchThat(point::isParentOf);
-        return children.isEmpty() ? Optional.empty() : Optional.of(new Tree<>(children));
+        return children.isEmpty() ? Optional.empty() : Optional.of(new Tree<>(children, false, point));
     }
 
     @Override
@@ -65,6 +78,12 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
         flowRecur(chooser, chooser.apply(getChildren(point).get()), workList);
         workList.add(point);
         return workList;
+    }
+
+    public Tree<V> subtreeAtPoint(final Node<V> point) {
+        Preconditions.checkArgument(contains(point));
+        return new Tree<>(nodes.suchThat(node -> node.getDepth() >= point.getDepth() && Node.areRelated(node, point)),
+                false, point);
     }
 
     public Optional<Iterable<Node<V>>> findPathBetween(Node<V> node1, Node<V> node2) {
@@ -104,7 +123,7 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
 
     @Override
     public MathSet<Link<Node<V>>> edgeSet() {
-        return null;
+        return edgeSet;
     }
 
     @Override

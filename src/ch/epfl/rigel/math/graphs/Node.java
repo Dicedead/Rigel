@@ -1,5 +1,6 @@
 package ch.epfl.rigel.math.graphs;
 
+import ch.epfl.rigel.Preconditions;
 import ch.epfl.rigel.math.sets.MathSet;
 import ch.epfl.rigel.math.sets.OrderedSet;
 
@@ -7,7 +8,13 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Implementation of hierarchized nodes to be used in directed graphs
@@ -20,49 +27,53 @@ public final class Node<T> {
     final private T value;
     final private Node<T> parent;
     final private int depth;
+    final private Path<Node<T>> hierarchy;
+    private int nmbrOfChildren;
+    private boolean lockNode;
 
     /**
      * Root Node Constructor: creates a node with no parent node
-     * Node<T> is immutable iff T is immutable
+     * Node<T> is immutable after applying lockNode() iff T is immutable
      *
      * @param value (T) value stored in the node
      */
     public Node(final T value) {
-        this.value = value;
-        this.parent = null;
-        this.depth = 0;
+        this(value, null);
     }
 
     /**
      * Child Node Constructor: creates a node with a non null parent node
-     * Node<T> is immutable iff T is immutable
+     * Node<T> is immutable after applying lockNode() iff T is immutable
      *
-     * @param value (T) value stored in the node
+     * @param value  (T) value stored in the node
      * @param parent (Node<T>) non null parent node
-     * @throws NullPointerException if parent is null
      */
     private Node(T value, Node<T> parent) {
         this.value = value;
-        this.parent = Objects.requireNonNull(parent);
-        this.depth = parent.getDepth() + 1;
+        this.parent = parent;
+        this.depth = (parent == null) ? 0 : parent.getDepth() + 1;
+        this.hierarchy = new Path<>(new OrderedSet<>(
+                new ArrayList<>(hierarchyRecur(new ArrayDeque<>(Collections.singleton(this))))));
     }
 
     /**
      * Creates a Node with this as parent and 'childValue' as value
      *
      * @param childValue (T) child node's value
-     * @return (Node<T>) said node containing said value
+     * @return (Node < T >) said node containing said value
      */
     public Node<T> createChild(final T childValue) {
+        Preconditions.checkArgument(!lockNode);
+        ++nmbrOfChildren;
         return new Node<>(childValue, this);
     }
 
     /**
-     * @return (Path<Node<T>>) a Path of all the nodes higher than this node; i.e its parent and (recursively) the parent
+     * @return (Path < Node < T > >) a Path of all the nodes higher than this node; i.e its parent and (recursively) the parent
      * of its parent
      */
     public Path<Node<T>> hierarchy() {
-         return new Path<>(new OrderedSet<>(new ArrayList<>(hierarchyRecur(new ArrayDeque<>(Collections.singleton(this))))));
+        return hierarchy;
     }
 
     /**
@@ -74,16 +85,28 @@ public final class Node<T> {
     }
 
     /**
-     * @return (Node<T>) this node's parent
+     * @return (Optional < Node < T > >) this node's parent, Optional.empty if null
      */
-    public Node<T> getParent() {
-        return parent;
+    public Optional<Node<T>> getParent() {
+        return parent == null ? Optional.empty() : Optional.of(parent);
     }
 
     /**
      * @return (int) this node's depth (number of nodes in hierarchy)
      */
-    public int getDepth() { return depth; }
+    public int getDepth() {
+        return depth;
+    }
+
+    public Node<T> lockNode() {
+        lockNode = true;
+        return this;
+    }
+
+    @SafeVarargs
+    public static <X> MathSet<Node<X>> bunk(Node<X>... nodes) {
+        return MathSet.of(nodes).image(Node::lockNode);
+    }
 
     /**
      * @return (boolean) whether this node has a parent or not
@@ -93,18 +116,32 @@ public final class Node<T> {
     }
 
     public boolean isParentOf(Node<T> potentialChild) {
-        return this.equals(potentialChild.getParent());
+        return this.equals(potentialChild.getParent().get());
     }
 
+    /**
+     * Checks whether the two given nodes are in the same branch.
+     * Note that any Node is always related to all nodes created through createChild applied upon it and its
+     * descendants.
+     *
+     * @param node1
+     * @param node2
+     * @param <X>
+     * @return
+     */
     public static <X> boolean areRelated(Node<X> node1, Node<X> node2) {
-        return node1.hierarchy().contains(node2) || node2.hierarchy().contains(node1);
+        return node1.hierarchy.contains(node2) || node2.hierarchy.contains(node1);
     }
 
     public static <X> boolean areRelatedRootless(Node<X> node1, Node<X> node2) {
-        final Path<Node<X>> node1Hier = node1.hierarchy();
-        final Path<Node<X>> node2Hier = node2.hierarchy();
-        return (node1Hier.contains(node2) && node1Hier.cardinality() > 1)
-                || (node2Hier.contains(node1) && node2Hier.cardinality() > 1);
+        if (node1.equals(node2)) return true;
+        if (!areRelated(node1, node2)) return false;
+
+        final Path<Node<X>> chosenHier = (node1.hierarchy.cardinality() > node2.hierarchy.cardinality()) ?
+                node1.hierarchy : node2.hierarchy;
+        return chosenHier.stream().takeWhile(node -> node.nmbrOfChildren <= 1)
+                .collect(Collectors.toSet()).containsAll(Set.of(node1, node2));
+
     }
 
     private Deque<Node<T>> hierarchyRecur(final Deque<Node<T>> nodeDeque) {

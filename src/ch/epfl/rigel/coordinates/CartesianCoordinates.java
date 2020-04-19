@@ -55,8 +55,6 @@ public final class CartesianCoordinates {
      */
     @Override
     public final boolean equals(Object o) {
-        //System.err.println("Fatal error : tried to test equality but double precision does not \n" +
-        //        "allow it.");
         throw new UnsupportedOperationException();
     }
 

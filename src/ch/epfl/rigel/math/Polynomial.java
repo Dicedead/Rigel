@@ -134,8 +134,6 @@ public final class Polynomial {
      */
     @Override
     public boolean equals(Object o) {
-        //System.err.println("Fatal error : tried to test equality between intervals but double precision does not \n" +
-        //        "allows it.");
         throw new UnsupportedOperationException();
     }
 

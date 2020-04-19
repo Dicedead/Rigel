@@ -12,21 +12,21 @@ import java.util.function.Function;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-public interface Graph<V, E extends MathSet<V>> {
+public interface Graph<T, V extends MathSet<T>> {
 
-    Optional<E> getNeighbours(final V point);
-    OrderedSet<V> flow(final Function<E, V> chooser, final V point);
-    Graph<V, ? extends MathSet<V>> on(MathSet<V> points);
-    Graph<V, E> connectedComponent(final V point);
-    MathSet<Graph<V, E>> connectedComponents();
-    MathSet<Link<V>> edgeSet();
-    E vertexSet();
+    Optional<V> getNeighbours(final T point);
+    OrderedSet<T> flow(final Function<V, T> chooser, final T point);
+    Graph<T, ? extends MathSet<T>> on(MathSet<T> points);
+    Graph<T, V> connectedComponent(final T point);
+    MathSet<Graph<T, V>> connectedComponents();
+    MathSet<Link<T>> edgeSet();
+    V vertexSet();
 
-    default OrderedSet<V> flow(final Comparator<V> chooser, final V point) {
-        return flow((E edges) -> Collections.max(edges.getData(), chooser), point);
+    default OrderedSet<T> flow(final Comparator<T> chooser, final T point) {
+        return flow((V vertices) -> Collections.max(vertices.getData(), chooser), point);
     }
 
-    default boolean areConnected(V v1, V v2)
+    default boolean areConnected(T v1, T v2)
     {
         return connectedComponent(v1).equals(connectedComponent(v2));
     }
