@@ -23,7 +23,7 @@ public class IndexedSet<T, I> extends MathSet<T> {
     }
 
     public T at(I i) {
-        return indexer.applyOn(i);
+        return indexer.apply(i);
     }
 
     public IndexedSet<T, I> indexedUnion(Collection<I> i) {
@@ -31,12 +31,8 @@ public class IndexedSet<T, I> extends MathSet<T> {
     }
 
 
-    public <U> IndexedSet<U, I> image(Function<T, U> f) {
-        return new IndexedSet<>(stream().map(f).collect(Collectors.toSet()), new SetFunction<>(lift(f)));
-    }
-
-    public <U> Function<I, U> lift(Function<T, U> f) {
-        return i -> f.apply(at(i));
+    public <U> IndexedSet<U, I> image(SetFunction<T, U> f) {
+        return new IndexedSet<>(f.apply(this), (i -> f.apply(at(i))));
     }
 
 }

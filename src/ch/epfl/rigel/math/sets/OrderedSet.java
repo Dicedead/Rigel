@@ -23,7 +23,7 @@ public class OrderedSet<T> extends IndexedSet<T, Integer> implements Iterable<T>
     }
     @SafeVarargs
     public OrderedSet(final T... t) {
-        super(List.of(t), new SetFunction<>((Integer i) -> t[i]));
+        super(List.of(t),  i -> t[i]);
     }
 
     public OrderedSet(final Iterable<T> t) {
@@ -38,7 +38,7 @@ public class OrderedSet<T> extends IndexedSet<T, Integer> implements Iterable<T>
     }
 
     public OrderedSet(final List<T> t) {
-        super(t, new SetFunction<>(t::get));
+        super(t, t::get);
     }
 
 

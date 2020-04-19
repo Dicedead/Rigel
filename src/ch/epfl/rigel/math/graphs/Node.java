@@ -1,6 +1,5 @@
 package ch.epfl.rigel.math.graphs;
 
-import ch.epfl.rigel.math.sets.MathSet;
 import ch.epfl.rigel.math.sets.OrderedSet;
 
 import java.util.ArrayDeque;
@@ -15,7 +14,7 @@ import java.util.Objects;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-public final class Node<T> {
+public class Node<T> {
 
     final private T value;
     final private Node<T> parent;
@@ -46,6 +45,7 @@ public final class Node<T> {
         this.parent = Objects.requireNonNull(parent);
         this.depth = parent.getDepth() + 1;
     }
+
 
     /**
      * Creates a Node with this as parent and 'childValue' as value

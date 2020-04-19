@@ -1,6 +1,5 @@
 package ch.epfl.rigel.astronomy;
 
-import ch.epfl.rigel.logging.RigelLogger;
 
 import java.io.BufferedReader;
 import java.io.IOException;

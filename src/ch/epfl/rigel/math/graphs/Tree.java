@@ -88,8 +88,7 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
     @Override
     public Graph<Node<V>, ? extends MathSet<Node<V>>> on(MathSet<Node<V>> points) {
         return new ConcreteGraph<>(new PartitionSet<>(intersection(points),
-                (a, b) -> points.containsSet(new OrderedSet<>(findPathBetween(a,b).orElseThrow()))),
-                edgeSet().suchThat(points::containsSet));
+                (a, b) -> points.containsSet(new OrderedSet<>(findPathBetween(a,b).orElseThrow()))), edgeSet().suchThat(points::containsSet));
     }
 
     @Override
@@ -99,12 +98,12 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
 
     @Override
     public MathSet<Graph<Node<V>, Tree<V>>> connectedComponents() {
-        return new MathSet<>(Collections.singleton(this));
+        return MathSet.of(this);
     }
 
     @Override
     public MathSet<Link<Node<V>>> edgeSet() {
-        return null;
+        return image(n -> new Link<>(n.getParent(), n));
     }
 
     @Override

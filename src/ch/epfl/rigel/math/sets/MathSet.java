@@ -3,10 +3,7 @@ package ch.epfl.rigel.math.sets;
 import javafx.util.Pair;
 
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.ToIntFunction;
+import java.util.function.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -21,11 +18,13 @@ public class MathSet<T> {
     public MathSet(MathSet<T> t) {
         data = t.getData();
     }
+
     @SafeVarargs
     public static <T> MathSet<T> of (T... t)
     {
         return new MathSet<T>(Set.of(t));
     }
+
     public MathSet<MathSet<T>> powerSet()
     {
         return powerSet(this);
@@ -54,67 +53,77 @@ public class MathSet<T> {
     public MathSet<T> intersection(final MathSet<T> others) {
         return intersection(Collections.singleton(others));
     }
+    public MathSet<T> intersection(final Collection<MathSet<T>> others) {
+        return suchThat(others.stream().map(MathSet::predicateContains).collect(Collectors.toSet()));
+    }
 
     public <U> MathSet<Pair<T, U>> product(final MathSet<U> other) {
         return product(Collections.singleton(other));
+    }
+    public <U> MathSet<Pair<T, U>> product(final Collection<MathSet<U>> other) {
+        return unionOf(image(t -> unionOf(other).image(u -> new Pair<>(t, u))));
     }
 
     public MathSet<T> union(final MathSet<T> others) {
         return union(Collections.singleton(others));
     }
-
-    public MathSet<T> intersection(final Collection<MathSet<T>> others) {
-        return suchThat(others.stream().map(MathSet::predicateContains).collect(Collectors.toSet()));
-    }
-
-    public <U> MathSet<Pair<T, U>> product(final Collection<MathSet<U>> other) {
-        return unionOf(image(t -> unionOf(other).image(u -> new Pair<>(t, u))));
-    }
-
-    public <U> MathSet<Maybe<T, U>> directSum(final MathSet<U> other) {
-         return image(t -> new Maybe<T, U>(t, null)).union(other.image(v -> new Maybe<T, U>(null, v)));
-    }
-
-    public <U> MathSet<Maybe<T, U>> directSum(final Collection<MathSet<U>> other) {
-        return image(t -> new Maybe<T, U>(t, null)).union(other.stream().map(s -> s.image(u -> new Maybe<T, U>(null, u))).collect(Collectors.toList()));
-    }
-
     public MathSet<T> union(final Collection<MathSet<T>> others) {
         return others.stream().flatMap(s -> s.getData().stream()).collect(MathSet.toSet());
     }
 
+
+    public <U> MathSet<Maybe<T, U>> directSum(final MathSet<U> other) {
+         return image(t -> new Maybe<T, U>(t, null)).union(other.image(v -> new Maybe<T, U>(null, v)));
+    }
+    public <U> MathSet<Maybe<T, U>> directSum(final Collection<MathSet<U>> other) {
+        return image(t -> new Maybe<T, U>(t, null)).union(other.stream().map(s -> s.image(u -> new Maybe<T, U>(null, u))).collect(Collectors.toList()));
+    }
+
+
     public boolean containsSet(final MathSet<T> other) {
         return data.containsAll(other.getData());
     }
-
     public boolean contains(final T t) { return data.contains(t); }
+    public Predicate<T> predicateContains() {
+        return this::contains;
+    }
+    public boolean in (T t)
+    {
+        return data.contains(t);
+    }
 
     public MathSet<T> without(final MathSet<T> other) {
         return suchThat(Predicate.not(other::contains));
+    }
+    public MathSet<T> without(final T other)
+    {
+        return suchThat(p -> !p.equals(other));
+    }
+    public MathSet<T> minusSet(final MathSet<T> other)
+    {
+        return intersection(without(other));
+    }
+    public MathSet<T> minus(final T other)
+    {
+        return intersection(without(of(other)));
     }
 
     public MathSet<T> suchThat(final Predicate<T> t) {
         return new MathSet<T>(stream().filter(t).collect(Collectors.toSet()));
     }
-
     public MathSet<T> suchThat(final Collection<Predicate<T>> t) {
         return stream().filter(l -> t.stream().allMatch(r -> r.test(l))).collect(MathSet.toSet());
     }
 
-    public MathSet<T> without(final T other)
+    public T minOf(ToIntFunction<T> f)
     {
-        return suchThat(p -> !p.equals(other));
+        return stream().min(Comparator.comparingInt(f)).orElseThrow();
+    }
+    public T maxOf(ToIntFunction<T> f)
+    {
+        return stream().max(Comparator.comparingInt(f)).orElseThrow();
     }
 
-    public MathSet<T> minusSet(final MathSet<T> other)
-    {
-        return intersection(without(other));
-    }
-
-    public MathSet<T> minus(final T other)
-    {
-        return intersection(without(of(other)));
-    }
 
     public Stream<T> stream() {
         return data.stream();
@@ -124,6 +133,7 @@ public class MathSet<T> {
         return data.size();
     }
 
+    public static <T> MathSet<T> emptySet (){return  new MathSet<>(Set.of());}
     public boolean isEmpty() {
         return data.size() == 0;
     }
@@ -131,21 +141,22 @@ public class MathSet<T> {
     public Set<T> getData() {
         return data;
     }
-
-    public Predicate<T> predicateContains() {
-        return this::contains;
+    public T getElement()
+    {
+        return stream().findFirst().orElseThrow();
+    }
+    public T getElement(final Predicate<T> t)
+    {
+        return suchThat(t).getElement();
     }
 
-    public <U> MathSet<U> image(Function<T, U> f) {
-        return new SetFunction<>(f).apply(this);
-    }
+
 
     public <U> MathSet<U> image(SetFunction<T, U> f) {
         return f.apply(this);
     }
-
     public <U> Function<T, U> lift(SetFunction<T, U> f) {
-        return f::applyOn;
+        return f;
     }
 
     static public <T> Collector<T, ?, MathSet<T>> toSet() {
@@ -199,72 +210,24 @@ public class MathSet<T> {
         return sets.iterator().next().intersection(sets);
     }
 
-
-    public static <T> MathSet<T> emptySet (){return  new MathSet<>(Set.of());}
-
     public static <T> MathSet<T> suchThat(final Predicate<T> t, final MathSet<T> set) {
         return set.suchThat(t);
     }
-
     public static <T> MathSet<T> suchThat(final Collection<Predicate<T>> t, final MathSet<T> set) {
         return set.suchThat(t);
     }
-
     public static <T> MathSet<T> suchThat(final Collection<Predicate<T>> t, final Collection<MathSet<T>> set) {
         return unionOf(set).suchThat(t);
     }
-
     public static <T> MathSet<T> suchThat(final Predicate<T> t, final Collection<MathSet<T>> set) {
         return unionOf(set).suchThat(t);
     }
 
+
+
     @Override
     public String toString() {
         return data.toString();
-    }
-
-    public Iterator<MathSet<T>> setIterator() {
-        return powerSet().getData().iterator();
-    }
-
-    public void forEachSet(Consumer<? super MathSet<T>> action) {
-        powerSet().getData().forEach(action);
-    }
-
-
-    public MathSet<MathSet<T>> suchThatSet(final Predicate<MathSet<T>> t)
-    {
-        return powerSet().suchThat(t);
-    }
-
-    public MathSet<MathSet<T>> suchThatSet(final Collection<Predicate<MathSet<T>>> t)
-    {
-        return powerSet().suchThat(t);
-    }
-
-    public boolean in (T t)
-    {
-        return data.contains(t);
-    }
-
-    public T getElement()
-    {
-        return stream().findFirst().orElseThrow();
-    }
-
-    public T minOf(ToIntFunction<T> f)
-    {
-        return stream().min(Comparator.comparingInt(f)).orElseThrow();
-    }
-
-    public T maxOf(ToIntFunction<T> f)
-    {
-        return stream().max(Comparator.comparingInt(f)).orElseThrow();
-    }
-
-    public T getElement(final Predicate<T> t)
-    {
-        return suchThat(t).getElement();
     }
 
     @Override
