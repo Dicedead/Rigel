@@ -20,12 +20,15 @@ public final class Path<T> extends OrderedSet<T> implements Graph<T, Path<T>> {
     public Path(OrderedSet<T> vertices) {
         super(vertices.toList());
     }
+
     public Path(List<T> vertices) {
         super(vertices);
     }
+
     public Path(Iterable<T> vertices) {
         super(vertices);
     }
+
     @SafeVarargs
     public Path(T... vertices) {
         super(vertices);
@@ -45,12 +48,11 @@ public final class Path<T> extends OrderedSet<T> implements Graph<T, Path<T>> {
         return this;
     }
 
-    public Path<T> subPath(T v1, T v2)
-    {
-        return new Path<T>(toList().subList(indexOf(v1), indexOf(v2)));
+    public Path<T> subPath(T v1, T v2) {
+        return new Path<>(toList().subList(Integer.min(indexOf(v1), indexOf(v2)), Integer.max(indexOf(v1), indexOf(v2))));
     }
 
-    public Optional<Iterable<T>> findPathBetween(T v1, T v2) {
+    public Optional<OrderedSet<T>> findPathBetween(T v1, T v2) {
         if (!(contains(v1) && contains(v2)))
             return Optional.empty();
         return Optional.of(subPath(v1, v2));
@@ -89,6 +91,7 @@ public final class Path<T> extends OrderedSet<T> implements Graph<T, Path<T>> {
 
     /**
      * Creates a path beginning at this path and ending at the end of the other
+     *
      * @param otherPath (Path<T>) the path to append
      * @return (Path < T >) a path composed of an appending of the two paths
      */

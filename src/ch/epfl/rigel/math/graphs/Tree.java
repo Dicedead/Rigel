@@ -86,19 +86,19 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
                 false, point);
     }
 
-    public Optional<Iterable<Node<V>>> findPathBetween(Node<V> node1, Node<V> node2) {
+    public Optional<OrderedSet<Node<V>>> findPathBetween(Node<V> node1, Node<V> node2) {
         Preconditions.checkArgument(contains(node1) && contains(node2));
 
         final Path<Node<V>> nodeOneHierarchy = node1.hierarchy();
         final Path<Node<V>> nodeTwoHierarchy = node2.hierarchy();
-        final var aut = nodeOneHierarchy.intersection(nodeTwoHierarchy);
+        final MathSet<Node<V>> aut = nodeOneHierarchy.intersection(nodeTwoHierarchy);
 
         if (aut.contains(node1) || aut.contains(node2))
         {
             return nodeTwoHierarchy.findPathBetween(node1, node2);
         } else {
 
-            final Node<V> anchor = aut.minOf(Node::getDepth);
+            final Node<V> anchor = aut.maxOf(Node::getDepth);
             return  Optional.of(new Path<>(nodeOneHierarchy.findPathBetween(node1, anchor).orElseThrow())
                     .add(new Path<>(nodeTwoHierarchy.findPathBetween(anchor, node2).orElseThrow()).reverse()));
         }

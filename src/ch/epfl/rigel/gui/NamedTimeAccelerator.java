@@ -20,9 +20,9 @@ public enum NamedTimeAccelerator {
     SIDEREAL_DAY("jour sidéral", TimeAccelerator.discrete(60, Duration.parse("23:56:04")));
 
     private final String name;
-    private final BiFunction<ZonedDateTime, Long, ZonedDateTime> accelerator;
+    private final TimeAccelerator accelerator;
 
-    NamedTimeAccelerator(final String name, final BiFunction<ZonedDateTime, Long, ZonedDateTime> accelerator) {
+    NamedTimeAccelerator(final String name, final TimeAccelerator accelerator) {
         this.name = name;
         this.accelerator = accelerator;
     }
@@ -37,7 +37,7 @@ public enum NamedTimeAccelerator {
     /**
      * @return (BiFunction<ZonedDateTime, Long, ZonedDateTime>) this accelerator's simulation function
      */
-    public BiFunction<ZonedDateTime, Long, ZonedDateTime> getAccelerator() {
+    public TimeAccelerator getAccelerator() {
         return accelerator;
     }
 

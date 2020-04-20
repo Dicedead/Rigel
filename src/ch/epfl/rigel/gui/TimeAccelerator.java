@@ -32,10 +32,10 @@ public interface TimeAccelerator {
      * returned time and T0 in nanoseconds
      *
      * @param factor (int) acceleration factor
-     * @return (BiFunction<ZonedDateTime, Long, ZonedDateTime>)
+     * @return TimeAccelerator
      */
-    static BiFunction<ZonedDateTime, Long, ZonedDateTime> continuous(final int factor) {
-        return (ZonedDateTime time, Long nanos) -> time.plusNanos(factor * nanos);
+    static TimeAccelerator continuous(final int factor) {
+        return (ZonedDateTime time, long nanos) -> time.plusNanos(factor * nanos);
     }
 
     /**
@@ -47,10 +47,10 @@ public interface TimeAccelerator {
      *
      * @param freq (int) rescales how many discrete steps are taken per real time unit
      * @param step (Duration) advancement step the simulation
-     * @return (BiFunction<ZonedDateTime, Long, ZonedDateTime>)
+     * @return TimeAccelerator
      */
-    static BiFunction<ZonedDateTime, Long, ZonedDateTime> discrete(final int freq, final Duration step) {
-        return (ZonedDateTime time, Long nanos) -> time.plusNanos(step.toNanos() * (long) Math.floor(freq * nanos));
+    static TimeAccelerator discrete(final int freq, final Duration step) {
+        return (ZonedDateTime time, long nanos) -> time.plusNanos(step.toNanos() * (long) Math.floor(freq * nanos));
     }
 
 }

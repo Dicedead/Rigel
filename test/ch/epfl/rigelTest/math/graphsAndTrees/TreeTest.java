@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -35,6 +36,11 @@ public class TreeTest {
         assertThrows(IllegalArgumentException.class, () -> {
            new Tree<>(Node.bunk(new Node<>(5), new Node<>(6)));
         });
+    }
+
+    @Test
+    void findPathBetweenTest() {
+        System.out.println(intTree.findPathBetween(child21, child12).get().image(Node::getValue));
     }
 
     @Test
