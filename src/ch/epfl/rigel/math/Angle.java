@@ -52,7 +52,7 @@ public final class Angle {
      * @return (double) Angle in radians
      */
     static public double ofDMS(int deg, int min, double sec) {
-        Preconditions.checkArgument(min >= 0 && sec >= 0 && min < 60 && sec < 60);
+        Preconditions.checkArgument(deg >= 0 && min >= 0 && sec >= 0 && min < 60 && sec < 60);
         return deg * RATIO_DEG_RAD + min * RATIO_MIN_RAD + sec * RATIO_SEC_RAD;
     }
 

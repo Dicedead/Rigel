@@ -79,6 +79,10 @@ public final class StereographicProjection implements Function<HorizontalCoordin
      */
     public HorizontalCoordinates inverseApply(CartesianCoordinates cartesCoords) {
 
+        if (cartesCoords.x() == 0 && cartesCoords.y() == 0) {
+            return HorizontalCoordinates.of(0,0);
+        }
+
         final double y = cartesCoords.y();
         final double x = cartesCoords.x();
         final double p2 = x * x + y * y;
