@@ -1,7 +1,5 @@
 package ch.epfl.rigel.math.sets;
 
-import ch.epfl.rigel.math.graphs.Path;
-
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -12,7 +10,7 @@ import java.util.stream.Stream;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-public class OrderedSet<T> extends IndexedSet<T, Integer> implements Iterable<T>{
+public class OrderedSet<T> extends IndexedSet<T, Integer> {
 
     public OrderedSet(Collection<T> t, SetFunction<Integer, T> indexer) {
         super(t, indexer);
@@ -58,31 +56,6 @@ public class OrderedSet<T> extends IndexedSet<T, Integer> implements Iterable<T>
     public int indexOf(T t)
     {
         return toList().indexOf(t);
-    }
-
-    @Override
-    public Stream<T> stream() {
-        return toList().stream();
-    }
-
-    @Override
-    public Iterator<T> iterator() {
-        return toList().iterator();
-    }
-
-    @Override
-    public void forEach(Consumer<? super T> action) {
-        toList().forEach(action);
-    }
-
-    @Override
-    public Spliterator<T> spliterator() {
-        return toList().spliterator();
-    }
-
-    @Override
-    public String toString() {
-        return this.toList().toString();
     }
 
     public OrderedSet<T> identification(OrderedSet<OrderedSet<T>> t)

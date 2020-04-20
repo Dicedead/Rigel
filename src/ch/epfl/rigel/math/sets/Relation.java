@@ -5,12 +5,10 @@ import ch.epfl.rigel.math.graphs.Link;
 
 import java.util.Set;
 
-@FunctionalInterface
 public interface Relation<T> {
 
     boolean areInRelation(T t, T u);
 
-    @FunctionalInterface
     interface Equivalence<T> extends Relation<T>{
         default boolean areInRelation(MathSet<T> pair)
         {

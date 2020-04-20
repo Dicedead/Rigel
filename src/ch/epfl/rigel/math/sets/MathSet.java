@@ -7,9 +7,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -18,7 +20,7 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class MathSet<T> {
+public class MathSet<T> implements Iterable<T> {
 
     private final Set<T> data;
 
@@ -124,10 +126,6 @@ public class MathSet<T> {
         return intersection(without(of(other)));
     }
 
-    public Stream<T> stream() {
-        return data.stream();
-    }
-
     public final int cardinality() {
         return data.size();
     }
@@ -197,20 +195,6 @@ public class MathSet<T> {
         return unionOf(set).suchThat(t);
     }
 
-    @Override
-    public String toString() {
-        return data.toString();
-    }
-
-    public Iterator<MathSet<T>> setIterator() {
-        return powerSet().getData().iterator();
-    }
-
-    public void forEachSet(Consumer<? super MathSet<T>> action) {
-        powerSet().getData().forEach(action);
-    }
-
-
     public final MathSet<MathSet<T>> suchThatSet(final Predicate<MathSet<T>> t) {
         return powerSet().suchThat(t);
     }
@@ -220,7 +204,8 @@ public class MathSet<T> {
     }
 
     public T getElement() {
-        return stream().findFirst().orElseThrow();
+        return stream().findFirst().orElseThrow(
+                () -> new NoSuchElementException("Tried to get element from empty set."));
     }
 
     public final T minOf(ToIntFunction<T> f) {
@@ -235,6 +220,37 @@ public class MathSet<T> {
         return suchThat(t).getElement();
     }
 
+    public Stream<T> stream() {
+        return data.stream();
+    }
+
+    public Stream<T> parallelStream() {
+        return data.parallelStream();
+    }
+
+    @Override
+    public final Iterator<T> iterator() {
+        return data.iterator();
+    }
+
+    @Override
+    public final Spliterator<T> spliterator() {
+        return data.spliterator();
+    }
+
+    @Override
+    public final void forEach(Consumer<? super T> action) {
+        data.forEach(action);
+    }
+
+    public final Iterator<MathSet<T>> setIterator() {
+        return powerSet().iterator();
+    }
+
+    public void forEachSet(Consumer<? super MathSet<T>> action) {
+        powerSet().forEach(action);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -246,5 +262,10 @@ public class MathSet<T> {
     @Override
     public int hashCode() {
         return Objects.hash(data);
+    }
+
+    @Override
+    public String toString() {
+        return data.toString();
     }
 }

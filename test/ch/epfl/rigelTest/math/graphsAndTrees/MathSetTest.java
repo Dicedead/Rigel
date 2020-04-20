@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MathSetTest {
@@ -31,5 +32,10 @@ public class MathSetTest {
     @Test
     void containsTest() {
         assertTrue(MathSet.of(1,2,3).contains(2));
+    }
+
+    @Test
+    void variousTests() {
+        assertFalse(set1.setIterator().hasNext());
     }
 }
