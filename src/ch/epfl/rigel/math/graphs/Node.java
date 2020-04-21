@@ -2,19 +2,15 @@ package ch.epfl.rigel.math.graphs;
 
 import ch.epfl.rigel.Preconditions;
 import ch.epfl.rigel.math.sets.MathSet;
-import ch.epfl.rigel.math.sets.OrderedSet;
+import ch.epfl.rigel.math.sets.OrderedTuple;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * Implementation of hierarchized nodes to be used in directed graphs
@@ -52,7 +48,7 @@ public final class Node<T> {
         this.value = value;
         this.parent = parent;
         this.depth = (parent == null) ? 0 : parent.getDepth() + 1;
-        this.hierarchy = new Path<>(new OrderedSet<>(
+        this.hierarchy = new Path<>(new OrderedTuple<>(
                 new ArrayList<>(hierarchyRecur(new ArrayDeque<>(Collections.singleton(this))))));
     }
 
@@ -116,7 +112,7 @@ public final class Node<T> {
     }
 
     public boolean isParentOf(Node<T> potentialChild) {
-        return this.equals(potentialChild.getParent().get());
+        return this.equals(potentialChild.getParent().orElse(null));
     }
 
     /**
@@ -124,10 +120,10 @@ public final class Node<T> {
      * Note that any Node is always related to all nodes created through createChild applied upon it and its
      * descendants.
      *
-     * @param node1
-     * @param node2
-     * @param <X>
-     * @return
+     * @param node1 starting node
+     * @param node2 finishing node
+     * @param <X> underlying type
+     * @return whether one is the parent of the other
      */
     public static <X> boolean areRelated(Node<X> node1, Node<X> node2) {
         return node1.hierarchy.contains(node2) || node2.hierarchy.contains(node1);

@@ -10,10 +10,7 @@ import java.util.Iterator;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.ToIntFunction;
+import java.util.function.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -47,7 +44,7 @@ public class MathSet<T> {
         final T firstElement = Cset.iterator().next();
         Set<T> subset = new HashSet<>(Cset);
         subset.remove(firstElement);
-        final Collection<Set<T>> subPowerSet = powerSet(new MathSet<T>(subset)).image(MathSet::getData).getData();
+        final Collection<Set<T>> subPowerSet = powerSet(new MathSet<>(subset)).image(MathSet::getData).getData();
         Set<Set<T>> powerSet = new HashSet<>();
         for (Set<T> s : subPowerSet) {
             Set<T> s1 = new HashSet<>(s);
@@ -80,7 +77,7 @@ public class MathSet<T> {
     }
 
     public final <U> MathSet<Maybe<T, U>> directSum(final MathSet<U> other) {
-        return image(t -> new Maybe<T, U>(t, null)).union(other.image(v -> new Maybe<T, U>(null, v)));
+        return image(t -> new Maybe<T, U>(t, null)).union(other.image(v -> new Maybe<>(null, v)));
     }
 
     public final <U> MathSet<Maybe<T, U>> directSum(final Collection<MathSet<U>> other) {
@@ -140,7 +137,7 @@ public class MathSet<T> {
         return data;
     }
 
-    public final Predicate<T> predicateContains() {
+    public final Equation<T> predicateContains() {
         return this::contains;
     }
 
@@ -223,12 +220,12 @@ public class MathSet<T> {
         return stream().findFirst().orElseThrow();
     }
 
-    public final T minOf(ToIntFunction<T> f) {
-        return stream().min(Comparator.comparingInt(f)).orElseThrow();
+    public final T minOf(SetFunction<T, Number> f) {
+        return stream().min(Comparator.comparingDouble(t -> f.apply(t).doubleValue())).orElseThrow();
     }
 
-    public final T maxOf(ToIntFunction<T> f) {
-        return stream().max(Comparator.comparingInt(f)).orElseThrow();
+    public final T maxOf(SetFunction<T, Number> f) {
+        return stream().max(Comparator.comparingDouble(t -> f.apply(t).doubleValue())).orElseThrow();
     }
 
     public T getElement(final Predicate<T> t) {

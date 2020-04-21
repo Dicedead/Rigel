@@ -1,7 +1,7 @@
 package ch.epfl.rigel.math.graphs;
 
 import ch.epfl.rigel.math.sets.MathSet;
-import ch.epfl.rigel.math.sets.OrderedSet;
+import ch.epfl.rigel.math.sets.OrderedTuple;
 import ch.epfl.rigel.math.sets.PartitionSet;
 
 import java.util.ArrayList;
@@ -14,10 +14,10 @@ import java.util.function.Function;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-public final class Path<T> extends OrderedSet<T> implements Graph<T, Path<T>> {
+public final class Path<T> extends OrderedTuple<T> implements Graph<T, Path<T>> {
 
 
-    public Path(OrderedSet<T> vertices) {
+    public Path(OrderedTuple<T> vertices) {
         super(vertices.toList());
     }
     public Path(List<T> vertices) {
@@ -37,17 +37,17 @@ public final class Path<T> extends OrderedSet<T> implements Graph<T, Path<T>> {
     }
 
     @Override
-    public OrderedSet<T> flow(Function<Path<T>, T> chooser, T point) {
+    public OrderedTuple<T> flow(Function<Path<T>, T> chooser, T point) {
         return this;
     }
 
-    public OrderedSet<T> flow() {
+    public OrderedTuple<T> flow() {
         return this;
     }
 
     public Path<T> subPath(T v1, T v2)
     {
-        return new Path<T>(toList().subList(indexOf(v1), indexOf(v2)));
+        return new Path<>(toList().subList(indexOf(v1), indexOf(v2)));
     }
 
     public Optional<Iterable<T>> findPathBetween(T v1, T v2) {
@@ -58,7 +58,7 @@ public final class Path<T> extends OrderedSet<T> implements Graph<T, Path<T>> {
 
     @Override
     public Graph<T, PartitionSet<T>> on(MathSet<T> points) {
-        return new ConcreteGraph<T>(this, edgeSet()).on(points);
+        return new ConcreteGraph<>(this, edgeSet()).on(points);
     }
 
     @Override

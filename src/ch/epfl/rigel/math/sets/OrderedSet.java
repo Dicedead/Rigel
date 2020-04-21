@@ -1,94 +1,44 @@
 package ch.epfl.rigel.math.sets;
 
-import ch.epfl.rigel.math.graphs.Path;
+import ch.epfl.rigel.Preconditions;
 
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
+public class OrderedSet<T> extends MathSet<T> {
+    private final Relation.Order<T> comparator;
 
-/**
- * @author Alexandre Sallinen (303162)
- * @author Salim Najib (310003)
- */
-public class OrderedSet<T> extends IndexedSet<T, Integer> implements Iterable<T>{
-
-    public OrderedSet(Collection<T> t, SetFunction<Integer, T> indexer) {
-        super(t, indexer);
+    public OrderedSet(MathSet<T> m,Relation.Order<T> comparator) {
+        super(m);
+        this.comparator = comparator;
     }
 
-    public OrderedSet(MathSet<T> points, SetFunction<Integer, T> integerTSetFunction) {
-        super(points, integerTSetFunction);
-    }
-    @SafeVarargs
-    public OrderedSet(final T... t) {
-        super(List.of(t),  i -> t[i]);
-    }
-
-    public OrderedSet(final Iterable<T> t) {
-        this(iterableToList(t));
-    }
-
-    private static<T> List<T> iterableToList(final Iterable<T> i)
+    public Relation.COMP compare(T t, T u)
     {
-        final List<T> target = new ArrayList<>();
-        i.forEach(target::add);
-        return target;
+        Preconditions.checkArgument(contains(t) && contains(u));
+        return comparator.compare(t, u);
     }
 
-    public OrderedSet(final List<T> t) {
-        super(t, t::get);
-    }
-
-    public List<T> toList() {
-        return IntStream.range(0, getData().size()).mapToObj(this::at).collect(Collectors.toList());
-    }
-
-    public T next (T t)
+    public MathSet<T> min()
     {
-        return at(toList().indexOf(t) + 1);
+        return suchThat(p -> comparator.partialApply(p).apply(this).equals(of(Relation.COMP.LESS)));
     }
 
-    public T prev (T t)
+    public MathSet<T> max()
     {
-        return at(toList().indexOf(t) - 1);
+        return suchThat(p -> comparator.partialApply(p).apply(this).equals(of(Relation.COMP.GREATER)));
     }
 
-    public int indexOf(T t)
+    public MathSet<T> moreThan(T t)
     {
-        return toList().indexOf(t);
+        return suchThat(p -> comparator.partialApply(t).apply(p) == (Relation.COMP.LESS));
     }
 
-    @Override
-    public Stream<T> stream() {
-        return toList().stream();
-    }
-
-    @Override
-    public Iterator<T> iterator() {
-        return toList().iterator();
-    }
-
-    @Override
-    public void forEach(Consumer<? super T> action) {
-        toList().forEach(action);
-    }
-
-    @Override
-    public Spliterator<T> spliterator() {
-        return toList().spliterator();
-    }
-
-    @Override
-    public String toString() {
-        return this.toList().toString();
-    }
-
-    public OrderedSet<T> identification(OrderedSet<OrderedSet<T>> t)
+    public MathSet<T> lessThan(T t)
     {
-        List<T> l = new ArrayList<>();
-        t.forEach(o -> l.addAll(o.toList()));
-        return new OrderedSet<T>(l);
+        return suchThat(p -> comparator.partialApply(t).apply(p) == (Relation.COMP.GREATER));
     }
+
+    public MathSet<T> equalsTo(T t)
+    {
+        return suchThat(p -> comparator.partialApply(t).apply(p) == (Relation.COMP.EQUAL));
+    }
+
 }

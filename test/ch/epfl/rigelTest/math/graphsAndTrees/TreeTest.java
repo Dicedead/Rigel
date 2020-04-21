@@ -2,7 +2,7 @@ package ch.epfl.rigelTest.math.graphsAndTrees;
 
 import ch.epfl.rigel.math.graphs.Node;
 import ch.epfl.rigel.math.graphs.Tree;
-import ch.epfl.rigel.math.sets.OrderedSet;
+import ch.epfl.rigel.math.sets.OrderedTuple;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -41,7 +41,7 @@ public class TreeTest {
 
     @Test
     void flowTest() {
-        OrderedSet<Node<Integer>> set = intTree.flow(Comparator.comparingInt(Node::getValue),root);
+        OrderedTuple<Node<Integer>> set = intTree.flow(Comparator.comparingInt(Node::getValue),root);
         assertEquals(Set.of(0,2,4), set.image(Node::getValue).getData());
     }
 
