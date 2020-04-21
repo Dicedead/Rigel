@@ -12,7 +12,6 @@ import static ch.epfl.rigel.math.sets.MathSet.toMathSet;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-@FunctionalInterface
 public interface SetFunction<T, U> extends Function<T, U> {
 
     default MathSet<U> restriction(MathSet<T> set, Collection<T> domain) {

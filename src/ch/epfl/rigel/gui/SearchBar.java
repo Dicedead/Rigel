@@ -35,6 +35,9 @@ public final class SearchBar {
             this.classList = classList;
         }
 
+        public List<Class<? extends CelestialObject>> getClassList() {
+            return classList;
+        }
 
     }
 
@@ -43,6 +46,7 @@ public final class SearchBar {
     }
 
     private Tree<CelestialObject> huffmanCode() {
+
         return null;
     }
 

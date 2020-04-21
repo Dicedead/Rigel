@@ -33,22 +33,6 @@ public class MyMoonModelTest {
     }
 
     @Test
-    void atDec() {
-
-        assertEquals(Angle.ofDMS(-11, 31, 38),
-                MoonModel.MOON.at(J2010.daysUntil(ZonedDateTime.of(
-                        LocalDate.of(2003, 9, 1),
-                        LocalTime.of(0, 0),
-                        ZoneOffset.UTC
-                )), new EclipticToEquatorialConversion(ZonedDateTime.of(
-                        LocalDate.of(2003, 9, 1),
-                        LocalTime.of(0, 0),
-                        ZoneOffset.UTC
-                ))).equatorialPos().dec(), delta);
-
-    }
-
-    @Test
     void atAngSize() {
 
         assertEquals(Angle.ofDMS(0, 32, 49),

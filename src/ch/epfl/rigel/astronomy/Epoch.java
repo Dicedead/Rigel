@@ -28,7 +28,7 @@ public enum Epoch {
      * @return (double) the distance in days from our epoch to when
      */
     public double daysUntil(ZonedDateTime when) {
-        return until(epoch, when);
+        return until(epoch, when) * COEFF_TO_DAYS;
     }
 
     /**
@@ -46,15 +46,15 @@ public enum Epoch {
      *
      * @param now  (ZonedDateTime) the time we want to know the distance from
      * @param when (ZonedDateTime) the time we want to know the distance of
-     * @return (double) the distance in days from now to when
+     * @return (double) the distance in milliseconds from now to when
      */
-    static private double until (final ZonedDateTime now, final ZonedDateTime when)
+    static public double until (final ZonedDateTime now, final ZonedDateTime when)
     {
         final OffsetDateTime you = now.withZoneSameInstant(when.getZone()).toOffsetDateTime();
         final LocalDateTime end = LocalDateTime.from(when);
         final long amount = end.toLocalDate().toEpochDay() - you.toLocalDate().toEpochDay();
 
-        return ((amount-Long.signum(amount))*86_400_000L+(end.toLocalTime().toNanoOfDay() - you.toLocalTime().toNanoOfDay()
-                + Long.signum(amount)* 86_400_000_000_000L)/ 1_000_000.) * COEFF_TO_DAYS;
+        return (amount-Long.signum(amount))*86_400_000L+(end.toLocalTime().toNanoOfDay() - you.toLocalTime().toNanoOfDay()
+                + Long.signum(amount)* 86_400_000_000_000L)/ 1_000_000.;
     }
 }

@@ -9,8 +9,10 @@ import org.junit.jupiter.api.Test;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TreeTest {
@@ -27,6 +29,18 @@ public class TreeTest {
         child11 = child1.createChild(4);
         child12 = child1.createChild(3);
         intTree = new Tree<>(Node.bunk(root, child1, child2, child11, child12, child21));
+    }
+
+    @Test
+    void construcThrows() {
+        assertThrows(IllegalArgumentException.class, () -> {
+           new Tree<>(Node.bunk(new Node<>(5), new Node<>(6)));
+        });
+    }
+
+    @Test
+    void findPathBetweenTest() {
+        System.out.println(intTree.findPathBetween(child21, child12).get().image(Node::getValue));
     }
 
     @Test
@@ -48,7 +62,6 @@ public class TreeTest {
     @Test
     void rootHasMinimalDepth() {
         assertEquals(root, Collections.min(intTree.getData(), Comparator.comparingInt(Node::getDepth)));
-        //assertEquals();
     }
 
     @Test
