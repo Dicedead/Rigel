@@ -1,6 +1,6 @@
 package ch.epfl.rigel.math.graphs;
 
-import ch.epfl.rigel.math.sets.OrderedSet;
+import ch.epfl.rigel.math.sets.OrderedTuple;
 import javafx.util.Pair;
 
 import java.util.NoSuchElementException;
@@ -11,7 +11,7 @@ import java.util.NoSuchElementException;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-public final class Link<T> extends OrderedSet<T> {
+public final class Link<T> extends OrderedTuple<T> {
 
     /**
      * Link constructor: ties 2 elements together

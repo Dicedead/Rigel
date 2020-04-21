@@ -2,7 +2,7 @@ package ch.epfl.rigel.math.graphs;
 
 import ch.epfl.rigel.Preconditions;
 import ch.epfl.rigel.math.sets.MathSet;
-import ch.epfl.rigel.math.sets.OrderedSet;
+import ch.epfl.rigel.math.sets.OrderedTuple;
 import ch.epfl.rigel.math.sets.PartitionSet;
 
 import java.util.ArrayList;
@@ -48,13 +48,13 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
         this.root = root;
         this.leaves = nodes.suchThat(node -> node.getDepth() == maxDepth);
         final MathSet<Node<V>> nonRoots = nodes.suchThat(node -> !node.equals(root));
-        this.edgeSet = (nonRoots.cardinality() <= 1) ? emptySet() : nonRoots.image(n -> new Link<>(n, n.getParent().get()));
+        this.edgeSet = (nonRoots.cardinality() <= 1) ? emptySet() : nonRoots.image(n -> new Link<>(n, n.getParent().orElse(null)));
         this.nodes = nodes;
     }
 
     @Override
     public Optional<Tree<V>> getNeighbours(Node<V> point) {
-        return Optional.of(new Tree<>(component(point).minus(point.getParent().get())));
+        return Optional.of(new Tree<>(component(point).minus(point.getParent().orElse(null))));
     }
 
     public Optional<Tree<V>> getChildren(Node<V> point) {
@@ -63,11 +63,11 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
     }
 
     @Override
-    public OrderedSet<Node<V>> flow(Function<Tree<V>, Node<V>> chooser, Node<V> point) {
-        final List<Node<V>> flowList = flowRecur(chooser, chooser.apply(getChildren(point).get()), new ArrayList<>());
+    public OrderedTuple<Node<V>> flow(Function<Tree<V>, Node<V>> chooser, Node<V> point) {
+        final List<Node<V>> flowList = flowRecur(chooser, chooser.apply(getChildren(point).orElse(null)), new ArrayList<>());
         flowList.add(point);
         Collections.reverse(flowList);
-        return new OrderedSet<>(flowList);
+        return new OrderedTuple<>(flowList);
     }
 
     private List<Node<V>> flowRecur(Function<Tree<V>, Node<V>> chooser, Node<V> point, List<Node<V>> workList) {
@@ -107,7 +107,7 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
     @Override
     public Graph<Node<V>, ? extends MathSet<Node<V>>> on(MathSet<Node<V>> points) {
         return new ConcreteGraph<>(new PartitionSet<>(intersection(points),
-                (a, b) -> points.containsSet(new OrderedSet<>(findPathBetween(a,b).orElseThrow()))),
+                (a, b) -> points.containsSet(new OrderedTuple<>(findPathBetween(a,b).orElseThrow()))),
                 edgeSet().suchThat(points::containsSet));
     }
 

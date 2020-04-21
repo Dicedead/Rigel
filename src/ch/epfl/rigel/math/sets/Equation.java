@@ -9,4 +9,13 @@ public interface Equation<T> extends Predicate<T> {
         return m.suchThat(this);
     }
 
+    @Override
+    default Equation<T> and(Predicate<? super T> other) {
+        return t -> test(t) && other.test(t);
+    }
+
+    @Override
+    default Equation<T> or(Predicate<? super T> other) {
+        return t -> test(t) || other.test(t);
+    }
 }

@@ -1,5 +1,8 @@
 package ch.epfl.rigel.math.sets;
 
+import com.sun.javafx.geom.transform.Identity;
+
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.function.Function;
 
@@ -43,4 +46,10 @@ public interface SetFunction<T, U> extends Function<T, U> {
     default <V> SetFunction<T, V> andThen(Function<? super U, ? extends V> after) {
         return (t -> after.apply(apply(t)));
     }
+
+    static <T> SetFunction<T, T> identity()
+    {
+        return i -> i;
+    }
+
 }

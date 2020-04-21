@@ -1,7 +1,7 @@
 package ch.epfl.rigel.math.graphs;
 
 import ch.epfl.rigel.math.sets.MathSet;
-import ch.epfl.rigel.math.sets.OrderedSet;
+import ch.epfl.rigel.math.sets.OrderedTuple;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -15,14 +15,14 @@ import java.util.function.Function;
 public interface Graph<T, V extends MathSet<T>> {
 
     Optional<V> getNeighbours(final T point);
-    OrderedSet<T> flow(final Function<V, T> chooser, final T point);
+    OrderedTuple<T> flow(final Function<V, T> chooser, final T point);
     Graph<T, ? extends MathSet<T>> on(MathSet<T> points);
     Graph<T, V> connectedComponent(final T point);
     MathSet<Graph<T, V>> connectedComponents();
     MathSet<Link<T>> edgeSet();
     V vertexSet();
 
-    default OrderedSet<T> flow(final Comparator<T> chooser, final T point) {
+    default OrderedTuple<T> flow(final Comparator<T> chooser, final T point) {
         return flow((V vertices) -> Collections.max(vertices.getData(), chooser), point);
     }
 

@@ -1,15 +1,10 @@
 package ch.epfl.rigel.math.sets;
 
 import ch.epfl.rigel.Preconditions;
-import javafx.util.Pair;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -48,7 +43,7 @@ public class PartitionSet<T> extends MathSet<T> {
         return components;
     }
 
-    public T representant (MathSet<T> component)
+    public T representing(MathSet<T> component)
     {
         Preconditions.checkArgument(components.contains(component));
         return component.getElement();
@@ -56,7 +51,7 @@ public class PartitionSet<T> extends MathSet<T> {
 
     public MathSet<T> representants()
     {
-        return components.image(this::representant);
+        return components.image(this::representing);
     }
 
     @Override

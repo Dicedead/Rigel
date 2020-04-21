@@ -1,8 +1,6 @@
 package ch.epfl.rigel.math.graphs;
 
 import ch.epfl.rigel.math.sets.*;
-import com.sun.javafx.geom.Edge;
-import javafx.util.Pair;
 
 import java.util.*;
 import java.util.function.Function;
@@ -31,9 +29,9 @@ public final class ConcreteGraph<T> extends MathSet<Maybe<T, Link<T>>> implement
 
     }
 
-    public ConcreteGraph(MathSet<Maybe<T, Link<T>>> mathSet, T t) {
+    public ConcreteGraph(MathSet<Maybe<T, Link<T>>> mathSet) {
         super(mathSet.getData());
-        vertices = new PartitionSet<T>(mathSet.image(p -> p.getKey().orElse(null)), (T v, T u) -> rec(of(u)).contains(v));
+        vertices = new PartitionSet<>(mathSet.image(p -> p.getKey().orElse(null)), (T v, T u) -> rec(of(u)).contains(v));
         this.edges = new MathSet<>(mathSet.image(p -> p.getValue().orElse(null)));
 
     }
@@ -43,13 +41,13 @@ public final class ConcreteGraph<T> extends MathSet<Maybe<T, Link<T>>> implement
     }
 
     @Override
-    public OrderedSet<T> flow(final Function<PartitionSet<T>, T> chooser, final T point) {
+    public OrderedTuple<T> flow(final Function<PartitionSet<T>, T> chooser, final T point) {
         if (getNeighbours(point).isEmpty())
-            return new OrderedSet<>(point);
+            return new OrderedTuple<>(point);
         final List<T> flowList = flow(chooser, chooser.apply(getNeighbours(point).get())).toList();
         flowList.add(point);
         Collections.reverse(flowList);
-        return new OrderedSet<>(flowList);
+        return new OrderedTuple<>(flowList);
     }
 
 
@@ -67,12 +65,12 @@ public final class ConcreteGraph<T> extends MathSet<Maybe<T, Link<T>>> implement
 
     @Override
     public Graph<T, PartitionSet<T>> on(MathSet<T> points) {
-        return new ConcreteGraph<T>(vertices.intersection(points), edges.suchThat(points::containsSet));
+        return new ConcreteGraph<>(vertices.intersection(points), edges.suchThat(points::containsSet));
     }
 
     @Override
     public Graph<T, PartitionSet<T>> connectedComponent(T point) {
-        return on(new PartitionSet<T>(vertices.component(point)));
+        return on(new PartitionSet<>(vertices.component(point)));
     }
 
     @Override

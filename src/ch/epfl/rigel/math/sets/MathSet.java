@@ -2,20 +2,8 @@ package ch.epfl.rigel.math.sets;
 
 import javafx.util.Pair;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.Spliterator;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.ToIntFunction;
+import java.util.*;
+import java.util.function.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -82,7 +70,7 @@ public class MathSet<T> implements Iterable<T> {
     }
 
     public final <U> MathSet<Maybe<T, U>> directSum(final MathSet<U> other) {
-        return image(t -> new Maybe<T, U>(t, null)).union(other.image(v -> new Maybe<T, U>(null, v)));
+        return image(t -> new Maybe<T, U>(t, null)).union(other.image(v -> new Maybe<>(null, v)));
     }
 
     public final <U> MathSet<Maybe<T, U>> directSum(final Collection<MathSet<U>> other) {
@@ -126,6 +114,10 @@ public class MathSet<T> implements Iterable<T> {
         return intersection(without(of(other)));
     }
 
+    public Stream<T> stream() {
+        return data.stream();
+    }
+
     public final int cardinality() {
         return data.size();
     }
@@ -138,7 +130,7 @@ public class MathSet<T> implements Iterable<T> {
         return data;
     }
 
-    public final Predicate<T> predicateContains() {
+    public final Equation<T> predicateContains() {
         return this::contains;
     }
 
@@ -208,20 +200,16 @@ public class MathSet<T> implements Iterable<T> {
                 () -> new NoSuchElementException("Tried to get element from empty set."));
     }
 
-    public final T minOf(ToIntFunction<T> f) {
-        return stream().min(Comparator.comparingInt(f)).orElseThrow();
+    public final T minOf(SetFunction<T, Number> f) {
+        return stream().min(Comparator.comparingDouble(t -> f.apply(t).doubleValue())).orElseThrow();
     }
 
-    public final T maxOf(ToIntFunction<T> f) {
-        return stream().max(Comparator.comparingInt(f)).orElseThrow();
+    public final T maxOf(SetFunction<T, Number> f) {
+        return stream().max(Comparator.comparingDouble(t -> f.apply(t).doubleValue())).orElseThrow();
     }
 
     public T getElement(final Predicate<T> t) {
         return suchThat(t).getElement();
-    }
-
-    public Stream<T> stream() {
-        return data.stream();
     }
 
     public Stream<T> parallelStream() {
