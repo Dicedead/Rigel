@@ -35,7 +35,7 @@ public interface TimeAccelerator {
      * @return TimeAccelerator
      */
     static TimeAccelerator continuous(final int factor) {
-        return (ZonedDateTime time, long nanos) -> time.plusNanos(factor * nanos);
+        return (time, nanos) -> time.plusNanos(factor * nanos);
     }
 
     /**
@@ -50,7 +50,7 @@ public interface TimeAccelerator {
      * @return TimeAccelerator
      */
     static TimeAccelerator discrete(final int freq, final Duration step) {
-        return (ZonedDateTime time, long nanos) -> time.plusNanos(step.toNanos() * (long) Math.floor(freq * nanos));
+        return (time, nanos) -> time.plusNanos(step.toNanos() * (long) Math.floor(freq * nanos));
     }
 
 }
