@@ -8,10 +8,12 @@ import static java.lang.Integer.signum;
 public interface Relation<T, U> {
 
     U areInRelation(T t, T u);
+
     default SetFunction<T, U> partialApply(T t)
     {
         return l -> areInRelation(t, l);
     }
+
     @FunctionalInterface
     interface Equivalence<T> extends Relation<T, Boolean>{
         default boolean areInRelation(MathSet<T> pair)

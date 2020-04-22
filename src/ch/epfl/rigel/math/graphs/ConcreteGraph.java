@@ -14,6 +14,11 @@ public final class ConcreteGraph<T> extends MathSet<Maybe<T, Link<T>>> implement
     private final PartitionSet<T> vertices;
     private final MathSet<Link<T>> edges;
 
+    /**
+     * Constructing a graph from points and edges, each partition is a connected component
+     * @param points the points
+     * @param edges the edges
+     */
     public ConcreteGraph(PartitionSet<T> points, MathSet<Link<T>> edges) {
         super(points.directSum(edges));
         vertices = points;
@@ -21,6 +26,11 @@ public final class ConcreteGraph<T> extends MathSet<Maybe<T, Link<T>>> implement
 
     }
 
+    /**
+     * Constructing a graph from points and edges
+     * @param points the points
+     * @param edges the edges
+     */
     public ConcreteGraph(MathSet<T> points, MathSet<Link<T>> edges) {
         super(points.directSum(edges));
 
@@ -28,7 +38,10 @@ public final class ConcreteGraph<T> extends MathSet<Maybe<T, Link<T>>> implement
         this.edges = edges;
 
     }
-
+    /**
+     * Constructing a graph from points and edges, condensed in a single MathSet
+     * @param mathSet the underlying data
+     */
     public ConcreteGraph(MathSet<Maybe<T, Link<T>>> mathSet) {
         super(mathSet.getData());
         vertices = new PartitionSet<>(mathSet.image(p -> p.getKey().orElse(null)), (T v, T u) -> rec(of(u)).contains(v));
@@ -36,12 +49,14 @@ public final class ConcreteGraph<T> extends MathSet<Maybe<T, Link<T>>> implement
 
     }
 
+
+    @Override
     public Optional<PartitionSet<T>> getNeighbours(final T point) {
         return Optional.of(new PartitionSet<>(edges.suchThat(l -> l.contains(point)).image(p -> p.next(point))));
     }
 
     @Override
-    public OrderedTuple<T> flow(final Function<PartitionSet<T>, T> chooser, final T point) {
+    public OrderedTuple<T> flow(final SetFunction<PartitionSet<T>, T> chooser, final T point) {
         if (getNeighbours(point).isEmpty())
             return new OrderedTuple<>(point);
         final List<T> flowList = flow(chooser, chooser.apply(getNeighbours(point).get())).toList();
@@ -78,10 +93,13 @@ public final class ConcreteGraph<T> extends MathSet<Maybe<T, Link<T>>> implement
         return vertexSet().components().image(this::on);
     }
 
+
+    @Override
     public MathSet<Link<T>> edgeSet() {
         return edges;
     }
 
+    @Override
     public PartitionSet<T> vertexSet() {
         return vertices;
     }

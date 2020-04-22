@@ -4,6 +4,7 @@ import ch.epfl.rigel.Preconditions;
 import ch.epfl.rigel.math.sets.MathSet;
 import ch.epfl.rigel.math.sets.OrderedTuple;
 import ch.epfl.rigel.math.sets.PartitionSet;
+import ch.epfl.rigel.math.sets.SetFunction;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,11 +24,23 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
     private final MathSet<Node<V>> leaves;
     private final Node<V> root;
     private final int maxDepth;
-
+    /**
+     * Main Constructor of Tree using parameter Nodes' inner hierarchy to construct the directed graph
+     * Supposes a connected tree AKA not a forest
+     *
+     * @param t (Collection<Node<T>>)
+     * @throws IllegalArgumentException if given leaves aren't all connected to the same root
+     */
     public Tree(Collection<MathSet<Node<V>>> t) {
         this(unionOf(t));
     }
-
+    /**
+     * Main Constructor of Tree using parameter Nodes' inner hierarchy to construct the directed graph
+     * Supposes a connected tree AKA not a forest
+     *
+     * @param nodes (Collection<Node<T>>)
+     * @throws IllegalArgumentException if given leaves aren't all connected to the same root
+     */
     public Tree(MathSet<Node<V>> nodes) {
         this(nodes, true, nodes.minOf(Node::getDepth));
     }
@@ -57,13 +70,18 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
         return Optional.of(new Tree<>(component(point).minus(point.getParent().orElse(null))));
     }
 
+    /**
+     *
+     * @param point (T)
+     * @return The points for which point is their parent
+     */
     public Optional<Tree<V>> getChildren(Node<V> point) {
         final MathSet<Node<V>> children = getNodesAtDepth(point.getDepth() + 1).suchThat(point::isParentOf);
         return children.isEmpty() ? Optional.empty() : Optional.of(new Tree<>(children, false, point));
     }
 
     @Override
-    public OrderedTuple<Node<V>> flow(Function<Tree<V>, Node<V>> chooser, Node<V> point) {
+    public OrderedTuple<Node<V>> flow(SetFunction<Tree<V>, Node<V>> chooser, Node<V> point) {
         final List<Node<V>> flowList = flowRecur(chooser, chooser.apply(getChildren(point).orElse(null)), new ArrayList<>());
         flowList.add(point);
         Collections.reverse(flowList);
@@ -80,13 +98,25 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
         return workList;
     }
 
+    /**
+     *
+     * @param point (T)
+     * @return the tree that has for root point and points the same as the current tree
+     */
     public Tree<V> subtreeAtPoint(final Node<V> point) {
         Preconditions.checkArgument(contains(point));
         return new Tree<>(nodes.suchThat(node -> node.getDepth() >= point.getDepth() && Node.areRelated(node, point)),
                 false, point);
     }
-
-    public Optional<OrderedSet<Node<V>>> findPathBetween(Node<V> node1, Node<V> node2) {
+    /**
+     * Finds the shortest path between two nodes
+     *
+     * @param node1 (Node<T>) from where the path should start
+     * @param node2 (Node<T>) where it should end
+     * @return (Path<Node<T>>) the shortest path in the graph from point a to b
+     * @throws IllegalArgumentException if either of the two nodes is not in the tree
+     */
+    public Optional<OrderedTuple<Node<V>>> findPathBetween(Node<V> node1, Node<V> node2) {
         Preconditions.checkArgument(contains(node1) && contains(node2));
 
         final Path<Node<V>> nodeOneHierarchy = node1.hierarchy();
@@ -138,10 +168,17 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
         return leaves;
     }
 
+    /**
+     * @param targetDepth the wanted depth of nodes
+     * @return all nodes sharing this depth
+     */
     public MathSet<Node<V>> getNodesAtDepth(int targetDepth) {
         return suchThat(node -> node.getDepth() == targetDepth);
     }
 
+    /**
+     * @return the root node to which every node should be linked
+     */
     public Node<V> getRoot() {
         return root;
     }
