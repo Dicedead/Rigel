@@ -2,8 +2,8 @@ package ch.epfl.rigel.math.graphs.poubelle;
 
 import ch.epfl.rigel.Preconditions;
 import ch.epfl.rigel.math.graphs.Link;
-import ch.epfl.rigel.math.sets.MathSet;
-import ch.epfl.rigel.math.sets.PointedSet;
+import ch.epfl.rigel.math.sets.concrete.MathSet;
+import ch.epfl.rigel.math.sets.concrete.PointedSet;
 import javafx.util.Pair;
 
 import java.util.*;

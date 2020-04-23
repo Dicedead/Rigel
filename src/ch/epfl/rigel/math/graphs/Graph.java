@@ -1,19 +1,20 @@
 package ch.epfl.rigel.math.graphs;
 
-import ch.epfl.rigel.math.sets.MathSet;
-import ch.epfl.rigel.math.sets.OrderedTuple;
-import ch.epfl.rigel.math.sets.SetFunction;
+import ch.epfl.rigel.math.sets.abtract.AbstractMathSet;
+import ch.epfl.rigel.math.sets.abtract.AbstractOrderedTuple;
+import ch.epfl.rigel.math.sets.concrete.MathSet;
+import ch.epfl.rigel.math.sets.concrete.OrderedTuple;
+import ch.epfl.rigel.math.sets.abtract.SetFunction;
 
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Optional;
-import java.util.function.Function;
 
 /**
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-public interface Graph<T, V extends MathSet<T>> {
+public interface Graph<T, V extends AbstractMathSet<T>> {
     /**
      * Gets the set of points linked to given point
      *
@@ -28,14 +29,14 @@ public interface Graph<T, V extends MathSet<T>> {
      * @param point   the point to begin with
      * @return the List of points traversed by the choice function
      */
-    OrderedTuple<T> flow(final SetFunction<V, T> chooser, final T point);
+    AbstractOrderedTuple<T> flow(final SetFunction<V, T> chooser, final T point);
     /**
      * Creates a graph ON given set of vertices
      *
      * @param points (Set<T>)
      * @return (Graph < T, U >) some implementation of Graph<T,U>
      */
-    Graph<T, ? extends MathSet<T>> on(MathSet<T> points);
+    Graph<T, ? extends AbstractMathSet<T>> on(AbstractMathSet<T> points);
     /**
      * A component is a maximally connected subset of a graph
      *
@@ -46,11 +47,11 @@ public interface Graph<T, V extends MathSet<T>> {
     /**
      * @return the Set of connected components of this graph
      */
-    MathSet<Graph<T, V>> connectedComponents();
+    AbstractMathSet<Graph<T, V>> connectedComponents();
     /**
      * @return (MathSet <Link<T>>) getter for immutable set of edges
      */
-    MathSet<Link<T>> edgeSet();
+    AbstractMathSet<Link<T>> edgeSet();
     /**
      * @return (MathSet <T>) getter for immutable set of vertices
      */
@@ -63,7 +64,7 @@ public interface Graph<T, V extends MathSet<T>> {
      * @param point   the point to begin with
      * @return the OrderedTuple of points traversed by the choice function
      */
-    default OrderedTuple<T> flow(final Comparator<T> chooser, final T point) {
+    default AbstractOrderedTuple<T> flow(final Comparator<T> chooser, final T point) {
         return flow((V vertices) -> Collections.max(vertices.getData(), chooser), point);
     }
 

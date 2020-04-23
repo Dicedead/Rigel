@@ -1,23 +1,23 @@
-package ch.epfl.rigel.math.sets;
+package ch.epfl.rigel.math.sets.abtract;
 
-import com.sun.javafx.geom.transform.Identity;
+import ch.epfl.rigel.math.sets.concrete.MathSet;
+import ch.epfl.rigel.math.sets.properties.Equation;
 
-import java.lang.reflect.Method;
-import java.util.Collection;
 import java.util.function.Function;
 
-import static ch.epfl.rigel.math.sets.MathSet.toMathSet;
+import static ch.epfl.rigel.math.sets.concrete.MathSet.toMathSet;
 
 /**
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
+@FunctionalInterface
 public interface SetFunction<T, U> extends Function<T, U> {
     /**
      * @param u the codomain set
      * @return An equation locating all elements that will be mapped in u by this function
      */
-    default Equation<T> preImageOf(final MathSet<U> u)
+    default Equation<T> preImageOf(final AbstractMathSet<U> u)
     {
         return (t -> u.contains(apply(t)));
     }
@@ -36,7 +36,7 @@ public interface SetFunction<T, U> extends Function<T, U> {
      * @param set the set on which to apply the function
      * @return the set containing the image of all elements of set by this function
      */
-    default MathSet<U> apply(MathSet<T> set) {
+    default MathSet<U> apply(AbstractMathSet<T> set) {
         return set.stream().map(this).collect(toMathSet());
     }
 

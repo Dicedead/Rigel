@@ -1,15 +1,16 @@
 package ch.epfl.rigel.math.graphs;
 
-import ch.epfl.rigel.math.sets.MathSet;
-import ch.epfl.rigel.math.sets.OrderedTuple;
-import ch.epfl.rigel.math.sets.PartitionSet;
-import ch.epfl.rigel.math.sets.SetFunction;
+import ch.epfl.rigel.math.sets.abtract.AbstractMathSet;
+import ch.epfl.rigel.math.sets.abtract.AbstractPartitionSet;
+import ch.epfl.rigel.math.sets.concrete.MathSet;
+import ch.epfl.rigel.math.sets.concrete.OrderedTuple;
+import ch.epfl.rigel.math.sets.concrete.PartitionSet;
+import ch.epfl.rigel.math.sets.abtract.SetFunction;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 
 /**
  * @author Alexandre Sallinen (303162)
@@ -88,7 +89,7 @@ public final class Path<T> extends OrderedTuple<T> implements Graph<T, Path<T>> 
     }
 
     @Override
-    public Graph<T, PartitionSet<T>> on(MathSet<T> points) {
+    public Graph<T, AbstractPartitionSet<T>> on(AbstractMathSet<T> points) {
         return new ConcreteGraph<>(this, edgeSet()).on(points);
     }
 

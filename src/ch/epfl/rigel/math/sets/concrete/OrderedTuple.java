@@ -1,0 +1,58 @@
+package ch.epfl.rigel.math.sets.concrete;
+
+import ch.epfl.rigel.math.sets.abtract.AbstractOrderedTuple;
+import ch.epfl.rigel.math.sets.abtract.SetFunction;
+import ch.epfl.rigel.math.sets.concrete.IndexedSet;
+import ch.epfl.rigel.math.sets.properties.Relation;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+/**
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
+public class OrderedTuple<T> extends IndexedSet<T, Integer> implements AbstractOrderedTuple<T> {
+
+    /**
+     * Classic constructor for an IndexedSet
+     * @param t the underlying data
+     * @param indexer the function allowing the order
+     */
+    public OrderedTuple(Collection<T> t, SetFunction<Integer, T> indexer) {
+        super(t, indexer);
+    }
+
+    /**
+     * The constructor from an array, assign each elements to its position in the array
+     * @param t the array to convert
+     */
+    @SafeVarargs
+    public OrderedTuple(final T... t) {
+        super(List.of(t),  i -> t[i]);
+    }
+
+    /**
+     * Constructor allowing to construct an OrderedTuple from any Iterable
+     * @param t the iterable to convert
+     */
+    public OrderedTuple(final Iterable<T> t) {
+        this(iterableToList(t));
+    }
+
+    private static<T> List<T> iterableToList(final Iterable<T> i)
+    {
+        final List<T> target = new ArrayList<>();
+        i.forEach(target::add);
+        return target;
+    }
+
+    public OrderedTuple(final List<T> t) {
+        super(t, t::get);
+    }
+
+}

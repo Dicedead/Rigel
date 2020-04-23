@@ -1,4 +1,4 @@
-package ch.epfl.rigel.math.sets;
+package ch.epfl.rigel.math.sets.concrete;
 
 import java.util.Collection;
 
@@ -6,7 +6,7 @@ import java.util.Collection;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-public final class PointedSet<T> extends MathSet<T> {
+public abstract class PointedSet<T> extends MathSet<T> {
 
     final private T special;
 

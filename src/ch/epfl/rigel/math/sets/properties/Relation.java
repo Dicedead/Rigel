@@ -1,14 +1,26 @@
-package ch.epfl.rigel.math.sets;
+package ch.epfl.rigel.math.sets.properties;
 
 import ch.epfl.rigel.Preconditions;
+import ch.epfl.rigel.math.sets.concrete.MathSet;
+import ch.epfl.rigel.math.sets.abtract.SetFunction;
 
 import static java.lang.Integer.signum;
 
 @FunctionalInterface
 public interface Relation<T, U> {
-
+    /**
+     *
+     * @param t (T)
+     * @param u (T)
+     * @return Whether two elements satisfy the relation
+     */
     U areInRelation(T t, T u);
 
+    /**
+     * Allows to compare an element to a set
+     * @param t (T)
+     * @return the set of possible value to the relation
+     */
     default SetFunction<T, U> partialApply(T t)
     {
         return l -> areInRelation(t, l);

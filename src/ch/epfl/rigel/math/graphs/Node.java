@@ -1,8 +1,9 @@
 package ch.epfl.rigel.math.graphs;
 
 import ch.epfl.rigel.Preconditions;
-import ch.epfl.rigel.math.sets.MathSet;
-import ch.epfl.rigel.math.sets.OrderedTuple;
+import ch.epfl.rigel.math.sets.abtract.AbstractMathSet;
+import ch.epfl.rigel.math.sets.concrete.MathSet;
+import ch.epfl.rigel.math.sets.concrete.OrderedTuple;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -100,7 +101,7 @@ public final class Node<T> {
     }
 
     @SafeVarargs
-    public static <X> MathSet<Node<X>> bunk(Node<X>... nodes) {
+    public static <X> AbstractMathSet<Node<X>> bunk(Node<X>... nodes) {
         return MathSet.of(nodes).image(Node::lockNode);
     }
 

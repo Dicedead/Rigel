@@ -1,10 +1,11 @@
 package ch.epfl.rigel.math.graphs;
 
 import ch.epfl.rigel.Preconditions;
-import ch.epfl.rigel.math.sets.MathSet;
-import ch.epfl.rigel.math.sets.OrderedTuple;
-import ch.epfl.rigel.math.sets.PartitionSet;
-import ch.epfl.rigel.math.sets.SetFunction;
+import ch.epfl.rigel.math.sets.abtract.AbstractMathSet;
+import ch.epfl.rigel.math.sets.concrete.MathSet;
+import ch.epfl.rigel.math.sets.concrete.OrderedTuple;
+import ch.epfl.rigel.math.sets.concrete.PartitionSet;
+import ch.epfl.rigel.math.sets.abtract.SetFunction;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,9 +20,9 @@ import java.util.function.Function;
  */
 public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V>, Tree<V>> {
 
-    private final MathSet<Node<V>> nodes;
-    private final MathSet<Link<Node<V>>> edgeSet;
-    private final MathSet<Node<V>> leaves;
+    private final AbstractMathSet<Node<V>> nodes;
+    private final AbstractMathSet<Link<Node<V>>> edgeSet;
+    private final AbstractMathSet<Node<V>> leaves;
     private final Node<V> root;
     private final int maxDepth;
     /**
@@ -31,8 +32,8 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
      * @param t (Collection<Node<T>>)
      * @throws IllegalArgumentException if given leaves aren't all connected to the same root
      */
-    public Tree(Collection<MathSet<Node<V>>> t) {
-        this(unionOf(t));
+    public Tree(Collection<AbstractMathSet<Node<V>>> t) {
+        this(AbstractMathSet.unionOf(t));
     }
     /**
      * Main Constructor of Tree using parameter Nodes' inner hierarchy to construct the directed graph
@@ -41,11 +42,11 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
      * @param nodes (Collection<Node<T>>)
      * @throws IllegalArgumentException if given leaves aren't all connected to the same root
      */
-    public Tree(MathSet<Node<V>> nodes) {
+    public Tree(AbstractMathSet<Node<V>> nodes) {
         this(nodes, true, nodes.minOf(Node::getDepth));
     }
 
-    private Tree(MathSet<Node<V>> nodes, boolean securityChecksActivated, Node<V> root) {
+    private Tree(AbstractMathSet<Node<V>> nodes, boolean securityChecksActivated, Node<V> root) {
         super(nodes, Node::areRelatedRootless);
 
         if (securityChecksActivated) {
@@ -60,7 +61,7 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
         this.maxDepth = nodes.maxOf(Node::getDepth).getDepth();
         this.root = root;
         this.leaves = nodes.suchThat(node -> node.getDepth() == maxDepth);
-        final MathSet<Node<V>> nonRoots = nodes.suchThat(node -> !node.equals(root));
+        final AbstractMathSet<Node<V>> nonRoots = nodes.suchThat(node -> !node.equals(root));
         this.edgeSet = (nonRoots.cardinality() <= 1) ? emptySet() : nonRoots.image(n -> new Link<>(n, n.getParent().orElse(null)));
         this.nodes = nodes;
     }
@@ -76,7 +77,7 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
      * @return The points for which point is their parent
      */
     public Optional<Tree<V>> getChildren(Node<V> point) {
-        final MathSet<Node<V>> children = getNodesAtDepth(point.getDepth() + 1).suchThat(point::isParentOf);
+        final AbstractMathSet<Node<V>> children = getNodesAtDepth(point.getDepth() + 1).suchThat(point::isParentOf);
         return children.isEmpty() ? Optional.empty() : Optional.of(new Tree<>(children, false, point));
     }
 
@@ -121,7 +122,7 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
 
         final Path<Node<V>> nodeOneHierarchy = node1.hierarchy();
         final Path<Node<V>> nodeTwoHierarchy = node2.hierarchy();
-        final MathSet<Node<V>> aut = nodeOneHierarchy.intersection(nodeTwoHierarchy);
+        final AbstractMathSet<Node<V>> aut = nodeOneHierarchy.intersection(nodeTwoHierarchy);
 
         if (aut.contains(node1) || aut.contains(node2))
         {
@@ -135,7 +136,7 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
     }
 
     @Override
-    public Graph<Node<V>, ? extends MathSet<Node<V>>> on(MathSet<Node<V>> points) {
+    public Graph<Node<V>, ? extends AbstractMathSet<Node<V>>> on(AbstractMathSet<Node<V>> points) {
         return new ConcreteGraph<>(new PartitionSet<>(intersection(points),
                 (a, b) -> points.containsSet(new OrderedTuple<>(findPathBetween(a,b).orElseThrow()))),
                 edgeSet().suchThat(points::containsSet));
@@ -147,12 +148,12 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
     }
 
     @Override
-    public MathSet<Graph<Node<V>, Tree<V>>> connectedComponents() {
+    public AbstractMathSet<Graph<Node<V>, Tree<V>>> connectedComponents() {
         return new MathSet<>(Collections.singleton(this));
     }
 
     @Override
-    public MathSet<Link<Node<V>>> edgeSet() {
+    public AbstractMathSet<Link<Node<V>>> edgeSet() {
         return edgeSet;
     }
 
@@ -164,7 +165,7 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
     /**
      * @return the points that have a parent but no children
      */
-    public MathSet<Node<V>> getLeaves() {
+    public AbstractMathSet<Node<V>> getLeaves() {
         return leaves;
     }
 
@@ -172,7 +173,7 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
      * @param targetDepth the wanted depth of nodes
      * @return all nodes sharing this depth
      */
-    public MathSet<Node<V>> getNodesAtDepth(int targetDepth) {
+    public AbstractMathSet<Node<V>> getNodesAtDepth(int targetDepth) {
         return suchThat(node -> node.getDepth() == targetDepth);
     }
 
