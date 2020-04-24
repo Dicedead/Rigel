@@ -2,7 +2,7 @@ package ch.epfl.rigel.math.sets;
 
 import ch.epfl.rigel.Preconditions;
 
-public class OrderedSet<T> extends MathSet<T> {
+public final class OrderedSet<T> extends MathSet<T> {
     private final Relation.Order<T> comparator;
 
     public OrderedSet(MathSet<T> m,Relation.Order<T> comparator) {

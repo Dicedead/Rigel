@@ -44,7 +44,11 @@ public final class Node<T> {
      * @param value  (T) value stored in the node
      * @param parent (Node<T>) non null parent node
      */
-    private Node(T value, Node<T> parent) {
+    public Node(T value, Node<T> parent) {
+        if (parent != null) {
+            Preconditions.checkArgument(!parent.lockNode);
+            ++parent.nmbrOfChildren;
+        }
         this.value = value;
         this.parent = parent;
         this.depth = (parent == null) ? 0 : parent.getDepth() + 1;
@@ -59,8 +63,6 @@ public final class Node<T> {
      * @return (Node < T >) said node containing said value
      */
     public Node<T> createChild(final T childValue) {
-        Preconditions.checkArgument(!lockNode);
-        ++nmbrOfChildren;
         return new Node<>(childValue, this);
     }
 
@@ -147,5 +149,9 @@ public final class Node<T> {
             nodeDeque.addLast(nodeDeque.getLast().parent);
             return hierarchyRecur(nodeDeque);
         }
+    }
+
+    public String toString() {
+        return getValue().toString();
     }
 }

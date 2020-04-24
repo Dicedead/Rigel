@@ -217,17 +217,17 @@ public class MathSet<T> implements Iterable<T> {
     }
 
     @Override
-    public final Iterator<T> iterator() {
+    public Iterator<T> iterator() {
         return data.iterator();
     }
 
     @Override
-    public final Spliterator<T> spliterator() {
+    public Spliterator<T> spliterator() {
         return data.spliterator();
     }
 
     @Override
-    public final void forEach(Consumer<? super T> action) {
+    public void forEach(Consumer<? super T> action) {
         data.forEach(action);
     }
 

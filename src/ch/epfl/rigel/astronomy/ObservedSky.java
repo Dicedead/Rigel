@@ -83,9 +83,9 @@ public final class ObservedSky {
                 .collect(Collectors.toList()), this::applyModel, i -> PLANET_NAMES.indexOf(i.name())));
         this.starMap = Collections.unmodifiableMap(toTreeMap(catalogue.stars(), Function.identity(), catalogue.starIndexMap()::get));
 
-        this.celestObjToCoordsMap = Stream.of(starMap, planetMap, sunMap, moonMap)
+        this.celestObjToCoordsMap = Collections.unmodifiableMap(Stream.of(starMap, planetMap, sunMap, moonMap)
                 .flatMap(l -> l.entrySet().stream())
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (u, v) -> v, HashMap::new));
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (u, v) -> v, HashMap::new)));
 
         this.sunPosition = (CartesianCoordinates) sunMap.values().toArray()[0];
         this.sun = (Sun) sunMap.keySet().toArray()[0];
@@ -192,6 +192,14 @@ public final class ObservedSky {
      */
     public CartesianCoordinates moonPosition() {
         return moonPosition;
+    }
+
+    /**
+     * @return (Map<CelestialObject, CartesianCoordinates>) immutable map of all celestial objects along with
+     *          their cartesian position
+     */
+    public Map<CelestialObject, CartesianCoordinates> celestialObjMap() {
+        return celestObjToCoordsMap;
     }
 
     /**
