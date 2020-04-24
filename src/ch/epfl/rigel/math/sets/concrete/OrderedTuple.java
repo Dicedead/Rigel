@@ -2,15 +2,11 @@ package ch.epfl.rigel.math.sets.concrete;
 
 import ch.epfl.rigel.math.sets.abtract.AbstractOrderedTuple;
 import ch.epfl.rigel.math.sets.abtract.SetFunction;
-import ch.epfl.rigel.math.sets.concrete.IndexedSet;
-import ch.epfl.rigel.math.sets.properties.Relation;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 
 /**
  * @author Alexandre Sallinen (303162)
@@ -33,7 +29,7 @@ public class OrderedTuple<T> extends IndexedSet<T, Integer> implements AbstractO
      */
     @SafeVarargs
     public OrderedTuple(final T... t) {
-        super(List.of(t),  i -> t[i]);
+        super(List.of(t), i -> t[i]);
     }
 
     /**

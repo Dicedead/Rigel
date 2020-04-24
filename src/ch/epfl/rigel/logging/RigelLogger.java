@@ -1,9 +1,7 @@
 package ch.epfl.rigel.logging;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.module.Configuration;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.*;

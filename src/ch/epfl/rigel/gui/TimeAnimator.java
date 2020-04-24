@@ -1,58 +1,60 @@
 package ch.epfl.rigel.gui;
 
 import javafx.animation.AnimationTimer;
-import javafx.beans.property.Property;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 
+/**
+ * Periodic time modifier
+ *
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public final class TimeAnimator extends AnimationTimer {
+
     private final DateTimeBean dateTimeBean;
-
-    public void setAccelerator(TimeAccelerator a)
-    {
-        accelerator.setValue(a);
-    }
-
-    private Property<TimeAccelerator> accelerator;
-    private SimpleBooleanProperty running;
+    private final ObjectProperty<TimeAccelerator> accelerator;
+    private final SimpleBooleanProperty running;
     private long last;
-    public TimeAnimator(DateTimeBean d) {
-        dateTimeBean = d;
-        last = 0;
-        accelerator = null;
+
+    /**
+     * Creates a new TimeAnimator modifying parameter dtBean
+     *
+     * @param dtBean (DateTimeBean) mutable ZonedDateTime instance
+     */
+    public TimeAnimator(DateTimeBean dtBean) {
+        dateTimeBean = dtBean;
+        accelerator = new SimpleObjectProperty<>(null);
+        running = new SimpleBooleanProperty();
     }
 
     /**
-     * This method needs to be overridden by extending classes. It is going to
-     * be called in every frame while the {@code AnimationTimer} is active.
+     * Advances time until 'now', given in nanoseconds
      *
-     * @param now The timestamp of the current frame given in nanoseconds. This
-     *            value will be the same for all {@code AnimationTimers} called
-     *            during one frame.
+     * @see AnimationTimer#handle(long)
+     * @param now (long) nanoseconds
      */
     @Override
     public void handle(long now) {
-
-        dateTimeBean.setZonedDateTime(accelerator.getValue().adjust(dateTimeBean.getZonedDateTime(), now - last));
+        dateTimeBean.setZonedDateTime(accelerator.get().adjust(dateTimeBean.getZonedDateTime(), now - last));
         last = now;
     }
 
     /**
-     * Starts the {@code AnimationTimer}. Once it is started, the
-     * {@link #handle(long)} method of this {@code AnimationTimer} will be
-     * called in every frame.
-     * <p>
-     * The {@code AnimationTimer} can be stopped by calling {@link #stop()}.
+     * @see AnimationTimer#start()
      */
     @Override
     public void start() {
         super.start();
+        last = System.nanoTime();
+        handle(last);
         running.set(true);
     }
 
     /**
-     * Stops the {@code AnimationTimer}. It can be activated again by calling
-     * {@link #start()}.
+     * @see AnimationTimer#stop()
      */
     @Override
     public void stop() {
@@ -60,7 +62,27 @@ public final class TimeAnimator extends AnimationTimer {
         running.set(false);
     }
 
-    public ReadOnlyBooleanProperty isRunning() {
+    /**
+     * Sets input TimeAccelerator a onto modified DateTimeBean
+     *
+     * @param a (TimeAccelerator)
+     */
+    public void setAccelerator(TimeAccelerator a) {
+        accelerator.set(a);
+    }
+
+    /**
+     * @return (ReadOnlyBooleanProperty) subject / observable boolean property: TimeAnimator running
+     */
+    public ReadOnlyBooleanProperty runningProperty() {
         return running;
+    }
+
+    /**
+     * @see TimeAnimator#runningProperty()
+     * @return (boolean) boolean value of running property
+     */
+    public boolean isRunning() {
+        return running.get();
     }
 }

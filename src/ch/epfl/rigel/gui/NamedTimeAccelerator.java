@@ -1,8 +1,6 @@
 package ch.epfl.rigel.gui;
 
 import java.time.Duration;
-import java.time.ZonedDateTime;
-import java.util.function.BiFunction;
 
 /**
  * Enum predefining time simulators (named: timed accelerators) and giving them names
@@ -17,7 +15,7 @@ public enum NamedTimeAccelerator {
     TIMES_300("300x", TimeAccelerator.continuous(300)),
     TIMES_3000("3000x", TimeAccelerator.continuous(3000)),
     DAY("jour", TimeAccelerator.discrete(60, Duration.ofHours(24))),
-    SIDEREAL_DAY("jour sidéral", TimeAccelerator.discrete(60, Duration.parse("23:56:04")));
+    SIDEREAL_DAY("jour sidéral", TimeAccelerator.discrete(60, Duration.parse("PT23H56M04S")));
 
     private final String name;
     private final TimeAccelerator accelerator;
@@ -35,7 +33,7 @@ public enum NamedTimeAccelerator {
     }
 
     /**
-     * @return (BiFunction<ZonedDateTime, Long, ZonedDateTime>) this accelerator's simulation function
+     * @return (TimeAccelerator) this accelerator
      */
     public TimeAccelerator getAccelerator() {
         return accelerator;

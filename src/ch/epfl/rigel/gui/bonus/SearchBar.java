@@ -1,4 +1,4 @@
-package ch.epfl.rigel.gui;
+package ch.epfl.rigel.gui.bonus;
 
 import ch.epfl.rigel.Preconditions;
 import ch.epfl.rigel.astronomy.CelestialObject;
@@ -10,9 +10,10 @@ import ch.epfl.rigel.astronomy.Sun;
 import ch.epfl.rigel.coordinates.EquatorialCoordinates;
 import ch.epfl.rigel.math.graphs.Node;
 import ch.epfl.rigel.math.graphs.Tree;
-import ch.epfl.rigel.math.sets.MathSet;
-import ch.epfl.rigel.math.sets.OrderedTuple;
-import ch.epfl.rigel.math.sets.PartitionSet;
+import ch.epfl.rigel.math.sets.abtract.AbstractMathSet;
+import ch.epfl.rigel.math.sets.concrete.MathSet;
+import ch.epfl.rigel.math.sets.concrete.OrderedTuple;
+import ch.epfl.rigel.math.sets.concrete.PartitionSet;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -56,7 +57,7 @@ public final class SearchBar {
             return new Tree<>(MathSet.emptySet());
         }
 
-        final OrderedTuple<MathSet<CelestialObject>> lengthsSet = new OrderedTuple<>(
+        final OrderedTuple<AbstractMathSet<CelestialObject>> lengthsSet = new OrderedTuple<>(
                 partitionLengths.components().stream()
                         .sorted(Comparator.comparingInt(set -> stringFunc.apply(set.getElement()).length()))
                         .collect(Collectors.toCollection(ArrayList::new)));
@@ -78,8 +79,8 @@ public final class SearchBar {
     }
 
     private void createSearchTreeRecur(final Set<Node<CelestialObject>> workSet, final Node<CelestialObject> currNode,
-            final MathSet<CelestialObject> nextLengthSet, final Function<CelestialObject, String> stringFunc,
-            final OrderedTuple<MathSet<CelestialObject>> orderedSets, final int currentDepth, final Node<CelestialObject> root) {
+            final AbstractMathSet<CelestialObject> nextLengthSet, final Function<CelestialObject, String> stringFunc,
+            final OrderedTuple<AbstractMathSet<CelestialObject>> orderedSets, final int currentDepth, final Node<CelestialObject> root) {
 
         nextLengthSet.stream()
             .forEach(celestObj -> {

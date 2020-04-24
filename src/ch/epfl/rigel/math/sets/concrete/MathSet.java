@@ -1,9 +1,6 @@
 package ch.epfl.rigel.math.sets.concrete;
 
-import ch.epfl.rigel.math.sets.Maybe;
 import ch.epfl.rigel.math.sets.abtract.AbstractMathSet;
-import ch.epfl.rigel.math.sets.abtract.SetFunction;
-import javafx.util.Pair;
 
 import java.util.*;
 import java.util.function.*;
@@ -56,7 +53,7 @@ public class MathSet<T> implements AbstractMathSet<T> {
     }
 
     /**
-     * Set theoristic union
+     * Set theoretical union
      * @param others the Sets to union with
      * @return A MathSet containing all elements that lies in one of the sets
      */

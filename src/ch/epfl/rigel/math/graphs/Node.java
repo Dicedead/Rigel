@@ -61,7 +61,7 @@ public final class Node<T> {
      * Creates a Node with this as parent and 'childValue' as value
      *
      * @param childValue (T) child node's value
-     * @return (Node < T >) said node containing said value
+     * @return (Node <T>) said node containing said value
      */
     public Node<T> createChild(final T childValue) {
         return new Node<>(childValue, this);
@@ -84,7 +84,7 @@ public final class Node<T> {
     }
 
     /**
-     * @return (Optional < Node < T > >) this node's parent, Optional.empty if null
+     * @return (Optional <Node <T>>) this node's parent, Optional.empty if null
      */
     public Optional<Node<T>> getParent() {
         return parent == null ? Optional.empty() : Optional.of(parent);
@@ -118,10 +118,13 @@ public final class Node<T> {
         return this.equals(potentialChild.getParent().orElse(null));
     }
 
+    public boolean isParent() { return nmbrOfChildren != 0; }
+
     /**
-     * Checks whether the two given nodes are in the same branch.
+     * Checks whether the two given nodes are in the same branch - NOT an equivalence relation
      * Note that any Node is always related to all nodes created through createChild applied upon it and its
-     * descendants.
+     * descendants. This particularly means that the root of all current nodes is related to all nodes - useful
+     * for family-checking.
      *
      * @param node1 starting node
      * @param node2 finishing node
@@ -132,6 +135,24 @@ public final class Node<T> {
         return node1.hierarchy.contains(node2) || node2.hierarchy.contains(node1);
     }
 
+    /**
+     * Defines an equivalence relation on nodes.
+     * Example: consider the following structural tree (java source code format):
+     *       1
+     *      / \
+     *     2   3
+     *    / \   \
+     *   4   5   6
+     *   where the root is 1, its two children are 2 and 3, then 3 has a unique child, 6, and 2 has two children, 4 and 5.
+     *   The set {1, 2, 3, 4, 5, 6} is partitioned into 5 sets: {4}, {5}, {3, 6}, {2}, {1}.
+     *   Generally speaking, two nodes a and b are related iff they are inside the same branch of nodes with exactly 1
+     *   child each OR they're the last node in the branch (ie, the first one to not have exactly 1 child node).
+     *
+     * @param node1 (Node<X>)
+     * @param node2 (Node<X>)
+     * @param <X> type of value stored inside the node
+     * @return (boolean) boolean value of: node1 ~ node2
+     */
     public static <X> boolean areRelatedRootless(Node<X> node1, Node<X> node2) {
         if (node1.equals(node2)) return true;
         if (!areRelated(node1, node2)) return false;
@@ -140,7 +161,6 @@ public final class Node<T> {
                 node1.hierarchy : node2.hierarchy;
         return chosenHier.stream().takeWhile(node -> node.nmbrOfChildren <= 1)
                 .collect(Collectors.toSet()).containsAll(Set.of(node1, node2));
-
     }
 
     private Deque<Node<T>> hierarchyRecur(final Deque<Node<T>> nodeDeque) {
@@ -152,6 +172,9 @@ public final class Node<T> {
         }
     }
 
+    /**
+     * @see Object#toString()
+     */
     public String toString() {
         return getValue().toString();
     }

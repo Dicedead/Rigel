@@ -2,6 +2,10 @@ package ch.epfl.rigel.math.sets.abtract;
 
 import ch.epfl.rigel.Preconditions;
 
+/**
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public interface AbstractPartitionSet<T> extends AbstractMathSet<T>{
      /**
      *

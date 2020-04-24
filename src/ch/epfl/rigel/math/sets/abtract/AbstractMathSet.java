@@ -4,7 +4,6 @@ import ch.epfl.rigel.math.sets.*;
 import ch.epfl.rigel.math.sets.concrete.MathSet;
 import ch.epfl.rigel.math.sets.properties.Equation;
 import javafx.util.Pair;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -12,6 +11,10 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public interface AbstractMathSet<T> extends Iterable<T> {
 
     /**
@@ -70,6 +73,7 @@ public interface AbstractMathSet<T> extends Iterable<T> {
         return stream().findFirst().orElseThrow(
                 () -> new NoSuchElementException("Tried to get element from empty set."));
     }
+
     /**
      * @param equation the property to respect
      * @return an element from the current set respecting equation
@@ -108,33 +112,34 @@ public interface AbstractMathSet<T> extends Iterable<T> {
         return union(Collections.singleton(others));
     }
     /**
-     * Set theoristic union
+     * Set theoretical union
      * @param others the Sets to union with
      * @return A MathSet containing all elements that lies in one of the sets
      */
     AbstractMathSet<T> union(final Collection<AbstractMathSet<T>> others);
+
     /**
      * The directsum construct a space containing a copy of all sets
      * @param others the other sets in the directsum
      * @param <U> the type of the other Sets
      * @return a set containing this set and others as copies inside him
      */
-    default <U> AbstractMathSet<Maybe<T, U>> directSum(final AbstractMathSet<U> others)
+    default <U> AbstractMathSet<OptionalPair<T, U>> directSum(final AbstractMathSet<U> others)
     {
         return directSum(Collections.singleton(others));
     }
     /**
-     * The directsum construct a space containing a copy of all sets
+     * The direct sum construct a space containing a copy of all sets
      * @param other the other sets in the directsum
      * @param <U> the type of the other Sets
      * @return a set containing this set and others as copies inside him
      */
-    default <U> AbstractMathSet<Maybe<T, U>> directSum(final Collection<AbstractMathSet<U>> other) {
-        return image(t -> new Maybe<T, U>(t, null)).union(other.stream().map(s -> s.image(u -> new Maybe<T, U>(null, u)))
+    default <U> AbstractMathSet<OptionalPair<T, U>> directSum(final Collection<AbstractMathSet<U>> other) {
+        return image(t -> new OptionalPair<T, U>(t, null)).union(other.stream().map(s -> s.image(u -> new OptionalPair<T, U>(null, u)))
                 .collect(Collectors.toList()));
     }
     /**
-     * Set theoristic union followed by a cartesian product
+     * Set theoretical union followed by a cartesian product
      * @param others the Collection of Sets to "multiply" with
      * @return A MathSet containing all possible pairs of elements from other and all other MathSets in other
      */
@@ -170,6 +175,8 @@ public interface AbstractMathSet<T> extends Iterable<T> {
     /**
      * The powerSet is the set of all subsets of a set, it allows to navigate through subsets
      * @return The powerset of the current MathSet
+     *
+     * Adapted from
      */
     AbstractMathSet<AbstractMathSet<T>> powerSet();
 
@@ -178,7 +185,7 @@ public interface AbstractMathSet<T> extends Iterable<T> {
             return Set.of();
 
         final T firstElement = set.iterator().next();
-        Set<T> subset = new HashSet<>(set);
+        final Set<T> subset = new HashSet<>(set);
         subset.remove(firstElement);
         final Collection<Set<T>> subPowerSet = powerSet(subset);
         Set<Set<T>> powerSet = new HashSet<>();
@@ -269,7 +276,7 @@ public interface AbstractMathSet<T> extends Iterable<T> {
     }
 
     @Override
-    default @NotNull Iterator<T> iterator()
+    default Iterator<T> iterator()
     {
         return getData().iterator();
     }
