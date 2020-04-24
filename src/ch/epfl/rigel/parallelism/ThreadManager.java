@@ -25,13 +25,6 @@ public final class ThreadManager {
     private final Map<String, ExecutorService> executorServiceMap = new HashMap<>();
     private final Map<String, ForkJoinPool> forkJoinPoolMap = new HashMap<>();
     private final ThreadFactory factory;
-    private Tree<RigelTask> taskTree;
-
-
-    public void assign(RigelTask.Difficulty forkjoinLimit)
-    {
-        //taskTree.getLeaves().stream().forEach();
-    }
 
     /**
      * Method allowing to ad a new executors service, useful to separate different usages

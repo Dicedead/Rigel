@@ -2,14 +2,14 @@ package ch.epfl.rigelTest.math.graphsAndTrees;
 
 import ch.epfl.rigel.math.graphs.Node;
 import ch.epfl.rigel.math.graphs.Tree;
-import ch.epfl.rigel.math.sets.OrderedTuple;
+import ch.epfl.rigel.math.sets.abtract.AbstractOrderedTuple;
+import ch.epfl.rigel.math.sets.concrete.OrderedTuple;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -34,14 +34,12 @@ public class TreeTest {
 
     @Test
     void construcThrows() {
-        assertThrows(IllegalArgumentException.class, () -> {
-           new Tree<>(Node.bunk(new Node<>(5), new Node<>(6)));
-        });
+        assertThrows(IllegalArgumentException.class, () -> new Tree<>(Node.bunk(new Node<>(5), new Node<>(6))));
     }
 
     @Test
     void findPathBetweenTest() {
-        System.out.println(intTree.findPathBetween(child21, child12).get().image(Node::getValue));
+        System.out.println(intTree.findPathBetween(child21, child12).orElseThrow().image(Node::getValue));
     }
 
     @Test
@@ -56,7 +54,7 @@ public class TreeTest {
 
     @Test
     void flowTest() {
-        OrderedTuple<Node<Integer>> set = intTree.flow(Comparator.comparingInt(Node::getValue),root);
+        AbstractOrderedTuple<Node<Integer>> set = intTree.flow(Comparator.comparingInt(Node::getValue),root);
         assertEquals(Set.of(0,2,4), set.image(Node::getValue).getData());
     }
 
