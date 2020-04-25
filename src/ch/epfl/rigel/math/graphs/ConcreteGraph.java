@@ -2,11 +2,8 @@ package ch.epfl.rigel.math.graphs;
 
 import ch.epfl.rigel.math.sets.*;
 import ch.epfl.rigel.math.sets.abtract.AbstractMathSet;
-import ch.epfl.rigel.math.sets.abtract.AbstractOrderedTuple;
 import ch.epfl.rigel.math.sets.abtract.AbstractPartitionSet;
-import ch.epfl.rigel.math.sets.abtract.SetFunction;
 import ch.epfl.rigel.math.sets.concrete.MathSet;
-import ch.epfl.rigel.math.sets.concrete.OrderedTuple;
 import ch.epfl.rigel.math.sets.concrete.PartitionSet;
 
 import java.util.*;
@@ -50,7 +47,7 @@ public final class ConcreteGraph<T> extends MathSet<Maybe<T, Link<T>>> implement
      */
     public ConcreteGraph(AbstractMathSet<Maybe<T, Link<T>>> mathSet) {
         super(mathSet.getData());
-        vertices = new PartitionSet<>(mathSet.image(p -> p.getKey().orElse(null)), (T v, T u) -> rec(of(u)).contains(v));
+        vertices = new PartitionSet<>(mathSet.image(p -> p.getKey().orElse(null)), (T v, T u) -> neighboursOf(of(u)).contains(v));
         this.edges = new MathSet<>(mathSet.image(p -> p.getValue().orElse(null)));
 
     }
@@ -59,29 +56,6 @@ public final class ConcreteGraph<T> extends MathSet<Maybe<T, Link<T>>> implement
     @Override
     public Optional<AbstractPartitionSet<T>> getNeighbours(final T point) {
         return Optional.of(new PartitionSet<>(edges.suchThat(l -> l.contains(point)).image(p -> p.next(point))));
-    }
-
-    @Override
-    public AbstractOrderedTuple<T> flow(final SetFunction<AbstractPartitionSet<T>, T> chooser, final T point) {
-        if (getNeighbours(point).isEmpty())
-            return new OrderedTuple<>(point);
-        final List<T> flowList = flow(chooser, chooser.apply(getNeighbours(point).get())).toList();
-        flowList.add(point);
-        Collections.reverse(flowList);
-        return new OrderedTuple<>(flowList);
-    }
-
-
-    private AbstractMathSet<T> rec(AbstractMathSet<T> t)
-    {
-        SetFunction<T, Optional<AbstractPartitionSet<T>>> f = this::getNeighbours;
-
-        var a = f.andThen(Optional::isPresent).preImageOf(true).solveIn(t);
-        if (a.cardinality() == 0)
-            return of();
-
-        var b = AbstractMathSet.unionOf(a.image(f.andThen(Optional::get)));
-        return a.union(rec(b));
     }
 
     @Override
@@ -98,7 +72,6 @@ public final class ConcreteGraph<T> extends MathSet<Maybe<T, Link<T>>> implement
     public AbstractMathSet<Graph<T, AbstractPartitionSet<T>>> connectedComponents() {
         return vertexSet().components().image(this::on);
     }
-
 
     @Override
     public AbstractMathSet<Link<T>> edgeSet() {

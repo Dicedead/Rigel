@@ -18,14 +18,18 @@ public interface AbstractOrderedTuple<T> extends AbstractIndexedSet<T, Integer>,
 
     default T next (T t)
     {
-        return at(toList().indexOf(t) + 1);
+
+        return t.equals(tail()) ? t : at(indexOf(t) + 1);
     }
 
     default T prev (T t)
     {
-        return at(toList().indexOf(t) - 1);
+        return t.equals(head()) ? t : at(toList().indexOf(t) - 1);
     }
 
+
+    default T tail(){return  at(cardinality() -1);}
+    default T head(){return at(0);}
     default int indexOf(T t)
     {
         return toList().indexOf(t);

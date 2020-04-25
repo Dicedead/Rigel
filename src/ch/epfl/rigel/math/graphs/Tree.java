@@ -2,6 +2,7 @@ package ch.epfl.rigel.math.graphs;
 
 import ch.epfl.rigel.Preconditions;
 import ch.epfl.rigel.math.sets.abtract.AbstractMathSet;
+import ch.epfl.rigel.math.sets.abtract.AbstractOrderedTuple;
 import ch.epfl.rigel.math.sets.concrete.MathSet;
 import ch.epfl.rigel.math.sets.concrete.OrderedTuple;
 import ch.epfl.rigel.math.sets.concrete.PartitionSet;
@@ -117,7 +118,7 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
      * @return (Path<Node<T>>) the shortest path in the graph from point a to b
      * @throws IllegalArgumentException if either of the two nodes is not in the tree
      */
-    public Optional<OrderedTuple<Node<V>>> findPathBetween(Node<V> node1, Node<V> node2) {
+    public Optional<AbstractOrderedTuple<Node<V>>> findPathBetween(Node<V> node1, Node<V> node2) {
         Preconditions.checkArgument(contains(node1) && contains(node2));
 
         final Path<Node<V>> nodeOneHierarchy = node1.hierarchy();
