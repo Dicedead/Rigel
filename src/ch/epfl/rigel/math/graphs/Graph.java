@@ -35,7 +35,7 @@ public interface Graph<T, V extends AbstractMathSet<T>> {
     /**
      * A component is a maximally connected subset of a graph
      *
-     * @param point the point on which we want the compponent
+     * @param point the point on which we want the component
      * @return the component onn which this point lies
      */
     Graph<T, V> connectedComponent(final T point);
@@ -44,11 +44,11 @@ public interface Graph<T, V extends AbstractMathSet<T>> {
      */
     AbstractMathSet<Graph<T, V>> connectedComponents();
     /**
-     * @return (MathSet <Link<T>>) getter for immutable set of edges
+     * @return (AbstractMathSet<Link<T>>) getter for immutable set of edges
      */
     AbstractMathSet<Link<T>> edgeSet();
     /**
-     * @return (MathSet <T>) getter for immutable set of vertices
+     * @return (AbstractMathSet<T>) getter for immutable set of vertices
      */
     V vertexSet();
 

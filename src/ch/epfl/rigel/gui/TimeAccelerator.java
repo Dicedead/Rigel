@@ -2,7 +2,6 @@ package ch.epfl.rigel.gui;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
-import java.util.function.BiFunction;
 
 /**
  * Functional interface for time variation simulating
@@ -35,7 +34,7 @@ public interface TimeAccelerator {
      * @return TimeAccelerator
      */
     static TimeAccelerator continuous(final int factor) {
-        return (ZonedDateTime time, long nanos) -> time.plusNanos(factor * nanos);
+        return (time, nanos) -> time.plusNanos(factor * nanos);
     }
 
     /**
@@ -45,12 +44,11 @@ public interface TimeAccelerator {
      * taking a ZonedDateTime T0 and a long n as inputs with n corresponding to the real time elapsed between the
      * returned time and T0 in nanoseconds
      *
-     * @param freq (int) rescales how many discrete steps are taken per real time unit
+     * @param freq (int) rescales how many discrete steps are taken per real time in Hertz
      * @param step (Duration) advancement step the simulation
      * @return TimeAccelerator
      */
     static TimeAccelerator discrete(final int freq, final Duration step) {
-        return (ZonedDateTime time, long nanos) -> time.plusNanos(step.toNanos() * (long) Math.floor(freq * nanos));
+        return (time, nanos) -> time.plusNanos(step.toNanos() * (long) Math.floor(nanos * freq * 1e-9));
     }
-
 }

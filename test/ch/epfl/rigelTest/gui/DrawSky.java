@@ -1,4 +1,4 @@
-package ch.epfl.rigel.gui;
+package ch.epfl.rigelTest.gui;
 
 import ch.epfl.rigel.astronomy.AsterismLoader;
 import ch.epfl.rigel.astronomy.HygDatabaseLoader;
@@ -8,6 +8,9 @@ import ch.epfl.rigel.coordinates.GeographicCoordinates;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.coordinates.StereographicProjection;
 import ch.epfl.rigel.coordinates.PlanarTransformation;
+import ch.epfl.rigel.gui.BlackBodyColor;
+import ch.epfl.rigel.gui.NamedTimeAccelerator;
+import ch.epfl.rigel.gui.SkyCanvasPainter;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
@@ -18,6 +21,7 @@ import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Duration;
 import java.time.ZonedDateTime;
 
 /**

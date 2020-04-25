@@ -1,7 +1,6 @@
 package ch.epfl.rigel.gui;
 
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 
 import java.time.LocalDate;
@@ -9,61 +8,102 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
+/**
+ * JavaFX bean representing a ZonedDateTime with 3 properties: date, time and timezone
+ *
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public final class DateTimeBean {
 
+    private final ObjectProperty<LocalDate> dateProperty = new SimpleObjectProperty<>(null);
+    private final ObjectProperty<LocalTime> timeProperty = new SimpleObjectProperty<>(null);
+    private final ObjectProperty<ZoneId> zoneProperty = new SimpleObjectProperty<>(null);
 
-    private LocalDate date  = null;
-    private LocalTime time  = null;
-    private ZoneId zone     = null;
-
-    public ObjectProperty<LocalDate> dateProperty()
-    {
-        return  new SimpleObjectProperty<>(date);
+    /**
+     * @return (ObjectProperty<LocalDate>) observable: date property
+     */
+    public ObjectProperty<LocalDate> dateProperty() {
+        return dateProperty;
     }
+
+    /**
+     * @return (LocalDate) value of observable: date
+     */
     public LocalDate getDate() {
-        return date;
+        return dateProperty.get();
     }
 
+    /**
+     * Setter for observable: date property
+     *
+     * @param date (LocalDate) date to be set to
+     */
     public void setDate(final LocalDate date) {
-        this.date = date;
+        dateProperty.set(date);
     }
 
-    public ObjectProperty<LocalTime> timeProperty()
-    {
-        return  new SimpleObjectProperty<>(time);
+    /**
+     * @return (ObjectProperty<LocalTime>) observable: time property
+     */
+    public ObjectProperty<LocalTime> timeProperty() {
+        return timeProperty;
     }
 
+    /**
+     * @return (LocalTime) value of observable: time
+     */
     public LocalTime getTime() {
-        return time;
+        return timeProperty.get();
     }
 
+    /**
+     * Setter for observable: time property
+     *
+     * @param time (LocalTime) time to be set to
+     */
     public void setTime(final LocalTime time) {
-        this.time = time;
+        timeProperty.set(time);
     }
 
-    public ObjectProperty<ZoneId> zoneProperty()
-    {
-        return  new SimpleObjectProperty<>(zone);
+    /**
+     * @return (ObjectProperty<ZoneId>) observable: timezone property
+     */
+    public ObjectProperty<ZoneId> zoneProperty() {
+        return zoneProperty;
     }
 
+    /**
+     * @return (ZoneId) value of observable: timezone
+     */
     public ZoneId getZone() {
-        return zone;
+        return zoneProperty.get();
     }
 
+    /**
+     * Setter for observable: timezone property
+     *
+     * @param zone (ZonedId) zone to be set to
+     */
     public void setZone(final ZoneId zone) {
-        this.zone = zone;
+        zoneProperty.set(zone);
     }
 
-    public ZonedDateTime getZonedDateTime()
-    {
-        return ZonedDateTime.of(date, time, zone);
+    /**
+     * @return (ZonedDateTime) current ZonedDateTime, with current date, time and timezone values
+     */
+    public ZonedDateTime getZonedDateTime() {
+        return ZonedDateTime.of(dateProperty.get(), timeProperty.get(), zoneProperty.get());
     }
 
-    public void setZonedDateTime(final ZonedDateTime zonedDateTime)
-    {
-        setDate(zonedDateTime.toLocalDate());
-        setTime(zonedDateTime.toLocalTime());
-        setZone(zonedDateTime.getZone());
+    /**
+     * 3 in 1 setter for date, time and timezone properties
+     *
+     * @param zonedDateTime (ZonedDateTime) ZonedDateTime to which all 3 properties will be set to
+     */
+    public void setZonedDateTime(final ZonedDateTime zonedDateTime) {
+        dateProperty.set(zonedDateTime.toLocalDate());
+        timeProperty.set(zonedDateTime.toLocalTime());
+        zoneProperty.set(zonedDateTime.getZone());
     }
-
 }

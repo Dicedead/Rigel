@@ -12,7 +12,7 @@ import java.util.*;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-public final class ConcreteGraph<T> extends MathSet<Maybe<T, Link<T>>> implements Graph<T, AbstractPartitionSet<T>> {
+public final class ConcreteGraph<T> extends MathSet<OptionalPair<T, Link<T>>> implements Graph<T, AbstractPartitionSet<T>> {
 
     private final AbstractPartitionSet<T> vertices;
     private final AbstractMathSet<Link<T>> edges;
@@ -45,7 +45,7 @@ public final class ConcreteGraph<T> extends MathSet<Maybe<T, Link<T>>> implement
      * Constructing a graph from points and edges, condensed in a single MathSet
      * @param mathSet the underlying data
      */
-    public ConcreteGraph(AbstractMathSet<Maybe<T, Link<T>>> mathSet) {
+    public ConcreteGraph(AbstractMathSet<OptionalPair<T, Link<T>>> mathSet) {
         super(mathSet.getData());
         vertices = new PartitionSet<>(mathSet.image(p -> p.getKey().orElse(null)), (T v, T u) -> neighboursOf(of(u)).contains(v));
         this.edges = new MathSet<>(mathSet.image(p -> p.getValue().orElse(null)));

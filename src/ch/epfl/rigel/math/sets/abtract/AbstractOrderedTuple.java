@@ -1,7 +1,6 @@
 package ch.epfl.rigel.math.sets.abtract;
 
 import ch.epfl.rigel.math.sets.properties.Relation;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 import java.util.List;
@@ -11,6 +10,10 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+/**
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public interface AbstractOrderedTuple<T> extends AbstractIndexedSet<T, Integer>, AbstractOrderedSet<T>, AbstractMathSet<T>{
     default List<T> toList() {
         return IntStream.range(0, getData().size()).mapToObj(this::at).collect(Collectors.toList());
@@ -47,7 +50,7 @@ public interface AbstractOrderedTuple<T> extends AbstractIndexedSet<T, Integer>,
     }
 
     @Override
-    default @NotNull Iterator<T> iterator() {
+    default Iterator<T> iterator() {
         return toList().iterator();
     }
 

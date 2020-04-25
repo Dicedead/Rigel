@@ -5,6 +5,10 @@ import ch.epfl.rigel.math.sets.properties.Relation;
 
 import java.util.Set;
 
+/**
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public interface AbstractOrderedSet<T> extends AbstractMathSet<T> {
 
     Relation.Order<T> getComparator();

@@ -29,6 +29,7 @@ public class TreeTest {
         child11 = child1.createChild(4);
         child12 = child1.createChild(3);
         intTree = new Tree<>(Node.bunk(root, child1, child2, child11, child12, child21));
+        System.out.println(intTree);
     }
 
     @Test
