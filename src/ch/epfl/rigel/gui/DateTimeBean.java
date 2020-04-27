@@ -1,5 +1,7 @@
 package ch.epfl.rigel.gui;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
@@ -19,7 +21,9 @@ public final class DateTimeBean {
     private final ObjectProperty<LocalDate> dateProperty = new SimpleObjectProperty<>(null);
     private final ObjectProperty<LocalTime> timeProperty = new SimpleObjectProperty<>(null);
     private final ObjectProperty<ZoneId> zoneProperty = new SimpleObjectProperty<>(null);
-    private ZonedDateTime currentZDT;
+    private final ObjectBinding<ZonedDateTime> currentZDT = Bindings.createObjectBinding(
+            () -> ZonedDateTime.of(dateProperty.get(), timeProperty.get(), zoneProperty.get()),
+            dateProperty, timeProperty, zoneProperty);
 
     /**
      * @return (ObjectProperty<LocalDate>) observable: date property
@@ -94,8 +98,13 @@ public final class DateTimeBean {
      * @return (ZonedDateTime) current ZonedDateTime, with current date, time and timezone values
      */
     public ZonedDateTime getZonedDateTime() {
-        return ZonedDateTime.of(dateProperty.get(), timeProperty.get(), zoneProperty.get());
+        return currentZDT.get();
     }
+
+    /**
+     * @return (ObjectBinding<ZonedDateTime>) ZonedDateTime binding
+     */
+    public ObjectBinding<ZonedDateTime> zdtProperty() { return currentZDT; }
 
     /**
      * 3 in 1 setter for date, time and timezone properties
