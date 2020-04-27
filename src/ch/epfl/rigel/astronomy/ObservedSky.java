@@ -75,14 +75,16 @@ public final class ObservedSky {
         this.daysUntilJ2010 = Epoch.J2010.daysUntil(date);
         this.catalogue = catalogue;
 
-        this.sunMap = Collections.unmodifiableMap(mapObjectToPosition(List.of(SunModel.SUN), this::applyModel));
-        this.moonMap = Collections.unmodifiableMap(mapObjectToPosition(List.of(MoonModel.MOON), this::applyModel));
-        this.planetMap = Collections.unmodifiableMap(toTreeMap(Arrays.stream(PlanetModel.values()).filter(i -> i.ordinal() != 2)
-                .collect(Collectors.toList()), this::applyModel, i -> PLANET_NAMES.indexOf(i.name())));
-        this.starMap = Collections.unmodifiableMap(toTreeMap(catalogue.stars(), Function.identity(), catalogue.starIndexMap()::get));
+        this.sunMap = mapObjectToPosition(List.of(SunModel.SUN), this::applyModel);
+        this.moonMap = mapObjectToPosition(List.of(MoonModel.MOON), this::applyModel);
+        this.planetMap = mapObjectToPosition(Arrays.stream(PlanetModel.values())
+                         .filter(i -> i.ordinal() != 2)
+                         .collect(Collectors.toList()), this::applyModel);
+        this.starMap = mapObjectToPosition(catalogue.stars(), Function.identity());
 
         this.celestObjToCoordsMap = Collections.unmodifiableMap(Stream.of(starMap, planetMap, sunMap, moonMap)
                 .flatMap(l -> l.entrySet().stream())
+                .parallel()
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (u, v) -> v, HashMap::new)));
 
         this.sunPosition = (CartesianCoordinates) sunMap.values().toArray()[0];
@@ -217,28 +219,12 @@ public final class ObservedSky {
      * @param <S>  f's output type -> the returned Map's keys' type
      * @param data (List<T>) input List to be applied f upon then put into keys
      * @param f    (Function<T,S>) function to apply on data
-     * @return (Map < S, CartesianCoordinates >) map associating CelestialObjects with their CartesianCoordinates
+     * @return (Map <S, CartesianCoordinates>) map associating CelestialObjects with their CartesianCoordinates
      */
     private <T, S extends CelestialObject> Map<S, CartesianCoordinates> mapObjectToPosition(final List<T> data, final Function<T, S> f) {
-        return data.stream().map(f).collect(Collectors.toMap(Function.identity(),
-                celestObj -> stereoProj.apply(eqToHor.apply(celestObj.equatorialPos())), (u, v) -> v, HashMap::new));
+        return Collections.unmodifiableMap(data.stream().map(f).collect(Collectors.toMap(Function.identity(),
+                celestObj -> stereoProj.apply(eqToHor.apply(celestObj.equatorialPos())), (u, v) -> v, HashMap::new)));
         //In our uses, f is either the identity -when data already contains CelestialObjects of type S-
         //or applyModel via method reference    -when data contains CelestialObjectModels<S>.
-    }
-
-    /**
-     * Helper creating a TreeMap with cartesian coordinates from a list of Celestial Objects
-     *
-     * @param inList List to draw the celestial object from
-     * @param func   Function to apply in mapObjectToPosition
-     * @param comp   Comparator to keep order
-     * @param <T>    Specialised Celestial object Model
-     * @param <S>    Specialised Celestial object
-     * @return Map containing the position of each Celestial object
-     */
-    private <T, S extends CelestialObject> Map<S, CartesianCoordinates>
-    toTreeMap(final List<T> inList, final Function<T, S> func, final ToIntFunction<S> comp) {
-        return mapObjectToPosition(inList, func).entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
-                Map.Entry::getValue, (o1, o2) -> o1, () -> new TreeMap<>(Comparator.comparingInt(comp))));
     }
 }

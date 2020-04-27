@@ -110,24 +110,24 @@ public class SearchBarTest {
     void searchBarTest() throws IOException{
         init();
         SearchBar search = new SearchBar(sky);
-        Set<CelestialObject> lul = search.search("S", SearchBar.Filters.ALL, SearchBar.SearchBy.NAME);
+        Set<CelestialObject> lul = search.search("S", SearchBar.Filters.ALL, SearchBar.SearchBy.NAME, sky);
         assertTrue(sky.celestialObjMap().keySet().containsAll(lul));
-        Set<CelestialObject> lul2 = search.search("Sc", SearchBar.Filters.ALL, SearchBar.SearchBy.NAME);
+        Set<CelestialObject> lul2 = search.search("Sc", SearchBar.Filters.ALL, SearchBar.SearchBy.NAME, sky);
         assertTrue(lul.containsAll(lul2) && !lul2.containsAll(lul));
 
         assertEquals("Sch",search.suggestions("Sc", SearchBar.SearchBy.NAME).stream().findAny().get());
 
         search.endSearch();
 
-        Set<CelestialObject> test = search.search("2", SearchBar.Filters.STARS, SearchBar.SearchBy.HIPPARCOS);
+        Set<CelestialObject> test = search.search("2", SearchBar.Filters.STARS, SearchBar.SearchBy.HIPPARCOS, sky);
         assertEquals(sky.starsMap().keySet().stream().filter(star -> String.valueOf(star.hipparcosId()).startsWith("2"))
                 .collect(Collectors.toSet()), test);
 
-        Set<CelestialObject> test2 = search.search("22", SearchBar.Filters.STARS, SearchBar.SearchBy.HIPPARCOS);
+        Set<CelestialObject> test2 = search.search("22", SearchBar.Filters.STARS, SearchBar.SearchBy.HIPPARCOS, sky);
         assertEquals(sky.starsMap().keySet().stream().filter(star -> String.valueOf(star.hipparcosId()).startsWith("22"))
                 .collect(Collectors.toSet()), test2);
 
-        assertEquals(0, search.search("a", SearchBar.Filters.STARS, SearchBar.SearchBy.HIPPARCOS).size());
+        assertEquals(0, search.search("a", SearchBar.Filters.STARS, SearchBar.SearchBy.HIPPARCOS, sky).size());
 
         search.endSearch();
 
