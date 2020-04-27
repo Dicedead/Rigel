@@ -7,6 +7,7 @@ import javafx.util.Pair;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -138,6 +139,7 @@ public interface AbstractMathSet<T> extends Iterable<T> {
         return image(t -> new OptionalPair<T, U>(t, null)).union(other.stream().map(s -> s.image(u -> new OptionalPair<T, U>(null, u)))
                 .collect(Collectors.toList()));
     }
+
     /**
      * Set theoretical union followed by a cartesian product
      * @param others the Collection of Sets to "multiply" with
@@ -147,6 +149,7 @@ public interface AbstractMathSet<T> extends Iterable<T> {
     {
         return product(Collections.singleton(others));
     }
+
     /**
      * Set theoristic union followed by a cartesian product
      * @param other the Collection of Sets to "multiply" with
@@ -155,6 +158,7 @@ public interface AbstractMathSet<T> extends Iterable<T> {
     default <U> AbstractMathSet<Pair<T, U>> product(final Collection<AbstractMathSet<U>> other) {
         return unionOf(image(t -> unionOf(other).image(u -> new Pair<>(t, u))));
     }
+
     /**
      * Set theoric substraction
      * @param other the set to substract
@@ -163,6 +167,7 @@ public interface AbstractMathSet<T> extends Iterable<T> {
     default AbstractMathSet<T> minusSet(final AbstractMathSet<T> other) {
         return suchThat(Predicate.not(other::contains));
     }
+
     /**
      * Set theoric substraction
      * @param other the element to substract

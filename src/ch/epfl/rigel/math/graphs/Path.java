@@ -1,10 +1,10 @@
 package ch.epfl.rigel.math.graphs;
 
 import ch.epfl.rigel.math.sets.abtract.AbstractMathSet;
+import ch.epfl.rigel.math.sets.abtract.AbstractOrderedTuple;
 import ch.epfl.rigel.math.sets.abtract.AbstractPartitionSet;
 import ch.epfl.rigel.math.sets.concrete.MathSet;
 import ch.epfl.rigel.math.sets.concrete.OrderedTuple;
-import ch.epfl.rigel.math.sets.concrete.PartitionSet;
 import ch.epfl.rigel.math.sets.abtract.SetFunction;
 
 import java.util.ArrayList;
@@ -82,7 +82,7 @@ public final class Path<T> extends OrderedTuple<T> implements Graph<T, Path<T>> 
      * @return (OrderedTuple <T>) said tuple
      * @throws IllegalArgumentException if value isn't in this path's vertices set
      */
-    public Optional<OrderedTuple<T>> findPathBetween(T v1, T v2) {
+    public Optional<AbstractOrderedTuple<T>> findPathBetween(T v1, T v2) {
         if (!(contains(v1) && contains(v2)))
             return Optional.empty();
         return Optional.of(subPath(v1, v2));

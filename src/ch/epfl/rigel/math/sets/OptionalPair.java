@@ -4,6 +4,7 @@ import javafx.util.Pair;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 /**
  * An ordered set with 2 possible values of 2 different types
@@ -23,6 +24,22 @@ public final class OptionalPair<U, V> extends Pair<Optional<U>, Optional<V>> {
      */
     public OptionalPair(U u, V v) {
         super(Objects.isNull(u) ? Optional.empty() : Optional.of(u), Objects.isNull(u) ? Optional.of(v) : Optional.empty());
+    }
+
+    public static <U, V>  OptionalPair<U, V> of(final Pair<U, V> c)
+    {
+        if(c.getKey() != null)
+            return new OptionalPair<>(c.getKey(), null );
+
+        else if (c.getValue() != null)
+            return new OptionalPair<>(null, c.getValue() );
+
+        else throw new IllegalArgumentException();
+    }
+
+    public <A, B> OptionalPair<A, B> flatMap(final BiFunction<U, V, OptionalPair<A,B>> function)
+    {
+        return getTrueType() == Position.LEFT ? function.apply(getKey().get(), null) : function.apply(null, getValue().get());
     }
 
     /**

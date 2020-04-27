@@ -1,6 +1,9 @@
 package ch.epfl.rigel.astronomy;
 
 import ch.epfl.rigel.Preconditions;
+import ch.epfl.rigel.math.graphs.ConcreteGraph;
+import ch.epfl.rigel.math.graphs.Graph;
+import javafx.util.Pair;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,7 +28,6 @@ public final class StarCatalogue {
     private final Map<Asterism, List<Integer>> asterismMap;
     private final Map<Star, Integer> starToIndexMap;
     private final Set<Asterism> immutableAsterismSet;
-
     /**
      * Constructs a catalogue of stars in and possibly out of asterisms
      *
