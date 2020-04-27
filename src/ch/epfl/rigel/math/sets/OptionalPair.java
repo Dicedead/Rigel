@@ -39,7 +39,7 @@ public final class OptionalPair<U, V> extends Pair<Optional<U>, Optional<V>> {
 
     public <A, B> OptionalPair<A, B> flatMap(final BiFunction<U, V, OptionalPair<A,B>> function)
     {
-        return getTrueType() == Position.LEFT ? function.apply(getKey().get(), null) : function.apply(null, getValue().get());
+        return getTruePos() == Position.LEFT ? function.apply(getKey().get(), null) : function.apply(null, getValue().get());
     }
 
     /**
