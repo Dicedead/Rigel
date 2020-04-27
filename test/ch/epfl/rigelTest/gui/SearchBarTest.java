@@ -12,6 +12,7 @@ import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.coordinates.StereographicProjection;
 import ch.epfl.rigel.gui.bonus.SearchBar;
 import ch.epfl.rigel.math.graphs.Tree;
+import ch.epfl.rigel.math.sets.concrete.MathSet;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -21,6 +22,15 @@ import java.time.LocalTime;
 import java.time.Month;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SearchBarTest {
     private static final String HYG_CATALOGUE_NAME =
@@ -72,12 +82,41 @@ public class SearchBarTest {
     }
 
     @Test
-    void searchTest() throws IOException {
+    void stats() throws IOException {
         init();
-        final SearchBar search = new SearchBar(sky);
-        final Tree<CelestialObject> testTree = search.createSearchTree('s', SearchBar.Filters.ALL, SearchBar.SearchBy.NAME);
-        //System.out.println(testTree);
-        System.out.println(testTree.getTotalDepth());
+        MathSet<CelestialObject> celestSet;
+        Map<Character, Integer> charMap = new HashMap<>();
+        for (char i = 'A'; i <= 'Z'; ++i) {
+            char finalI = Character.toLowerCase(i);
+            celestSet = sky.celestialObjMap().keySet().stream()
+                    .filter(celest -> celest.name().substring(0,2).contains("" + finalI))
+                    .collect(MathSet.toMathSet());
+            charMap.put(finalI, celestSet.cardinality());
+
+            celestSet = sky.celestialObjMap().keySet().stream()
+                    .filter(celest -> celest.name().length() <= 2)
+                    .collect(MathSet.toMathSet());
+            //ALL CELEST OBJECTS HAVE NAME LENGTH AT LEAST 3
+            if (celestSet.cardinality() != 0) {
+                System.out.println(celestSet);
+            }
+        }
+        //System.out.println(charMap);
+        //Final charmap:
+        // {A=82, B=58, C=42, D=84, E=141, F=1, G=74, H=4, I=65, J=1, K=74, L=59, M=78, N=66, O=77, P=149, Q=0, R=54,
+        //  S=58, T=126, U=43, V=3, W=1, X=51, Y=0, Z=81}
+    }
+
+    @Test
+    void searchBarTest() throws IOException{
+        init();
+        SearchBar search = new SearchBar(sky);
+        Set<CelestialObject> lul = search.search("S", SearchBar.Filters.ALL, SearchBar.SearchBy.NAME);
+        assertTrue(sky.celestialObjMap().keySet().containsAll(lul));
+        Set<CelestialObject> lul2 = search.search("Sc", SearchBar.Filters.ALL, SearchBar.SearchBy.NAME);
+        assertTrue(lul.containsAll(lul2) && !lul2.containsAll(lul));
+
+        System.out.println(search.suggestions("Sc", SearchBar.SearchBy.NAME));
     }
 
 }

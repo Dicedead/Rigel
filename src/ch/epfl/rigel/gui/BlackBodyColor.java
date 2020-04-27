@@ -33,6 +33,26 @@ public final class BlackBodyColor {
          b) is immune to reflection (Field.setAccessible)
      */
 
+    /**
+     * @return (int) Size of list of colors, a way to initialise and (eventually) debug the colors list
+     */
+    public static int init() {
+        //##RigelLogger.getGuiLogger().info("Building COLOR_LIST");
+        return ColorListSingleton.getInstance().size();
+    }
+
+
+    /**
+     * Get the Color corresponding to a temperature between 1000 and 40_000
+     *
+     * @param temperature (double) temperature in Kelvin
+     * @return (Color) corresponding color
+     * @throws IllegalArgumentException if temperature isn't in [1000,40000]
+     */
+    public static Color colorForTemperature(final double temperature) {
+        return ColorListSingleton.getInstance().get((int) Math.round(checkInInterval(TEMP_INTERVAL, temperature) / 100) - 10);
+    }
+
     static private class ColorListSingleton {
 
         private final static List<Color> COLOR_LIST = initList();
@@ -64,25 +84,5 @@ public final class BlackBodyColor {
         private static List<Color> getInstance() {
             return COLOR_LIST;
         }
-    }
-
-    /**
-     * @return (int) Size of list of colors, a way to initialise and (eventually) debug the colors list
-     */
-    public static int init() {
-        //##RigelLogger.getGuiLogger().info("Building COLOR_LIST");
-        return ColorListSingleton.getInstance().size();
-    }
-
-
-    /**
-     * Get the Color corresponding to a temperature between 1000 and 40_000
-     *
-     * @param temperature (double) temperature in Kelvin
-     * @return (Color) corresponding color
-     * @throws IllegalArgumentException if temperature isn't in [1000,40000]
-     */
-    public static Color colorForTemperature(final double temperature) {
-        return ColorListSingleton.getInstance().get((int) Math.round(checkInInterval(TEMP_INTERVAL, temperature) / 100) - 10);
     }
 }

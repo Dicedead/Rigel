@@ -34,6 +34,7 @@ public interface Relation<T, U> {
             return areInRelation(pair.getElement(), pair.minus(pair.getElement()).getElement());
         }
     }
+
     enum COMP {
         LESS, EQUAL, GREATER;
         public static COMP of(int i)
