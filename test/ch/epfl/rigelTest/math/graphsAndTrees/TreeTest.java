@@ -1,9 +1,8 @@
 package ch.epfl.rigelTest.math.graphsAndTrees;
 
-import ch.epfl.rigel.math.graphs.Node;
+import ch.epfl.rigel.math.graphs.GraphNode;
 import ch.epfl.rigel.math.graphs.Tree;
 import ch.epfl.rigel.math.sets.abtract.AbstractOrderedTuple;
-import ch.epfl.rigel.math.sets.concrete.OrderedTuple;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -18,28 +17,28 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class TreeTest {
 
     private static Tree<Integer> intTree;
-    private static Node<Integer> root, child1, child2, child11, child12, child21;
+    private static GraphNode<Integer> root, child1, child2, child11, child12, child21;
 
     @BeforeAll
     static void init() {
-        root = new Node<>(0);
+        root = new GraphNode<>(0);
         child1 = root.createChild(2);
         child2 = root.createChild(1);
         child21 = child2.createChild(5);
         child11 = child1.createChild(4);
         child12 = child1.createChild(3);
-        intTree = new Tree<>(Node.bunk(root, child1, child2, child11, child12, child21));
+        intTree = new Tree<>(GraphNode.bunk(root, child1, child2, child11, child12, child21));
         System.out.println(intTree);
     }
 
     @Test
     void construcThrows() {
-        assertThrows(IllegalArgumentException.class, () -> new Tree<>(Node.bunk(new Node<>(5), new Node<>(6))));
+        assertThrows(IllegalArgumentException.class, () -> new Tree<>(GraphNode.bunk(new GraphNode<>(5), new GraphNode<>(6))));
     }
 
     @Test
     void findPathBetweenTest() {
-        System.out.println(intTree.findPathBetween(child21, child12).orElseThrow().image(Node::getValue));
+        System.out.println(intTree.findPathBetween(child21, child12).orElseThrow().image(GraphNode::getValue));
     }
 
     @Test
@@ -54,13 +53,13 @@ public class TreeTest {
 
     @Test
     void flowTest() {
-        AbstractOrderedTuple<Node<Integer>> set = intTree.flow(Comparator.comparingInt(Node::getValue),root);
-        assertEquals(Set.of(0,2,4), set.image(Node::getValue).getData());
+        AbstractOrderedTuple<GraphNode<Integer>> set = intTree.flow(Comparator.comparingInt(GraphNode::getValue),root);
+        assertEquals(Set.of(0,2,4), set.image(GraphNode::getValue).getData());
     }
 
     @Test
     void rootHasMinimalDepth() {
-        assertEquals(root, Collections.min(intTree.getData(), Comparator.comparingInt(Node::getDepth)));
+        assertEquals(root, Collections.min(intTree.getData(), Comparator.comparingInt(GraphNode::getDepth)));
     }
 
     @Test
