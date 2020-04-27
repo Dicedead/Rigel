@@ -1,4 +1,4 @@
-package ch.epfl.rigel.math.sets.abtract;
+package ch.epfl.rigel.math.sets.abstraction;
 
 import ch.epfl.rigel.Preconditions;
 import ch.epfl.rigel.math.sets.properties.Relation;

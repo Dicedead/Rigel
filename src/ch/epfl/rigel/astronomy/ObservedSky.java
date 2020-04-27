@@ -103,7 +103,7 @@ public final class ObservedSky {
      *
      * @param point       (CartesianCoordinates) point to approach
      * @param maxDistance (double) max allowed distance
-     * @return (Optional < CelestialObject >) Optional.empty if no objects within maxDistance radius, otherwise, the
+     * @return (Optional <CelestialObject>) Optional.empty if no object within maxDistance radius, otherwise, the
      * closest CelestialObject wrapped in an Optional cell.
      */
     public Optional<CelestialObject> objectClosestTo(final CartesianCoordinates point, final double maxDistance) {

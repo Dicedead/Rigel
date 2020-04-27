@@ -1,7 +1,7 @@
 package ch.epfl.rigel.math.sets.concrete;
 
-import ch.epfl.rigel.math.sets.abtract.AbstractOrderedTuple;
-import ch.epfl.rigel.math.sets.abtract.SetFunction;
+import ch.epfl.rigel.math.sets.abstraction.AbstractOrderedTuple;
+import ch.epfl.rigel.math.sets.abstraction.SetFunction;
 
 import java.util.ArrayList;
 import java.util.Collection;

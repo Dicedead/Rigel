@@ -1,8 +1,6 @@
 package ch.epfl.rigel.math.sets.concrete;
 
-import ch.epfl.rigel.Preconditions;
-import ch.epfl.rigel.math.sets.abtract.AbstractOrderedSet;
-import ch.epfl.rigel.math.sets.concrete.MathSet;
+import ch.epfl.rigel.math.sets.abstraction.AbstractOrderedSet;
 import ch.epfl.rigel.math.sets.properties.Relation;
 
 /**

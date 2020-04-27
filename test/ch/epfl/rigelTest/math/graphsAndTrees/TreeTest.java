@@ -2,7 +2,7 @@ package ch.epfl.rigelTest.math.graphsAndTrees;
 
 import ch.epfl.rigel.math.graphs.GraphNode;
 import ch.epfl.rigel.math.graphs.Tree;
-import ch.epfl.rigel.math.sets.abtract.AbstractOrderedTuple;
+import ch.epfl.rigel.math.sets.abstraction.AbstractOrderedTuple;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

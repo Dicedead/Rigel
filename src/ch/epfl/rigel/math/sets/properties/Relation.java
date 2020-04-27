@@ -2,9 +2,7 @@ package ch.epfl.rigel.math.sets.properties;
 
 import ch.epfl.rigel.Preconditions;
 import ch.epfl.rigel.math.sets.concrete.MathSet;
-import ch.epfl.rigel.math.sets.abtract.SetFunction;
-
-import java.util.Optional;
+import ch.epfl.rigel.math.sets.abstraction.SetFunction;
 
 import static java.lang.Integer.signum;
 

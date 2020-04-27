@@ -1,6 +1,6 @@
 package ch.epfl.rigel.math.sets.properties;
 
-import ch.epfl.rigel.math.sets.abtract.AbstractMathSet;
+import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
 
 import java.util.function.Predicate;
 /**

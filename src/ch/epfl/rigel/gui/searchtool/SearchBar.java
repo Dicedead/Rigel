@@ -1,4 +1,4 @@
-package ch.epfl.rigel.gui.bonus;
+package ch.epfl.rigel.gui.searchtool;
 
 import ch.epfl.rigel.Preconditions;
 import ch.epfl.rigel.astronomy.CelestialObject;
@@ -60,14 +60,18 @@ public final class SearchBar {
         sky.celestialObjMap().keySet().forEach(
                 celestObj -> {
                     final String initial = String.valueOf(celestObj.name().charAt(0));
-                    if (initialsMap.containsKey(initial)) {
-                        initialsMap.get(initial).add(celestObj);
-                    } else {
+                    if (!initialsMap.containsKey(initial)) {
                         initialsMap.put(initial, new HashSet<>());
                     }
+                    initialsMap.get(initial).add(celestObj);
                     
                     if (celestObj instanceof Star) {
-                       // hipparcosMap.get(String.valueOf(((Star) celestObj).hipparcosId())).add((Star) celestObj);
+                        final String firstDigit = String.valueOf(String.valueOf(((Star) celestObj).hipparcosId()).charAt(0));
+
+                        if (!hipparcosMap.containsKey(firstDigit)) {
+                            hipparcosMap.put(firstDigit, new HashSet<>());
+                        }
+                        hipparcosMap.get(firstDigit).add((Star) celestObj);
                     }
                 }
         );

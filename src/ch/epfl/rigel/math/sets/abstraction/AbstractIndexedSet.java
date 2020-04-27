@@ -1,4 +1,4 @@
-package ch.epfl.rigel.math.sets.abtract;
+package ch.epfl.rigel.math.sets.abstraction;
 
 /**
  * @author Alexandre Sallinen (303162)

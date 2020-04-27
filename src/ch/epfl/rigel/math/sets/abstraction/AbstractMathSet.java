@@ -1,4 +1,4 @@
-package ch.epfl.rigel.math.sets.abtract;
+package ch.epfl.rigel.math.sets.abstraction;
 
 import ch.epfl.rigel.math.sets.*;
 import ch.epfl.rigel.math.sets.concrete.MathSet;
@@ -7,7 +7,6 @@ import javafx.util.Pair;
 
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

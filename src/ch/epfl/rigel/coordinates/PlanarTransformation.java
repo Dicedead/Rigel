@@ -22,6 +22,8 @@ public final class PlanarTransformation implements Function<CartesianCoordinates
     private final double Mxx, Mxy, Myy, Myx, Tx, Ty;
     private final double determinant;
 
+    private final boolean isPositiveDilatation;
+
     private PlanarTransformation(final double mxx, final double mxy, final double myx, final double myy, final double tx,
                                  final double ty)  {
         Mxx = mxx;
@@ -32,6 +34,8 @@ public final class PlanarTransformation implements Function<CartesianCoordinates
         Ty = ty;
 
         determinant =  Mxx * Myy - Mxy * Myx;
+
+        isPositiveDilatation = (Mxx > 0) && (Myy == -Mxx) && (Myx == 0) && (Mxy == 0);
     }
 
     /**
@@ -170,7 +174,8 @@ public final class PlanarTransformation implements Function<CartesianCoordinates
      * @return (double) distance after transformation
      */
     public double applyDistance(final double initialDistance) {
-        return euclideanNormOf(Mxx * initialDistance, Myx * initialDistance);
+        return (isPositiveDilatation) ? Mxx*initialDistance :
+                euclideanNormOf(Mxx * initialDistance, Myx * initialDistance);
     }
 
     /**

@@ -1,12 +1,10 @@
 package ch.epfl.rigel.math.sets.concrete;
 
-import ch.epfl.rigel.astronomy.Star;
-import ch.epfl.rigel.math.sets.abtract.AbstractIndexedSet;
-import ch.epfl.rigel.math.sets.abtract.AbstractMathSet;
-import ch.epfl.rigel.math.sets.abtract.SetFunction;
+import ch.epfl.rigel.math.sets.abstraction.AbstractIndexedSet;
+import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
+import ch.epfl.rigel.math.sets.abstraction.SetFunction;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 /**

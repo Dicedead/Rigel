@@ -40,6 +40,6 @@ public final class Link<T> extends OrderedTuple<T> {
      * @throws NoSuchElementException if 'start' is not in the link
      */
     public T next(final T start) {
-        return getElement(l -> !l.equals(start));
+        return getElement(l -> !l.equals(start)).get();
     }
 }
