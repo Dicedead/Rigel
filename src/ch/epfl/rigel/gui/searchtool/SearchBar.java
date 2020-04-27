@@ -78,16 +78,19 @@ public final class SearchBar {
         savedSky = sky;
     }
 
-    public Set<CelestialObject> search(final String inputString, final Filters filter, final SearchBy type) {
-        Preconditions.checkArgument(type != SearchBy.HIPPARCOS || filter == Filters.STARS);
+    public Set<CelestialObject> search(final String inputString, final Filters inputFilter, final SearchBy type) {
+
+        final Filters filter = (type == SearchBy.HIPPARCOS) ? Filters.STARS : inputFilter;
+
         if (inputString.length() == 1) {
             return (!initialsMap.containsKey(inputString))? Set.of() : search(inputString, Set.copyOf(
                     (filter == Filters.STARS) ? hipparcosMap.get(inputString) : initialsMap.get(inputString)),
                     filter, type);
         }
-        return search(inputString, (ongoingString.length() < inputString.length()) ? ongoingSearchSet :
+        return Collections.unmodifiableSet(
+                search(inputString, (ongoingString.length() < inputString.length()) ? ongoingSearchSet :
                 Set.copyOf((filter == Filters.STARS) ? hipparcosMap.get(inputString) :
-                        initialsMap.get(inputString.substring(0,2))), filter, type);
+                        initialsMap.get(inputString.substring(0,2))), filter, type));
     }
 
     public Set<String> suggestions(final String inputString, final SearchBy type) {
@@ -109,7 +112,7 @@ public final class SearchBar {
                 .filter(celestObj -> filter.classList.contains(celestObj.getClass())
                         && type.stringFunction.apply(celestObj).startsWith(inputString))
                 .collect(Collectors.toCollection(HashSet::new));
-        return Collections.unmodifiableSet(ongoingSearchSet);
+        return ongoingSearchSet;
     }
 
     public enum Filters {

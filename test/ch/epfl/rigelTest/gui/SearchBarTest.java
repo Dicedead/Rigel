@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SearchBarTest {
@@ -125,6 +126,9 @@ public class SearchBarTest {
         Set<CelestialObject> test2 = search.search("22", SearchBar.Filters.STARS, SearchBar.SearchBy.HIPPARCOS);
         assertEquals(sky.starsMap().keySet().stream().filter(star -> String.valueOf(star.hipparcosId()).startsWith("22"))
                 .collect(Collectors.toSet()), test2);
+
+        assertEquals(0, search.search("a", SearchBar.Filters.STARS, SearchBar.SearchBy.HIPPARCOS).size());
+
 
     }
 
