@@ -7,7 +7,7 @@ import ch.epfl.rigel.math.sets.concrete.OrderedTuple;
 
 import java.util.Optional;
 
-public class Cycle<T> extends OrderedTuple<T> implements Graph<T, AbstractOrderedTuple<T>> {
+public final class Cycle<T> extends OrderedTuple<T> implements Graph<T, AbstractOrderedTuple<T>> {
 
     /**
      * Gets the set of points linked to given point
