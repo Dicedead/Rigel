@@ -1,7 +1,6 @@
 package ch.epfl.rigel.astronomy;
 
 import ch.epfl.rigel.Preconditions;
-import ch.epfl.rigel.math.graphs.ConcreteGraph;
 
 import java.util.List;
 
