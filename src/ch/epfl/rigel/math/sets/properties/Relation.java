@@ -4,6 +4,8 @@ import ch.epfl.rigel.Preconditions;
 import ch.epfl.rigel.math.sets.concrete.MathSet;
 import ch.epfl.rigel.math.sets.abtract.SetFunction;
 
+import java.util.Optional;
+
 import static java.lang.Integer.signum;
 
 @FunctionalInterface
@@ -31,7 +33,8 @@ public interface Relation<T, U> {
         default boolean areInRelation(MathSet<T> pair)
         {
             Preconditions.checkArgument(pair.cardinality() == 2);
-            return areInRelation(pair.getElement(), pair.minus(pair.getElement()).getElement());
+            T t = pair.getElementOrThrow();
+            return areInRelation(t, pair.minus(t).getElementOrThrow());
         }
     }
 

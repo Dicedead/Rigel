@@ -46,7 +46,7 @@ public final class PointedSet<T> extends MathSet<T> {
      * @return (T) the pointed element in the set
      */
     @Override
-    public T getElement() {
+    public T getElementOrThrow() {
         return special;
     }
 

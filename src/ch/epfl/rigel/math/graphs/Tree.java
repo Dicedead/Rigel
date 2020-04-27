@@ -67,7 +67,7 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
 
     @Override
     public Optional<Tree<V>> getNeighbours(Node<V> point) {
-        return Optional.of(new Tree<>(component(point).minus(point.getParent().orElse(null))));
+        return getChildren(point.getParent().orElseThrow());
     }
 
     /**
@@ -105,8 +105,7 @@ public final class Tree<V> extends PartitionSet<Node<V>> implements Graph<Node<V
      */
     public Tree<V> subtreeAtPoint(final Node<V> point) {
         Preconditions.checkArgument(contains(point));
-        return new Tree<>(nodes.suchThat(node -> node.getDepth() >= point.getDepth() && Node.areRelated(node, point)),
-                false, point, maxDepth);
+        return new Tree<>(neighboursOf(of(point)).minusSet(point.hierarchy()));
     }
     /**
      * Finds the shortest path between two nodes

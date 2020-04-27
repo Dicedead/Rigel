@@ -69,17 +69,24 @@ public interface AbstractMathSet<T> extends Iterable<T> {
      *
      * @return an element from the current set
      */
-    default T getElement()
+    default Optional<T> getElement()
+    {
+        return stream().findFirst();
+    }
+
+
+    default T getElementOrThrow()
     {
         return stream().findFirst().orElseThrow(
                 () -> new NoSuchElementException("Tried to get element from empty set."));
     }
 
+
     /**
      * @param equation the property to respect
      * @return an element from the current set respecting equation
      */
-    default T getElement(final Predicate<T> equation)
+    default Optional<T> getElement(final Predicate<T> equation)
     {
         return suchThat(equation).getElement();
     }
@@ -259,7 +266,7 @@ public interface AbstractMathSet<T> extends Iterable<T> {
      * @return A sett containing all elements from each sets
      */
     static <T> AbstractMathSet<T> unionOf(final AbstractMathSet<AbstractMathSet<T>> sets) {
-        return sets.getElement().union(sets.getData());
+        return sets.getElementOrThrow().union(sets.getData());
     }
 
     /**

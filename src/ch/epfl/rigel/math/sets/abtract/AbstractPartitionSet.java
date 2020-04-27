@@ -14,7 +14,7 @@ public interface AbstractPartitionSet<T> extends AbstractMathSet<T>{
      */
      default AbstractMathSet<T> component(T t) {
         Preconditions.checkArgument(contains(t));
-        return components().suchThat(p -> p.contains(t)).getElement();
+        return components().suchThat(p -> p.contains(t)).getElementOrThrow();
     }
     /**
      *
@@ -30,7 +30,7 @@ public interface AbstractPartitionSet<T> extends AbstractMathSet<T>{
     default T representing(AbstractMathSet<T> component)
     {
         Preconditions.checkArgument(components().contains(component));
-        return component.getElement();
+        return component.getElementOrThrow();
     }
 
     /**

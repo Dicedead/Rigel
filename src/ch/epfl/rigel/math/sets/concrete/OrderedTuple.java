@@ -6,6 +6,7 @@ import ch.epfl.rigel.math.sets.abtract.SetFunction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -51,4 +52,8 @@ public class OrderedTuple<T> extends IndexedSet<T, Integer> implements AbstractO
         super(t, t::get);
     }
 
+    @Override
+    public <U> OrderedTuple<U> image(SetFunction<T, U> f) {
+        return new OrderedTuple<>(toList().stream().map(f).collect(Collectors.toList()));
+    }
 }

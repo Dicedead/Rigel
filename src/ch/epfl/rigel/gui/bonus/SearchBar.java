@@ -34,7 +34,8 @@ public final class SearchBar {
     private Set<CelestialObject> ongoingSearchSet;
     private String ongoingString;
 
-    public SearchBar(final ObservedSky sky) {
+    public SearchBar(final ObservedSky sky){
+
         this.initOngoing = true;
         this.savedSky = sky;
         this.initialsMap = IntStream.rangeClosed('A', 'Z').boxed()
@@ -108,20 +109,21 @@ public final class SearchBar {
     }
 
     public enum Filters {
+
         SOLAR_SYSTEM(List.of(Moon.class, Sun.class, Planet.class)),
         STARS(List.of(Star.class)),
         ALL(List.of(Moon.class, Sun.class, Planet.class, Star.class));
 
         private final List<Class<? extends CelestialObject>> classList;
 
-        private Filters(List<Class<? extends CelestialObject>> classList) {
+        Filters(List<Class<? extends CelestialObject>> classList) {
             this.classList = classList;
         }
-
         public List<Class<? extends CelestialObject>> classList() {
             return classList;
         }
     }
+
 
     public enum SearchBy {
         NAME(CelestialObject::name),
