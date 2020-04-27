@@ -39,6 +39,17 @@ public final class ObserverLocationBean {
     }
 
     /**
+     * Composite setter for longitude and latitude observables (in turn modifying the GeographicCoordinates coords
+     * bind)
+     *
+     * @param geoCoords (GeographicCoordinates) coordinates to be set to
+     */
+    public void setCoordinates(final GeographicCoordinates geoCoords) {
+        lonDeg.set(geoCoords.lon());
+        latDeg.set(geoCoords.lat());
+    }
+
+    /**
      * @return (double) value of observable: longitude in degrees
      */
     public double getLonDeg() {

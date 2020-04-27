@@ -69,8 +69,6 @@ public final class ObservedSky {
      */
     public ObservedSky(final ZonedDateTime date, final GeographicCoordinates geoCoords,
                        final StereographicProjection projection, final StarCatalogue catalogue) {
-        //##RigelLogger.getAstronomyLogger().entering("ObservedSky", "ObservedSky");
-        //##RigelLogger.getAstronomyLogger().info("Constructing sky at date " + date + " and position " + geoCoords.toString());
         this.stereoProj = projection;
         this.eqToHor = new EquatorialToHorizontalConversion(date, geoCoords);
         this.eclToEqu = new EclipticToEquatorialConversion(date);
@@ -91,9 +89,6 @@ public final class ObservedSky {
         this.sun = (Sun) sunMap.keySet().toArray()[0];
         this.moonPosition = (CartesianCoordinates) moonMap.values().toArray()[0];
         this.moon = (Moon) moonMap.keySet().toArray()[0];
-
-        //##RigelLogger.getAstronomyLogger().info("Sky finished initialisation");
-        //##RigelLogger.getAstronomyLogger().exiting("ObservedSky", "ObservedSky");
 
     }
 

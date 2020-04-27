@@ -129,6 +129,7 @@ public class SearchBarTest {
 
         assertEquals(0, search.search("a", SearchBar.Filters.STARS, SearchBar.SearchBy.HIPPARCOS).size());
 
+        search.endSearch();
 
     }
 
