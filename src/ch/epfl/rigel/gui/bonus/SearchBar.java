@@ -7,21 +7,16 @@ import ch.epfl.rigel.astronomy.ObservedSky;
 import ch.epfl.rigel.astronomy.Planet;
 import ch.epfl.rigel.astronomy.Star;
 import ch.epfl.rigel.astronomy.Sun;
-import ch.epfl.rigel.coordinates.EquatorialCoordinates;
-import ch.epfl.rigel.math.graphs.Node;
-import ch.epfl.rigel.math.graphs.Tree;
-import ch.epfl.rigel.math.sets.abtract.AbstractMathSet;
-import ch.epfl.rigel.math.sets.concrete.MathSet;
-import ch.epfl.rigel.math.sets.concrete.OrderedTuple;
-import ch.epfl.rigel.math.sets.concrete.PartitionSet;
 
-import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * A tool to search through celestial objects
@@ -31,68 +26,85 @@ import java.util.stream.Collectors;
  */
 public final class SearchBar {
 
-    private final ObservedSky sky;
+    private ObservedSky savedSky;
+    private final Map<String, Set<CelestialObject>> initialsMap;
+    private final Map<String, Set<Star>> hipparcosMap;
+    private boolean initOngoing;
+
+    private Set<CelestialObject> ongoingSearchSet;
+    private String ongoingString;
 
     public SearchBar(final ObservedSky sky) {
-        this.sky = sky;
+        this.initOngoing = true;
+        this.savedSky = sky;
+        this.initialsMap = IntStream.rangeClosed('A', 'Z').boxed()
+                .collect(Collectors.toMap(
+                        String::valueOf, HashSet::new, (u,v) -> u, HashMap::new
+                ));
+        this.hipparcosMap = IntStream.range(0, 10).boxed()
+                .collect(Collectors.toMap(
+                        String::valueOf, HashSet::new, (u,v) -> u, HashMap::new
+                ));
+        updateWithSky(sky);
+        this.initOngoing = false;
     }
 
-    public Tree<CelestialObject> createSearchTree(
-            final char inputChar, final Filters filter, final SearchBy search) {
-
-        Preconditions.checkArgument(search != SearchBy.HIPPARCOS || filter == Filters.STARS);
-        final char initialChar = (Character.isLowerCase(inputChar)) ? Character.toUpperCase(inputChar) : inputChar;
-
-        final Function<CelestialObject, String> stringFunc = search.getStringFunction();
-
-        final PartitionSet<CelestialObject> partitionLengths = new PartitionSet<>(
-                new MathSet<>(sky.celestialObjMap().keySet().stream()
-                        .filter(celestObj -> filter.classList().contains(celestObj.getClass())
-                                && stringFunc.apply(celestObj).charAt(0) == initialChar)
-                        .collect(Collectors.toSet())),
-                (celestObj1, celestObj2) -> stringFunc.apply(celestObj1).length() == stringFunc.apply(celestObj2).length());
-
-        //char does not correspond to any initial name
-        if (partitionLengths.cardinality() == 0) {
-            return new Tree<>(MathSet.emptySet());
+    public void updateWithSky(final ObservedSky sky) {
+        if (sky.celestialObjMap().keySet().equals(savedSky.celestialObjMap().keySet()) && !initOngoing) {
+            savedSky = sky;
+            return;
         }
-
-        final OrderedTuple<AbstractMathSet<CelestialObject>> lengthsSet = new OrderedTuple<>(
-                partitionLengths.components().stream()
-                        .sorted(Comparator.comparingInt(set -> stringFunc.apply(set.getElement()).length()))
-                        .collect(Collectors.toCollection(ArrayList::new)));
-
-        final boolean existsCelestObjOfNameChar = (stringFunc.apply(lengthsSet.at(0).getElement()).length() == 1);
-
-        final Node<CelestialObject> root = new Node<>(existsCelestObjOfNameChar ?
-                lengthsSet.at(0).getElement() :
-                new CelestialObject(String.valueOf(initialChar), EquatorialCoordinates.of(0, 0),
-                        0, 0) {
-                });
-
-        final Set<Node<CelestialObject>> nodesSet = new HashSet<>();
-        nodesSet.add(root);
-        createSearchTreeRecur(nodesSet, root, existsCelestObjOfNameChar ? lengthsSet.at(1) : lengthsSet.at(0),
-                stringFunc, lengthsSet, 1, root);
-
-        return new Tree<>(new MathSet<>(nodesSet.stream().map(Node::lockNode).collect(Collectors.toSet())));
+        initialsMap.values().forEach(Set::clear);
+        hipparcosMap.values().forEach(Set::clear);
+        sky.celestialObjMap().keySet().forEach(
+                celestObj -> {
+                    final String initial = String.valueOf(celestObj.name().charAt(0));
+                    if (initialsMap.containsKey(initial)) {
+                        initialsMap.get(initial).add(celestObj);
+                    } else {
+                        initialsMap.put(initial, new HashSet<>());
+                    }
+                    
+                    if (celestObj instanceof Star) {
+                       // hipparcosMap.get(String.valueOf(((Star) celestObj).hipparcosId())).add((Star) celestObj);
+                    }
+                }
+        );
+        savedSky = sky;
     }
 
-    private void createSearchTreeRecur(final Set<Node<CelestialObject>> workSet, final Node<CelestialObject> currNode,
-            final AbstractMathSet<CelestialObject> nextLengthSet, final Function<CelestialObject, String> stringFunc,
-            final OrderedTuple<AbstractMathSet<CelestialObject>> orderedSets, final int currentDepth, final Node<CelestialObject> root) {
+    public Set<CelestialObject> search(final String inputString, final Filters filter, final SearchBy type) {
+        Preconditions.checkArgument(type != SearchBy.HIPPARCOS || filter == Filters.STARS);
+        if (inputString.length() == 1) {
+            return (!initialsMap.containsKey(inputString))? Set.of() : search(inputString, Set.copyOf(
+                    (filter == Filters.STARS) ? hipparcosMap.get(inputString) : initialsMap.get(inputString)),
+                    filter, type);
+        }
+        return search(inputString, (ongoingString.length() < inputString.length()) ? ongoingSearchSet :
+                Set.copyOf((filter == Filters.STARS) ? hipparcosMap.get(inputString) :
+                        initialsMap.get(inputString.substring(0,2))), filter, type);
+    }
 
-        nextLengthSet.stream()
-            .forEach(celestObj -> {
-                final Node<CelestialObject> nextNode = new Node<>(celestObj,
-                        (stringFunc.apply(celestObj).contains(stringFunc.apply(currNode.getValue()).substring(0, currentDepth))) ?
-                                currNode : root);
-                workSet.add(nextNode);
-                if (orderedSets.indexOf(nextLengthSet) < orderedSets.cardinality() - 1) {
-                    createSearchTreeRecur(workSet, nextNode, orderedSets.next(nextLengthSet), stringFunc, orderedSets,
-                           currentDepth + 1, root);
-                }
-            });
+    public Set<String> suggestions(final String inputString, final SearchBy type) {
+        return ongoingSearchSet.stream()
+                .filter(celestObj -> type.stringFunction.apply(celestObj).length() > inputString.length())
+                .map(celestObj -> inputString + type.stringFunction.apply(celestObj).charAt(inputString.length()))
+                .collect(Collectors.toCollection(HashSet::new));
+    }
+
+    public void endSearch() {
+        ongoingString = "";
+        ongoingSearchSet.clear();
+    }
+
+    private Set<CelestialObject> search(final String inputString, final Set<? extends CelestialObject> searchSet,
+                                        final Filters filter, final SearchBy type) {
+        ongoingString = inputString;
+        ongoingSearchSet = searchSet.stream()
+                .filter(celestObj -> filter.classList.contains(celestObj.getClass())
+                        && type.stringFunction.apply(celestObj).startsWith(inputString))
+                .collect(Collectors.toCollection(HashSet::new));
+        return Collections.unmodifiableSet(ongoingSearchSet);
     }
 
     public enum Filters {
@@ -114,16 +126,12 @@ public final class SearchBar {
     public enum SearchBy {
         NAME(CelestialObject::name),
         HIPPARCOS(celestObj -> (!(celestObj instanceof Star)) ?
-                null : String.valueOf(((Star) celestObj).hipparcosId()));
+                "" : String.valueOf(((Star) celestObj).hipparcosId()));
 
         private final Function<CelestialObject, String> stringFunction;
 
         SearchBy(final Function<CelestialObject, String> stringGetter) {
             this.stringFunction = stringGetter;
-        }
-
-        private Function<CelestialObject, String> getStringFunction() {
-            return stringFunction;
         }
     }
 }

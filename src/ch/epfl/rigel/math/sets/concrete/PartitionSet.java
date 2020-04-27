@@ -35,8 +35,8 @@ public class PartitionSet<T> extends MathSet<T> implements AbstractPartitionSet<
     }
 
     /**
-     * Main constructorl, building the equivalence classes from a relation
-     * @param data the underlying data
+     * Main constructor, building the equivalence classes from a relation
+     * @param data (AbstractMathSet<T>) the underlying data
      * @param areInRelation the equivalence relation used to partition the set
      */
     public PartitionSet(final AbstractMathSet<T> data, Relation.Equivalence<T> areInRelation) {

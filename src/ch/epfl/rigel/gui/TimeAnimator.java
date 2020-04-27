@@ -6,6 +6,8 @@ import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
+import java.time.ZonedDateTime;
+
 /**
  * Periodic time modifier
  *
@@ -17,7 +19,10 @@ public final class TimeAnimator extends AnimationTimer {
     private final DateTimeBean dateTimeBean;
     private final ObjectProperty<TimeAccelerator> accelerator;
     private final SimpleBooleanProperty running;
-    private long last;
+    private ZonedDateTime startTime;
+
+    private boolean hasJustBeenStarted = false;
+    private long initialRealTime;
 
     /**
      * Creates a new TimeAnimator modifying parameter dtBean
@@ -38,8 +43,11 @@ public final class TimeAnimator extends AnimationTimer {
      */
     @Override
     public void handle(long now) {
-        dateTimeBean.setZonedDateTime(accelerator.get().adjust(dateTimeBean.getZonedDateTime(), now - last));
-        last = now;
+        if (hasJustBeenStarted) {
+            initialRealTime = now;
+            hasJustBeenStarted = false;
+        }
+        dateTimeBean.setZonedDateTime(accelerator.get().adjust(startTime, now - initialRealTime));
     }
 
     /**
@@ -47,9 +55,9 @@ public final class TimeAnimator extends AnimationTimer {
      */
     @Override
     public void start() {
+        hasJustBeenStarted = true;
+        startTime = dateTimeBean.getZonedDateTime();
         super.start();
-        last = System.nanoTime();
-        handle(last);
         running.set(true);
     }
 
