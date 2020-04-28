@@ -1,7 +1,7 @@
-package ch.epfl.rigel.gui.bonus;
+package ch.epfl.rigel.gui.searchtool;
 
 import ch.epfl.rigel.math.graphs.Tree;
-import ch.epfl.rigel.math.sets.abtract.AbstractMathSet;
+import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
 import ch.epfl.rigel.math.sets.concrete.MathSet;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;

@@ -1,6 +1,6 @@
 package ch.epfl.rigel.math.sets.concrete;
 
-import ch.epfl.rigel.math.sets.abtract.AbstractMathSet;
+import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
 
 import java.util.Collection;
 

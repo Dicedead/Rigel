@@ -1,53 +1,42 @@
-package ch.epfl.rigel.gui.bonus;
+package ch.epfl.rigel.gui.searchtool;
 
-import ch.epfl.rigel.astronomy.ObservedSky;
+import ch.epfl.rigel.astronomy.CelestialObject;
+import ch.epfl.rigel.astronomy.StarCatalogue;
 import ch.epfl.rigel.math.graphs.GraphNode;
 import ch.epfl.rigel.math.graphs.Path;
 import ch.epfl.rigel.math.graphs.Tree;
-import ch.epfl.rigel.math.sets.abtract.AbstractMathSet;
+import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
 import ch.epfl.rigel.math.sets.concrete.IndexedSet;
 import ch.epfl.rigel.math.sets.concrete.MathSet;
-import javafx.beans.Observable;
-import javafx.beans.binding.Binding;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.concurrent.Task;
-import javafx.geometry.Side;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.CustomMenuItem;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.input.KeyCode;
-
-import java.nio.CharBuffer;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static ch.epfl.rigel.math.sets.abtract.AbstractMathSet.unionOf;
-import static ch.epfl.rigel.math.sets.concrete.MathSet.emptySet;
+import static ch.epfl.rigel.math.sets.abstraction.AbstractMathSet.unionOf;
 import static ch.epfl.rigel.math.sets.concrete.MathSet.of;
 
-public final class Searcher<T> extends AutoCompleter<T>{
+public final class Searcher extends AutoCompleter<CelestialObject> {
 
-    private final WeakHashMap<String, T> resultCache;
+    private final WeakHashMap<String, CelestialObject> resultCache;
     private final AbstractMathSet<String> data;
     private final int cacheCapacity;
-    private final Predicate<T> filter;
-    private final AbstractMathSet<Tree<Character>> unfinishedData;
-
-    protected Searcher(AbstractMathSet<String> names, int cacheCapacity, Predicate<T> p) {
+    private final Predicate<CelestialObject> filter;
+    private final IndexedSet<Tree<Character>, Character> unfinishedData;
+    private final IndexedSet<CelestialObject, String> starCatalogue;
+    protected Searcher(int cacheCapacity, Predicate<CelestialObject> p, StarCatalogue sky) {
         super(cacheCapacity*2);
-        this.data = names;
+        this.data = sky.stars().stream().map(CelestialObject::name).collect(MathSet.toMathSet());
         this.resultCache = new WeakHashMap<>(cacheCapacity);
         this.cacheCapacity = cacheCapacity;
         this.filter = p;
-        this.unfinishedData = IntStream.rangeClosed('a', 'z')
+        this.unfinishedData = new IndexedSet<>(IntStream.rangeClosed('a', 'z')
                 .mapToObj(s ->
                         new Tree<>(unionOf(data.suchThat(str -> str.charAt(0) == s)
                                 .image(Path::fromString)), false))
-                .collect(MathSet.toMathSet());
+                .collect(Collectors.toMap(t -> t.getRoot().getValue(), Function.identity())));
+        this.starCatalogue = new IndexedSet<>(sky.stars().stream().collect(Collectors.toMap(CelestialObject::name, Function.identity())));
     }
 
     public Optional<Tree<Character>> search(char s, Tree<Character> unfinished, int n)
@@ -70,7 +59,8 @@ public final class Searcher<T> extends AutoCompleter<T>{
     {
         if(resultCache.size() == cacheCapacity)
             flushCache();
-        labels.forEach(l -> resultCache.put(l , data.at(l)));
+
+        labels.forEach(l -> resultCache.put(l , starCatalogue.at(l)));
     }
 
     protected void flushCache()
@@ -81,22 +71,22 @@ public final class Searcher<T> extends AutoCompleter<T>{
     @Override
     AbstractMathSet<String> process(String s, String t) {
 
-        var res = search(t.charAt(t.length() - 1), unfinishedData.getElement(tr -> tr.getRoot().getValue() == t.charAt(0)).orElseThrow(), t.length());
+        var res = search(t.charAt(t.length() - 1), unfinishedData.at(t.charAt(0)), t.length());
         return res.isEmpty() ? of(t) : potentialSolutions(res.get(), t);
     }
 
     @Override
-    AbstractMathSet<T> handleReturn(String t) {
+    AbstractMathSet<CelestialObject> handleReturn(String t) {
 
         if (unfinishedData.isEmpty())
         {
-            var res = data.at(t);
+            var res = starCatalogue.at(t);
             prepareCache(of(t));
             return of(res).suchThat(filter);
         }
         else
-            return potentialSolutions(unfinishedData, t)
-                    .image(data::at)
+            return potentialSolutions(unfinishedData.at(t.charAt(0)), t)
+                    .image(starCatalogue::at)
                     .suchThat(filter);
     }
 
