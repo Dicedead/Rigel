@@ -1,12 +1,14 @@
 package ch.epfl.rigel.math.sets.concrete;
 
+import ch.epfl.rigel.math.sets.abtract.AbstractMathSet;
+
 import java.util.Collection;
 
 /**
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-public final class PointedSet<T> extends MathSet<T> {
+public abstract class PointedSet<T> extends MathSet<T> {
 
     final private T special;
 
@@ -27,7 +29,7 @@ public final class PointedSet<T> extends MathSet<T> {
      * @param t       the underlying data
      * @param special the element to remember
      */
-    public PointedSet(MathSet<T> t, T special) {
+    public PointedSet(AbstractMathSet<T> t, T special) {
         super(t.getData());
         this.special = special;
     }

@@ -17,8 +17,8 @@ public class StarSearcher extends Searcher<CelestialObject> {
 
     StarSearcher(ObservedSky s, Filters f)
     {
-        super(new IndexedSet<>(s.stars().stream()
-                .collect(Collectors.toMap(CelestialObject::name, Function.identity()))),
+        super(s.stars().stream()
+                .collect(Collectors.toMap(CelestialObject::name, Function.identity())),
                 DEFAULT_CACHE_SIZE,
                 t -> f.classList().contains(t.getClass()));
     }

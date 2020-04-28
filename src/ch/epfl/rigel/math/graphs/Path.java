@@ -41,7 +41,16 @@ public final class Path<T> extends OrderedTuple<T> implements Graph<T, Path<T>> 
     public Path(T... vertices) {
         super(vertices);
     }
+    public static Path<GraphNode<Character>> fromString(String s)
+    {
+        List<GraphNode<Character>> data = new ArrayList<>();
+        data.add(new GraphNode<>(s.charAt(0)));
+        for (int i = 1; i < s.length() - 1; i++) {
+            data.add(new GraphNode<>(s.charAt(i), data.get(i- 1)));
+        }
 
+        return new Path<>(data);
+    }
     @Override
     public Optional<Path<T>> getNeighbours(T point) {
         return Optional.of(new Path<>(prev(point), point, next(point)));
