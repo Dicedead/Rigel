@@ -78,6 +78,7 @@ public final class Tree<V> extends PointedSet<GraphNode<V>> implements Graph<Gra
     {
         return new Tree<>();
     }
+
     public Tree<V> add (final Path<GraphNode<V>> p)
     {
         return new Tree<>(union(p));

@@ -7,15 +7,20 @@ import ch.epfl.rigel.math.sets.concrete.IndexedSet;
 import ch.epfl.rigel.math.sets.concrete.MathSet;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static ch.epfl.rigel.math.sets.concrete.MathSet.of;
 
-public class StarSearcher extends Searcher<CelestialObject> {
+public class StarSearcher extends Searcher {
 
     static private final int DEFAULT_CACHE_SIZE = 10;
 
-    StarSearcher(ObservedSky s, Filters f)
+    protected StarSearcher(int cacheCapacity, Predicate<CelestialObject> p, StarCatalogue sky) {
+        super(cacheCapacity, p, sky);
+    }
+
+   /* StarSearcher(ObservedSky s, Filters f)
     {
         super(s.stars().stream()
                 .collect(Collectors.toMap(CelestialObject::name, Function.identity())),
@@ -46,7 +51,7 @@ public class StarSearcher extends Searcher<CelestialObject> {
         public MathSet<Class<? extends CelestialObject>> classList() {
             return classList;
         }
-    }
+    }*/
 
 
 }
