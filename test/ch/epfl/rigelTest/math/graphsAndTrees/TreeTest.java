@@ -46,10 +46,6 @@ public class TreeTest {
         assertEquals(6, intTree.cardinality());
     }
 
-    @Test
-    void partitions() {
-        assertEquals(5, intTree.components().cardinality());
-    }
 
     @Test
     void flowTest() {

@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 
 import static ch.epfl.rigel.math.sets.concrete.MathSet.of;
 
-public class StarSearcher extends Searcher<CelestialObject> {
-
+class StarSearche {
+/*
     static private final int DEFAULT_CACHE_SIZE = 10;
 
     StarSearcher(ObservedSky s, Filters f)
@@ -48,5 +48,5 @@ public class StarSearcher extends Searcher<CelestialObject> {
         }
     }
 
-
+*/
 }

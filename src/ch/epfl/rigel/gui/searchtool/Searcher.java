@@ -25,7 +25,8 @@ public final class Searcher extends AutoCompleter<CelestialObject> {
     private final Predicate<CelestialObject> filter;
     private final IndexedSet<Tree<Character>, Character> unfinishedData;
     private final IndexedSet<CelestialObject, String> starCatalogue;
-    protected Searcher(int cacheCapacity, Predicate<CelestialObject> p, StarCatalogue sky) {
+
+    public Searcher(int cacheCapacity, Predicate<CelestialObject> p, StarCatalogue sky) {
         super(cacheCapacity*2);
         this.data = sky.stars().stream().map(CelestialObject::name).collect(MathSet.toMathSet());
         this.resultCache = new WeakHashMap<>(cacheCapacity);
@@ -36,7 +37,7 @@ public final class Searcher extends AutoCompleter<CelestialObject> {
                         new Tree<>(unionOf(data.suchThat(str -> str.charAt(0) == s)
                                 .image(Path::fromString)), false))
                 .collect(Collectors.toMap(t -> t.getRoot().getValue(), Function.identity())));
-        this.starCatalogue = new IndexedSet<>(sky.stars().stream().collect(Collectors.toMap(CelestialObject::name, Function.identity())));
+        this.starCatalogue = new IndexedSet<CelestialObject, String>(sky.stars().stream().collect(Collectors.toMap(CelestialObject::name, Function.identity())));
     }
 
     public Optional<Tree<Character>> search(char s, Tree<Character> unfinished, int n)
@@ -89,6 +90,4 @@ public final class Searcher extends AutoCompleter<CelestialObject> {
                     .image(starCatalogue::at)
                     .suchThat(filter);
     }
-
-
 }
