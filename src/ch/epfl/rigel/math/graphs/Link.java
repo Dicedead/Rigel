@@ -27,7 +27,7 @@ public final class Link<T> extends OrderedTuple<T> {
      * Link constructor: ties the 2 elements in a pair together (with no order)
      * @param p (Pair<T,T>)
      */
-    public Link(final Pair<T, T> p) {
+    public Link(Pair<T, T> p) {
 
         super(p.getKey(), p.getValue());
     }
@@ -39,7 +39,7 @@ public final class Link<T> extends OrderedTuple<T> {
      * @return (T) the object 'start' is tied to
      * @throws NoSuchElementException if 'start' is not in the link
      */
-    public T next(final T start) {
+    public T next(T start) {
         return getElement(l -> !l.equals(start)).get();
     }
 }

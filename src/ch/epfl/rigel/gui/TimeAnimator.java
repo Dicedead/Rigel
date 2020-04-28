@@ -32,7 +32,7 @@ public final class TimeAnimator extends AnimationTimer {
     public TimeAnimator(DateTimeBean dtBean) {
         dateTimeBean = dtBean;
         accelerator = new SimpleObjectProperty<>(null);
-        running = new SimpleBooleanProperty();
+        running = new SimpleBooleanProperty(false);
     }
 
     /**
@@ -46,8 +46,9 @@ public final class TimeAnimator extends AnimationTimer {
         if (hasJustBeenStarted) {
             initialRealTime = now;
             hasJustBeenStarted = false;
+        } else {
+            dateTimeBean.setZonedDateTime(accelerator.get().adjust(startTime, now - initialRealTime));
         }
-        dateTimeBean.setZonedDateTime(accelerator.get().adjust(startTime, now - initialRealTime));
     }
 
     /**

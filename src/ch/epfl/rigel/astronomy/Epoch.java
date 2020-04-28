@@ -9,13 +9,14 @@ import java.time.*;
  * @author Salim Najib (310003)
  */
 public enum Epoch {
-
-    J2000(ZonedDateTime.of(LocalDateTime.of(2000, Month.JANUARY, 1, 12, 0), ZoneOffset.UTC)),
-    J2010(ZonedDateTime.of(LocalDate.of(2010, Month.JANUARY, 1).minusDays(1), LocalTime.of(0, 0),
+    J2000(ZonedDateTime.of(LocalDate.of(2000, Month.JANUARY, 1), LocalTime.NOON, ZoneOffset.UTC)),
+    J2010(ZonedDateTime.of(LocalDate.of(2010, Month.JANUARY, 1).minusDays(1), LocalTime.MIDNIGHT,
             ZoneOffset.UTC));
 
-    private final static double COEFF_TO_DAYS = 1d / (24 * 3600 * 1000);
-    private final static double COEFF_JULIAN = 1d / 36525;
+    private static final double COEFF_TO_DAYS = 1d / (24 * 3600 * 1000);
+    private static final double COEFF_JULIAN = 1d / 36525;
+    private static final long MILLIS_IN_DAY = 86_400_000L;
+    private static final long NANOS_IN_DAY = 86_400_000_000_000L;
 
     private final ZonedDateTime epoch;
 
@@ -48,13 +49,13 @@ public enum Epoch {
      * @param when (ZonedDateTime) the time we want to know the distance of
      * @return (double) the distance in milliseconds from now to when
      */
-    static public double until (final ZonedDateTime now, final ZonedDateTime when)
+    static public double until (ZonedDateTime now, ZonedDateTime when)
     {
-        final OffsetDateTime you = now.withZoneSameInstant(when.getZone()).toOffsetDateTime();
-        final LocalDateTime end = LocalDateTime.from(when);
-        final long amount = end.toLocalDate().toEpochDay() - you.toLocalDate().toEpochDay();
+        OffsetDateTime you = now.withZoneSameInstant(when.getZone()).toOffsetDateTime();
+        LocalDateTime end = LocalDateTime.from(when);
+        long amount = end.toLocalDate().toEpochDay() - you.toLocalDate().toEpochDay();
 
-        return (amount-Long.signum(amount))*86_400_000L+(end.toLocalTime().toNanoOfDay() - you.toLocalTime().toNanoOfDay()
-                + Long.signum(amount)* 86_400_000_000_000L)/ 1_000_000.;
+        return (amount-Long.signum(amount))*MILLIS_IN_DAY+(end.toLocalTime().toNanoOfDay() - you.toLocalTime().toNanoOfDay()
+                + Long.signum(amount)*NANOS_IN_DAY)/1e6;
     }
 }

@@ -31,9 +31,10 @@ public enum PlanetModel implements CelestialObjectModel<Planet> {
     NEPTUNE("Neptune", 165.84539, 326.895127, 23.07, 0.010483,
             30.1985, 1.7673, 131.879, 62.20, -6.87);
 
-    static final public List<PlanetModel> ALL = List.of(PlanetModel.values());
+    public final static List<PlanetModel> ALL = List.of(PlanetModel.values());
 
     private final static double DAYS_IN_TROP_YEAR = 365.242191;
+    private final static double QUOTIENT = Angle.TAU / DAYS_IN_TROP_YEAR;
 
     private final double Tp, epsilon, lonPer, excent, a, inc, lonN, theta0, V0;
     private final String name;
@@ -62,33 +63,33 @@ public enum PlanetModel implements CelestialObjectModel<Planet> {
     public Planet at(double daysSinceJ2010, EclipticToEquatorialConversion eclipToEquaConversion) {
 
         //DETERMINATION OF COORDINATES LAMBDA AND BETA
-        final double meanAnomaly = (Angle.TAU * daysSinceJ2010) / (DAYS_IN_TROP_YEAR * Tp) + epsilon - lonPer;
-        final double trueAnomaly = meanAnomaly + 2 * excent * Math.sin(meanAnomaly);
-        final double helioLon = trueAnomaly + lonPer;
-        final double sinl_LonN = Math.sin(helioLon - lonN);
-        final double psi = Math.asin(sinl_LonN * Math.sin(inc));
-        final double distanceToSun = a * (1 - excent * excent) / (1 + excent * Math.cos(trueAnomaly));
+        double meanAnomaly = (daysSinceJ2010*QUOTIENT)/Tp + epsilon - lonPer;
+        double trueAnomaly = meanAnomaly + 2 * excent * Math.sin(meanAnomaly);
+        double helioLon = trueAnomaly + lonPer;
+        double sinl_LonN = Math.sin(helioLon - lonN);
+        double psi = Math.asin(sinl_LonN * Math.sin(inc));
+        double distanceToSun = a * (1 - excent * excent) / (1 + excent * Math.cos(trueAnomaly));
 
-        final double distanceToSun_Pr = distanceToSun * Math.cos(psi);
-        final double helioLon_Pr = Math.atan2(sinl_LonN * Math.cos(inc), Math.cos(helioLon - lonN)) + lonN;
+        double distanceToSun_Pr = distanceToSun * Math.cos(psi);
+        double helioLon_Pr = Math.atan2(sinl_LonN * Math.cos(inc), Math.cos(helioLon - lonN)) + lonN;
 
         //Making private auxiliary methods for computing meanAnomaly, trueAnomaly, distanceToSun & helioLon values for the
         //Earth seemed a little bit overkill.
-        final double meanAnomaly_E = (Angle.TAU * daysSinceJ2010) / (DAYS_IN_TROP_YEAR * EARTH.Tp) + EARTH.epsilon - EARTH.lonPer;
-        final double trueAnomaly_E = meanAnomaly_E + 2 * EARTH.excent * Math.sin(meanAnomaly_E);
-        final double distanceToSun_E = EARTH.a * (1 - EARTH.excent * EARTH.excent) / (1 + EARTH.excent * Math.cos(trueAnomaly_E));
-        final double helioLon_E = trueAnomaly_E + EARTH.lonPer;
+        double meanAnomaly_E = (QUOTIENT * daysSinceJ2010) / EARTH.Tp + EARTH.epsilon - EARTH.lonPer;
+        double trueAnomaly_E = meanAnomaly_E + 2 * EARTH.excent * Math.sin(meanAnomaly_E);
+        double distanceToSun_E = EARTH.a * (1 - EARTH.excent * EARTH.excent) / (1 + EARTH.excent * Math.cos(trueAnomaly_E));
+        double helioLon_E = trueAnomaly_E + EARTH.lonPer;
 
-        final double sinl_Pr_L = Math.sin(helioLon_Pr - helioLon_E);
+        double sinl_Pr_L = Math.sin(helioLon_Pr - helioLon_E);
 
-        final double lambda = (this.ordinal() <= 1) ?
+        double lambda = (this.ordinal() <= 1) ?
                 Angle.normalizePositive(Math.PI + helioLon_E + Math.atan2(-1 * distanceToSun_Pr * sinl_Pr_L,
                         distanceToSun_E - distanceToSun_Pr * Math.cos(helioLon_E - helioLon_Pr))) :
                 Angle.normalizePositive(helioLon_Pr + Math.atan2(distanceToSun_E * sinl_Pr_L,
                         distanceToSun_Pr - distanceToSun_E * Math.cos(helioLon_Pr - helioLon_E)));
 
         //ANGULAR SIZE & MAGNITUDE
-        final double rho = Math.sqrt(distanceToSun_E * distanceToSun_E + distanceToSun * distanceToSun - 2 * distanceToSun_E *
+        double rho = Math.sqrt(distanceToSun_E * distanceToSun_E + distanceToSun * distanceToSun - 2 * distanceToSun_E *
                 distanceToSun * Math.cos(helioLon - helioLon_E) * Math.cos(psi));
 
         return new Planet(name,

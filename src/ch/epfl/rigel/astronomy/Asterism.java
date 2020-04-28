@@ -20,7 +20,7 @@ public final class Asterism {
      * @throws IllegalArgumentException if stars is an empty list
      */
     public Asterism(List<Star> stars) {
-        Preconditions.checkArgument(!(stars.size() == 0));
+        Preconditions.checkArgument(!(stars.isEmpty()));
         starList = List.copyOf(stars);
     }
 

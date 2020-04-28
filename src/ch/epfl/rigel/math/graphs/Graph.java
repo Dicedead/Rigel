@@ -21,9 +21,9 @@ public interface Graph<T, V extends AbstractMathSet<T>> {
      * Gets the set of points linked to given point
      *
      * @param point (T) given point
-     * @return (Set <T>) said set
+     * @return (Set < T >) said set
      */
-    Optional<V> getNeighbours(final T point);
+    Optional<V> getNeighbours(T point);
 
     /**
      * Creates a graph ON given set of vertices
@@ -32,23 +32,27 @@ public interface Graph<T, V extends AbstractMathSet<T>> {
      * @return (Graph < T, U >) some implementation of Graph<T,U>
      */
     Graph<T, ? extends AbstractMathSet<T>> on(AbstractMathSet<T> points);
+
     /**
      * A component is a maximally connected subset of a graph
      *
      * @param point the point on which we want the component
      * @return the component onn which this point lies
      */
-    Graph<T, V> connectedComponent(final T point);
+    Graph<T, V> connectedComponent(T point);
+
     /**
      * @return the Set of connected components of this graph
      */
     AbstractMathSet<Graph<T, V>> connectedComponents();
+
     /**
-     * @return (AbstractMathSet<Link<T>>) getter for immutable set of edges
+     * @return (AbstractMathSet < Link < T > >) getter for immutable set of edges
      */
     AbstractMathSet<Link<T>> edgeSet();
+
     /**
-     * @return (AbstractMathSet<T>) getter for immutable set of vertices
+     * @return (AbstractMathSet < T >) getter for immutable set of vertices
      */
     V vertexSet();
 
@@ -59,7 +63,7 @@ public interface Graph<T, V extends AbstractMathSet<T>> {
      * @param point   the point to begin with
      * @return the OrderedTuple of points traversed by the choice function
      */
-    default AbstractOrderedTuple<T> flow(final Comparator<T> chooser, final T point) {
+    default AbstractOrderedTuple<T> flow(Comparator<T> chooser, T point) {
         return flow((V vertices) -> Collections.max(vertices.getData(), chooser), point);
     }
 
@@ -70,7 +74,7 @@ public interface Graph<T, V extends AbstractMathSet<T>> {
      * @param point   the point to begin with
      * @return the List of points traversed by the choice function
      */
-    default AbstractOrderedTuple<T> flow(final SetFunction<V, T> chooser, final T point) {
+    default AbstractOrderedTuple<T> flow(SetFunction<V, T> chooser, T point) {
         if (getNeighbours(point).isEmpty())
             return new OrderedTuple<>(point);
         final List<T> flowList = flow(chooser, chooser.apply(getNeighbours(point).get())).toList();
@@ -80,8 +84,7 @@ public interface Graph<T, V extends AbstractMathSet<T>> {
     }
 
 
-    default AbstractMathSet<T> neighboursOf(AbstractMathSet<T> t)
-    {
+    default AbstractMathSet<T> neighboursOf(AbstractMathSet<T> t) {
         SetFunction<T, Optional<V>> f = this::getNeighbours;
 
         var a = f.andThen(Optional::isPresent).preImageOf(true).solveIn(t);
@@ -92,8 +95,7 @@ public interface Graph<T, V extends AbstractMathSet<T>> {
         return a.union(neighboursOf(b));
     }
 
-    default boolean areConnected(T v1, T v2)
-    {
+    default boolean areConnected(T v1, T v2) {
         return connectedComponent(v1).equals(connectedComponent(v2));
     }
 

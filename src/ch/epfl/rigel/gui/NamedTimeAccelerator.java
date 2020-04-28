@@ -20,7 +20,7 @@ public enum NamedTimeAccelerator {
     private final String name;
     private final TimeAccelerator accelerator;
 
-    NamedTimeAccelerator(final String name, final TimeAccelerator accelerator) {
+    NamedTimeAccelerator(String name, TimeAccelerator accelerator) {
         this.name = name;
         this.accelerator = accelerator;
     }

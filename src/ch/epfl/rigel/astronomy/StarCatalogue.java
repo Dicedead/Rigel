@@ -36,8 +36,7 @@ public final class StarCatalogue {
 
         this.starToIndexMap = Collections.unmodifiableMap(IntStream.range(0,stars.size()).boxed()
                 .collect(Collectors.toMap(stars::get,Function.identity(), (o1,o2)->o1)));
-        //Although this map causes some spatial complexity, it avoids an O(n*m) call to indexOf below and in
-        //ObservedSky
+        //Although this map causes some spatial complexity, it avoids an O(n*m) call to indexOf below
 
         this.asterismMap = asterisms.stream().collect(Collectors.toMap(Function.identity(),
                 asterism -> { Preconditions.checkArgument(starToIndexMap.keySet().containsAll(asterism.stars())); //(*)

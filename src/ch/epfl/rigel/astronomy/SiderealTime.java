@@ -24,7 +24,8 @@ public final class SiderealTime {
 
     //Non instantiable
     private SiderealTime() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Fatal error: tried to instantiate " +
+                "non instantiable class SiderealTime.");
     }
     /*
       The constructor of a non instantiable class throwing a UO Exception rather than just being private:
@@ -32,11 +33,10 @@ public final class SiderealTime {
          b) is immune to reflection (Field.setAccessible)
      */
 
-    private final static double S_ZERO_COEFF_0 = 0.000025862;
-    private final static double[] S_ZERO_COEFFS = {2400.051336, 6.697374558};
-    private final static double S_ONE_COEFF = 1.002737909;
-    private final static Polynomial POLYNOM = Polynomial.of(S_ZERO_COEFF_0, S_ZERO_COEFFS);
-    private final static double COEFF_TO_HOURS = 1d / 36e5;
+    private static final double S_ZERO_COEFF_0 = 0.000025862;
+    private static final double S_ONE_COEFF = 1.002737909;
+    private static final Polynomial POLYNOM = Polynomial.of(S_ZERO_COEFF_0, 2400.051336, 6.697374558);
+    private static final double COEFF_TO_HOURS = 1d / (60 * 60 * 1000);
 
     /**
      * Computes sidereal Greenwich time

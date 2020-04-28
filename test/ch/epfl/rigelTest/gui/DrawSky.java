@@ -60,7 +60,7 @@ public final class DrawSky extends Application {
 
             final PlanarTransformation transform = PlanarTransformation.ofDilatAndTrans(1300, 400, 300);
 
-            final SkyCanvasPainter paint = new SkyCanvasPainter(canvasFuture, transform);
+            final SkyCanvasPainter paint = new SkyCanvasPainter(canvasFuture);
 
             paint.clear();
 
@@ -68,12 +68,12 @@ public final class DrawSky extends Application {
             //££ThreadManager.getGui().execute(
                 //££    () ->
                     //££{
-                paint.drawAsterisms(sky);
-                paint.drawStars(sky);
-                paint.drawPlanets(sky);
-                paint.drawSun(sky);
-                paint.drawMoon(sky);
-                paint.drawHorizon(proj);
+                paint.drawAsterisms(sky, transform);
+                paint.drawStars(sky, transform);
+                paint.drawPlanets(sky, transform);
+                paint.drawSun(sky, transform);
+                paint.drawMoon(sky, transform);
+                paint.drawHorizon(proj, transform);
                 //££});
 
             ImageIO.write(SwingFXUtils.fromFXImage(canvasFuture.snapshot(null, null),

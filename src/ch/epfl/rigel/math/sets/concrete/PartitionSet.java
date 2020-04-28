@@ -38,7 +38,7 @@ public class PartitionSet<T> extends MathSet<T> implements AbstractPartitionSet<
      * @param data (AbstractMathSet<T>) the underlying data
      * @param areInRelation the equivalence relation used to partition the set
      */
-    public PartitionSet(final AbstractMathSet<T> data, Relation.Equivalence<T> areInRelation) {
+    public PartitionSet(AbstractMathSet<T> data, Relation.Equivalence<T> areInRelation) {
         this(data.image( (T elem1) -> areInRelation.partialApply(elem1).preImageOf(true).solveIn(data)).getData());
     }
 
@@ -46,7 +46,7 @@ public class PartitionSet<T> extends MathSet<T> implements AbstractPartitionSet<
      * A single equivalence class Partition Set
      * @param t the MathSet to copy
      */
-    public PartitionSet(final AbstractMathSet<T> t) {
+    public PartitionSet(AbstractMathSet<T> t) {
         this(Collections.singletonList(t));
     }
 

@@ -15,17 +15,17 @@ public class IndexedSet<T, I> extends MathSet<T> implements AbstractIndexedSet<T
 
     private final SetFunction<I, T> indexer;
 
-    public IndexedSet(Collection<T> t, final SetFunction<I, T> indexer) {
+    public IndexedSet(Collection<T> t, SetFunction<I, T> indexer) {
         super(t);
         this.indexer = indexer;
     }
 
-    public IndexedSet(final Map<I, T> t) {
+    public IndexedSet(Map<I, T> t) {
         super(t.values());
         this.indexer = t::get;
     }
 
-    public IndexedSet(final AbstractMathSet<T> t, final SetFunction<I, T> indexer) {
+    public IndexedSet(AbstractMathSet<T> t, SetFunction<I, T> indexer) {
         super(t);
         this.indexer = indexer;
     }

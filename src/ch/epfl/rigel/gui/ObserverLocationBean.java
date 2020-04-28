@@ -44,7 +44,7 @@ public final class ObserverLocationBean {
      *
      * @param geoCoords (GeographicCoordinates) coordinates to be set to
      */
-    public void setCoordinates(final GeographicCoordinates geoCoords) {
+    public void setCoordinates(GeographicCoordinates geoCoords) {
         lonDeg.set(geoCoords.lon());
         latDeg.set(geoCoords.lat());
     }

@@ -10,19 +10,23 @@ import ch.epfl.rigel.Preconditions;
  */
 public final class Angle {
 
-    static final public double TAU = 2 * Math.PI;
+    private Angle() {
+        throw new UnsupportedOperationException("Tried to instantiate instantiable class Angle.");
+    }
+
+    public final static double TAU = 2 * Math.PI;
 
     //Number of ...
-    static final private double SECONDS_IN_MINUTES = 60d;
-    static final private double MINUTES_IN_HOURS = 60d;
-    static final private double HOUR_IN_DEGREE = 1d / 15;
-    static final private double DEGREE_IN_HOUR = 15d;
+    private final static double SECONDS_IN_MINUTES = 60d;
+    private final static double MINUTES_IN_HOURS = 60d;
+    private final static double HOUR_IN_DEGREE = 1d / 15;
+    private final static double DEGREE_IN_HOUR = 15d;
 
-    static final private double RATIO_MIN_RAD = TAU / (360 * MINUTES_IN_HOURS);
-    static final private double RATIO_RAD_DEG = 360 / TAU;
-    static final private double RATIO_DEG_RAD = TAU / 360;
-    static final private double RATIO_SEC_RAD = TAU / (360d * MINUTES_IN_HOURS * SECONDS_IN_MINUTES);
-    static final private RightOpenInterval NORMALIZING_INTERVAL = RightOpenInterval.of(0, TAU);
+    private final static double RATIO_MIN_RAD = TAU / (360 * MINUTES_IN_HOURS);
+    private final static double RATIO_RAD_DEG = 360 / TAU;
+    private final static double RATIO_DEG_RAD = TAU / 360;
+    private final static double RATIO_SEC_RAD = TAU / (360d * MINUTES_IN_HOURS * SECONDS_IN_MINUTES);
+    private final static RightOpenInterval NORMALIZING_INTERVAL = RightOpenInterval.of(0, TAU);
 
     /**
      * Normalize a value on the right open interval [0, TAU[
@@ -31,8 +35,7 @@ public final class Angle {
      * @return (double) Reduced value of the angle
      */
     static public double normalizePositive(double rad) {
-        return //Normalizing twice for bug fixing: TAU is mapped to TAU and not 0 when applied only once
-                NORMALIZING_INTERVAL.reduce(NORMALIZING_INTERVAL.reduce(rad));
+        return NORMALIZING_INTERVAL.reduce(rad);
     }
 
     /**

@@ -48,10 +48,6 @@ public final class ObservedSky {
     private final Moon moon;
     private final Sun sun;
 
-    private static final List<String> PLANET_NAMES = List.of("Mercure", "Vénus", "Mars", "Jupiter", "Saturne", "Uranus", "Neptune");
-    //Sadly, PlanetModel does not offer any way to compare instances of Planet - a getter for such a list would have
-    //done but pre-step 7 classes' API need not to be modified.
-
     private static final Function<CartesianCoordinates, BiFunction<CartesianCoordinates, CartesianCoordinates, Integer>>
             CLOSEST_TO_C = c -> (a, b) -> Double.compare(euclideanDistSquared(a, c), euclideanDistSquared(b, c));
     /*This Function assigns a target point c in Cartesian Coordinates, then returns a BiFunction of this
@@ -67,8 +63,8 @@ public final class ObservedSky {
      * @param projection (StereographicProjection) center of projection
      * @param catalogue  (StarCatalogue) stars and their asterisms
      */
-    public ObservedSky(final ZonedDateTime date, final GeographicCoordinates geoCoords,
-                       final StereographicProjection projection, final StarCatalogue catalogue) {
+    public ObservedSky(ZonedDateTime date, GeographicCoordinates geoCoords,
+                       StereographicProjection projection, StarCatalogue catalogue) {
         this.stereoProj = projection;
         this.eqToHor = new EquatorialToHorizontalConversion(date, geoCoords);
         this.eclToEqu = new EclipticToEquatorialConversion(date);
@@ -103,7 +99,7 @@ public final class ObservedSky {
      * @return (Optional <CelestialObject>) Optional.empty if no object within maxDistance radius, otherwise, the
      * closest CelestialObject wrapped in an Optional cell.
      */
-    public Optional<CelestialObject> objectClosestTo(final CartesianCoordinates point, final double maxDistance) {
+    public Optional<CelestialObject> objectClosestTo(CartesianCoordinates point, double maxDistance) {
         return celestObjToCoordsMap.keySet().parallelStream().min((celestObj1, celestObj2) -> CLOSEST_TO_C.apply(point)
                 .apply(celestObjToCoordsMap.get(celestObj1), celestObjToCoordsMap.get(celestObj2))) //(*)
                 .filter(celestObj -> euclideanDistance(celestObjToCoordsMap.get(celestObj), point) <= maxDistance); //(**)
@@ -113,7 +109,7 @@ public final class ObservedSky {
         (*) is a linear scan, comparing keySet's elements by their distance (squared) to the target, and (**) checks
         whether the closest object found (ie the 'minimum') is within a maxDistance radius of the target.
         Applying a first approximate filter to the celestial objects before running the linear scan has also proven to
-        be slower, for a Stream.
+        be slower, for a parallel stream.
 
         parallelStream proved to greatly shorten the execution time on testing (at least 33%),
         making the map worthwhile when compared to 2 identically ordered lists, especially after
@@ -207,7 +203,7 @@ public final class ObservedSky {
      * @return (K extends CelestialObject) parametrized CelestialObject
      * @see CelestialObjectModel#at(double, EclipticToEquatorialConversion)
      */
-    private <K extends CelestialObject> K applyModel(final CelestialObjectModel<K> celestialObjectModel) {
+    private <K extends CelestialObject> K applyModel(CelestialObjectModel<K> celestialObjectModel) {
         return celestialObjectModel.at(daysUntilJ2010, eclToEqu);
     }
 
@@ -221,8 +217,10 @@ public final class ObservedSky {
      * @param f    (Function<T,S>) function to apply on data
      * @return (Map <S, CartesianCoordinates>) map associating CelestialObjects with their CartesianCoordinates
      */
-    private <T, S extends CelestialObject> Map<S, CartesianCoordinates> mapObjectToPosition(final List<T> data, final Function<T, S> f) {
-        return Collections.unmodifiableMap(data.stream().map(f).collect(Collectors.toMap(Function.identity(),
+    private <T, S extends CelestialObject> Map<S, CartesianCoordinates> mapObjectToPosition(List<T> data, Function<T, S> f) {
+        return Collections.unmodifiableMap(data.stream()
+                .map(f)
+                .collect(Collectors.toMap(Function.identity(),
                 celestObj -> stereoProj.apply(eqToHor.apply(celestObj.equatorialPos())), (u, v) -> v, HashMap::new)));
         //In our uses, f is either the identity -when data already contains CelestialObjects of type S-
         //or applyModel via method reference    -when data contains CelestialObjectModels<S>.

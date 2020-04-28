@@ -43,21 +43,8 @@ public final class RightOpenInterval extends Interval {
      */
     public static RightOpenInterval symmetric(double size) {
         Preconditions.checkArgument(size > 0);
-        return new RightOpenInterval(-size / 2.0, size / 2.0);
-    }
-
-    /**
-     * Clipping sends number to itsellf if it is in the interval, and else at the nearest bound
-     *
-     * @param v (double) the number to clip
-     * @return (double) the clipped number
-     */
-    public double clip(double v) {
-        /*This can be understood in this way : if v is smaller than the upper bound it may be in the interval so we
-        choose it, then we compare it with the actual lower bound.
-        If this is not the case we simply take the upper bound as it is superior to the lower bound.
-         */
-        return Math.max(Math.min(this.high(), v), this.low());
+        double halfSize = size / 2.0;
+        return new RightOpenInterval(-halfSize, halfSize);
     }
 
     /**
@@ -89,6 +76,6 @@ public final class RightOpenInterval extends Interval {
      * @return (double) reduced number
      */
     public double reduce(double v) {
-        return v - this.size() * Math.floor((v - this.low()) / this.size());
+        return contains(v) ? v : v - this.size() * Math.floor((v - this.low()) / this.size());
     }
 }

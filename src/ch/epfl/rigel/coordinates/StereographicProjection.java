@@ -36,15 +36,16 @@ public final class StereographicProjection implements Function<HorizontalCoordin
      */
     @Override
     public CartesianCoordinates apply(HorizontalCoordinates azAlt) {
-        final double lambda = azAlt.az() - centerOfProjection.az();
+        double lambda = azAlt.az() - centerOfProjection.az();
 
-        final double phi = azAlt.alt();
-        final double sinP = 2 * sin(phi);
+        double phi = azAlt.alt();
+        double sinP = 2 * sin(phi);
+        double cosP = cos(phi);
 
-        final double term1 = cos(lambda - phi) + cos(lambda + phi);
-        final double den = 1 / (sinPhi1 * sinP + cosPhi1 * term1 + 2); // +2 and remove 1/2
+        double term1 = 2*cos(lambda)*cosP;
+        double den = 1 / (sinPhi1 * sinP + cosPhi1 * term1 + 2); // +2 and remove 1/2
 
-        return CartesianCoordinates.of(sin(lambda) * cos(phi) * 2 * den, (cosPhi1 * sinP - sinPhi1 * term1) * den);
+        return CartesianCoordinates.of(sin(lambda) * cosP * 2 * den, (cosPhi1 * sinP - sinPhi1 * term1) * den);
     }
 
     /**
@@ -112,7 +113,8 @@ public final class StereographicProjection implements Function<HorizontalCoordin
      */
     @Override
     public final boolean equals(Object o) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Fatal error : tried to test equality but double precision does not \n" +
+                "allow it.");
     }
 
     /**
@@ -121,6 +123,7 @@ public final class StereographicProjection implements Function<HorizontalCoordin
      */
     @Override
     public final int hashCode() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Fatal error : tried to hashcode but double precision does not \n" +
+                "allow it.");
     }
 }
