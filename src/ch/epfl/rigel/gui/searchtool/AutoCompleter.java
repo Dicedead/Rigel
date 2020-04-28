@@ -1,8 +1,6 @@
 package ch.epfl.rigel.gui.searchtool;
 
-import ch.epfl.rigel.math.graphs.Tree;
 import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
-import ch.epfl.rigel.math.sets.concrete.MathSet;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Side;
@@ -11,8 +9,6 @@ import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
-
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import static ch.epfl.rigel.math.sets.concrete.MathSet.emptySet;
@@ -23,11 +19,12 @@ public abstract class AutoCompleter<T> extends TextField {
     private final ContextMenu entriesGUI;
     private final int numberOfEntry;
 
-    protected AutoCompleter(int numberOfEntry) {
+    public AutoCompleter(int numberOfEntry) {
+        super();
         this.entriesGUI = new ContextMenu();
         this.numberOfEntry= numberOfEntry;
         results = new SimpleObjectProperty<>(emptySet());
-        init();
+        makeLinks();
     }
 
     public AbstractMathSet<T> getResults() {
@@ -42,7 +39,7 @@ public abstract class AutoCompleter<T> extends TextField {
         this.results.set(results);
     }
 
-    protected void populate(AbstractMathSet<String> toPopulate)
+    protected void populate(final AbstractMathSet<String> toPopulate)
     {
         entriesGUI.getItems().addAll(toPopulate.image(e -> new CustomMenuItem(new Label(e), true))
                 .getData()
@@ -54,7 +51,7 @@ public abstract class AutoCompleter<T> extends TextField {
     abstract AbstractMathSet<String> process(String s, String t);
     abstract AbstractMathSet<T> handleReturn(String t);
 
-    public void init()
+    public void makeLinks()
     {
         textProperty().addListener((observable, oldValue, newValue) -> {
             String enteredText = getText();
@@ -64,10 +61,7 @@ public abstract class AutoCompleter<T> extends TextField {
                 populate(process(newValue, oldValue));
                 if (!entriesGUI.isShowing()) { //optional
                     entriesGUI.show(this, Side.BOTTOM, 0, 0); //position of popup
-                }
-            }
-
-        });
+                }}});
 
         focusedProperty().addListener((observableValue, oldValue, newValue) -> {
             entriesGUI.hide();
