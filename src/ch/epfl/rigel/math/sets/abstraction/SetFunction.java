@@ -17,7 +17,7 @@ public interface SetFunction<T, U> extends Function<T, U> {
      * @param u the codomain set
      * @return An equation locating all elements that will be mapped in u by this function
      */
-    default Equation<T> preImageOf(final AbstractMathSet<U> u)
+    default Equation<T> preImageOf(AbstractMathSet<U> u)
     {
         return (t -> u.contains(apply(t)));
     }
@@ -26,7 +26,7 @@ public interface SetFunction<T, U> extends Function<T, U> {
      * @param u the codomain element
      * @return An equation locating all elements that will be mapped at u by this function
      */
-    default Equation<T> preImageOf(final U u)
+    default Equation<T> preImageOf(U u)
     {
         return (t -> apply(t).equals(u));
     }

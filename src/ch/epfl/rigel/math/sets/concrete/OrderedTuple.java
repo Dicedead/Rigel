@@ -29,7 +29,7 @@ public class OrderedTuple<T> extends IndexedSet<T, Integer> implements AbstractO
      * @param t the array to convert
      */
     @SafeVarargs
-    public OrderedTuple(final T... t) {
+    public OrderedTuple(T... t) {
         super(List.of(t), i -> t[i]);
     }
 
@@ -37,7 +37,7 @@ public class OrderedTuple<T> extends IndexedSet<T, Integer> implements AbstractO
      * Constructor allowing to construct an OrderedTuple from any Iterable
      * @param t the iterable to convert
      */
-    public OrderedTuple(final Iterable<T> t) {
+    public OrderedTuple(Iterable<T> t) {
         this(iterableToList(t));
     }
 
@@ -48,7 +48,7 @@ public class OrderedTuple<T> extends IndexedSet<T, Integer> implements AbstractO
         return target;
     }
 
-    public OrderedTuple(final List<T> t) {
+    public OrderedTuple(List<T> t) {
         super(t, t::get);
     }
 

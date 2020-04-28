@@ -6,6 +6,7 @@ import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.coordinates.StereographicProjection;
 import ch.epfl.rigel.coordinates.PlanarTransformation;
 import ch.epfl.rigel.math.ClosedInterval;
+import javafx.geometry.Bounds;
 import javafx.geometry.VPos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -29,35 +30,25 @@ import static ch.epfl.rigel.math.Angle.ofDeg;
  */
 public final class SkyCanvasPainter {
 
-    private final static double CELEST_SIZE_COEFF = applyToAngle(ofDeg(0.5)) / 140;
-    private final static ClosedInterval CLIP_INTERVAL = ClosedInterval.of(-2, 5);
-    private final static Color YELLOW_HALO = Color.YELLOW.deriveColor(1, 1, 1, 0.25);
-    private final static HorizontalCoordinates PARALLEL = HorizontalCoordinates.ofDeg(0, 0);
+    private static final double CELEST_SIZE_COEFF = applyToAngle(ofDeg(0.5)) / 140;
+    private static final ClosedInterval CLIP_INTERVAL = ClosedInterval.of(-2, 5);
+    private static final Color YELLOW_HALO = Color.YELLOW.deriveColor(1, 1, 1, 0.25);
+    private static final HorizontalCoordinates PARALLEL = HorizontalCoordinates.ofDeg(0, 0);
+    private static final Function<Star, Paint> STAR_COLOR = s -> BlackBodyColor.colorForTemperature(s.colorTemperature());
 
     private final Canvas canvas;
     private final GraphicsContext graphicsContext;
-
-    private final static Function<Star, Paint> STAR_COLOR = s -> BlackBodyColor.colorForTemperature(s.colorTemperature());
-    private final Function<CartesianCoordinates, Boolean> isInCanvas;
-    private final Function<CartesianCoordinates, Boolean> isInCanvasTransformed;
-    private final PlanarTransformation transform;
+    private final Bounds bounds;
 
     /**
      * SkyCanvasPainter Constructor
      *
-     * @param canvas    (Canvas) canvas to be drawn on
-     * @param transform (PlanarTransformation) transformation to be applied
+     * @param canvas (Canvas) canvas to be drawn on
      */
-    public SkyCanvasPainter(final Canvas canvas, final PlanarTransformation transform) {
+    public SkyCanvasPainter(Canvas canvas) {
         this.canvas = canvas;
         this.graphicsContext = this.canvas.getGraphicsContext2D();
-        this.transform = transform;
-        final CartesianCoordinates invertedCanvasSizes = transform.invert().apply(canvas.getWidth(), canvas.getHeight());
-        final double absInvertedX = Math.abs(invertedCanvasSizes.x());
-        final double absInvertedY = Math.abs(invertedCanvasSizes.y());
-        this.isInCanvas = coord -> Math.abs(coord.x()) <= absInvertedX && Math.abs(coord.y()) <= absInvertedY;
-        //avoids transforming the coordinates before checking if they are in canvas
-        this.isInCanvasTransformed = coord -> coord.x() <= canvas.getWidth() && coord.y() <= canvas.getHeight();
+        this.bounds = canvas.getBoundsInLocal();
     }
 
     /**
@@ -70,19 +61,29 @@ public final class SkyCanvasPainter {
         }
     }
 
+    public void drawDefault(ObservedSky sky, PlanarTransformation transform, StereographicProjection proj) {
+        drawAsterisms(sky, transform);
+        drawStars(sky, transform);
+        drawPlanets(sky, transform);
+        drawSun(sky, transform);
+        drawMoon(sky, transform);
+        drawHorizon(proj, transform);
+    }
+
     /**
      * Draws blue lines representing asterisms in current sky
      *
-     * @param sky (ObservedSky) current sky
+     * @param sky       (ObservedSky) current sky
+     * @param transform (PlanarTransformation) current transformation to the canvas
      */
-    public void drawAsterisms(ObservedSky sky) {
+    public void drawAsterisms(ObservedSky sky, PlanarTransformation transform) {
         graphicsContext.setStroke(Color.BLUE);
         graphicsContext.setLineWidth(1);
         sky.asterisms().forEach(
                 asterism -> {
                     final CartesianCoordinates cartesStar0 = transform.apply(getCartesFromIndex(sky, asterism, 0));
                     asterismLineRecurr(cartesStar0, transform.apply(getCartesFromIndex(sky, asterism, 1)),
-                            0, asterism, sky);
+                            0, asterism, sky, transform);
                 }
         );
     }
@@ -90,31 +91,37 @@ public final class SkyCanvasPainter {
     /**
      * Places the stars in current sky, with radius depending of their magnitude
      *
-     * @param sky (ObservedSky) current sky
+     * @param sky       (ObservedSky) current sky
+     * @param transform (PlanarTransformation) current transformation to the canvas
      */
-    public void drawStars(final ObservedSky sky) {
-        pipeline(sky.starsMap().entrySet().parallelStream(), SkyCanvasPainter::apparentSize, STAR_COLOR);
+    public void drawStars(ObservedSky sky, PlanarTransformation transform) {
+        pipeline(sky.starsMap().entrySet().parallelStream(), SkyCanvasPainter::apparentSize, STAR_COLOR,
+                transform);
         //Once again, parallelStream shortened the initialisation time upon testing.
     }
 
     /**
      * Places the planets in current sky, with radius depending of their magnitude, in light grey
      *
-     * @param sky (ObservedSky) current sky
+     * @param sky       (ObservedSky) current sky
+     * @param transform (PlanarTransformation) current transformation to the canvas
      */
-    public void drawPlanets(final ObservedSky sky) {
-        pipeline(sky.planetsMap().entrySet().stream(), SkyCanvasPainter::apparentSize, planet -> Color.LIGHTGRAY);
+    public void drawPlanets(ObservedSky sky, PlanarTransformation transform) {
+        pipeline(sky.planetsMap().entrySet().stream(), SkyCanvasPainter::apparentSize, planet -> Color.LIGHTGRAY,
+                transform);
     }
 
     /**
      * Draws the Sun in 3 layers in the current sky
      *
-     * @param sky (ObservedSky) current sky
+     * @param sky       (ObservedSky) current sky
+     * @param transform (PlanarTransformation) current transformation to the canvas
      */
-    public void drawSun(final ObservedSky sky) {
-        if (isInCanvas.apply(sky.sunPosition())) {
-            final CartesianCoordinates transformedCoords = transform.apply(sky.sunPosition());
-            final double innerSize = transform.applyDistance(applyToAngle(sky.sun().angularSize()));
+    public void drawSun(ObservedSky sky, PlanarTransformation transform) {
+        final CartesianCoordinates transformedCoords = transform.apply(sky.sunPosition());
+
+        if (bounds.contains(transformedCoords.x(), transformedCoords.y())) {
+            double innerSize = transform.applyDistance(applyToAngle(sky.sun().angularSize()));
             drawCircle(YELLOW_HALO, transformedCoords, innerSize * 2.2);
             drawCircle(Color.YELLOW, transformedCoords, innerSize + 2);
             drawCircle(Color.WHITE, transformedCoords, innerSize);
@@ -124,20 +131,23 @@ public final class SkyCanvasPainter {
     /**
      * Draws the Moon in the current sky in white
      *
-     * @param sky (ObservedSky) current sky
+     * @param sky       (ObservedSky) current sky
+     * @param transform (PlanarTransformation) current transformation to the canvas
      */
-    public void drawMoon(final ObservedSky sky) {
-        pipeline(sky.moonMap().entrySet().stream(), moon -> applyToAngle(moon.angularSize()), moon -> Color.WHITE);
+    public void drawMoon(ObservedSky sky, PlanarTransformation transform) {
+        pipeline(sky.moonMap().entrySet().stream(), moon -> applyToAngle(moon.angularSize()), moon -> Color.WHITE,
+                transform);
     }
 
     /**
      * Draws the horizon and octant names in red
      *
      * @param projection (StereographicProjection) centered projection to the 2D plane
+     * @param transform  (PlanarTransformation) current transformation to the canvas
      */
-    public void drawHorizon(final StereographicProjection projection) {
-        final double size = transform.applyDistance(2 * projection.circleRadiusForParallel(PARALLEL));
-        final CartesianCoordinates transformedCenter = transform.apply(projection.circleCenterForParallel(PARALLEL));
+    public void drawHorizon(StereographicProjection projection, PlanarTransformation transform) {
+        double size = transform.applyDistance(2 * projection.circleRadiusForParallel(PARALLEL));
+        CartesianCoordinates transformedCenter = transform.apply(projection.circleCenterForParallel(PARALLEL));
 
         synchronized (graphicsContext) {
             graphicsContext.setStroke(Color.RED);
@@ -149,8 +159,8 @@ public final class SkyCanvasPainter {
         }
         IntStream.range(0, 8).boxed().forEach(
                 i -> {
-                    final HorizontalCoordinates octantHorizCoords = HorizontalCoordinates.ofDeg(45 * i, -0.5);
-                    final CartesianCoordinates octantTransCoords = transform.apply(projection.apply(octantHorizCoords));
+                    HorizontalCoordinates octantHorizCoords = HorizontalCoordinates.ofDeg(45 * i, -0.5);
+                    CartesianCoordinates octantTransCoords = transform.apply(projection.apply(octantHorizCoords));
                     graphicsContext.fillText(octantHorizCoords.azOctantName("N", "E", "S", "O"),
                             octantTransCoords.x(), octantTransCoords.y());
                 }
@@ -163,22 +173,24 @@ public final class SkyCanvasPainter {
      * @param positions      (Stream<Map.Entry<T, CartesianCoordinates>>) Stream or ParallelStream
      * @param radiusFunction (Function<T, Double>) how to compute radii for given stream of celestial objects
      * @param color          (Function<T, Paint>) how to find the color for given stream of celestial objects
+     * @param transform      (PlanarTransformation) current transformation to the canvas
      * @param <T>            (extends CelestialObject)
      */
-    private <T extends CelestialObject> void pipeline(final Stream<Map.Entry<T, CartesianCoordinates>> positions,
-                                                      final Function<T, Double> radiusFunction, final Function<T, Paint> color) {
-        drawCelestial(applyTransform(checkInCanvas(positions)), radiusFunction, color);
+    private <T extends CelestialObject> void pipeline(Stream<Map.Entry<T, CartesianCoordinates>> positions,
+            Function<T, Double> radiusFunction, Function<T, Paint> color, PlanarTransformation transform) {
+        drawCelestial(checkInCanvas(applyTransform(positions, transform)), radiusFunction, color, transform);
     }
 
     /**
      * Applies transformation on celestial objects' positions
      *
      * @param positions (Stream<Map.Entry<T, CartesianCoordinates>>)
+     * @param transform (PlanarTransformation) current transformation to the canvas
      * @param <T>       (extends CelestialObject)
      * @return (Stream < Map.Entry < T, CartesianCoordinates > >) transformed positions
      */
     private <T extends CelestialObject> Stream<Map.Entry<T, CartesianCoordinates>> applyTransform(
-            final Stream<Map.Entry<T, CartesianCoordinates>> positions) {
+            Stream<Map.Entry<T, CartesianCoordinates>> positions, PlanarTransformation transform) {
         return positions.map(entry -> Map.entry(entry.getKey(), transform.apply(entry.getValue())));
     }
 
@@ -190,8 +202,8 @@ public final class SkyCanvasPainter {
      * @return (Stream < Map.Entry < T, CartesianCoordinates > >) filtered positions
      */
     private <T extends CelestialObject> Stream<Map.Entry<T, CartesianCoordinates>> checkInCanvas(
-            final Stream<Map.Entry<T, CartesianCoordinates>> positions) {
-        return positions.filter(entry -> isInCanvas.apply(entry.getValue()));
+            Stream<Map.Entry<T, CartesianCoordinates>> positions) {
+        return positions.filter(entry -> isInCanvas(entry.getValue()));
     }
 
     /**
@@ -201,15 +213,14 @@ public final class SkyCanvasPainter {
      *                       coordinates
      * @param radiusFunction (Function<T, Double> radiusFunction) how to compute radii for given positions
      * @param color          (Function<T, Paint>) how to color given celestial objects
+     * @param transform      (PlanarTransformation) current transformation to the canvas
      * @param <T>            (extends CelestialObject)
      */
-    private <T extends CelestialObject> void drawCelestial(final Stream<Map.Entry<T, CartesianCoordinates>> positions,
-                                                           final Function<T, Double> radiusFunction, final Function<T, Paint> color) {
+    private <T extends CelestialObject> void drawCelestial(Stream<Map.Entry<T, CartesianCoordinates>> positions,
+            Function<T, Double> radiusFunction, Function<T, Paint> color, PlanarTransformation transform) {
         positions.forEach(e ->
-        {
-            final double size = transform.applyDistance(radiusFunction.apply(e.getKey()));
-            drawCircle(color.apply(e.getKey()), e.getValue(), size);
-        });
+                drawCircle(color.apply(e.getKey()), e.getValue(), transform.applyDistance(radiusFunction.apply(e.getKey())))
+        );
     }
 
     /**
@@ -221,7 +232,8 @@ public final class SkyCanvasPainter {
      */
     private synchronized void drawCircle(Paint color, CartesianCoordinates cartesCoords, double size) {
         graphicsContext.setFill(color);
-        graphicsContext.fillOval(cartesCoords.x() - size / 2, cartesCoords.y() - size / 2, size, size);
+        final double halfSize = size / 2;
+        graphicsContext.fillOval(cartesCoords.x() - halfSize, cartesCoords.y() - halfSize, size, size);
         //Used in drawSun and drawCelestial
     }
 
@@ -233,16 +245,17 @@ public final class SkyCanvasPainter {
      * @param currentStartStar (int) index of the current starting star at starting point in asterism.stars()
      * @param asterism         (Asterism) current asterism being drawn
      * @param sky              (ObservedSky) current sky
+     * @param transform        (PlanarTransformation) current transformation to the canvas
      */
     private void asterismLineRecurr(final CartesianCoordinates c1, final CartesianCoordinates c2,
-                                    final int currentStartStar, final Asterism asterism, final ObservedSky sky) {
+                                    final int currentStartStar, final Asterism asterism, final ObservedSky sky, final PlanarTransformation transform) {
 
-        if (isInCanvasTransformed.apply(c1) || isInCanvasTransformed.apply(c2)) {
+        if (isInCanvas(c1) || isInCanvas(c2)) {
             graphicsContext.strokeLine(c1.x(), c1.y(), c2.x(), c2.y());
         }
         if (currentStartStar <= asterism.stars().size() - 2) {
             asterismLineRecurr(c2, transform.apply(getCartesFromIndex(sky, asterism, currentStartStar + 1)),
-                    currentStartStar + 1, asterism, sky);
+                    currentStartStar + 1, asterism, sky, transform);
         }
     }
 
@@ -256,6 +269,10 @@ public final class SkyCanvasPainter {
      */
     private CartesianCoordinates getCartesFromIndex(ObservedSky sky, Asterism aster, int index) {
         return sky.starsMap().get(sky.stars().get(sky.asterismIndices(aster).get(index)));
+    }
+
+    private boolean isInCanvas(final CartesianCoordinates coords) {
+        return bounds.contains(coords.x(), coords.y());
     }
 
     /**

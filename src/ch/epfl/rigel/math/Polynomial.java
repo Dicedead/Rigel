@@ -1,6 +1,7 @@
 package ch.epfl.rigel.math;
 
 import ch.epfl.rigel.Preconditions;
+
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -21,22 +22,22 @@ public final class Polynomial {
     private final static double EPSILON = 1e-8;
 
     //Handling multiple variables through currying
-    private final static BiFunction<Integer, Integer, Function<double[], List<Boolean>>> COEFF_FORMAT =  (i, d) -> c ->
+    private final static BiFunction<Integer, Integer, Function<double[], List<Boolean>>> COEFF_FORMAT = (i, d) -> c ->
             List.of(areEqual(c[i], 0), (i == d - 1 || areEqual(c[i], 0)), areEqual(c[i + 1], 0));
-            //Evaluates a bunch of conditions on the coefficients (if they're 0, if the next 0 is 0, if they're the constant
-            //term. The boolean list it constructs is used in conjunction with the following currying Functions:
+    //Evaluates a bunch of conditions on the coefficients (if they're 0, if the next 0 is 0, if they're the constant
+    //term. The boolean list it constructs is used in conjunction with the following currying Functions:
 
     private final static BiFunction<StringBuilder, Boolean, Function<String, StringBuilder>> SKIPP_COEFF =
-                    (sb, b) -> s -> sb.append(b ? "" : s);
-                    //Skips the coefficient if it is == 0
+            (sb, b) -> s -> sb.append(b ? "" : s);
+    //Skips the coefficient if it is == 0
 
-    private final static BiFunction<Integer, Integer, Function<double[], List<String>>> X_TO_POWER =  (i, d) -> c ->
-            List.of("x", "^" + (d - i), (0 > c[i + 1]) ? "-" :  "+" );
-            //Taking care of x^(power)(next sign) format
+    private final static BiFunction<Integer, Integer, Function<double[], List<String>>> X_TO_POWER = (i, d) -> c ->
+            List.of("x", "^" + (d - i), (0 > c[i + 1]) ? "-" : "+");
+    //Taking care of x^(power)(next sign) format
 
     private final static BiFunction<Integer, double[], String> NUMBER_FORMAT = (j, c) ->
             (areEqual(Math.abs(c[j]), 1) || areEqual(c[j], 0) ? "" : new DecimalFormat("##.########").format(Math.abs(c[j])));
-            //If coefficient is non-zero, show first 8 decimals
+    //If coefficient is non-zero, show first 8 decimals
 
     private Polynomial(double coefficientN, double... coefficients) {
 
@@ -67,18 +68,13 @@ public final class Polynomial {
      * @return (double) polynomial computed at desired point
      */
     public double at(double x) {
-        return atRecur(x, degree);
-    }
+        double result = coefficients[0];
 
-    /**
-     * Auxiliary recursive method applying horner's scheme
-     *
-     * @param x (double) point to interpret
-     * @param currentDeg (int) degree of subpolynomial
-     * @return (double)
-     */
-    private double atRecur(final double x, final int currentDeg) {
-        return currentDeg == 0 ? coefficients[0] : atRecur(x, currentDeg - 1) * x + coefficients[currentDeg];
+        for (int i = 1; i <= coefficients.length - 1; ++i) {
+            result = result * x + coefficients[i];
+        }
+
+        return result;
     }
 
     /**
@@ -94,15 +90,14 @@ public final class Polynomial {
      * Auxiliary recursive method for toString String formatting
      *
      * @param format (StringBuilder) String being built before step i
-     * @param i (int) incremental
+     * @param i      (int) incremental
      * @return (StringBuilder) String being built at step i / before step i+1
      */
-    private StringBuilder toStringRecursive(StringBuilder format, final int i)
-    {
+    private StringBuilder toStringRecursive(StringBuilder format, final int i) {
         //Largely applying Functions defined above
         return (i == degree || degree == 0) ? format : toStringRecursive(IntStream.of(0, 1, 2)
-                    .mapToObj(k -> SKIPP_COEFF.apply(k == 0 ? format.append(NUMBER_FORMAT.apply(i, coefficients)) : format,
-                    COEFF_FORMAT.apply(i, degree).apply(coefficients).get(k)).apply(X_TO_POWER.apply(i, degree).apply(coefficients).get(k)))
+                .mapToObj(k -> SKIPP_COEFF.apply(k == 0 ? format.append(NUMBER_FORMAT.apply(i, coefficients)) : format,
+                        COEFF_FORMAT.apply(i, degree).apply(coefficients).get(k)).apply(X_TO_POWER.apply(i, degree).apply(coefficients).get(k)))
                 .collect(Collectors.toList()).get(2), i + 1);
 
         /*The IntStream(0,1,2) defines steps to take: (for k in this IntStream:)

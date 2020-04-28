@@ -22,7 +22,7 @@ public final class ViewingParametersBean {
      *
      * @param newFieldOfViewDeg (double) fov to be set to in degrees
      */
-    public void setFieldOfViewDeg(final double newFieldOfViewDeg) {
+    public void setFieldOfViewDeg(double newFieldOfViewDeg) {
         fieldOfViewDeg.set(newFieldOfViewDeg);
     }
 
@@ -31,7 +31,7 @@ public final class ViewingParametersBean {
      *
      * @param newCenter (HorizontalCoordinates) coordinates to be set to
      */
-    public void setCenter(final HorizontalCoordinates newCenter) {
+    public void setCenter(HorizontalCoordinates newCenter) {
         center.set(newCenter);
     }
 

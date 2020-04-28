@@ -23,16 +23,16 @@ public interface AbstractMathSet<T> extends Iterable<T> {
      * @param <U> the codomain type
      * @return the MathSet containing all the lements produced by f when applied on this set
      */
-    default <U> AbstractMathSet<U> image(final SetFunction<T, U> f)
+    default <U> AbstractMathSet<U> image(SetFunction<T, U> f)
     {
         return f.apply(this);
     }
 
-    default boolean contains(final T t)
+    default boolean contains(T t)
     {
         return getData().contains(t);
     }
-    default boolean containsSet(final AbstractMathSet<T> other)
+    default boolean containsSet(AbstractMathSet<T> other)
     {
         return getData().containsAll(other.getData());
     }
@@ -48,7 +48,7 @@ public interface AbstractMathSet<T> extends Iterable<T> {
      * @param equation the predicate that each element will have to respect
      * @return the set of all elements in this set that complies to t
      */
-    default AbstractMathSet<T> suchThat(final Predicate<T> equation)
+    default AbstractMathSet<T> suchThat(Predicate<T> equation)
     {
         return suchThat(Collections.singletonList(equation));
     }
@@ -58,7 +58,7 @@ public interface AbstractMathSet<T> extends Iterable<T> {
      * @return the set of all elements in this set that complies to all t
      */
 
-    AbstractMathSet<T> suchThat(final Collection<Predicate<T>> t);
+    AbstractMathSet<T> suchThat(Collection<Predicate<T>> t);
 
     /**
      * @return the data wrapped by the set in its raw form
@@ -85,7 +85,7 @@ public interface AbstractMathSet<T> extends Iterable<T> {
      * @param equation the property to respect
      * @return an element from the current set respecting equation
      */
-    default Optional<T> getElement(final Predicate<T> equation)
+    default Optional<T> getElement(Predicate<T> equation)
     {
         return suchThat(equation).getElement();
     }
@@ -96,7 +96,7 @@ public interface AbstractMathSet<T> extends Iterable<T> {
      * @param others the collection of Set to intersect with
      * @return A MathSet containing only those elements that lies in all sets
      */
-    default AbstractMathSet<T> intersection(final AbstractMathSet<T> others)
+    default AbstractMathSet<T> intersection(AbstractMathSet<T> others)
     {
         return intersection(Collections.singleton(others));
     }
@@ -106,7 +106,7 @@ public interface AbstractMathSet<T> extends Iterable<T> {
      * @param others the collection of Set to intersect with
      * @return A MathSet containing only those elements that lies in all sets
      */
-    default AbstractMathSet<T> intersection(final Collection<AbstractMathSet<T>> others) {
+    default AbstractMathSet<T> intersection(Collection<AbstractMathSet<T>> others) {
         return suchThat(others.stream().map(AbstractMathSet::predicateContains).collect(Collectors.toSet()));
     }
     /**
@@ -114,7 +114,7 @@ public interface AbstractMathSet<T> extends Iterable<T> {
      * @param others the Sets to union with
      * @return A MathSet containing all elements that lies in one of the sets
      */
-    default AbstractMathSet<T> union(final AbstractMathSet<T> others)
+    default AbstractMathSet<T> union(AbstractMathSet<T> others)
     {
         return union(Collections.singleton(others));
     }
@@ -123,7 +123,7 @@ public interface AbstractMathSet<T> extends Iterable<T> {
      * @param others the Sets to union with
      * @return A MathSet containing all elements that lies in one of the sets
      */
-    AbstractMathSet<T> union(final Collection<AbstractMathSet<T>> others);
+    AbstractMathSet<T> union(Collection<AbstractMathSet<T>> others);
 
     /**
      * The directsum construct a space containing a copy of all sets
@@ -131,7 +131,7 @@ public interface AbstractMathSet<T> extends Iterable<T> {
      * @param <U> the type of the other Sets
      * @return a set containing this set and others as copies inside him
      */
-    default <U> AbstractMathSet<OptionalPair<T, U>> directSum(final AbstractMathSet<U> others)
+    default <U> AbstractMathSet<OptionalPair<T, U>> directSum(AbstractMathSet<U> others)
     {
         return directSum(Collections.singleton(others));
     }
@@ -141,7 +141,7 @@ public interface AbstractMathSet<T> extends Iterable<T> {
      * @param <U> the type of the other Sets
      * @return a set containing this set and others as copies inside him
      */
-    default <U> AbstractMathSet<OptionalPair<T, U>> directSum(final Collection<AbstractMathSet<U>> other) {
+    default <U> AbstractMathSet<OptionalPair<T, U>> directSum(Collection<AbstractMathSet<U>> other) {
         return image(t -> new OptionalPair<T, U>(t, null)).union(other.stream().map(s -> s.image(u -> new OptionalPair<T, U>(null, u)))
                 .collect(Collectors.toList()));
     }
@@ -151,7 +151,7 @@ public interface AbstractMathSet<T> extends Iterable<T> {
      * @param others the Collection of Sets to "multiply" with
      * @return A MathSet containing all possible pairs of elements from other and all other MathSets in other
      */
-    default <U> AbstractMathSet<Pair<T, U>>product(final AbstractMathSet<U> others)
+    default <U> AbstractMathSet<Pair<T, U>>product(AbstractMathSet<U> others)
     {
         return product(Collections.singleton(others));
     }
@@ -161,7 +161,7 @@ public interface AbstractMathSet<T> extends Iterable<T> {
      * @param other the Collection of Sets to "multiply" with
      * @return A MathSet containing all possible pairs of elements from other and all other MathSets in other
      */
-    default <U> AbstractMathSet<Pair<T, U>> product(final Collection<AbstractMathSet<U>> other) {
+    default <U> AbstractMathSet<Pair<T, U>> product(Collection<AbstractMathSet<U>> other) {
         return unionOf(image(t -> unionOf(other).image(u -> new Pair<>(t, u))));
     }
 
@@ -170,7 +170,7 @@ public interface AbstractMathSet<T> extends Iterable<T> {
      * @param other the set to substract
      * @return the set containing all elements of this set except those lying in other
      */
-    default AbstractMathSet<T> minusSet(final AbstractMathSet<T> other) {
+    default AbstractMathSet<T> minusSet(AbstractMathSet<T> other) {
         return suchThat(Predicate.not(other::contains));
     }
 
@@ -179,7 +179,7 @@ public interface AbstractMathSet<T> extends Iterable<T> {
      * @param other the element to substract
      * @return the set containing all elements of this set except other
      */
-    default AbstractMathSet<T> minus(final T other) {
+    default AbstractMathSet<T> minus(T other) {
         return suchThat(p -> !p.equals(other));
     }
 
@@ -187,10 +187,16 @@ public interface AbstractMathSet<T> extends Iterable<T> {
      * The powerSet is the set of all subsets of a set, it allows to navigate through subsets
      * @return The powerset of the current MathSet
      *
-     * Adapted from
      */
     AbstractMathSet<AbstractMathSet<T>> powerSet();
 
+    /**
+     * Powerset computation implementation, adapted from the JASS exercise
+     *
+     * @param set (Set<T>) set which's powerset will be computed
+     * @param <T> type
+     * @return (Set<Set<T>>) powerset of input set
+     */
     static<T> Set<Set<T>> powerSet(Set<T> set) {
         if (set.isEmpty())
             return Set.of();
@@ -264,7 +270,7 @@ public interface AbstractMathSet<T> extends Iterable<T> {
      * @param <T> the type of those sets
      * @return A sett containing all elements from each sets
      */
-    static <T> AbstractMathSet<T> unionOf(final AbstractMathSet<AbstractMathSet<T>> sets) {
+    static <T> AbstractMathSet<T> unionOf(AbstractMathSet<AbstractMathSet<T>> sets) {
         return sets.getElementOrThrow().union(sets.getData());
     }
 
@@ -274,7 +280,7 @@ public interface AbstractMathSet<T> extends Iterable<T> {
      * @param <T> the type of those sets
      * @return A sett containing all elements from each sets
      */
-    static <T> AbstractMathSet<T> unionOf(final Collection<AbstractMathSet<T>> sets) {
+    static <T> AbstractMathSet<T> unionOf(Collection<AbstractMathSet<T>> sets) {
         return unionOf(new MathSet<>(sets));
     }
 

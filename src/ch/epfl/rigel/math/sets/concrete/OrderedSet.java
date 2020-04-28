@@ -8,8 +8,8 @@ import ch.epfl.rigel.math.sets.properties.Relation;
  * @author Salim Najib (310003)
  */
 public final class OrderedSet<T> extends MathSet<T> implements AbstractOrderedSet<T> {
-    private final Relation.Order<T> comparator;
 
+    private final Relation.Order<T> comparator;
 
     /**
      * The main constructor

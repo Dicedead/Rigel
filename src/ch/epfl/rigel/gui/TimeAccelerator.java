@@ -21,7 +21,7 @@ public interface TimeAccelerator {
      * @param nanosElapsed (long) real time elapsed between initialTime and returned time
      * @return (ZonedDateTime) adjusted simulated time
      */
-    ZonedDateTime adjust(final ZonedDateTime initialTime, final long nanosElapsed);
+    ZonedDateTime adjust(ZonedDateTime initialTime, long nanosElapsed);
 
     /**
      * Creates a continuous time accelerator:
@@ -33,7 +33,7 @@ public interface TimeAccelerator {
      * @param factor (int) acceleration factor
      * @return TimeAccelerator
      */
-    static TimeAccelerator continuous(final int factor) {
+    static TimeAccelerator continuous(int factor) {
         return (time, nanos) -> time.plusNanos(factor * nanos);
     }
 
@@ -48,7 +48,7 @@ public interface TimeAccelerator {
      * @param step (Duration) advancement step the simulation
      * @return TimeAccelerator
      */
-    static TimeAccelerator discrete(final int freq, final Duration step) {
+    static TimeAccelerator discrete(int freq, Duration step) {
         return (time, nanos) -> time.plusNanos(step.toNanos() * (long) Math.floor(nanos * freq * 1e-9));
     }
 }

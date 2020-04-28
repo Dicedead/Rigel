@@ -1,6 +1,5 @@
 package ch.epfl.rigel;
 
-import ch.epfl.rigel.logging.RigelLogger;
 import ch.epfl.rigel.math.Interval;
 
 /**
@@ -37,8 +36,7 @@ public final class Preconditions {
      */
     public static double checkInInterval(Interval interval, double value) {
         if (!interval.contains(value)) {
-            //##RigelLogger.getBackendLogger().severe("Value : " + value + " is not in interval " + interval.toString());
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Value not in given interval.");
         }
         return value;
     }

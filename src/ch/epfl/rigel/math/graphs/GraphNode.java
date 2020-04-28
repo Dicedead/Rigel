@@ -34,7 +34,7 @@ public final class GraphNode<T> {
      *
      * @param value (T) value stored in the node
      */
-    public GraphNode(final T value) {
+    public GraphNode(T value) {
         this(value, null);
     }
 
@@ -63,7 +63,7 @@ public final class GraphNode<T> {
      * @param childValue (T) child node's value
      * @return (GraphNode<T>) said node containing said value
      */
-    public GraphNode<T> createChild(final T childValue) {
+    public GraphNode<T> createChild(T childValue) {
         return new GraphNode<>(childValue, this);
     }
 
@@ -163,7 +163,7 @@ public final class GraphNode<T> {
                 .collect(Collectors.toSet()).containsAll(Set.of(node1, node2));
     }
 
-    private Deque<GraphNode<T>> hierarchyRecur(final Deque<GraphNode<T>> nodeDeque) {
+    private Deque<GraphNode<T>> hierarchyRecur(Deque<GraphNode<T>> nodeDeque) {
         if (nodeDeque.getLast().isRoot())
             return nodeDeque;
         else {

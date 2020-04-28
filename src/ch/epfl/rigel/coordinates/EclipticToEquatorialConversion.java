@@ -21,7 +21,7 @@ public final class EclipticToEquatorialConversion implements Function<EclipticCo
     private final double sinEpsilon;
     private final double cosEpsilon;
 
-    private final static Polynomial POLYNOM = Polynomial.of(
+    private static final Polynomial POLYNOM = Polynomial.of(
             ofArcsec(0.00181), ofArcsec(-0.0006), ofArcsec(-46.815), Angle.ofDMS(23, 26, 21.45));
 
     /**
@@ -31,9 +31,9 @@ public final class EclipticToEquatorialConversion implements Function<EclipticCo
      */
     public EclipticToEquatorialConversion(ZonedDateTime when) {
 
-        final double T = J2000.julianCenturiesUntil(when);
+        double julianCentsJ2000toWhen = J2000.julianCenturiesUntil(when);
 
-        final double epsilon = POLYNOM.at(T);
+        double epsilon = POLYNOM.at(julianCentsJ2000toWhen);
 
         this.sinEpsilon = sin(epsilon);
         this.cosEpsilon = cos(epsilon);
@@ -46,11 +46,11 @@ public final class EclipticToEquatorialConversion implements Function<EclipticCo
     @Override
     public EquatorialCoordinates apply(EclipticCoordinates eclipCoords) {
 
-        final double lambda = eclipCoords.lon();
-        final double beta = eclipCoords.lat();
+        double lambda = eclipCoords.lon();
+        double beta = eclipCoords.lat();
 
-        final double term1 = 2 * sin(beta);
-        final double term2 = sin(lambda - beta) + sin(lambda + beta);
+        double term1 = 2 * sin(beta);
+        double term2 = sin(lambda - beta) + sin(lambda + beta);
             /*Playing around with some trigonometry, one can isolate these 2 common terms so there's no need to compute
               them twice.*/
 
@@ -65,7 +65,8 @@ public final class EclipticToEquatorialConversion implements Function<EclipticCo
      */
     @Override
     public final boolean equals(Object o) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Fatal error : tried to test equality but double precision does not \n" +
+                "allow it.");
     }
 
     /**
@@ -74,6 +75,7 @@ public final class EclipticToEquatorialConversion implements Function<EclipticCo
      */
     @Override
     public final int hashCode() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Fatal error : tried to hashcode but double precision does not \n" +
+                "allow it.");
     }
 }

@@ -29,10 +29,6 @@ class MyStereographicProjectionTest {
         assertEquals(-0.1316524976, stereographicProjection45.apply(HorizontalCoordinates.ofDeg(45,30)).y(),EPSILON);
         assertEquals(3.648705, stereographicProjection45.inverseApply(CartesianCoordinates.of(10,0)).az(),1e-6);
         assertEquals(15,stereographicProjection.apply(stereographicProjection.inverseApply(CartesianCoordinates.of(10, 15))).y(), EPSILON);
-        assertTrue(RightOpenInterval.of(0,Angle.TAU).contains(Angle.normalizePositive(-1.1102230246251565E-16)));
-        assertEquals(0,stereographicProjection.inverseApply(stereographicProjection.apply(center)).alt(),  EPSILON);
-        assertEquals(0,stereographicProjection.inverseApply(stereographicProjection.apply(center)).az(),  EPSILON);
-        assertEquals(0,stereographicProjection45.apply(stereographicProjection45.inverseApply( CartesianCoordinates.of(5,0))).y(),EPSILON2);
     }
 
     @Test

@@ -39,16 +39,16 @@ public final class EquatorialToHorizontalConversion implements Function<Equatori
     @Override
     public HorizontalCoordinates apply(EquatorialCoordinates equCoords) {
 
-        final double dec = equCoords.dec();
-        final double sinDec = sin(dec);
-        final double H = localTime - equCoords.ra();
+        double dec = equCoords.dec();
+        double sinDec = sin(dec);
+        double hourAngle = localTime - equCoords.ra();
 
-        final double term1 = sinDec * sinPhi + cosPhi * cos(dec) * cos(H);
+        double term1 = sinDec * sinPhi + cosPhi * cos(dec) * cos(hourAngle);
           /*Same playing around with trigonometry as for EclipticToEquatorialConversion in order to perform less
             computation.*/
 
         return HorizontalCoordinates.of(
-                normalizePositive(atan2(-cosPhi * cos(dec) * sin(H), sinDec - sinPhi * term1)),
+                normalizePositive(atan2(-cosPhi * cos(dec) * sin(hourAngle), sinDec - sinPhi * term1)),
                 asin(term1));
     }
 
@@ -58,9 +58,8 @@ public final class EquatorialToHorizontalConversion implements Function<Equatori
      */
     @Override
     public final boolean equals(Object o) {
-        //System.err.println("Fatal error : tried to test equality but double precision does not \n" +
-        //        "allow it.");
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Fatal error : tried to test equality but double precision does not \n" +
+                        "allow it.");
     }
 
     /**
@@ -69,6 +68,7 @@ public final class EquatorialToHorizontalConversion implements Function<Equatori
      */
     @Override
     public final int hashCode() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Fatal error : tried to hashcode but double precision does not \n" +
+                "allow it.");
     }
 }

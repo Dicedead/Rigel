@@ -121,7 +121,7 @@ public final class Tree<V> extends PointedSet<GraphNode<V>> implements Graph<Gra
      * @param point (T)
      * @return the tree that has for root point and points the same as the current tree
      */
-    public Tree<V> subtreeAtPoint(final GraphNode<V> point) {
+    public Tree<V> subtreeAtPoint(GraphNode<V> point) {
         Preconditions.checkArgument(contains(point));
         return new Tree<>(nodes.suchThat(node -> node.getDepth() >= point.getDepth() && GraphNode.areRelated(node, point)),
                 false, point, maxDepth);

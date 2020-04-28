@@ -17,11 +17,12 @@ public enum SunModel implements CelestialObjectModel<Sun> {
 
     SUN;
 
-    static private final double RATIO = TAU / 365.242191;
-    static private final double THETA_0 = ofDeg(0.533128);
-    static private final double LON_2010 = ofDeg(279.557208);
-    static private final double LON_PER = ofDeg(283.112438);
-    static private final double EXCENT = 0.016705;
+    private final static double RATIO = TAU / 365.242191;
+    private final static double THETA_0 = ofDeg(0.533128);
+    private final static double LON_2010 = ofDeg(279.557208);
+    private final static double LON_PER = ofDeg(283.112438);
+    private final static double EXCENT = 0.016705;
+    private final static double ONE_MIN_EXC2 = 1 - EXCENT * EXCENT;
 
     /**
      * Builds the Sun at a given point in time.
@@ -39,7 +40,7 @@ public enum SunModel implements CelestialObjectModel<Sun> {
         final EclipticCoordinates eclipCoords = EclipticCoordinates.of(normalizePositive(trueAnomaly + LON_PER), 0);
 
         return new Sun(eclipCoords, eclipToEquaConversion.apply(eclipCoords),
-                (float) (THETA_0 * (1 + EXCENT * cos(trueAnomaly)) / (1 - Math.pow(EXCENT, 2))), //Angular size
+                (float) (THETA_0 * (1 + EXCENT * cos(trueAnomaly)) / (ONE_MIN_EXC2)), //Angular size
                 (float) (meanAnomaly));
     }
 }

@@ -48,7 +48,8 @@ public abstract class Interval {
      */
     @Override
     public final boolean equals(Object o) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Fatal error : tried to test equality but double precision does not \n" +
+                "allow it.");
     }
 
     /**
@@ -57,6 +58,7 @@ public abstract class Interval {
      */
     @Override
     public final int hashCode() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Fatal error : tried to hashcode but double precision does not \n" +
+                "allow it.");
     }
 }

@@ -44,7 +44,7 @@ public final class DateTimeBean {
      *
      * @param date (LocalDate) date to be set to
      */
-    public void setDate(final LocalDate date) {
+    public void setDate(LocalDate date) {
         dateProperty.set(date);
     }
 
@@ -67,7 +67,7 @@ public final class DateTimeBean {
      *
      * @param time (LocalTime) time to be set to
      */
-    public void setTime(final LocalTime time) {
+    public void setTime(LocalTime time) {
         timeProperty.set(time);
     }
 
@@ -90,7 +90,7 @@ public final class DateTimeBean {
      *
      * @param zone (ZonedId) zone to be set to
      */
-    public void setZone(final ZoneId zone) {
+    public void setZone(ZoneId zone) {
         zoneProperty.set(zone);
     }
 
@@ -111,7 +111,7 @@ public final class DateTimeBean {
      *
      * @param zonedDateTime (ZonedDateTime) ZonedDateTime to which all 3 properties will be set to
      */
-    public void setZonedDateTime(final ZonedDateTime zonedDateTime) {
+    public void setZonedDateTime(ZonedDateTime zonedDateTime) {
         dateProperty.set(zonedDateTime.toLocalDate());
         timeProperty.set(zonedDateTime.toLocalTime());
         zoneProperty.set(zonedDateTime.getZone());

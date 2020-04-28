@@ -54,7 +54,7 @@ public final class ConcreteGraph<T> extends MathSet<OptionalPair<T, Link<T>>> im
 
 
     @Override
-    public Optional<AbstractPartitionSet<T>> getNeighbours(final T point) {
+    public Optional<AbstractPartitionSet<T>> getNeighbours(T point) {
         return Optional.of(new PartitionSet<>(edges.suchThat(l -> l.contains(point)).image(p -> p.next(point))));
     }
 
