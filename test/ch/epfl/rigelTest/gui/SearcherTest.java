@@ -1,7 +1,8 @@
-package ch.epfl.rigel.gui.searchtool;
+package ch.epfl.rigelTest.gui;
 
 import ch.epfl.rigel.astronomy.HygDatabaseLoader;
 import ch.epfl.rigel.astronomy.StarCatalogue;
+import ch.epfl.rigel.gui.searchtool.Searcher;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -11,7 +12,10 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.io.InputStream;
 
-final class SearcherTest  extends Application {
+public class SearcherTest  extends Application {
+
+    public SearcherTest() {}
+
     public static void main(String[] args)
     {
         launch(args);
@@ -33,16 +37,15 @@ final class SearcherTest  extends Application {
                     .loadFrom(hs, HygDatabaseLoader.INSTANCE)
                     .build();
 
-            Searcher searcher = new Searcher(10, p -> true, catalogue);
             Canvas sky = new Canvas();
-            searcher.setEditable(true);
-            searcher.setVisible(true);
 
             StackPane root = new StackPane(sky);
+            Searcher searcher = new Searcher(10, p -> true, catalogue);
+            searcher.setEditable(true);
+            searcher.setVisible(true);
             root.getChildren().add(searcher);
 
             primaryStage.setScene(new Scene(root, 300, 250));
-            primaryStage.show();
             primaryStage.setMinWidth(800);
             primaryStage.setMinHeight(600);
 

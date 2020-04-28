@@ -62,6 +62,7 @@ public final class SkyCanvasPainter {
     }
 
     public void drawDefault(ObservedSky sky, PlanarTransformation transform, StereographicProjection proj) {
+        clear();
         drawAsterisms(sky, transform);
         drawStars(sky, transform);
         drawPlanets(sky, transform);
