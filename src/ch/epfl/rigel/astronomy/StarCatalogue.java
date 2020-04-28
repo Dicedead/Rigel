@@ -34,7 +34,6 @@ public final class StarCatalogue {
      */
     public StarCatalogue(List<Star> stars, List<Asterism> asterisms) {
 
-        //##RigelLogger.getAstronomyLogger().info("Constructing star catalogue");
         this.starToIndexMap = Collections.unmodifiableMap(IntStream.range(0,stars.size()).boxed()
                 .collect(Collectors.toMap(stars::get,Function.identity(), (o1,o2)->o1)));
         //Although this map causes some spatial complexity, it avoids an O(n*m) call to indexOf below and in
@@ -53,7 +52,6 @@ public final class StarCatalogue {
         this.immutableAsterismSet = Collections.unmodifiableSet(asterismMap.keySet());
         //keySet allows for retain & retainAll, need to make it immutable; as the map's visibility is restrained to this
         //class and the Asterisms are immutable objects, this O(1) call suffices.
-        //##RigelLogger.getAstronomyLogger().info("Finished star catalogue");
 
     }
 
@@ -80,14 +78,6 @@ public final class StarCatalogue {
     public List<Integer> asterismIndices(Asterism asterism) {
         Preconditions.checkArgument(asterismMap.containsKey(asterism));
         return asterismMap.get(asterism);
-    }
-
-    /**
-     * @return (Map<Star, Integer>) map associating each star in catalogue.stars() to its index in the same list, acting
-     *         as an O(1) indexOf
-     */
-    public Map<Star, Integer> starIndexMap() {
-        return starToIndexMap;
     }
 
     /***

@@ -1,7 +1,7 @@
 package ch.epfl.rigel.math.graphs;
 
 import ch.epfl.rigel.Preconditions;
-import ch.epfl.rigel.math.sets.abtract.AbstractMathSet;
+import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
 import ch.epfl.rigel.math.sets.concrete.MathSet;
 import ch.epfl.rigel.math.sets.concrete.OrderedTuple;
 

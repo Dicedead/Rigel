@@ -4,14 +4,14 @@ import ch.epfl.rigel.astronomy.AsterismLoader;
 import ch.epfl.rigel.astronomy.CelestialObject;
 import ch.epfl.rigel.astronomy.HygDatabaseLoader;
 import ch.epfl.rigel.astronomy.ObservedSky;
+import ch.epfl.rigel.astronomy.Star;
 import ch.epfl.rigel.astronomy.StarCatalogue;
 import ch.epfl.rigel.coordinates.EclipticToEquatorialConversion;
 import ch.epfl.rigel.coordinates.EquatorialToHorizontalConversion;
 import ch.epfl.rigel.coordinates.GeographicCoordinates;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.coordinates.StereographicProjection;
-import ch.epfl.rigel.gui.bonus.SearchBar;
-import ch.epfl.rigel.math.graphs.Tree;
+import ch.epfl.rigel.gui.searchtool.SearchBar;
 import ch.epfl.rigel.math.sets.concrete.MathSet;
 import org.junit.jupiter.api.Test;
 
@@ -23,13 +23,12 @@ import java.time.Month;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class    SearchBarTest {
@@ -111,12 +110,27 @@ public class    SearchBarTest {
     void searchBarTest() throws IOException{
         init();
         SearchBar search = new SearchBar(sky);
-        Set<CelestialObject> lul = search.search("S", SearchBar.Filters.ALL, SearchBar.SearchBy.NAME);
+        Set<CelestialObject> lul = search.search("S", SearchBar.Filters.ALL, SearchBar.SearchBy.NAME, sky);
         assertTrue(sky.celestialObjMap().keySet().containsAll(lul));
-        Set<CelestialObject> lul2 = search.search("Sc", SearchBar.Filters.ALL, SearchBar.SearchBy.NAME);
+        Set<CelestialObject> lul2 = search.search("Sc", SearchBar.Filters.ALL, SearchBar.SearchBy.NAME, sky);
         assertTrue(lul.containsAll(lul2) && !lul2.containsAll(lul));
 
-        System.out.println(search.suggestions("Sc", SearchBar.SearchBy.NAME));
+        assertEquals("Sch",search.suggestions("Sc", SearchBar.SearchBy.NAME).stream().findAny().get());
+
+        search.endSearch();
+
+        Set<CelestialObject> test = search.search("2", SearchBar.Filters.STARS, SearchBar.SearchBy.HIPPARCOS, sky);
+        assertEquals(sky.starsMap().keySet().stream().filter(star -> String.valueOf(star.hipparcosId()).startsWith("2"))
+                .collect(Collectors.toSet()), test);
+
+        Set<CelestialObject> test2 = search.search("22", SearchBar.Filters.STARS, SearchBar.SearchBy.HIPPARCOS, sky);
+        assertEquals(sky.starsMap().keySet().stream().filter(star -> String.valueOf(star.hipparcosId()).startsWith("22"))
+                .collect(Collectors.toSet()), test2);
+
+        assertEquals(0, search.search("a", SearchBar.Filters.STARS, SearchBar.SearchBy.HIPPARCOS, sky).size());
+
+        search.endSearch();
+
     }
 
 }

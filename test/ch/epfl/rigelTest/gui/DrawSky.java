@@ -41,10 +41,6 @@ public final class DrawSky extends Application {
     @Override
     public void start(Stage primaryStage) {
 
-        //££ThreadManager.initThreads();
-
-        //££ThreadManager.getLogger().execute(() -> RigelLogger.init(new File("logs/Step8"), RigelLogger.runType.DEBUG));
-
         try (InputStream hs = resourceStream("/hygdata_v3.csv"); InputStream ast = resourceStream("/asterisms.txt")) {
             BlackBodyColor.init();
             //££final Future<StarCatalogue> catalogue = ThreadManager.getIo().submit(() -> new StarCatalogue.Builder()
@@ -80,7 +76,6 @@ public final class DrawSky extends Application {
                 paint.drawHorizon(proj);
                 //££});
 
-            //##RigelLogger.getBackendLogger().info("Finished drawing stars");
             ImageIO.write(SwingFXUtils.fromFXImage(canvasFuture.snapshot(null, null),
                     null), "png", new File("sky.png"));
 

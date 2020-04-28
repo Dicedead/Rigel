@@ -1,11 +1,11 @@
 package ch.epfl.rigel.math.graphs;
 
-import ch.epfl.rigel.math.sets.abtract.AbstractMathSet;
-import ch.epfl.rigel.math.sets.abtract.AbstractOrderedTuple;
-import ch.epfl.rigel.math.sets.abtract.AbstractPartitionSet;
+import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
+import ch.epfl.rigel.math.sets.abstraction.AbstractOrderedTuple;
+import ch.epfl.rigel.math.sets.abstraction.AbstractPartitionSet;
 import ch.epfl.rigel.math.sets.concrete.MathSet;
 import ch.epfl.rigel.math.sets.concrete.OrderedTuple;
-import ch.epfl.rigel.math.sets.abtract.SetFunction;
+import ch.epfl.rigel.math.sets.abstraction.SetFunction;
 
 import java.util.ArrayList;
 import java.util.Collections;

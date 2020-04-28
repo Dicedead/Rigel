@@ -56,7 +56,7 @@ public final class SkyCanvasPainter {
         final double absInvertedX = Math.abs(invertedCanvasSizes.x());
         final double absInvertedY = Math.abs(invertedCanvasSizes.y());
         this.isInCanvas = coord -> Math.abs(coord.x()) <= absInvertedX && Math.abs(coord.y()) <= absInvertedY;
-        //getInBounds creates Bounds object, unneeded.
+        //avoids transforming the coordinates before checking if they are in canvas
         this.isInCanvasTransformed = coord -> coord.x() <= canvas.getWidth() && coord.y() <= canvas.getHeight();
     }
 

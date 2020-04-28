@@ -1,12 +1,11 @@
-package ch.epfl.rigel.gui.bonus;
+package ch.epfl.rigel.gui.searchtool;
 
 import ch.epfl.rigel.astronomy.*;
 import ch.epfl.rigel.coordinates.CartesianCoordinates;
-import ch.epfl.rigel.math.sets.abtract.AbstractMathSet;
+import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
 import ch.epfl.rigel.math.sets.concrete.IndexedSet;
 import ch.epfl.rigel.math.sets.concrete.MathSet;
 
-import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -16,7 +15,7 @@ public class StarSearcher extends Searcher<CelestialObject> {
 
     static private final int DEFAULT_CACHE_SIZE = 10;
 
-    StarSearcher(StarCatalogue s, Filters f)
+    StarSearcher(ObservedSky s, Filters f)
     {
         super(s.stars().stream()
                 .collect(Collectors.toMap(CelestialObject::name, Function.identity())),

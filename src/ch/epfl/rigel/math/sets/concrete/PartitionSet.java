@@ -1,12 +1,11 @@
 package ch.epfl.rigel.math.sets.concrete;
 
-import ch.epfl.rigel.math.sets.abtract.AbstractMathSet;
-import ch.epfl.rigel.math.sets.abtract.AbstractPartitionSet;
+import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
+import ch.epfl.rigel.math.sets.abstraction.AbstractPartitionSet;
 import ch.epfl.rigel.math.sets.properties.Relation;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.stream.Stream;
 
 /**
  * @author Alexandre Sallinen (303162)
