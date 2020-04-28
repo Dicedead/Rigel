@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class SearchBarTest {
+public class    SearchBarTest {
     private static final String HYG_CATALOGUE_NAME =
             "/hygdata_v3.csv";
     private static final String AST_CATALOGUE_NAME =

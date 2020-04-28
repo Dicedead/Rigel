@@ -7,6 +7,7 @@ import ch.epfl.rigel.math.sets.concrete.MathSet;
 import ch.epfl.rigel.math.sets.concrete.OrderedTuple;
 import ch.epfl.rigel.math.sets.concrete.PartitionSet;
 import ch.epfl.rigel.math.sets.abtract.SetFunction;
+import ch.epfl.rigel.math.sets.concrete.PointedSet;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,15 +15,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 
 /**
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-public final class Tree<V> extends PartitionSet<GraphNode<V>> implements Graph<GraphNode<V>, Tree<V>> {
+public final class Tree<V> extends PointedSet<GraphNode<V>> implements Graph<GraphNode<V>, Tree<V>> {
 
     private final AbstractMathSet<GraphNode<V>> nodes;
-    private final GraphNode<V> root;
     private final int maxDepth;
 
     /**
@@ -44,13 +45,22 @@ public final class Tree<V> extends PartitionSet<GraphNode<V>> implements Graph<G
      * @throws IllegalArgumentException if given leaves aren't all connected to the same root
      */
     public Tree(AbstractMathSet<GraphNode<V>> nodes) {
-        this(nodes, !nodes.isEmpty(), (nodes.isEmpty()) ? new GraphNode<>(null) : nodes.minOf(GraphNode::getDepth),
-                (nodes.isEmpty()) ? -1 : nodes.maxOf(GraphNode::getDepth).getDepth());
+        this(nodes, true, nodes.minOf(GraphNode::getDepth), nodes.maxOf(GraphNode::getDepth).getDepth());
+    }
+
+    public Tree(AbstractMathSet<GraphNode<V>> nodes, boolean securityChecksActivated) {
+        this(nodes, securityChecksActivated, nodes.minOf(GraphNode::getDepth), nodes.maxOf(GraphNode::getDepth).getDepth());
+    }
+
+    private Tree()
+    {
+        super(emptySet(), null);
+        this.maxDepth = -1;
+        this.nodes = emptySet();
     }
 
     private Tree(AbstractMathSet<GraphNode<V>> nodes, boolean securityChecksActivated, GraphNode<V> root, int maxDepth) {
-        super(nodes, GraphNode::areRelatedRootless);
-
+        super(nodes, root);
         if (securityChecksActivated) {
             Preconditions.checkArgument(nodes.image(
                     node -> {
@@ -61,8 +71,16 @@ public final class Tree<V> extends PartitionSet<GraphNode<V>> implements Graph<G
         }
 
         this.maxDepth = maxDepth;
-        this.root = root;
         this.nodes = nodes;
+    }
+
+    public static <V> Tree<V> emptyTree()
+    {
+        return new Tree<>();
+    }
+    public Tree<V> add (final Path<GraphNode<V>> p)
+    {
+        return new Tree<>(union(p));
     }
 
     @Override
@@ -153,7 +171,7 @@ public final class Tree<V> extends PartitionSet<GraphNode<V>> implements Graph<G
 
     @Override
     public AbstractMathSet<Link<GraphNode<V>>> edgeSet() {
-        final AbstractMathSet<GraphNode<V>> nonRoots = nodes.suchThat(node -> !node.equals(root));
+        final AbstractMathSet<GraphNode<V>> nonRoots = nodes.suchThat(node -> !node.equals(getElementOrThrow()));
         return (nonRoots.cardinality() <= 1) ? emptySet() : nonRoots.image(n -> new Link<>(n, n.getParent().orElse(null)));
     }
 
@@ -182,11 +200,11 @@ public final class Tree<V> extends PartitionSet<GraphNode<V>> implements Graph<G
      * @return the root node to which every node should be linked
      */
     public GraphNode<V> getRoot() {
-        return root;
+        return getElementOrThrow();
     }
 
     public int getTotalDepth() {
-        return maxDepth - root.getDepth();
+        return maxDepth - getElementOrThrow().getDepth();
     }
 
     public int getMaxDepth() {
@@ -194,6 +212,6 @@ public final class Tree<V> extends PartitionSet<GraphNode<V>> implements Graph<G
     }
 
     public int getMinDepth() {
-        return root.getDepth();
+        return getElementOrThrow().getDepth();
     }
 }
