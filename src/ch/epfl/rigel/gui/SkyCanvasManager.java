@@ -26,8 +26,12 @@ import javafx.scene.canvas.Canvas;
 public final class SkyCanvasManager {
 
     private static final int MAX_CANVAS_DISTANCE = 10;
-    private static final RightOpenInterval AZDEG_INTERVAL = RightOpenInterval.of(0,360);
-    private static final ClosedInterval ALTDEG_INTERVAL = ClosedInterval.of(5, 90);
+    private static final double MIN_ALT = Angle.ofDeg(5);
+    private static final double MAX_ALT = Math.PI/2;
+    private static final ClosedInterval ALT_INTERVAL = ClosedInterval.of(MIN_ALT, MAX_ALT);
+    private static final double ALT_STEP = Angle.ofDeg(5);
+    private static final double AZ_STEP = Angle.ofDeg(10);
+    private static final ClosedInterval FOV_INTERVAL = ClosedInterval.of(30, 150);
 
     private final StarCatalogue catalogue;
     private final DateTimeBean dtBean;
@@ -57,7 +61,7 @@ public final class SkyCanvasManager {
         this.viewBean = viewBean;
         this.obsLocBean = obsLocBean;
 
-        canvas = new Canvas();
+        canvas = new Canvas(800, 600);
         painter = new SkyCanvasPainter(canvas);
 
         //CREATING VARIOUS ASTRONOMICAL AND MATHEMATICAL BINDINGS
@@ -103,17 +107,17 @@ public final class SkyCanvasManager {
 
         canvas.setOnKeyPressed(key -> {
             switch (key.getCode()) {
-                case LEFT: modifyView(-10, 0, viewBean.getCenter());
-                case RIGHT: modifyView(+10, 0, viewBean.getCenter());
-                case UP: modifyView(0, +5, viewBean.getCenter());
-                case DOWN: modifyView(0, -5, viewBean.getCenter());
+                case LEFT: modifyView(-AZ_STEP, 0, viewBean.getCenter()); break;
+                case RIGHT: modifyView(+AZ_STEP, 0, viewBean.getCenter()); break;
+                case UP: modifyView(0, +ALT_STEP, viewBean.getCenter()); break;
+                case DOWN: modifyView(0, -ALT_STEP, viewBean.getCenter());
             }
             key.consume();
         });
 
-        canvas.setOnScroll(scroll -> viewBean.setFieldOfViewDeg(
-                viewBean.getFieldOfViewDeg() + (Math.abs(scroll.getDeltaX()) < Math.abs(scroll.getDeltaY()) ?
-                scroll.getDeltaY() : scroll.getDeltaX())));
+        canvas.setOnScroll(scroll -> viewBean.setFieldOfViewDeg(FOV_INTERVAL.clip(
+                viewBean.getFieldOfViewDeg() - (Math.abs(scroll.getDeltaX()) < Math.abs(scroll.getDeltaY()) ?
+                scroll.getDeltaY() : scroll.getDeltaX()))));
 
         //FINALLY, ADDING LISTENERS TO REDRAW SKY
         observedSky.addListener((p, o, n) -> painter.drawDefault(observedSky.get(), planeToCanvas.get(), projection.get()));
@@ -169,11 +173,10 @@ public final class SkyCanvasManager {
         return mouseAltDeg.get();
     }
 
-    private void modifyView(double azDegDelta, double altDegDelta, HorizontalCoordinates center) {
-        if (!(AZDEG_INTERVAL.contains(center.azDeg() + azDegDelta)
-                && ALTDEG_INTERVAL.contains(center.altDeg() + altDegDelta))) {
-            return;
-        }
-        viewBean.setCenter(center.withDeltaDeg(azDegDelta, altDegDelta));
+    private void modifyView(double azDelta, double altDelta, HorizontalCoordinates center) {
+        viewBean.setCenter(HorizontalCoordinates.of(
+                Angle.normalizePositive(center.az() + azDelta),
+                ALT_INTERVAL.clip(center.alt() + altDelta)
+        ));
     }
 }

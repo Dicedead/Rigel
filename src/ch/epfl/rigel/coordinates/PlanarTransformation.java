@@ -227,7 +227,6 @@ public final class PlanarTransformation implements Function<CartesianCoordinates
      */
     public static double euclideanDistSquared(final CartesianCoordinates coord1, final CartesianCoordinates coord2) {
         return euclideanNormSquared(coord1.x() - coord2.x(), coord1.y() - coord2.y());
-        //Math.pow(n,2) is just a tad slower than n*n for squaring, so was Math.hyp compared to this method
     }
 
     /**
@@ -239,25 +238,5 @@ public final class PlanarTransformation implements Function<CartesianCoordinates
      */
     public static double euclideanDistance(CartesianCoordinates coord1, CartesianCoordinates coord2) {
         return euclideanNormOf(coord1.x() - coord2.x(), coord1.y() - coord2.y());
-    }
-
-    /**
-     * @throws UnsupportedOperationException (double precision does not allow for equals)
-     * @see Object#equals(Object)
-     */
-    @Override
-    public final boolean equals(Object o) {
-        throw new UnsupportedOperationException("Fatal error : tried to test equality but double precision does not \n" +
-                "allow it.");
-    }
-
-    /**
-     * @throws UnsupportedOperationException (double precision does not allow for hashcode)
-     * @see Object#hashCode()
-     */
-    @Override
-    public final int hashCode() {
-        throw new UnsupportedOperationException("Fatal error : tried to hashcode but double precision does not \n" +
-                "allow it.");
     }
 }
