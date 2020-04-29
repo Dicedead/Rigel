@@ -9,13 +9,16 @@ import ch.epfl.rigel.coordinates.PlanarTransformation;
 import ch.epfl.rigel.coordinates.StereographicProjection;
 import ch.epfl.rigel.math.Angle;
 import ch.epfl.rigel.math.ClosedInterval;
-import ch.epfl.rigel.math.RightOpenInterval;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.binding.ObjectBinding;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.canvas.Canvas;
+
+import java.util.Optional;
 
 /**
  * Draws the sky on canvas continuously
@@ -25,6 +28,8 @@ import javafx.scene.canvas.Canvas;
  */
 public final class SkyCanvasManager {
 
+    public static final boolean ENABLE_ROTATION = true;
+
     private static final int MAX_CANVAS_DISTANCE = 10;
     private static final double MIN_ALT = Angle.ofDeg(5);
     private static final double MAX_ALT = Math.PI/2;
@@ -32,6 +37,7 @@ public final class SkyCanvasManager {
     private static final double ALT_STEP = Angle.ofDeg(5);
     private static final double AZ_STEP = Angle.ofDeg(10);
     private static final ClosedInterval FOV_INTERVAL = ClosedInterval.of(30, 150);
+    private static final double ROTATE_STEP = Angle.ofDeg(10);
 
     private final StarCatalogue catalogue;
     private final DateTimeBean dtBean;
@@ -48,10 +54,12 @@ public final class SkyCanvasManager {
     private final DoubleBinding maxDistanceCanvasToCartesian;
 
     private final ObjectBinding<CelestialObject> objectUnderMouse;
+    private final ObjectBinding<Optional<CelestialObject>> optionalObjectUnderMouse;
     private final DoubleBinding mouseAzDeg;
     private final DoubleBinding mouseAltDeg;
 
     private final ObjectProperty<CartesianCoordinates> mousePosition = new SimpleObjectProperty<>();
+    private final DoubleProperty rotation = new SimpleDoubleProperty(0);
 
     public SkyCanvasManager(StarCatalogue catalogue, DateTimeBean dtBean,
            ObserverLocationBean obsLocBean, ViewingParametersBean viewBean) {
@@ -70,11 +78,14 @@ public final class SkyCanvasManager {
                 viewBean.centerProperty());
 
         planeToCanvas = Bindings.createObjectBinding(
-                () -> PlanarTransformation.ofDilatAndTrans(
+                () -> {
+                    final PlanarTransformation transAndDilat = PlanarTransformation.ofDilatAndTrans(
                         canvas.getWidth()/StereographicProjection.applyToAngle(
                                 Angle.ofDeg(viewBean.getFieldOfViewDeg())),
-                        canvas.getWidth()/2, canvas.getHeight()/2),
-                canvas.widthProperty(), canvas.heightProperty(), viewBean.fieldOfViewDegProperty());
+                        canvas.getWidth()/2, canvas.getHeight()/2);
+                    return ENABLE_ROTATION ? transAndDilat.concat(PlanarTransformation.rotation(rotation.get())) :
+                            transAndDilat;},
+                canvas.widthProperty(), canvas.heightProperty(), viewBean.fieldOfViewDegProperty(), rotation);
 
         inversePlaneToCanvas = Bindings.createObjectBinding(() -> planeToCanvas.get().invert(), planeToCanvas);
 
@@ -95,9 +106,13 @@ public final class SkyCanvasManager {
                 () -> inversePlaneToCanvas.get().applyDistance(MAX_CANVAS_DISTANCE),
                 inversePlaneToCanvas);
 
-        objectUnderMouse = Bindings.createObjectBinding(
-                () -> observedSky.get().objectClosestTo(mousePosition.get(), maxDistanceCanvasToCartesian.get()).orElse(null),
+        optionalObjectUnderMouse = Bindings.createObjectBinding(
+                () -> observedSky.get().objectClosestTo(mousePosition.get(), maxDistanceCanvasToCartesian.get()),
                 observedSky, mousePosition, maxDistanceCanvasToCartesian);
+
+        objectUnderMouse = Bindings.createObjectBinding(
+                () -> optionalObjectUnderMouse.get().isPresent() ? optionalObjectUnderMouse.get().get() : null,
+                optionalObjectUnderMouse);
 
         canvas.setOnMousePressed(mouse -> {
             if (mouse.isPrimaryButtonDown()) canvas.requestFocus();
@@ -107,10 +122,13 @@ public final class SkyCanvasManager {
 
         canvas.setOnKeyPressed(key -> {
             switch (key.getCode()) {
-                case LEFT: modifyView(-AZ_STEP, 0, viewBean.getCenter()); break;
-                case RIGHT: modifyView(+AZ_STEP, 0, viewBean.getCenter()); break;
-                case UP: modifyView(0, +ALT_STEP, viewBean.getCenter()); break;
-                case DOWN: modifyView(0, -ALT_STEP, viewBean.getCenter());
+                case LEFT: modifyViewBean(-AZ_STEP, 0, viewBean.getCenter()); break;
+                case RIGHT: modifyViewBean(+AZ_STEP, 0, viewBean.getCenter()); break;
+                case UP: modifyViewBean(0, +ALT_STEP, viewBean.getCenter()); break;
+                case DOWN: modifyViewBean(0, -ALT_STEP, viewBean.getCenter()); break;
+                case J: modifyRotation(ROTATE_STEP); break;
+                case L: modifyRotation(-ROTATE_STEP); break;
+                case K: if (rotation.get() != 0) modifyRotation(-rotation.get());
             }
             key.consume();
         });
@@ -173,10 +191,16 @@ public final class SkyCanvasManager {
         return mouseAltDeg.get();
     }
 
-    private void modifyView(double azDelta, double altDelta, HorizontalCoordinates center) {
+    private void modifyViewBean(double azDelta, double altDelta, HorizontalCoordinates center) {
         viewBean.setCenter(HorizontalCoordinates.of(
                 Angle.normalizePositive(center.az() + azDelta),
                 ALT_INTERVAL.clip(center.alt() + altDelta)
         ));
+    }
+
+    private void modifyRotation(double deltaRad) {
+        if (ENABLE_ROTATION) {
+            rotation.set(rotation.get() + deltaRad);
+        }
     }
 }

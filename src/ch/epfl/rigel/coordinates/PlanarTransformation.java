@@ -3,6 +3,7 @@ package ch.epfl.rigel.coordinates;
 import ch.epfl.rigel.Preconditions;
 
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 /**
  * Functional class representing a 2x3 matrix for scaling, translating and rotating transformations.
@@ -12,7 +13,7 @@ import java.util.function.Function;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-public final class PlanarTransformation implements Function<CartesianCoordinates, CartesianCoordinates> {
+public final class PlanarTransformation implements UnaryOperator<CartesianCoordinates> {
     /*
       JavaFX's Transform class has to go through many processes and intermediate types (Scale, Rotate, Point2D,...)
       which are of no use for this project, therefore we've remade Transform which greatly improved efficiency and
@@ -24,8 +25,7 @@ public final class PlanarTransformation implements Function<CartesianCoordinates
 
     private final boolean isDiagonal;
 
-    private PlanarTransformation(final double mxx, final double mxy, final double myx, final double myy, final double tx,
-                                 final double ty)  {
+    private PlanarTransformation(double mxx, double mxy, double myx, double myy, double tx, double ty)  {
         Mxx = mxx;
         Mxy = mxy;
         Myy = myy;
@@ -51,8 +51,7 @@ public final class PlanarTransformation implements Function<CartesianCoordinates
      * @param ty  (double) position (2,3) - translation coefficient, set to 0 if no translation on y axis wanted
      * @return (PlanarTransformation) loaded 2x3 matrix
      */
-    public static PlanarTransformation of(final double mxx, final double mxy, final double myx, final double myy, final double tx,
-                                          final double ty) {
+    public static PlanarTransformation of(double mxx, double mxy, double myx, double myy, double tx, double ty) {
         return new PlanarTransformation(mxx, mxy, myx, myy, tx, ty);
     }
 
@@ -67,7 +66,7 @@ public final class PlanarTransformation implements Function<CartesianCoordinates
      * @param ty    (double) position (2,3) - translation coefficient, set to 0 if no translation on y axis wanted
      * @return (PlanarTransformation) loaded diagonal matrix
      */
-    public static PlanarTransformation ofDilatAndTrans(final double dilatX, final double dilatY, final double tx, final double ty) {
+    public static PlanarTransformation ofDilatAndTrans(double dilatX, double dilatY, double tx, double ty) {
         return new PlanarTransformation(dilatX, 0, 0, dilatY, tx, ty);
     }
 
@@ -81,8 +80,38 @@ public final class PlanarTransformation implements Function<CartesianCoordinates
      * @param ty    (double) position (2,3) - translation coefficient, set to 0 if no translation on y axis wanted
      * @return (PlanarTransformation) loaded diagonal matrix
      */
-    public static PlanarTransformation ofDilatAndTrans(final double dilat,  final double tx, final double ty) {
+    public static PlanarTransformation ofDilatAndTrans(double dilat, double tx, double ty) {
         return new PlanarTransformation(dilat, 0, 0, -dilat, tx, ty);
+    }
+
+    /**
+     * Constructs the following rotation matrix:
+     * [ cos(rad) -sin(rad) 0 ]
+     * [ sin(rad) cos(rad)  0 ]
+     *
+     * @param rad (double) angle of rotation, given in radians
+     * @return (PlanarTransformation)
+     */
+    public static PlanarTransformation rotation(double rad) {
+        double cosRad = Math.cos(rad);
+        double sinRad = Math.sin(rad);
+        return new PlanarTransformation(cosRad, -sinRad, sinRad, cosRad, 0, 0);
+    }
+
+    /**
+     * Composes two planar transformations: multiplies the 2x2 left matrices and adds up translations
+     *
+     * @param other (PlanarTransformation) other transformation
+     * @return (PlanarTransformation) resulting composition matrix
+     */
+    public PlanarTransformation concat(PlanarTransformation other) {
+        return new PlanarTransformation(
+                Mxx * other.Mxx + Mxy * other.Myx,
+                Mxx * other.Mxy + Mxy * other.Myy,
+                Myx * other.Mxx + Myy * other.Myx,
+                Myx * other.Mxy + Myy * other.Myy,
+                Tx + other.Tx,
+                Ty + other.Ty);
     }
 
     /**
@@ -136,7 +165,7 @@ public final class PlanarTransformation implements Function<CartesianCoordinates
      * @param y (double) 2nd coefficient of input 2x1 vector
      * @return (CartesianCoordinates) 2x1 vector resulting of the product
      */
-    public CartesianCoordinates apply(final double x, final double y) {
+    public CartesianCoordinates apply(double x, double y) {
         return CartesianCoordinates.of(Mxx * x + Mxy * y + Tx, Myx * x + Myy * y + Ty);
     }
 
@@ -149,7 +178,7 @@ public final class PlanarTransformation implements Function<CartesianCoordinates
      * @param cartesianCoordinates (CartesianCoordinates) Input 2x1 vector
      * @return (CartesianCoordinates) 2x1 vector resulting of the product
      */
-    public CartesianCoordinates applyVector(final CartesianCoordinates cartesianCoordinates) {
+    public CartesianCoordinates applyVector(CartesianCoordinates cartesianCoordinates) {
         return applyVector(cartesianCoordinates.x(), cartesianCoordinates.y());
     }
 
@@ -161,7 +190,7 @@ public final class PlanarTransformation implements Function<CartesianCoordinates
      * @param y (double) 2nd coefficient of input 2x1 vector
      * @return (CartesianCoordinates) 2x1 vector resulting of the product
      */
-    public CartesianCoordinates applyVector(final double x, final double y) {
+    public CartesianCoordinates applyVector(double x, double y) {
         return CartesianCoordinates.of(Mxx * x + Mxy * y, Myx * x + Myy * y);
     }
 
@@ -173,7 +202,7 @@ public final class PlanarTransformation implements Function<CartesianCoordinates
      * @param initialDistance (double) distance before transformation
      * @return (double) distance after transformation
      */
-    public double applyDistance(final double initialDistance) {
+    public double applyDistance(double initialDistance) {
         return (isDiagonal) ? Math.abs(Mxx * initialDistance) :
                 euclideanNormOf(Mxx * initialDistance, Myx * initialDistance);
     }
@@ -191,7 +220,7 @@ public final class PlanarTransformation implements Function<CartesianCoordinates
      * @param coords (CartesianCoordinates) input vector
      * @return (double) coords' norm
      */
-    public static double euclideanNormOf(final CartesianCoordinates coords) {
+    public static double euclideanNormOf(CartesianCoordinates coords) {
         return euclideanNormOf(coords.x(), coords.y());
     }
 
@@ -202,7 +231,7 @@ public final class PlanarTransformation implements Function<CartesianCoordinates
      * @param y (double) second coordinate of input vector
      * @return (double) vector's norm
      */
-    public static double euclideanNormOf(final double x, final double y) {
+    public static double euclideanNormOf(double x, double y) {
         return Math.sqrt(x*x + y*y);
         //not implemented as the sqrt of the next method for minor efficiency purposes
     }
@@ -214,7 +243,7 @@ public final class PlanarTransformation implements Function<CartesianCoordinates
      * @param y (double) second coordinate of input vector
      * @return (double) vector's norm squared
      */
-    public static double euclideanNormSquared(final double x, final double y) {
+    public static double euclideanNormSquared(double x, double y) {
         return x*x + y*y;
     }
 
@@ -225,7 +254,7 @@ public final class PlanarTransformation implements Function<CartesianCoordinates
      * @param coord2 (CartesianCoordinates)
      * @return (double)
      */
-    public static double euclideanDistSquared(final CartesianCoordinates coord1, final CartesianCoordinates coord2) {
+    public static double euclideanDistSquared(CartesianCoordinates coord1, CartesianCoordinates coord2) {
         return euclideanNormSquared(coord1.x() - coord2.x(), coord1.y() - coord2.y());
     }
 

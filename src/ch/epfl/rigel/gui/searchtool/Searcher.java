@@ -1,5 +1,6 @@
 package ch.epfl.rigel.gui.searchtool;
 
+import ch.epfl.rigel.Preconditions;
 import ch.epfl.rigel.astronomy.CelestialObject;
 import ch.epfl.rigel.astronomy.StarCatalogue;
 import ch.epfl.rigel.math.graphs.GraphNode;
@@ -12,7 +13,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static ch.epfl.rigel.math.sets.abstraction.AbstractMathSet.unionOf;
 import static ch.epfl.rigel.math.sets.concrete.MathSet.emptySet;
@@ -44,7 +44,8 @@ public final class Searcher extends AutoCompleter<CelestialObject> {
         }
 
         this.unfinishedData = new IndexedSet<>(preDat);
-        this.starCatalogue = new IndexedSet<CelestialObject, String>(sky.stars().stream().collect(Collectors.toMap(CelestialObject::name, Function.identity(), (v1, v2) ->  v1)));
+        this.starCatalogue = new IndexedSet<CelestialObject, String>(sky.stars().stream().collect(Collectors.toMap(CelestialObject::name,
+                Function.identity(), (v1, v2) ->  v1)));
     }
 
     private static int findFirstalpha(String str)
@@ -55,17 +56,20 @@ public final class Searcher extends AutoCompleter<CelestialObject> {
         }
         return -1;
     }
-    public Optional<Tree<Character>> search(final char s, final Tree<Character> unfinished, int n)
+    public Optional<Tree<Character>> search(char inputChar, Tree<Character> unfinished, int n)
     {
+        Preconditions.checkArgument(Character.isAlphabetic(inputChar));
+        final char s = Character.toLowerCase(inputChar);
         Optional<GraphNode<Character>> potential = unfinished.getNodesAtDepth(Math.max(n, 0)).getElement(p -> p.getValue() == s);
         return potential.isEmpty() ? Optional.empty() : Optional.of(unfinished.subtreeAtPoint(potential.get()));
     }
 
     public AbstractMathSet<String> potentialSolutions(final Tree<Character> data, final String builder)
     {
-
         return data.getLeaves()
-                .image(n -> builder + n.hierarchy().reverse().image(l -> l.getValue().toString()).stream().collect(Collectors.joining()))
+                .image(n -> builder + n.hierarchy().reverse()
+                        .image(l -> l.getValue().toString()).stream()
+                        .collect(Collectors.joining()))
                 .union(new MathSet<>(resultCache.keySet()));
     }
 
