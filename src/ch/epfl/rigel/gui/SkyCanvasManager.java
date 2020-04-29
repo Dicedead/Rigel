@@ -31,6 +31,7 @@ public final class SkyCanvasManager {
     private static final ClosedInterval ALT_INTERVAL = ClosedInterval.of(MIN_ALT, MAX_ALT);
     private static final double ALT_STEP = Angle.ofDeg(5);
     private static final double AZ_STEP = Angle.ofDeg(10);
+    private static final ClosedInterval FOV_INTERVAL = ClosedInterval.of(30, 150);
 
     private final StarCatalogue catalogue;
     private final DateTimeBean dtBean;
@@ -114,9 +115,9 @@ public final class SkyCanvasManager {
             key.consume();
         });
 
-        canvas.setOnScroll(scroll -> viewBean.setFieldOfViewDeg(
+        canvas.setOnScroll(scroll -> viewBean.setFieldOfViewDeg(FOV_INTERVAL.clip(
                 viewBean.getFieldOfViewDeg() - (Math.abs(scroll.getDeltaX()) < Math.abs(scroll.getDeltaY()) ?
-                scroll.getDeltaY() : scroll.getDeltaX())));
+                scroll.getDeltaY() : scroll.getDeltaX()))));
 
         //FINALLY, ADDING LISTENERS TO REDRAW SKY
         observedSky.addListener((p, o, n) -> painter.drawDefault(observedSky.get(), planeToCanvas.get(), projection.get()));
