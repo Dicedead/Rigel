@@ -1,4 +1,4 @@
-package ch.epfl.rigel.math.sets.concrete;
+package ch.epfl.rigel.math.sets.implement;
 
 import ch.epfl.rigel.math.sets.abstraction.AbstractOrderedSet;
 import ch.epfl.rigel.math.sets.properties.Relation;

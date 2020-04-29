@@ -1,6 +1,6 @@
 package ch.epfl.rigel.math.graphs;
 
-import ch.epfl.rigel.math.sets.concrete.OrderedTuple;
+import ch.epfl.rigel.math.sets.implement.OrderedTuple;
 import javafx.util.Pair;
 
 import java.util.NoSuchElementException;

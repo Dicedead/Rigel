@@ -1,11 +1,11 @@
 package ch.epfl.rigel.math.sets.abstraction;
 
-import ch.epfl.rigel.math.sets.concrete.MathSet;
+import ch.epfl.rigel.math.sets.implement.MathSet;
 import ch.epfl.rigel.math.sets.properties.Equation;
 
 import java.util.function.Function;
 
-import static ch.epfl.rigel.math.sets.concrete.MathSet.toMathSet;
+import static ch.epfl.rigel.math.sets.implement.MathSet.toMathSet;
 
 /**
  * @author Alexandre Sallinen (303162)

@@ -4,7 +4,6 @@ import ch.epfl.rigel.astronomy.AsterismLoader;
 import ch.epfl.rigel.astronomy.CelestialObject;
 import ch.epfl.rigel.astronomy.HygDatabaseLoader;
 import ch.epfl.rigel.astronomy.ObservedSky;
-import ch.epfl.rigel.astronomy.Star;
 import ch.epfl.rigel.astronomy.StarCatalogue;
 import ch.epfl.rigel.coordinates.EclipticToEquatorialConversion;
 import ch.epfl.rigel.coordinates.EquatorialToHorizontalConversion;
@@ -12,7 +11,7 @@ import ch.epfl.rigel.coordinates.GeographicCoordinates;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.coordinates.StereographicProjection;
 import ch.epfl.rigel.gui.searchtool.SearchBar;
-import ch.epfl.rigel.math.sets.concrete.MathSet;
+import ch.epfl.rigel.math.sets.implement.MathSet;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;

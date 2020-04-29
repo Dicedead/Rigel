@@ -1,7 +1,7 @@
 package ch.epfl.rigel.math.sets.abstraction;
 
 import ch.epfl.rigel.math.sets.*;
-import ch.epfl.rigel.math.sets.concrete.MathSet;
+import ch.epfl.rigel.math.sets.implement.MathSet;
 import ch.epfl.rigel.math.sets.properties.Equation;
 import javafx.util.Pair;
 

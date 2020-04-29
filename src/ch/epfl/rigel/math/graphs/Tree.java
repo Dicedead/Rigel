@@ -3,11 +3,11 @@ package ch.epfl.rigel.math.graphs;
 import ch.epfl.rigel.Preconditions;
 import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
 import ch.epfl.rigel.math.sets.abstraction.AbstractOrderedTuple;
-import ch.epfl.rigel.math.sets.concrete.MathSet;
-import ch.epfl.rigel.math.sets.concrete.OrderedTuple;
-import ch.epfl.rigel.math.sets.concrete.PartitionSet;
+import ch.epfl.rigel.math.sets.implement.MathSet;
+import ch.epfl.rigel.math.sets.implement.OrderedTuple;
+import ch.epfl.rigel.math.sets.implement.PartitionSet;
 import ch.epfl.rigel.math.sets.abstraction.SetFunction;
-import ch.epfl.rigel.math.sets.concrete.PointedSet;
+import ch.epfl.rigel.math.sets.implement.PointedSet;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,7 +15,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.IntStream;
 
 /**
  * @author Alexandre Sallinen (303162)

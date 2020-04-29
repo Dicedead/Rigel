@@ -3,8 +3,8 @@ package ch.epfl.rigel.math.graphs;
 import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
 import ch.epfl.rigel.math.sets.abstraction.AbstractOrderedTuple;
 import ch.epfl.rigel.math.sets.abstraction.AbstractPartitionSet;
-import ch.epfl.rigel.math.sets.concrete.MathSet;
-import ch.epfl.rigel.math.sets.concrete.OrderedTuple;
+import ch.epfl.rigel.math.sets.implement.MathSet;
+import ch.epfl.rigel.math.sets.implement.OrderedTuple;
 import ch.epfl.rigel.math.sets.abstraction.SetFunction;
 
 import java.util.ArrayList;

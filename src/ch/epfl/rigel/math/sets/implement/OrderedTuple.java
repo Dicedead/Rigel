@@ -1,4 +1,4 @@
-package ch.epfl.rigel.math.sets.concrete;
+package ch.epfl.rigel.math.sets.implement;
 
 import ch.epfl.rigel.math.sets.abstraction.AbstractOrderedTuple;
 import ch.epfl.rigel.math.sets.abstraction.SetFunction;
@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
  */
 public class OrderedTuple<T> extends IndexedSet<T, Integer> implements AbstractOrderedTuple<T> {
 
+    private final List<T> listAspect;
+
     /**
      * Classic constructor for an IndexedSet
      * @param t the underlying data
@@ -22,6 +24,7 @@ public class OrderedTuple<T> extends IndexedSet<T, Integer> implements AbstractO
      */
     public OrderedTuple(Collection<T> t, SetFunction<Integer, T> indexer) {
         super(t, indexer);
+        listAspect = AbstractOrderedTuple.createList(this);
     }
 
     /**
@@ -30,7 +33,7 @@ public class OrderedTuple<T> extends IndexedSet<T, Integer> implements AbstractO
      */
     @SafeVarargs
     public OrderedTuple(T... t) {
-        super(List.of(t), i -> t[i]);
+        this(List.of(t), i -> t[i]);
     }
 
     /**
@@ -49,11 +52,15 @@ public class OrderedTuple<T> extends IndexedSet<T, Integer> implements AbstractO
     }
 
     public OrderedTuple(List<T> t) {
-        super(t, t::get);
+        this(t, t::get);
     }
 
     @Override
     public <U> OrderedTuple<U> image(SetFunction<T, U> f) {
         return new OrderedTuple<>(toList().stream().map(f).collect(Collectors.toList()));
+    }
+
+    public List<T> toList() {
+        return listAspect;
     }
 }

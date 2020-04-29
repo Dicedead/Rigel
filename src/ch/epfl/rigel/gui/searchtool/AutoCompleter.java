@@ -11,9 +11,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 
 import java.util.HashSet;
-import java.util.stream.Collectors;
 
-import static ch.epfl.rigel.math.sets.concrete.MathSet.emptySet;
+import static ch.epfl.rigel.math.sets.implement.MathSet.emptySet;
 
 public abstract class AutoCompleter<T> extends TextField {
 

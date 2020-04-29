@@ -6,17 +6,16 @@ import ch.epfl.rigel.math.graphs.GraphNode;
 import ch.epfl.rigel.math.graphs.Path;
 import ch.epfl.rigel.math.graphs.Tree;
 import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
-import ch.epfl.rigel.math.sets.concrete.IndexedSet;
-import ch.epfl.rigel.math.sets.concrete.MathSet;
+import ch.epfl.rigel.math.sets.implement.IndexedSet;
+import ch.epfl.rigel.math.sets.implement.MathSet;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static ch.epfl.rigel.math.sets.abstraction.AbstractMathSet.unionOf;
-import static ch.epfl.rigel.math.sets.concrete.MathSet.emptySet;
-import static ch.epfl.rigel.math.sets.concrete.MathSet.of;
+import static ch.epfl.rigel.math.sets.implement.MathSet.emptySet;
+import static ch.epfl.rigel.math.sets.implement.MathSet.of;
 
 public final class Searcher extends AutoCompleter<CelestialObject> {
 
@@ -63,7 +62,6 @@ public final class Searcher extends AutoCompleter<CelestialObject> {
 
     public AbstractMathSet<String> potentialSolutions(final Tree<Character> data, final String builder)
     {
-
         return data.getLeaves()
                 .image(n -> n.hierarchy().reverse().image(l -> l.getValue().toString()).stream().collect(Collectors.joining()))
                 .union(new MathSet<>(resultCache.keySet()));
