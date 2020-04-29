@@ -65,7 +65,7 @@ public final class Searcher extends AutoCompleter<CelestialObject> {
     {
 
         return data.getLeaves()
-                .image(n -> builder + n.hierarchy().reverse().image(l -> l.getValue().toString()).stream().collect(Collectors.joining()))
+                .image(n -> n.hierarchy().reverse().image(l -> l.getValue().toString()).stream().collect(Collectors.joining()))
                 .union(new MathSet<>(resultCache.keySet()));
     }
 
@@ -85,8 +85,8 @@ public final class Searcher extends AutoCompleter<CelestialObject> {
     @Override
     AbstractMathSet<String> process(final String s, final String t) {
 
-        if (!s.equals("")) {
-            final var res = search(getText().charAt(getText().length() - 1), unfinishedData.at(getText().charAt(0)), getText().length());
+        if (!s.equals("") && Character.isAlphabetic(s.charAt(getText().length() - 1))) {
+            final var res = search(s.charAt(s.length() - 1), unfinishedData.at(s.charAt(0)), s.length() - 1);
             return res.isEmpty() ? of(t) : potentialSolutions(res.get(), t);
         }
         return emptySet();
