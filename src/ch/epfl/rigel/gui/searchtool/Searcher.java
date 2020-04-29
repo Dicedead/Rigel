@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static ch.epfl.rigel.math.sets.abstraction.AbstractMathSet.unionOf;
+import static ch.epfl.rigel.math.sets.concrete.MathSet.emptySet;
 import static ch.epfl.rigel.math.sets.concrete.MathSet.of;
 
 public final class Searcher extends AutoCompleter<CelestialObject> {
@@ -27,36 +28,48 @@ public final class Searcher extends AutoCompleter<CelestialObject> {
     private final IndexedSet<CelestialObject, String> starCatalogue;
 
     public Searcher(int cacheCapacity, Predicate<CelestialObject> p, StarCatalogue sky) {
-        super(cacheCapacity*2);
+        super(2 * cacheCapacity);
         this.data = sky.stars().stream().map(CelestialObject::name).collect(MathSet.toMathSet());
         this.resultCache = new WeakHashMap<>(cacheCapacity);
         this.cacheCapacity = cacheCapacity;
         this.filter = p;
-        this.unfinishedData = new IndexedSet<>(IntStream.rangeClosed('a', 'z')
-                .mapToObj(s ->
-                        new Tree<>(unionOf(data.suchThat(str -> str.charAt(0) == s)
-                                .image(Path::fromString)), false))
-                .collect(Collectors.toMap(t -> t.getRoot().getValue(), Function.identity())));
-        this.starCatalogue = new IndexedSet<CelestialObject, String>(sky.stars().stream().collect(Collectors.toMap(CelestialObject::name, Function.identity())));
+
+        Map<Character, Tree<Character>> preDat = new HashMap<>();
+        for (char i = 'a'; i <= 'z'; ++i)
+        {
+            final char finalI = i;
+            final var res = data.suchThat(str -> str.toLowerCase().indexOf(finalI) == findFirstalpha(str));
+            if (!res.isEmpty())
+                preDat.put(i, new Tree<>(unionOf(res.image(s -> Path.fromString(s.toLowerCase()))), false));
+        }
+
+        this.unfinishedData = new IndexedSet<>(preDat);
+        this.starCatalogue = new IndexedSet<CelestialObject, String>(sky.stars().stream().collect(Collectors.toMap(CelestialObject::name, Function.identity(), (v1, v2) ->  v1)));
     }
 
-    public Optional<Tree<Character>> search(char s, Tree<Character> unfinished, int n)
+    private static int findFirstalpha(String str)
     {
-        Optional<GraphNode<Character>> potential = unfinished.getNodesAtDepth(n).getElement(p -> p.getValue() == s);
+        for (int i = 0; i < str.length(); i++) {
+            if(Character.isAlphabetic(str.charAt(i)))
+                return i;
+        }
+        return -1;
+    }
+    public Optional<Tree<Character>> search(final char s, final Tree<Character> unfinished, int n)
+    {
+        Optional<GraphNode<Character>> potential = unfinished.getNodesAtDepth(Math.max(n, 0)).getElement(p -> p.getValue() == s);
         return potential.isEmpty() ? Optional.empty() : Optional.of(unfinished.subtreeAtPoint(potential.get()));
     }
 
-    public AbstractMathSet<String> potentialSolutions(Tree<Character> data, String builder)
+    public AbstractMathSet<String> potentialSolutions(final Tree<Character> data, final String builder)
     {
 
         return data.getLeaves()
-                .image(n -> n.hierarchy().reverse())
-                .image(p -> p.image(GraphNode::getValue))
-                .image(l -> builder + l.image(Object::toString).stream().collect(Collectors.joining()))
+                .image(n -> builder + n.hierarchy().reverse().image(l -> l.getValue().toString()).stream().collect(Collectors.joining()))
                 .union(new MathSet<>(resultCache.keySet()));
     }
 
-    protected void prepareCache(AbstractMathSet<String> labels)
+    protected void prepareCache(final AbstractMathSet<String> labels)
     {
         if(resultCache.size() == cacheCapacity)
             flushCache();
@@ -70,20 +83,22 @@ public final class Searcher extends AutoCompleter<CelestialObject> {
     }
 
     @Override
-    AbstractMathSet<String> process(String s, String t) {
+    AbstractMathSet<String> process(final String s, final String t) {
 
-        var res = search(t.charAt(t.length() - 1), unfinishedData.at(t.charAt(0)), t.length());
-        return res.isEmpty() ? of(t) : potentialSolutions(res.get(), t);
+        if (!s.equals("")) {
+            final var res = search(getText().charAt(getText().length() - 1), unfinishedData.at(getText().charAt(0)), getText().length());
+            return res.isEmpty() ? of(t) : potentialSolutions(res.get(), t);
+        }
+        return emptySet();
     }
 
     @Override
-    AbstractMathSet<CelestialObject> handleReturn(String t) {
+    AbstractMathSet<CelestialObject> handleReturn(final String t) {
 
         if (unfinishedData.isEmpty())
         {
-            var res = starCatalogue.at(t);
             prepareCache(of(t));
-            return of(res).suchThat(filter);
+            return of(starCatalogue.at(t)).suchThat(filter);
         }
         else
             return potentialSolutions(unfinishedData.at(t.charAt(0)), t)

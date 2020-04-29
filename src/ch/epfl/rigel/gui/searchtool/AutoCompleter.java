@@ -9,6 +9,8 @@ import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
+
+import java.util.HashSet;
 import java.util.stream.Collectors;
 
 import static ch.epfl.rigel.math.sets.concrete.MathSet.emptySet;
@@ -41,11 +43,10 @@ public abstract class AutoCompleter<T> extends TextField {
 
     protected void populate(final AbstractMathSet<String> toPopulate)
     {
-        entriesGUI.getItems().addAll(toPopulate.image(e -> new CustomMenuItem(new Label(e), true))
-                .getData()
-                .stream()
-                .limit(numberOfEntry)
-                .collect(Collectors.toSet()));
+        entriesGUI.getItems().addAll(new HashSet<>(toPopulate.image(e -> new CustomMenuItem(new Label(e), true))
+                .getData()));
+        if (entriesGUI.getItems().size() - numberOfEntry > 0)
+            entriesGUI.getItems().remove(0, entriesGUI.getItems().size() - numberOfEntry);
     }
 
     abstract AbstractMathSet<String> process(String s, String t);

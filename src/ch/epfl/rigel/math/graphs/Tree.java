@@ -52,7 +52,7 @@ public final class Tree<V> extends PointedSet<GraphNode<V>> implements Graph<Gra
         this(nodes, securityChecksActivated, nodes.minOf(GraphNode::getDepth), nodes.maxOf(GraphNode::getDepth).getDepth());
     }
 
-    private Tree()
+    public Tree()
     {
         super(emptySet(), null);
         this.maxDepth = -1;

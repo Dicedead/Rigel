@@ -271,7 +271,7 @@ public interface AbstractMathSet<T> extends Iterable<T> {
      * @return A sett containing all elements from each sets
      */
     static <T> AbstractMathSet<T> unionOf(AbstractMathSet<AbstractMathSet<T>> sets) {
-        return sets.getElementOrThrow().union(sets.getData());
+        return sets.getElement().orElse(MathSet.emptySet()).union(sets.getData());
     }
 
     /**
