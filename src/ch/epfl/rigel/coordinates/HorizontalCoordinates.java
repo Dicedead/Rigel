@@ -64,17 +64,6 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
     }
 
     /**
-     * Constructs a HorizontalCoordinates adding given deltas to current coordinates
-     *
-     * @param deltaAzDeg (double) change in azimuth coordinates, in degrees
-     * @param deltaAltDeg (double) change in altitude coordinates, in degrees
-     * @return (HorizontalCoordinates)
-     */
-    public HorizontalCoordinates withDeltaDeg(double deltaAzDeg, double deltaAltDeg) {
-        return HorizontalCoordinates.ofDeg(azDeg() + deltaAzDeg, altDeg() + deltaAltDeg);
-    }
-
-    /**
      * @return (double) azimuth in radians
      */
     public double az() {
