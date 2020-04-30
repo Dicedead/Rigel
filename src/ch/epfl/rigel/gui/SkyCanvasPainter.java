@@ -38,7 +38,6 @@ public final class SkyCanvasPainter {
 
     private final Canvas canvas;
     private final GraphicsContext graphicsContext;
-    private final Bounds bounds;
 
     /**
      * SkyCanvasPainter Constructor
@@ -48,7 +47,6 @@ public final class SkyCanvasPainter {
     public SkyCanvasPainter(Canvas canvas) {
         this.canvas = canvas;
         this.graphicsContext = this.canvas.getGraphicsContext2D();
-        this.bounds = canvas.getBoundsInLocal();
     }
 
     /**
@@ -121,7 +119,7 @@ public final class SkyCanvasPainter {
     public void drawSun(ObservedSky sky, PlanarTransformation transform) {
         final CartesianCoordinates transformedCoords = transform.apply(sky.sunPosition());
 
-        if (bounds.contains(transformedCoords.x(), transformedCoords.y())) {
+        if (isInCanvas(transformedCoords)) {
             double innerSize = transform.applyDistance(applyToAngle(sky.sun().angularSize()));
             drawCircle(YELLOW_HALO, transformedCoords, innerSize * 2.2);
             drawCircle(Color.YELLOW, transformedCoords, innerSize + 2);
@@ -158,14 +156,12 @@ public final class SkyCanvasPainter {
             graphicsContext.setTextAlign(TextAlignment.CENTER);
             graphicsContext.setTextBaseline(VPos.TOP);
         }
-        IntStream.range(0, 8).boxed().forEach(
-                i -> {
-                    HorizontalCoordinates octantHorizCoords = HorizontalCoordinates.ofDeg(45 * i, -0.5);
-                    CartesianCoordinates octantTransCoords = transform.apply(projection.apply(octantHorizCoords));
-                    graphicsContext.fillText(octantHorizCoords.azOctantName("N", "E", "S", "O"),
-                            octantTransCoords.x(), octantTransCoords.y());
-                }
-        );
+        for (int i = 0; i < 8; ++i) {
+            HorizontalCoordinates octantHorizCoords = HorizontalCoordinates.ofDeg(45 * i, -0.5);
+            CartesianCoordinates octantTransCoords = transform.apply(projection.apply(octantHorizCoords));
+            graphicsContext.fillText(octantHorizCoords.azOctantName("N", "E", "S", "O"),
+                    octantTransCoords.x(), octantTransCoords.y());
+        }
     }
 
     /**
@@ -178,7 +174,7 @@ public final class SkyCanvasPainter {
      * @param <T>            (extends CelestialObject)
      */
     private <T extends CelestialObject> void pipeline(Stream<Map.Entry<T, CartesianCoordinates>> positions,
-            Function<T, Double> radiusFunction, Function<T, Paint> color, PlanarTransformation transform) {
+             Function<T, Double> radiusFunction, Function<T, Paint> color, PlanarTransformation transform) {
         drawCelestial(checkInCanvas(applyTransform(positions, transform)), radiusFunction, color, transform);
     }
 
@@ -188,7 +184,7 @@ public final class SkyCanvasPainter {
      * @param positions (Stream<Map.Entry<T, CartesianCoordinates>>)
      * @param transform (PlanarTransformation) current transformation to the canvas
      * @param <T>       (extends CelestialObject)
-     * @return (Stream < Map.Entry < T, CartesianCoordinates > >) transformed positions
+     * @return (Stream<Map.Entry<T, CartesianCoordinates>>) transformed positions
      */
     private <T extends CelestialObject> Stream<Map.Entry<T, CartesianCoordinates>> applyTransform(
             Stream<Map.Entry<T, CartesianCoordinates>> positions, PlanarTransformation transform) {
@@ -200,7 +196,7 @@ public final class SkyCanvasPainter {
      *
      * @param positions (Stream<Map.Entry<T, CartesianCoordinates>>)
      * @param <T>       (extends CelestialObject)
-     * @return (Stream < Map.Entry < T, CartesianCoordinates > >) filtered positions
+     * @return (Stream<Map.Entry<T, CartesianCoordinates>>) filtered positions
      */
     private <T extends CelestialObject> Stream<Map.Entry<T, CartesianCoordinates>> checkInCanvas(
             Stream<Map.Entry<T, CartesianCoordinates>> positions) {
@@ -248,8 +244,8 @@ public final class SkyCanvasPainter {
      * @param sky              (ObservedSky) current sky
      * @param transform        (PlanarTransformation) current transformation to the canvas
      */
-    private void asterismLineRecurr(final CartesianCoordinates c1, final CartesianCoordinates c2,
-                                    final int currentStartStar, final Asterism asterism, final ObservedSky sky, final PlanarTransformation transform) {
+    private void asterismLineRecurr(CartesianCoordinates c1, CartesianCoordinates c2,
+            int currentStartStar, Asterism asterism, ObservedSky sky, PlanarTransformation transform) {
 
         if (isInCanvas(c1) || isInCanvas(c2)) {
             graphicsContext.strokeLine(c1.x(), c1.y(), c2.x(), c2.y());
@@ -273,7 +269,7 @@ public final class SkyCanvasPainter {
     }
 
     private boolean isInCanvas(final CartesianCoordinates coords) {
-        return bounds.contains(coords.x(), coords.y());
+        return canvas.getBoundsInLocal().contains(coords.x(), coords.y());
     }
 
     /**

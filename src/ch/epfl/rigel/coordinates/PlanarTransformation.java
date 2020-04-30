@@ -232,8 +232,7 @@ public final class PlanarTransformation implements UnaryOperator<CartesianCoordi
      * @return (double) vector's norm
      */
     public static double euclideanNormOf(double x, double y) {
-        return Math.sqrt(x*x + y*y);
-        //not implemented as the sqrt of the next method for minor efficiency purposes
+        return Math.sqrt(euclideanNormSquared(x, y));
     }
 
     /**

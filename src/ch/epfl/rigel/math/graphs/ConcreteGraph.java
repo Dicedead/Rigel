@@ -47,7 +47,8 @@ public final class ConcreteGraph<T> extends MathSet<OptionalPair<T, Link<T>>> im
      */
     public ConcreteGraph(AbstractMathSet<OptionalPair<T, Link<T>>> mathSet) {
         super(mathSet.getData());
-        vertices = new PartitionSet<>(mathSet.image(p -> p.getKey().orElse(null)), (T v, T u) -> neighboursOf(of(u)).contains(v));
+        vertices = new PartitionSet<>(mathSet.image(p -> p.getKey().orElse(null)),
+                (T v, T u) -> neighboursOf(of(u)).contains(v));
         this.edges = new MathSet<>(mathSet.image(p -> p.getValue().orElse(null)));
 
     }

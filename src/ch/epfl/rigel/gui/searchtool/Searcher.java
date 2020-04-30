@@ -24,7 +24,7 @@ public final class Searcher extends AutoCompleter<CelestialObject> {
     private final int cacheCapacity;
     private final Predicate<CelestialObject> filter;
     private final IndexedSet<Tree<Character>, Character> unfinishedData;
-    private final IndexedSet<CelestialObject, String> starCatalogue;
+    private final IndexedSet<CelestialObject, String> starToString;
 
     public Searcher(int cacheCapacity, Predicate<CelestialObject> p, StarCatalogue sky) {
         super(2 * cacheCapacity);
@@ -43,7 +43,8 @@ public final class Searcher extends AutoCompleter<CelestialObject> {
         }
 
         this.unfinishedData = new IndexedSet<>(preDat);
-        this.starCatalogue = new IndexedSet<CelestialObject, String>(sky.stars().stream().collect(Collectors.toMap(CelestialObject::name, Function.identity(), (v1, v2) ->  v1)));
+        this.starToString = new IndexedSet<CelestialObject, String>(sky.stars().stream()
+                .collect(Collectors.toMap(CelestialObject::name, Function.identity(), (v1, v2) ->  v1)));
     }
 
     private static int findFirstalpha(String str)
@@ -72,7 +73,7 @@ public final class Searcher extends AutoCompleter<CelestialObject> {
         if(resultCache.size() == cacheCapacity)
             flushCache();
 
-        labels.forEach(l -> resultCache.put(l , starCatalogue.at(l)));
+        labels.forEach(l -> resultCache.put(l , starToString.at(l)));
     }
 
     protected void flushCache()
@@ -96,11 +97,11 @@ public final class Searcher extends AutoCompleter<CelestialObject> {
         if (unfinishedData.isEmpty())
         {
             prepareCache(of(t));
-            return of(starCatalogue.at(t)).suchThat(filter);
+            return of(starToString.at(t)).suchThat(filter);
         }
         else
             return potentialSolutions(unfinishedData.at(t.charAt(0)), t)
-                    .image(starCatalogue::at)
+                    .image(starToString::at)
                     .suchThat(filter);
     }
 }

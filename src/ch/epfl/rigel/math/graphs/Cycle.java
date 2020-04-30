@@ -2,12 +2,27 @@ package ch.epfl.rigel.math.graphs;
 
 import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
 import ch.epfl.rigel.math.sets.abstraction.AbstractOrderedTuple;
+import ch.epfl.rigel.math.sets.implement.IndexedSet;
 import ch.epfl.rigel.math.sets.implement.MathSet;
 import ch.epfl.rigel.math.sets.implement.OrderedTuple;
 
+import java.util.List;
 import java.util.Optional;
 
 public final class Cycle<T> extends OrderedTuple<T> implements Graph<T, AbstractOrderedTuple<T>> {
+
+    private final T start;
+    private final T end;
+
+    public Cycle(List<T> listedData) {
+        super(listedData);
+        start = listedData.get(0);
+        end = listedData.get(listedData.size() - 1);
+    }
+
+    public Cycle(OrderedTuple<T> orderedData) {
+        this(orderedData.toList());
+    }
 
     /**
      * Gets the set of points linked to given point
@@ -43,15 +58,27 @@ public final class Cycle<T> extends OrderedTuple<T> implements Graph<T, Abstract
     }
 
     /**
-     * @return the Set of connected components of this graph
+     * @return (AbstractMathSet<Graph<T, AbstractOrderedTuple<T>>>) the Set of connected components of this graph
      */
     @Override
     public AbstractMathSet<Graph<T, AbstractOrderedTuple<T>>> connectedComponents() {
         return MathSet.of(this);
     }
 
+    public T getStart() {
+        return start;
+    }
+
+    public T getEnd() {
+        return end;
+    }
+
+    public boolean isLastBeforeRepeat(T value) {
+        return value == end;
+    }
+
     /**
-     * @return (MathSet < Link < T > >) getter for immutable set of edges
+     * @return (AbstractMathSet<Link<T>>) getter for immutable set of edges
      */
     @Override
     public AbstractMathSet<Link<T>> edgeSet() {
@@ -59,7 +86,7 @@ public final class Cycle<T> extends OrderedTuple<T> implements Graph<T, Abstract
     }
 
     /**
-     * @return (MathSet < T >) getter for immutable set of vertices
+     * @return (AbstractOrderedTuple<T>) getter for immutable set of vertices
      */
     @Override
     public AbstractOrderedTuple<T> vertexSet() {

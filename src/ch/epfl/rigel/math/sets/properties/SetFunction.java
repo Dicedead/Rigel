@@ -1,7 +1,7 @@
-package ch.epfl.rigel.math.sets.abstraction;
+package ch.epfl.rigel.math.sets.properties;
 
+import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
 import ch.epfl.rigel.math.sets.implement.MathSet;
-import ch.epfl.rigel.math.sets.properties.Equation;
 
 import java.util.function.Function;
 
@@ -11,7 +11,6 @@ import static ch.epfl.rigel.math.sets.implement.MathSet.toMathSet;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-@FunctionalInterface
 public interface SetFunction<T, U> extends Function<T, U> {
     /**
      * @param u the codomain set

@@ -16,8 +16,9 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.scene.canvas.Canvas;
-
+;
 import java.util.Optional;
 
 /**
@@ -61,6 +62,14 @@ public final class SkyCanvasManager {
     private final ObjectProperty<CartesianCoordinates> mousePosition = new SimpleObjectProperty<>();
     private final DoubleProperty rotation = new SimpleDoubleProperty(0);
 
+    /**
+     * SkyCanvasManager constructor
+     *
+     * @param catalogue (StarCatalogue) set of stars and asterisms
+     * @param dtBean (DateTimeBean) bean representing a mutable ZonedDateTime object
+     * @param obsLocBean (ObserverLocationBean) bean representing a mutable GeographicCoordinates object
+     * @param viewBean (ViewingParametersBean) bean comprised of an fov parameter and the center of projection property
+     */
     public SkyCanvasManager(StarCatalogue catalogue, DateTimeBean dtBean,
            ObserverLocationBean obsLocBean, ViewingParametersBean viewBean) {
 
@@ -69,7 +78,7 @@ public final class SkyCanvasManager {
         this.viewBean = viewBean;
         this.obsLocBean = obsLocBean;
 
-        canvas = new Canvas(800, 600);
+        canvas = new Canvas(1,1);
         painter = new SkyCanvasPainter(canvas);
 
         //CREATING VARIOUS ASTRONOMICAL AND MATHEMATICAL BINDINGS
@@ -89,13 +98,16 @@ public final class SkyCanvasManager {
 
         inversePlaneToCanvas = Bindings.createObjectBinding(() -> planeToCanvas.get().invert(), planeToCanvas);
 
+        canvas.setOnMouseMoved(mouse -> mousePosition.set(inversePlaneToCanvas.get().apply(mouse.getX(), mouse.getY())));
+
         observedSky = Bindings.createObjectBinding(
                 () -> new ObservedSky(dtBean.getZonedDateTime(), obsLocBean.getCoords(), projection.get(),catalogue),
                 dtBean.zdtProperty(), obsLocBean.coordsProperty(), projection);
 
         //TAKING CARE OF MOUSE'S POSITION AND USER INTERACTION
         mouseHorizontalPosition = Bindings.createObjectBinding(
-                () -> projection.get().inverseApply(inversePlaneToCanvas.get().apply(mousePosition.get())),
+                () -> mousePosition.get() != null ?
+                projection.get().inverseApply(inversePlaneToCanvas.get().apply(mousePosition.get())) : null,
                 projection, inversePlaneToCanvas, mousePosition);
 
         mouseAzDeg = Bindings.createDoubleBinding(() -> mouseHorizontalPosition.get().azDeg(), mouseHorizontalPosition);
@@ -107,18 +119,17 @@ public final class SkyCanvasManager {
                 inversePlaneToCanvas);
 
         optionalObjectUnderMouse = Bindings.createObjectBinding(
-                () -> observedSky.get().objectClosestTo(mousePosition.get(), maxDistanceCanvasToCartesian.get()),
+                () -> mousePosition.get() != null ?
+                observedSky.get().objectClosestTo(mousePosition.get(), maxDistanceCanvasToCartesian.get()) : Optional.empty(),
                 observedSky, mousePosition, maxDistanceCanvasToCartesian);
 
         objectUnderMouse = Bindings.createObjectBinding(
-                () -> optionalObjectUnderMouse.get().isPresent() ? optionalObjectUnderMouse.get().get() : null,
-                optionalObjectUnderMouse);
+                () -> optionalObjectUnderMouse.get() != null && optionalObjectUnderMouse.get().isPresent() ?
+                        optionalObjectUnderMouse.get().get() : null, optionalObjectUnderMouse);
 
         canvas.setOnMousePressed(mouse -> {
             if (mouse.isPrimaryButtonDown()) canvas.requestFocus();
         });
-
-        canvas.setOnMouseMoved(mouse -> mousePosition.set(inversePlaneToCanvas.get().apply(mouse.getX(), mouse.getY())));
 
         canvas.setOnKeyPressed(key -> {
             switch (key.getCode()) {
@@ -138,8 +149,13 @@ public final class SkyCanvasManager {
                 scroll.getDeltaY() : scroll.getDeltaX()))));
 
         //FINALLY, ADDING LISTENERS TO REDRAW SKY
-        observedSky.addListener((p, o, n) -> painter.drawDefault(observedSky.get(), planeToCanvas.get(), projection.get()));
-        planeToCanvas.addListener((p, o, n) -> painter.drawDefault(observedSky.get(), planeToCanvas.get(), projection.get()));
+        ChangeListener<Object> painterEvent =
+                (p, o, n) -> painter.drawDefault(observedSky.get(), planeToCanvas.get(), projection.get());
+
+        canvas.heightProperty().addListener(painterEvent);
+        canvas.widthProperty().addListener(painterEvent);
+        observedSky.addListener(painterEvent);
+        planeToCanvas.addListener(painterEvent);
     }
 
     /**

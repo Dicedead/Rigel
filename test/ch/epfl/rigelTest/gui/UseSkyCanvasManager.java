@@ -5,6 +5,7 @@ import ch.epfl.rigel.astronomy.HygDatabaseLoader;
 import ch.epfl.rigel.astronomy.StarCatalogue;
 import ch.epfl.rigel.coordinates.GeographicCoordinates;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
+import ch.epfl.rigel.gui.BlackBodyColor;
 import ch.epfl.rigel.gui.DateTimeBean;
 import ch.epfl.rigel.gui.ObserverLocationBean;
 import ch.epfl.rigel.gui.SkyCanvasManager;
@@ -35,6 +36,8 @@ public final class UseSkyCanvasManager extends Application {
                     .loadFrom(hs, HygDatabaseLoader.INSTANCE)
                     .loadFrom(ast, AsterismLoader.INSTANCE)
                     .build();
+
+            BlackBodyColor.init();
 
             ZonedDateTime when =
                     ZonedDateTime.parse("2020-02-17T20:15:00+01:00");
@@ -72,6 +75,7 @@ public final class UseSkyCanvasManager extends Application {
 
             primaryStage.setY(100);
 
+            primaryStage.setTitle("Rigel");
             primaryStage.setScene(new Scene(root));
             primaryStage.show();
 

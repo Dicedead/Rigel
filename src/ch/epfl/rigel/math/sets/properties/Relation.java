@@ -2,10 +2,13 @@ package ch.epfl.rigel.math.sets.properties;
 
 import ch.epfl.rigel.Preconditions;
 import ch.epfl.rigel.math.sets.implement.MathSet;
-import ch.epfl.rigel.math.sets.abstraction.SetFunction;
 
 import static java.lang.Integer.signum;
 
+/**
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 @FunctionalInterface
 public interface Relation<T, U> {
     /**
@@ -50,7 +53,6 @@ public interface Relation<T, U> {
         }
     }
 
-    @FunctionalInterface
     interface Order<T> extends Relation<T, COMP>
     {
         default COMP compare(T t, T u)

@@ -3,7 +3,7 @@ package ch.epfl.rigel.math.graphs;
 import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
 import ch.epfl.rigel.math.sets.abstraction.AbstractOrderedTuple;
 import ch.epfl.rigel.math.sets.implement.OrderedTuple;
-import ch.epfl.rigel.math.sets.abstraction.SetFunction;
+import ch.epfl.rigel.math.sets.properties.SetFunction;
 
 import java.util.Collections;
 import java.util.Comparator;
