@@ -43,13 +43,13 @@ public final class Path<T> extends OrderedTuple<T> implements Graph<T, Path<T>> 
     }
 
     public static Path<GraphNode<Character>> fromString(String s) {
-        return fromStringWithRoot(s, new GraphNode<>(s.charAt(0)));
+        return fromStringWithRoot(s, new GraphNode<>(s.charAt(0)), 1);
     }
 
-    public static Path<GraphNode<Character>> fromStringWithRoot(String s, GraphNode<Character> root) {
+    public static Path<GraphNode<Character>> fromStringWithRoot(String s, GraphNode<Character> root, int startPos) {
         List<GraphNode<Character>> data = new ArrayList<>();
         data.add(root);
-        for (int i = 1; i < s.length(); i++) {
+        for (int i = startPos; i < s.length(); i++) {
             data.add(new GraphNode<>(s.charAt(i), data.get(i - 1)));
         }
         return new Path<>(data);

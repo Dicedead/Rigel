@@ -198,7 +198,7 @@ public final class Tree<V> extends PointedSet<GraphNode<V>> implements Graph<Gra
      * Computes the partition defined in GraphNode.areRelatedRootless
      * @see GraphNode#areRelatedRootless(GraphNode, GraphNode)
      *
-     * @return
+     * @return (PartitionSet<GraphNode<V>>)
      */
     public PartitionSet<GraphNode<V>> partition() {
         return new PartitionSet<>(new MathSet<>(getData()), GraphNode::areRelatedRootless);

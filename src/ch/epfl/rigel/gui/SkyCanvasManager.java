@@ -12,8 +12,10 @@ import ch.epfl.rigel.math.ClosedInterval;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.binding.ObjectBinding;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -34,7 +36,8 @@ import java.util.stream.Collectors;
 public final class SkyCanvasManager {
 
     private static final int MAX_CANVAS_DISTANCE = 10;
-    private static final ClosedInterval ALT_INTERVAL = ClosedInterval.of(Angle.ofDeg(5), Math.PI/2);
+    private static final ClosedInterval NORMAL_ALT_INTERVAL = ClosedInterval.of(Angle.ofDeg(5), Math.PI/2);
+    private static final ClosedInterval EXTENDED_ALT_INTERVAL = ClosedInterval.of(-Math.PI/2, Math.PI/2);
     private static final double ALT_STEP = Angle.ofDeg(5);
     private static final double AZ_STEP = Angle.ofDeg(10);
     private static final ClosedInterval FOV_INTERVAL = ClosedInterval.of(30, 150);
@@ -60,9 +63,11 @@ public final class SkyCanvasManager {
     private final ObjectProperty<CartesianCoordinates> mousePosition = new SimpleObjectProperty<>();
 
     //BONUS CONTENT
+    private final BooleanProperty extendedAltitudeIsOn = new SimpleBooleanProperty(false);
+
     private final DoubleProperty mouseXstartOfDrag = new SimpleDoubleProperty();
     private final DoubleProperty mouseYstartOfDrag = new SimpleDoubleProperty();
-    private final DoubleProperty mouseDragSensitivity = new SimpleDoubleProperty(1/1e4);
+    private final DoubleProperty mouseDragSensitivity = new SimpleDoubleProperty(1/2e4);
     //suggested interval is [1/4e4; 4/1e4]
     private static final double ROTATION_ATTENUATION = 1/10d;
 
@@ -180,6 +185,9 @@ public final class SkyCanvasManager {
             }
         });
 
+        extendedAltitudeIsOn.addListener((p, o, n) -> modifyViewBean(0,0));
+        //clips to smaller [5; -90] if extentedAltitude is turned off.
+
         //FINALLY, ADDING LISTENERS TO REDRAW SKY
         ChangeListener<Object> painterEvent =
                 (p, o, n) -> painter.draw(observedSky.get(), planeToCanvas.get(), projection.get(), objectsToDraw.get());
@@ -283,10 +291,42 @@ public final class SkyCanvasManager {
         this.mouseDragSensitivity.set(mouseDragSensitivity);
     }
 
+    /**
+     * @return (boolean) value of observable: enabled extended altitude interval
+     */
+    public boolean isExtendedAltitudeIsOn() {
+        return extendedAltitudeIsOn.get();
+    }
+
+    /**
+     * @return (BooleanProperty) observable: enabled extended altitude interval
+     */
+    public BooleanProperty extendedAltitudeIsOnProperty() {
+        return extendedAltitudeIsOn;
+    }
+
+    /**
+     * Setter for observable: enabled extended altitude interval
+     *
+     * @param extendedAltitudeIsOn (boolean) value to be set to
+     */
+    public void setExtendedAltitudeIsOn(boolean extendedAltitudeIsOn) {
+        this.extendedAltitudeIsOn.set(extendedAltitudeIsOn);
+    }
+
+    /**
+     * Modifies the center of projection with given deltas. With the freedom mouse movement lends, we would have felt
+     * bad not to give an option to extend the allowed interval of latitude - it is turned OFF by default though.
+     *
+     * @param azDelta (double) change in azimuth
+     * @param altDelta (double) change in altitude
+     */
     private void modifyViewBean(double azDelta, double altDelta) {
         viewBean.setCenter(HorizontalCoordinates.of(
                 Angle.normalizePositive(viewBean.getCenter().az() + azDelta),
-                ALT_INTERVAL.clip(viewBean.getCenter().alt() + altDelta)
+                (extendedAltitudeIsOn.get()) ?
+                EXTENDED_ALT_INTERVAL.clip(viewBean.getCenter().alt() + altDelta) :
+                NORMAL_ALT_INTERVAL.clip(viewBean.getCenter().alt() + altDelta)
         ));
     }
 

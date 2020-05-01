@@ -23,7 +23,7 @@ public abstract class AutoCompleter<T> extends TextField {
     public AutoCompleter(int numberOfEntry) {
         super();
         this.entriesGUI = new ContextMenu();
-        this.numberOfEntry= numberOfEntry;
+        this.numberOfEntry = numberOfEntry;
         results = new SimpleObjectProperty<>(emptySet());
         makeLinks();
     }
@@ -40,8 +40,8 @@ public abstract class AutoCompleter<T> extends TextField {
         this.results.set(results);
     }
 
-    protected void populate(final AbstractMathSet<String> toPopulate)
-    {
+    protected void populate(final AbstractMathSet<String> toPopulate) {
+        entriesGUI.getItems().clear();
         entriesGUI.getItems().addAll(new HashSet<>(toPopulate.image(e -> new CustomMenuItem(new Label(e), true))
                 .getData()));
         if (entriesGUI.getItems().size() - numberOfEntry > 0)
@@ -52,24 +52,25 @@ public abstract class AutoCompleter<T> extends TextField {
 
     abstract AbstractMathSet<T> handleReturn(String t);
 
-    public void makeLinks()
-    {
+    public void makeLinks() {
         textProperty().addListener((observable, oldValue, newValue) -> {
             String enteredText = getText();
-            if (enteredText == null ) {
+            if (enteredText == null) {
                 entriesGUI.hide();
             } else {
                 populate(process(newValue, oldValue));
                 if (!entriesGUI.isShowing()) { //optional
                     entriesGUI.show(this, Side.BOTTOM, 0, 0); //position of popup
-                }}});
+                }
+            }
+        });
 
         focusedProperty().addListener((observableValue, oldValue, newValue) -> {
             entriesGUI.hide();
         });
 
         setOnKeyReleased(event -> {
-            if (event.getCode() == KeyCode.ENTER){
+            if (event.getCode() == KeyCode.ENTER) {
                 results.setValue(handleReturn(getText()));
             }
         });

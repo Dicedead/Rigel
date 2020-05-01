@@ -15,8 +15,9 @@ import java.util.List;
 public class SearcherTestSlow extends Application {
 
     void basicSearch() {
-        List<Star> stars = List.of(new Star(1, "sa", EquatorialCoordinates.of(0,0), 5f,5f),
-                new Star(1, "se", EquatorialCoordinates.of(0,0), 5f,5f)) ;
+        List<Star> stars = List.of(new Star(1, "Sa", EquatorialCoordinates.of(0,0), 5f,5f),
+                new Star(1, "Se", EquatorialCoordinates.of(0,0), 5f,5f),
+                new Star(1, "Sia", EquatorialCoordinates.of(0,0), 5f,5f)) ;
         StarCatalogue cat = new StarCatalogue(stars, List.of(new Asterism(stars)));
 
         Searcher searcher = new Searcher(10, p -> true, cat);

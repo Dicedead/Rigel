@@ -39,5 +39,4 @@ public class IndexedSet<T, I> extends MathSet<T> implements AbstractIndexedSet<T
     public <U> IndexedSet<U, I> image(SetFunction<T, U> f) {
         return new IndexedSet<>(f.apply(this), (i -> f.apply(at(i))));
     }
-
 }

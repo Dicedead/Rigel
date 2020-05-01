@@ -104,9 +104,7 @@ public class    SearchBarTest {
         // {A=82, B=58, C=42, D=84, E=141, F=1, G=74, H=4, I=65, J=1, K=74, L=59, M=78, N=66, O=77, P=149, Q=0, R=54,
         //  S=58, T=126, U=43, V=3, W=1, X=51, Y=0, Z=81}
 
-        System.out.println(sky.celestialObjMap().keySet().stream().collect(MathSet.toMathSet()).suchThat(
-                celest -> !Character.isAlphabetic(celest.name().charAt(0)) && !Character.isAlphabetic(celest.name().charAt(2))
-        ));
+        assertTrue(sky.stars().stream().collect(MathSet.toMathSet()).image(CelestialObject::name).contains("Sirius"));
     }
 
     @Test

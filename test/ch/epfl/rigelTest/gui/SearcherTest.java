@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class SearcherTest extends Application {
-    public static void main(String[] args) { System.out.println("lul");launch(args); }
+    public static void main(String[] args) { launch(args); }
 
     @Override
     public void start(Stage primaryStage) {
