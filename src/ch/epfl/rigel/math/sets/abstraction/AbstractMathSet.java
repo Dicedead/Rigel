@@ -29,6 +29,19 @@ public interface AbstractMathSet<T> extends Iterable<T> {
         return f.apply(this);
     }
 
+    /**
+     * Applies given function to the elements of the set that verify the predicate, those that do not are just
+     * ignored
+     *
+     * @param filter (Predicate<T>) said predicate on starting set (this set)
+     * @param f (SetFunction<T,U>) the function to apply upon this set
+     * @param <U> type of returned set
+     * @return (AbstractMathSet<U>)
+     */
+    default <U> AbstractMathSet<U> imageIf(Predicate<T> filter, SetFunction<T, U> f) {
+        return this.suchThat(filter).image(f);
+    }
+
     default boolean contains(T t) {
         return getData().contains(t);
     }

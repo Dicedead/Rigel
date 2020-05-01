@@ -18,6 +18,7 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.input.MouseButton;
 
 import java.util.Optional;
 import java.util.Set;
@@ -31,8 +32,6 @@ import java.util.stream.Collectors;
  * @author Salim Najib (310003)
  */
 public final class SkyCanvasManager {
-
-    public static final boolean ENABLE_ROTATION = true;
 
     private static final int MAX_CANVAS_DISTANCE = 10;
     private static final ClosedInterval ALT_INTERVAL = ClosedInterval.of(Angle.ofDeg(5), Math.PI/2);
@@ -58,10 +57,17 @@ public final class SkyCanvasManager {
     private final ObjectBinding<Optional<CelestialObject>> objectUnderMouse;
     private final DoubleBinding mouseAzDeg;
     private final DoubleBinding mouseAltDeg;
+    private final ObjectProperty<CartesianCoordinates> mousePosition = new SimpleObjectProperty<>();
 
     //BONUS CONTENT
-    private final ObjectProperty<CartesianCoordinates> mousePosition = new SimpleObjectProperty<>();
+    private final DoubleProperty mouseXstartOfDrag = new SimpleDoubleProperty();
+    private final DoubleProperty mouseYstartOfDrag = new SimpleDoubleProperty();
+    private final DoubleProperty mouseDragSensitivity = new SimpleDoubleProperty(1/1e4);
+    //suggested interval is [1/4e4; 4/1e4]
+    private static final double ROTATION_ATTENUATION = 1/10d;
+
     private final DoubleProperty rotation = new SimpleDoubleProperty(0);
+
     private final ObjectProperty<TreeSet<DrawableObjects>> objectsToDraw = new SimpleObjectProperty<>(
             new TreeSet<>(Set.of(DrawableObjects.values())));
     //objectsToDraw is not a collection of observables but rather one observable that happened to be a set of immutable
@@ -93,13 +99,12 @@ public final class SkyCanvasManager {
                 viewBean.centerProperty());
 
         planeToCanvas = Bindings.createObjectBinding(
-                () -> {
-                    final PlanarTransformation transAndDilat = PlanarTransformation.ofDilatAndTrans(
-                        canvas.getWidth()/StereographicProjection.applyToAngle(
-                                Angle.ofDeg(viewBean.getFieldOfViewDeg())),
-                        canvas.getWidth()/2, canvas.getHeight()/2);
-                    return ENABLE_ROTATION ? transAndDilat.concat(PlanarTransformation.rotation(rotation.get())) :
-                            transAndDilat;},
+                () ->
+                    PlanarTransformation.ofDilatAndTrans(
+                            canvas.getWidth()/StereographicProjection.applyToAngle(
+                                    Angle.ofDeg(viewBean.getFieldOfViewDeg())),
+                    canvas.getWidth()/2, canvas.getHeight()/2)
+                            .concat(PlanarTransformation.rotation(rotation.get())),
                 canvas.widthProperty(), canvas.heightProperty(), viewBean.fieldOfViewDegProperty(), rotation);
 
         canvasToPlane = Bindings.createObjectBinding(() -> planeToCanvas.get().invert(), planeToCanvas);
@@ -139,15 +144,19 @@ public final class SkyCanvasManager {
         canvas.setOnMouseMoved(mouse -> mousePosition.set(canvasToPlane.get().apply(mouse.getX(), mouse.getY())));
 
         canvas.setOnMousePressed(mouse -> {
-            if (mouse.isPrimaryButtonDown()) canvas.requestFocus();
+            if (mouse.isPrimaryButtonDown() || mouse.getButton() == MouseButton.MIDDLE) {
+                if (!canvas.isFocused()) canvas.requestFocus();
+                mouseXstartOfDrag.set(mouse.getX());
+                mouseYstartOfDrag.set(mouse.getY());
+            }
         });
 
         canvas.setOnKeyPressed(key -> {
             switch (key.getCode()) {
-                case LEFT: modifyViewBean(-AZ_STEP, 0, viewBean.getCenter()); break;
-                case RIGHT: modifyViewBean(+AZ_STEP, 0, viewBean.getCenter()); break;
-                case UP: modifyViewBean(0, +ALT_STEP, viewBean.getCenter()); break;
-                case DOWN: modifyViewBean(0, -ALT_STEP, viewBean.getCenter()); break;
+                case LEFT: modifyViewBean(-AZ_STEP, 0); break;
+                case RIGHT: modifyViewBean(+AZ_STEP, 0); break;
+                case UP: modifyViewBean(0, +ALT_STEP); break;
+                case DOWN: modifyViewBean(0, -ALT_STEP); break;
                 case J: modifyRotation(ROTATE_STEP); break;
                 case L: modifyRotation(-ROTATE_STEP); break;
                 case K: if (rotation.get() != 0) modifyRotation(-rotation.get());
@@ -158,6 +167,18 @@ public final class SkyCanvasManager {
         canvas.setOnScroll(scroll -> viewBean.setFieldOfViewDeg(FOV_INTERVAL.clip(
                 viewBean.getFieldOfViewDeg() - (Math.abs(scroll.getDeltaX()) < Math.abs(scroll.getDeltaY()) ?
                 scroll.getDeltaY() : scroll.getDeltaX()))));
+
+        canvas.setOnMouseDragged(mouse -> {
+            if (mouse.isPrimaryButtonDown()) {
+                modifyViewBean(
+                mouseDragSensitivity.get() * (mouse.getX() - mouseXstartOfDrag.get()),
+                mouseDragSensitivity.get() * (mouseYstartOfDrag.get() - mouse.getY()));
+            }
+            if (mouse.getButton() == MouseButton.MIDDLE) {
+            modifyRotation(mouseDragSensitivity.get() * ROTATION_ATTENUATION *
+                    (mouseXstartOfDrag.get() + mouseYstartOfDrag.get() - mouse.getX() - mouse.getY()));
+            }
+        });
 
         //FINALLY, ADDING LISTENERS TO REDRAW SKY
         ChangeListener<Object> painterEvent =
@@ -239,16 +260,37 @@ public final class SkyCanvasManager {
         objectsToDraw.set((setToDraw instanceof TreeSet) ? ((TreeSet<DrawableObjects>)setToDraw) : new TreeSet<>(setToDraw));
     }
 
-    private void modifyViewBean(double azDelta, double altDelta, HorizontalCoordinates center) {
+    /**
+     * @return (double) value of observable: mouse's drag sensitivity
+     */
+    public double getMouseDragSensitivity() {
+        return mouseDragSensitivity.get();
+    }
+
+    /**
+     * @return (DoubleProperty) observable: mouse's drag sensitivity
+     */
+    public DoubleProperty mouseDragSensitivityProperty() {
+        return mouseDragSensitivity;
+    }
+
+    /**
+     * Setter for observable: mouse's drag sensitivity
+     *
+     * @param mouseDragSensitivity (double) mouse sensitivity to be set to
+     */
+    public void setMouseDragSensitivity(double mouseDragSensitivity) {
+        this.mouseDragSensitivity.set(mouseDragSensitivity);
+    }
+
+    private void modifyViewBean(double azDelta, double altDelta) {
         viewBean.setCenter(HorizontalCoordinates.of(
-                Angle.normalizePositive(center.az() + azDelta),
-                ALT_INTERVAL.clip(center.alt() + altDelta)
+                Angle.normalizePositive(viewBean.getCenter().az() + azDelta),
+                ALT_INTERVAL.clip(viewBean.getCenter().alt() + altDelta)
         ));
     }
 
     private void modifyRotation(double deltaRad) {
-        if (ENABLE_ROTATION) {
-            rotation.set(rotation.get() + deltaRad);
-        }
+        rotation.set(rotation.get() + deltaRad);
     }
 }

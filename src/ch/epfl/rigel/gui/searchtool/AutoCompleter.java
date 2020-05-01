@@ -49,6 +49,7 @@ public abstract class AutoCompleter<T> extends TextField {
     }
 
     abstract AbstractMathSet<String> process(String s, String t);
+
     abstract AbstractMathSet<T> handleReturn(String t);
 
     public void makeLinks()

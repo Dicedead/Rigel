@@ -44,15 +44,34 @@ public final class Tree<V> extends PointedSet<GraphNode<V>> implements Graph<Gra
      * @throws IllegalArgumentException if given leaves aren't all connected to the same root
      */
     public Tree(AbstractMathSet<GraphNode<V>> nodes) {
-        this(nodes, true, nodes.minOf(GraphNode::getDepth), nodes.maxOf(GraphNode::getDepth).getDepth());
+        this(nodes, true);
     }
 
+    /**
+     * Dangerous but efficient constructor not performing security checks if user programmer decides so.
+     * This class will NOT function properly with an invalid tree, ie one that does not have exactly one root node at
+     * the top of every other node's hierarchy.
+     *
+     * @param nodes (AbstractMathSet<GraphNode<V>>)
+     * @param securityChecksActivated (boolean)
+     */
     public Tree(AbstractMathSet<GraphNode<V>> nodes, boolean securityChecksActivated) {
-        this(nodes, securityChecksActivated, nodes.minOf(GraphNode::getDepth), nodes.maxOf(GraphNode::getDepth).getDepth());
+        this(nodes, nodes.minOf(GraphNode::getDepth), securityChecksActivated);
     }
 
-    private Tree()
-    {
+    /**
+     * @see Tree#Tree(AbstractMathSet, boolean)
+     * Same as the constructor mentionned above along with root specification
+     *
+     * @param nodes (AbstractMathSet<GraphNode<V>>)
+     * @param root (GraphNode<V>)
+     * @param securityChecksActivated (boolean)
+     */
+    public Tree(AbstractMathSet<GraphNode<V>> nodes, GraphNode<V> root, boolean securityChecksActivated) {
+        this(nodes, securityChecksActivated, root, nodes.maxOf(GraphNode::getDepth).getDepth());
+    }
+
+    private Tree() {
         super(emptySet(), null);
         this.maxDepth = -1;
         this.nodes = emptySet();
@@ -100,7 +119,7 @@ public final class Tree<V> extends PointedSet<GraphNode<V>> implements Graph<Gra
      * @return The points for which point is their parent
      */
     public Optional<Tree<V>> getChildren(GraphNode<V> point) {
-        final AbstractMathSet<GraphNode<V>> children = getNodesAtDepth(point.getDepth() + 1).suchThat(point::isParentOf);
+        AbstractMathSet<GraphNode<V>> children = getNodesAtDepth(point.getDepth() + 1).suchThat(point::isParentOf);
         return children.isEmpty() ? Optional.empty() : Optional.of(new Tree<>(children, false, point, maxDepth));
     }
 
@@ -175,6 +194,16 @@ public final class Tree<V> extends PointedSet<GraphNode<V>> implements Graph<Gra
         return new MathSet<>(Collections.singleton(this));
     }
 
+    /**
+     * Computes the partition defined in GraphNode.areRelatedRootless
+     * @see GraphNode#areRelatedRootless(GraphNode, GraphNode)
+     *
+     * @return
+     */
+    public PartitionSet<GraphNode<V>> partition() {
+        return new PartitionSet<>(new MathSet<>(getData()), GraphNode::areRelatedRootless);
+    }
+
     @Override
     public AbstractMathSet<Link<GraphNode<V>>> edgeSet() {
         final AbstractMathSet<GraphNode<V>> nonRoots = nodes.suchThat(node -> !node.equals(getElementOrThrow()));
@@ -219,5 +248,10 @@ public final class Tree<V> extends PointedSet<GraphNode<V>> implements Graph<Gra
 
     public int getMinDepth() {
         return getElementOrThrow().getDepth();
+    }
+
+    @Override
+    public String toString() {
+        return "Tree: "+ partition().components().toString();
     }
 }
