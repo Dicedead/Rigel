@@ -29,7 +29,7 @@ public final class ClosedInterval extends Interval {
      * @throws IllegalArgumentException if low >= high
      */
     public static ClosedInterval of(double low, double high) {
-        Preconditions.checkArgument(high > low);
+        Preconditions.checkArgument(high > low, "Interval: Given high bound is smaller than lower bound");
         return new ClosedInterval(low, high);
     }
 
@@ -41,7 +41,7 @@ public final class ClosedInterval extends Interval {
      * @throws IllegalArgumentException if size is <= 0
      */
     public static ClosedInterval symmetric(double size) {
-        Preconditions.checkArgument(size > 0);
+        Preconditions.checkArgument(size > 0, "Interval: Given size is not > 0");
         double halfSize = size / 2.0;
         return new ClosedInterval(-halfSize, halfSize);
     }

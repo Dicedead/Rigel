@@ -2,7 +2,6 @@ package ch.epfl.rigel.coordinates;
 
 import ch.epfl.rigel.Preconditions;
 
-import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 /**
@@ -20,10 +19,13 @@ public final class PlanarTransformation implements UnaryOperator<CartesianCoordi
       possibly -for once in our project...- code readability in SkyCanvasPainter.
      */
 
+    private static final double BASICALLY_ZERO = 1e-13;
+
     private final double Mxx, Mxy, Myy, Myx, Tx, Ty;
     private final double determinant;
 
     private final boolean isDiagonal;
+    /* A bit of a shortcut name as isDiagonal also implies Mxx = -Myy */
 
     private PlanarTransformation(double mxx, double mxy, double myx, double myy, double tx, double ty)  {
         Mxx = mxx;
@@ -126,9 +128,10 @@ public final class PlanarTransformation implements UnaryOperator<CartesianCoordi
      * @return (PlanarTransformation) inverse transformation of trans
      * @throws IllegalArgumentException if determinant of input matrix == 0 (ie input matrix isn't invertible)
      */
-    public static PlanarTransformation inverseOf(final PlanarTransformation trans) {
-        Preconditions.checkArgument(trans.determinant != 0);
-        final double inversDet = 1/trans.determinant;
+    public static PlanarTransformation inverseOf(PlanarTransformation trans) {
+        Preconditions.checkArgument(Math.abs(trans.determinant) >= BASICALLY_ZERO,
+                "PlanarTransformation: tried to invert non invertible matrix (det == or really close to 0).");
+        double inversDet = 1/trans.determinant;
         return new PlanarTransformation(inversDet * trans.Myy, -inversDet * trans.Mxy, -inversDet * trans.Myx,
                 inversDet * trans.Mxx, inversDet * (trans.Mxy * trans.Ty - trans.Myy * trans.Tx),
                 inversDet * (trans.Myx * trans.Tx - trans.Mxx * trans.Ty));

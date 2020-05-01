@@ -62,7 +62,7 @@ public final class UseSkyCanvasManager extends Application {
                     viewingParametersBean);
 
             canvasManager.objectUnderMouseProperty().addListener(
-                    (p, o, n) -> {if (n != null) System.out.println(n);});
+                    (p, o, n) -> n.ifPresent(System.out::println));
 
             Canvas sky = canvasManager.canvas();
             BorderPane root = new BorderPane(sky);

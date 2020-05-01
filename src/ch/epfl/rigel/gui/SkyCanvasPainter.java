@@ -6,7 +6,6 @@ import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.coordinates.StereographicProjection;
 import ch.epfl.rigel.coordinates.PlanarTransformation;
 import ch.epfl.rigel.math.ClosedInterval;
-import javafx.geometry.Bounds;
 import javafx.geometry.VPos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -15,8 +14,8 @@ import javafx.scene.paint.Paint;
 import javafx.scene.text.TextAlignment;
 
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.function.Function;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static ch.epfl.rigel.coordinates.StereographicProjection.applyToAngle;
@@ -59,14 +58,27 @@ public final class SkyCanvasPainter {
         }
     }
 
-    public void drawDefault(ObservedSky sky, PlanarTransformation transform, StereographicProjection proj) {
+    /**
+     * Draws objects with possible filters
+     *
+     * @param sky (ObservedSky) current observed sky
+     * @param transform (PlanarTransformation) current transformation to the canvas
+     * @param proj (StereographicProjection) current projection to the 2D plane
+     * @param objectsToDraw (TreeSet<DrawableObjects>) possible filters
+     */
+    public void draw(ObservedSky sky, PlanarTransformation transform, StereographicProjection proj,
+                     TreeSet<DrawableObjects> objectsToDraw) {
         clear();
-        drawAsterisms(sky, transform);
-        drawStars(sky, transform);
-        drawPlanets(sky, transform);
-        drawSun(sky, transform);
-        drawMoon(sky, transform);
-        drawHorizon(proj, transform);
+        for(DrawableObjects toDraw : objectsToDraw)
+            switch (toDraw) {
+                case ASTERISMS: drawAsterisms(sky, transform); break;
+                case STARS: drawStars(sky, transform); break;
+                case PLANETS: drawPlanets(sky, transform); break;
+                case SUN: drawSun(sky, transform); break;
+                case MOON: drawMoon(sky, transform); break;
+                case HORIZON: drawHorizon(proj, transform); break;
+                default: throw new IllegalStateException("SkyCanvasPainter: unknown drawable object type");
+            }
     }
 
     /**
@@ -268,7 +280,13 @@ public final class SkyCanvasPainter {
         return sky.starsMap().get(sky.stars().get(sky.asterismIndices(aster).get(index)));
     }
 
-    private boolean isInCanvas(final CartesianCoordinates coords) {
+    /**
+     * Shortcut method for testing if given coords are within canvas' current bounds
+     *
+     * @param coords (CartesianCoordinates coords)
+     * @return (boolean)
+     */
+    private boolean isInCanvas(CartesianCoordinates coords) {
         return canvas.getBoundsInLocal().contains(coords.x(), coords.y());
     }
 

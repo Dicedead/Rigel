@@ -11,20 +11,26 @@ import ch.epfl.rigel.math.Interval;
 public final class Preconditions {
 
     //Non instantiable
-    private Preconditions(){ throw new UnsupportedOperationException(); }
-    /*
-      The constructor of a non instantiable class throwing a UO Exception rather than just being private:
-         a) guarantees that the following code does not create an instance, and
-         b) is immune to reflection (Field.setAccessible)
+    private Preconditions(){ throw new UnsupportedOperationException("Fatal error: tried to instantiate non" +
+            "instantiable class Preconditions."); }
+
+    /**
+     * Validity checking method
+     *
+      * @param argIsTrue (boolean) Boolean to check
      */
+    public static void checkArgument(boolean argIsTrue) {
+        checkArgument(argIsTrue, "Invalid argument.");
+    }
 
     /**
      * Validity checking method
      * @param argIsTrue (boolean) Boolean to check
+     * @param errorString (String) String attached to the IAE thrown if given condition is false
      */
-    public static void checkArgument(boolean argIsTrue){
+    public static void checkArgument(boolean argIsTrue, String errorString){
         if (!argIsTrue) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(errorString);
         }
     }
 

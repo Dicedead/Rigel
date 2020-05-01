@@ -51,7 +51,7 @@ public final class Tree<V> extends PointedSet<GraphNode<V>> implements Graph<Gra
         this(nodes, securityChecksActivated, nodes.minOf(GraphNode::getDepth), nodes.maxOf(GraphNode::getDepth).getDepth());
     }
 
-    public Tree()
+    private Tree()
     {
         super(emptySet(), null);
         this.maxDepth = -1;
@@ -66,19 +66,25 @@ public final class Tree<V> extends PointedSet<GraphNode<V>> implements Graph<Gra
                         final Path<GraphNode<V>> pathN = node.hierarchy();
                         return pathN.at(pathN.cardinality() - 1);
                     })
-                    .cardinality() == 1);
+                    .cardinality() == 1, "Tree: Given set of nodes does not have a common root.");
         }
 
         this.maxDepth = maxDepth;
         this.nodes = nodes;
     }
 
+    /**
+     * Factory constructor of an empty tree of type V
+     *
+     * @param <V> type parameter
+     * @return (Tree<V>)
+     */
     public static <V> Tree<V> emptyTree()
     {
         return new Tree<>();
     }
 
-    public Tree<V> add (final Path<GraphNode<V>> p)
+    public Tree<V> add(final Path<GraphNode<V>> p)
     {
         return new Tree<>(union(p));
     }
