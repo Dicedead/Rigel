@@ -20,7 +20,7 @@ public class SearcherTestSlow extends Application {
                 new Star(1, "Sia", EquatorialCoordinates.of(0,0), 5f,5f)) ;
         StarCatalogue cat = new StarCatalogue(stars, List.of(new Asterism(stars)));
 
-        Searcher searcher = new Searcher(10, p -> true, cat);
+        //Searcher searcher = new Searcher(10, p -> true, cat);
     }
 
     @Override

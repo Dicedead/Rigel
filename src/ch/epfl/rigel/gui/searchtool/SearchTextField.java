@@ -10,10 +10,14 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 
-import java.util.HashSet;
-
 import static ch.epfl.rigel.math.sets.implement.MathSet.emptySet;
 
+/**
+ * Search tool GUI's implementation and functionalities abstraction
+ *
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
 public abstract class SearchTextField<T> extends TextField {
 
     private final ObjectProperty<AbstractMathSet<T>> results;
@@ -42,15 +46,22 @@ public abstract class SearchTextField<T> extends TextField {
 
     protected void populate(final AbstractMathSet<String> toPopulate) {
         entriesGUI.getItems().clear();
-        entriesGUI.getItems().addAll(new HashSet<>(toPopulate.image(e -> new CustomMenuItem(new Label(e), true))
-                .getData()));
+        for (String str : toPopulate) {
+            CustomMenuItem menuItem = new CustomMenuItem(new Label(str), true);
+            menuItem.getContent().setOnMouseClicked(mouse -> clickAction(str));
+            entriesGUI.getItems().add(menuItem);
+        }
+
+        //entriesGUI.getItems().addAll(toPopulate.image(str -> new CustomMenuItem(new Label(str), true)).getData());
         if (entriesGUI.getItems().size() - numberOfEntry > 0)
             entriesGUI.getItems().remove(0, entriesGUI.getItems().size() - numberOfEntry);
     }
 
-    abstract AbstractMathSet<String> process(String s, String t);
+    abstract AbstractMathSet<String> process(String s);
 
     abstract AbstractMathSet<T> handleReturn(String t);
+
+    abstract void clickAction(String str);
 
     public void makeLinks() {
         textProperty().addListener((observable, oldValue, newValue) -> {
@@ -58,7 +69,7 @@ public abstract class SearchTextField<T> extends TextField {
             if (enteredText == null) {
                 entriesGUI.hide();
             } else {
-                populate(process(newValue, oldValue));
+                populate(process(newValue));
                 if (!entriesGUI.isShowing()) { //optional
                     entriesGUI.show(this, Side.BOTTOM, 0, 0); //position of popup
                 }

@@ -7,6 +7,7 @@ import ch.epfl.rigel.coordinates.CartesianCoordinates;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.coordinates.PlanarTransformation;
 import ch.epfl.rigel.coordinates.StereographicProjection;
+import ch.epfl.rigel.gui.searchtool.Searcher;
 import ch.epfl.rigel.math.Angle;
 import ch.epfl.rigel.math.ClosedInterval;
 import javafx.beans.binding.Bindings;
@@ -25,6 +26,7 @@ import javafx.scene.input.MouseButton;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -47,8 +49,10 @@ public final class SkyCanvasManager {
     private final DateTimeBean dtBean;
     private final ViewingParametersBean viewBean;
     private final ObserverLocationBean obsLocBean;
+
     private final Canvas canvas;
     private final SkyCanvasPainter painter;
+    private final Searcher searcher;
 
     private final ObjectBinding<StereographicProjection> projection;
     private final ObjectBinding<PlanarTransformation> planeToCanvas;
@@ -78,6 +82,7 @@ public final class SkyCanvasManager {
     //objectsToDraw is not a collection of observables but rather one observable that happened to be a set of immutable
     //objects, it thus made sense for us not to use ObservableSet
     private final ObjectBinding<Set<Class<?>>> drawableClasses;
+    private final ObjectBinding<Predicate<CelestialObject>> drawableContains;
 
     /**
      * SkyCanvasManager constructor
@@ -98,10 +103,26 @@ public final class SkyCanvasManager {
         canvas = new Canvas(1,1); //avoids some ugliness down in planeToCanvas and its inverse
         painter = new SkyCanvasPainter(canvas);
 
-        //CREATING VARIOUS ASTRONOMICAL AND MATHEMATICAL BINDINGS
         projection = Bindings.createObjectBinding(
                 () -> new StereographicProjection(viewBean.getCenter()),
                 viewBean.centerProperty());
+
+        observedSky = Bindings.createObjectBinding(
+                () -> new ObservedSky(dtBean.getZonedDateTime(), obsLocBean.getCoords(), projection.get(),catalogue),
+                dtBean.zdtProperty(), obsLocBean.coordsProperty(), projection);
+
+        drawableClasses = Bindings.createObjectBinding(
+                () -> objectsToDraw.get().stream().map(DrawableObjects::getCorrespondingClass).collect(Collectors.toSet()),
+                objectsToDraw);
+
+        drawableContains = Bindings.createObjectBinding(
+                () -> celest -> drawableClasses.get().contains(celest.getClass()), drawableClasses);
+
+        searcher = new Searcher(catalogue.stars().size() + 10, drawableContains.get(),
+                observedSky.get(), obsLocBean, dtBean);
+
+        searcher.filterProperty().bind(drawableContains);
+        searcher.lastSelectedCenterProperty().bindBidirectional(viewBean.centerProperty());
 
         planeToCanvas = Bindings.createObjectBinding(
                 () ->
@@ -113,14 +134,6 @@ public final class SkyCanvasManager {
                 canvas.widthProperty(), canvas.heightProperty(), viewBean.fieldOfViewDegProperty(), rotation);
 
         canvasToPlane = Bindings.createObjectBinding(() -> planeToCanvas.get().invert(), planeToCanvas);
-
-        observedSky = Bindings.createObjectBinding(
-                () -> new ObservedSky(dtBean.getZonedDateTime(), obsLocBean.getCoords(), projection.get(),catalogue),
-                dtBean.zdtProperty(), obsLocBean.coordsProperty(), projection);
-
-        drawableClasses = Bindings.createObjectBinding(
-                () -> objectsToDraw.get().stream().map(DrawableObjects::getCorrespondingClass).collect(Collectors.toSet()),
-                objectsToDraw);
 
         //TAKING CARE OF MOUSE'S POSITION AND USER INTERACTION
         mouseHorizontalPosition = Bindings.createObjectBinding(
@@ -188,7 +201,7 @@ public final class SkyCanvasManager {
         extendedAltitudeIsOn.addListener((p, o, n) -> modifyViewBean(0,0));
         //clips to smaller [5; -90] if extentedAltitude is turned off.
 
-        //FINALLY, ADDING LISTENERS TO REDRAW SKY
+        //ADDING LISTENERS TO REDRAW SKY
         ChangeListener<Object> painterEvent =
                 (p, o, n) -> painter.draw(observedSky.get(), planeToCanvas.get(), projection.get(), objectsToDraw.get());
 
@@ -202,6 +215,13 @@ public final class SkyCanvasManager {
      */
     public Canvas canvas() {
         return canvas;
+    }
+
+    /**
+     * @return (Searcher) search window
+     */
+    public Searcher searcher() {
+        return searcher;
     }
 
     /**

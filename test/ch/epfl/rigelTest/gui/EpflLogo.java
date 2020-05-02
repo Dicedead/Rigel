@@ -23,7 +23,7 @@ public class EpflLogo extends Application {
     @Override
     public void start(Stage primaryStage) {
         try (InputStream hs = resourceStream()) {
-            StarCatalogue catalogue = new StarCatalogue.Builder()
+            /*StarCatalogue catalogue = new StarCatalogue.Builder()
                     .loadFrom(hs, HygDatabaseLoader.INSTANCE)
                     .build();
 
@@ -35,7 +35,7 @@ public class EpflLogo extends Application {
             searcher.setVisible(true);
 
             primaryStage.setScene(new Scene(root, 300, 250));
-            primaryStage.show();
+            primaryStage.show();*/
 
         } catch (IOException e) {
             e.printStackTrace();

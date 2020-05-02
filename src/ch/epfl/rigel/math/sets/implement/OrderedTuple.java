@@ -15,8 +15,6 @@ import java.util.stream.Collectors;
  */
 public class OrderedTuple<T> extends IndexedSet<T, Integer> implements AbstractOrderedTuple<T> {
 
-    private final List<T> listAspect;
-
     /**
      * Classic constructor for an IndexedSet
      * @param t the underlying data
@@ -24,7 +22,6 @@ public class OrderedTuple<T> extends IndexedSet<T, Integer> implements AbstractO
      */
     public OrderedTuple(Collection<T> t, SetFunction<Integer, T> indexer) {
         super(t, indexer);
-        listAspect = AbstractOrderedTuple.createList(this);
     }
 
     /**
@@ -58,9 +55,5 @@ public class OrderedTuple<T> extends IndexedSet<T, Integer> implements AbstractO
     @Override
     public <U> OrderedTuple<U> image(SetFunction<T, U> f) {
         return new OrderedTuple<>(toList().stream().map(f).collect(Collectors.toList()));
-    }
-
-    public List<T> toList() {
-        return listAspect;
     }
 }

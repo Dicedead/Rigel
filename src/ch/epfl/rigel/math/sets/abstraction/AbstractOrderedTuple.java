@@ -51,26 +51,4 @@ public interface AbstractOrderedTuple<T> extends AbstractIndexedSet<T, Integer>,
     default Relation.Order<T> getComparator() {
         return (t, u) -> indexOf(t) < indexOf(u) ? Relation.COMP.LESS : indexOf(t) == indexOf(u) ? Relation.COMP.EQUAL : Relation.COMP.GREATER;
     }
-
-    @Override
-    default Stream<T> stream() {
-        return toList().stream();
-    }
-
-    @Override
-    default Iterator<T> iterator() {
-        return toList().iterator();
-    }
-
-    @Override
-    default void forEach(Consumer<? super T> action) {
-        toList().forEach(action);
-    }
-
-    @Override
-    default Spliterator<T> spliterator() {
-        return toList().spliterator();
-    }
-
-
 }
