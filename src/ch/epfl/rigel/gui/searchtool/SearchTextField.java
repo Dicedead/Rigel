@@ -14,13 +14,13 @@ import java.util.HashSet;
 
 import static ch.epfl.rigel.math.sets.implement.MathSet.emptySet;
 
-public abstract class AutoCompleter<T> extends TextField {
+public abstract class SearchTextField<T> extends TextField {
 
     private final ObjectProperty<AbstractMathSet<T>> results;
     private final ContextMenu entriesGUI;
     private final int numberOfEntry;
 
-    public AutoCompleter(int numberOfEntry) {
+    public SearchTextField(int numberOfEntry) {
         super();
         this.entriesGUI = new ContextMenu();
         this.numberOfEntry = numberOfEntry;

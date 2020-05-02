@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 import static ch.epfl.rigel.math.sets.abstraction.AbstractMathSet.unionOf;
 import static ch.epfl.rigel.math.sets.implement.MathSet.emptySet;
 
-public final class Searcher extends AutoCompleter<CelestialObject> {
+public final class Searcher extends SearchTextField<CelestialObject> {
 
     private final WeakHashMap<String, CelestialObject> resultCache;
     private final AbstractMathSet<String> data;
@@ -32,12 +32,12 @@ public final class Searcher extends AutoCompleter<CelestialObject> {
     public Searcher(int cacheCapacity, Predicate<CelestialObject> p, StarCatalogue sky) {
         super(2 * cacheCapacity);
 
-        /*List<Star> stars = List.of(new Star(1, "Sa", EquatorialCoordinates.of(0,0), 5f,5f),
+        List<Star> stars = List.of(new Star(1, "Sa", EquatorialCoordinates.of(0,0), 5f,5f),
                 new Star(1, "Se", EquatorialCoordinates.of(0,0), 5f,5f),
                 new Star(1, "Sia", EquatorialCoordinates.of(0,0), 5f,5f),
-                new Star(1, "Sip", EquatorialCoordinates.of(0,0), 5f,5f)) ;*/
+                new Star(1, "Sip", EquatorialCoordinates.of(0,0), 5f,5f)) ;
 
-        this.data = sky.stars().stream().map(CelestialObject::name).collect(MathSet.toMathSet());
+        this.data = stars.stream().map(CelestialObject::name).collect(MathSet.toMathSet());
         this.resultCache = new WeakHashMap<>(cacheCapacity);
         this.cacheCapacity = cacheCapacity;
         this.filter = p;
@@ -68,19 +68,29 @@ public final class Searcher extends AutoCompleter<CelestialObject> {
         return -1;
     }
 
-    public Optional<Tree<Character>> search(char s, Tree<Character> unfinished, int depth) {
-        //TODO need to REMOVE from a Tree being worked on the nodes that are of no interest with depth
-        if (depth > unfinished.getMaxDepth()) return Optional.empty();
-        AbstractMathSet<GraphNode<Character>> potential = unfinished.getNodesAtDepth(Math.max(depth, 0))
+    public Optional<Tree<Character>> search(String inputText, char s, Tree<Character> initialTree, int depth) {
+
+        if (depth > initialTree.getMaxDepth()) return Optional.empty();
+        AbstractMathSet<GraphNode<Character>> potential = initialTree.getNodesAtDepth(Math.max(depth, 0))
                 .suchThat(node -> node.getValue() == ((depth == 0) ? Character.toUpperCase(s) : s));
-        return potential.isEmpty() ? Optional.empty() : Optional.of(unfinished.subtreeAtPoint(potential.minOf(GraphNode::getDepth)));
+        potential = potential.suchThat(node -> node.hierarchy().reverse().image(GraphNode::getValue).stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining()).equals(inputText));
+
+        AbstractMathSet<GraphNode<Character>>
+                unionHierarchy = unionOf(potential.image(node -> node.hierarchy().union(initialTree.subtreeAtPoint(node))));
+
+        return potential.isEmpty() ?
+                Optional.empty() : Optional.of(
+                        new Tree<>(unionHierarchy));
     }
 
     public AbstractMathSet<String> potentialSolutions(Tree<Character> data) {
 
         return data.getLeaves()
                 .image(n -> n.hierarchy().reverse()
-                        .image(l -> l.getValue().toString())
+                        .image(GraphNode::getValue)
+                        .image(String::valueOf)
                         .stream()
                         .collect(Collectors.joining()))
                 .union(new MathSet<>(resultCache.keySet()));
@@ -102,8 +112,9 @@ public final class Searcher extends AutoCompleter<CelestialObject> {
 
         int firstAlpha;
         if (!s.equals("") && availableChars.contains(s.charAt(firstAlpha = findFirstalpha(s)))) {
-            Optional<Tree<Character>> res = search(s.charAt(s.length() - 1),
+            Optional<Tree<Character>> res = search(s, s.charAt(s.length() - 1),
                     treesOfCharacters.at(s.charAt(firstAlpha)), s.length() - 1);
+            var lul = potentialSolutions(res.get());
             return res.isEmpty() ? MathSet.of(t) : potentialSolutions(res.get());
         }
         return emptySet();

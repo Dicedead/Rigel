@@ -13,6 +13,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.TextAlignment;
 
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.function.Function;
@@ -64,10 +65,11 @@ public final class SkyCanvasPainter {
      * @param sky (ObservedSky) current observed sky
      * @param transform (PlanarTransformation) current transformation to the canvas
      * @param proj (StereographicProjection) current projection to the 2D plane
-     * @param objectsToDraw (TreeSet<DrawableObjects>) possible filters
+     * @param objectsToDraw (EnumSet<DrawableObjects>) possible filters - taking advantage of EnumSet's inner order of
+     *                      objects
      */
     public void draw(ObservedSky sky, PlanarTransformation transform, StereographicProjection proj,
-                     TreeSet<DrawableObjects> objectsToDraw) {
+                     EnumSet<DrawableObjects> objectsToDraw) {
         clear();
         for(DrawableObjects toDraw : objectsToDraw)
             switch (toDraw) {
@@ -77,7 +79,7 @@ public final class SkyCanvasPainter {
                 case SUN: drawSun(sky, transform); break;
                 case MOON: drawMoon(sky, transform); break;
                 case HORIZON: drawHorizon(proj, transform); break;
-                default: throw new IllegalStateException("SkyCanvasPainter: unknown drawable object type");
+                default: throw new IllegalStateException("SkyCanvasPainter: unknown drawable object type given.");
             }
     }
 

@@ -22,9 +22,9 @@ import javafx.beans.value.ChangeListener;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.input.MouseButton;
 
+import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 /**
@@ -73,8 +73,8 @@ public final class SkyCanvasManager {
 
     private final DoubleProperty rotation = new SimpleDoubleProperty(0);
 
-    private final ObjectProperty<TreeSet<DrawableObjects>> objectsToDraw = new SimpleObjectProperty<>(
-            new TreeSet<>(Set.of(DrawableObjects.values())));
+    private final ObjectProperty<EnumSet<DrawableObjects>> objectsToDraw = new SimpleObjectProperty<>(
+            EnumSet.allOf(DrawableObjects.class));
     //objectsToDraw is not a collection of observables but rather one observable that happened to be a set of immutable
     //objects, it thus made sense for us not to use ObservableSet
     private final ObjectBinding<Set<Class<?>>> drawableClasses;
@@ -254,18 +254,18 @@ public final class SkyCanvasManager {
     }
 
     /**
-     * @return (ObjectProperty<TreeSet<DrawableObjects>>) observable: set of objects to draw
+     * @return (ObjectProperty<EnumSet<DrawableObjects>>) observable: set of objects to draw
      */
-    public ObjectProperty<TreeSet<DrawableObjects>> objectsToDrawProperty() { return objectsToDraw; }
+    public ObjectProperty<EnumSet<DrawableObjects>> objectsToDrawProperty() { return objectsToDraw; }
 
     /**
      * Setter for observable: set of objects to draw
      *
-     * @param setToDraw (Set<DrawableObjects>) potentially new set of DrawableObjects
+     * @param setToDraw (EnumSet<DrawableObjects>) potentially new set of DrawableObjects
      */
-    public void setObjectsToDraw(Set<DrawableObjects> setToDraw) {
+    public void setObjectsToDraw(EnumSet<DrawableObjects> setToDraw) {
         if (!setToDraw.equals(objectsToDraw.get()))
-        objectsToDraw.set((setToDraw instanceof TreeSet) ? ((TreeSet<DrawableObjects>)setToDraw) : new TreeSet<>(setToDraw));
+        objectsToDraw.set(setToDraw);
     }
 
     /**
