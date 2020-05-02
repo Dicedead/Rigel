@@ -32,12 +32,12 @@ public final class Searcher extends SearchTextField<CelestialObject> {
     public Searcher(int cacheCapacity, Predicate<CelestialObject> p, StarCatalogue sky) {
         super(2 * cacheCapacity);
 
-        List<Star> stars = List.of(new Star(1, "Sa", EquatorialCoordinates.of(0,0), 5f,5f),
+        /*List<Star> stars = List.of(new Star(1, "Sa", EquatorialCoordinates.of(0,0), 5f,5f),
                 new Star(1, "Se", EquatorialCoordinates.of(0,0), 5f,5f),
                 new Star(1, "Sia", EquatorialCoordinates.of(0,0), 5f,5f),
-                new Star(1, "Sip", EquatorialCoordinates.of(0,0), 5f,5f)) ;
+                new Star(1, "Sip", EquatorialCoordinates.of(0,0), 5f,5f)) ;*/
 
-        this.data = stars.stream().map(CelestialObject::name).collect(MathSet.toMathSet());
+        this.data = sky.stars().stream().map(CelestialObject::name).collect(MathSet.toMathSet());
         this.resultCache = new WeakHashMap<>(cacheCapacity);
         this.cacheCapacity = cacheCapacity;
         this.filter = p;
