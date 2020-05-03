@@ -52,7 +52,6 @@ public abstract class SearchTextField<T> extends TextField {
             entriesGUI.getItems().add(menuItem);
         }
 
-        //entriesGUI.getItems().addAll(toPopulate.image(str -> new CustomMenuItem(new Label(str), true)).getData());
         if (entriesGUI.getItems().size() - numberOfEntry > 0)
             entriesGUI.getItems().remove(0, entriesGUI.getItems().size() - numberOfEntry);
     }
@@ -86,5 +85,4 @@ public abstract class SearchTextField<T> extends TextField {
             }
         });
     }
-
 }

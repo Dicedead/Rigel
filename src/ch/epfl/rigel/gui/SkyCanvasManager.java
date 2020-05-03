@@ -72,6 +72,7 @@ public final class SkyCanvasManager {
     private final DoubleProperty mouseXstartOfDrag = new SimpleDoubleProperty();
     private final DoubleProperty mouseYstartOfDrag = new SimpleDoubleProperty();
     private final DoubleProperty mouseDragSensitivity = new SimpleDoubleProperty(1/2e4);
+    private final DoubleProperty mouseScrollSensitivity = new SimpleDoubleProperty(0.75);
     //suggested interval is [1/4e4; 4/1e4]
     private static final double ROTATION_ATTENUATION = 1/10d;
 
@@ -183,8 +184,8 @@ public final class SkyCanvasManager {
         });
 
         canvas.setOnScroll(scroll -> viewBean.setFieldOfViewDeg(FOV_INTERVAL.clip(
-                viewBean.getFieldOfViewDeg() - (Math.abs(scroll.getDeltaX()) < Math.abs(scroll.getDeltaY()) ?
-                scroll.getDeltaY() : scroll.getDeltaX()))));
+                viewBean.getFieldOfViewDeg() - mouseScrollSensitivity.get() *
+                        (Math.abs(scroll.getDeltaX()) < Math.abs(scroll.getDeltaY()) ? scroll.getDeltaY() : scroll.getDeltaX()))));
 
         canvas.setOnMouseDragged(mouse -> {
             if (mouse.isPrimaryButtonDown()) {
@@ -309,6 +310,29 @@ public final class SkyCanvasManager {
      */
     public void setMouseDragSensitivity(double mouseDragSensitivity) {
         this.mouseDragSensitivity.set(mouseDragSensitivity);
+    }
+
+    /**
+     * @return (double) value of observable: mouse scroll sensitivity
+     */
+    public double getMouseScrollSensitivity() {
+        return mouseScrollSensitivity.get();
+    }
+
+    /**
+     * @return (DoubleProperty) observable: scroll sensitivity
+     */
+    public DoubleProperty mouseScrollSensitivityProperty() {
+        return mouseScrollSensitivity;
+    }
+
+    /**
+     * Setter for observable: mouse scroll sensitivity
+     *
+     * @param mouseScrollSensitivity (double) sensitivity to be set to
+     */
+    public void setMouseScrollSensitivity(double mouseScrollSensitivity) {
+        this.mouseScrollSensitivity.set(mouseScrollSensitivity);
     }
 
     /**

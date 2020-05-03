@@ -77,6 +77,7 @@ public final class UseSkyCanvasManager extends Application {
 
             primaryStage.setTitle("Rigel");
             primaryStage.setScene(new Scene(root));
+
             primaryStage.show();
 
             sky.requestFocus();

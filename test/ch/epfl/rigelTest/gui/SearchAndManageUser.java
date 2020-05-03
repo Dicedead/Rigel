@@ -79,6 +79,7 @@ public final class SearchAndManageUser extends Application {
 
             primaryStage.setTitle("Rigel");
             primaryStage.setScene(new Scene(root));
+            primaryStage.setFullScreen(true);
             primaryStage.show();
 
             sky.requestFocus();

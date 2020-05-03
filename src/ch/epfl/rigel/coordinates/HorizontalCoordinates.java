@@ -145,9 +145,9 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
     }
 
     /**
-     * Bug fixing
+     * Had not to throw UOE for performance
      */
     public boolean equals(Object o) {
-        return false;
+        return o == this;
     }
 }
