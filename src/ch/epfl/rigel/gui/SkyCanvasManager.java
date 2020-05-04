@@ -119,10 +119,8 @@ public final class SkyCanvasManager {
         drawableContains = Bindings.createObjectBinding(
                 () -> celest -> drawableClasses.get().contains(celest.getClass()), drawableClasses);
 
-        searcher = new Searcher(catalogue.stars().size() + 10, drawableContains.get(),
-                observedSky.get(), obsLocBean, dtBean);
+        searcher = new Searcher(catalogue.stars().size() + 10, observedSky.get(), obsLocBean, dtBean);
 
-        searcher.filterProperty().bind(drawableContains);
         searcher.lastSelectedCenterProperty().bindBidirectional(viewBean.centerProperty());
 
         planeToCanvas = Bindings.createObjectBinding(

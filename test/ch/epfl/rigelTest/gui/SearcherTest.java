@@ -42,13 +42,13 @@ public class SearcherTest extends Application {
             ViewingParametersBean viewingParametersBean =
                     new ViewingParametersBean();
             viewingParametersBean.setCenter(
-                    HorizontalCoordinates.ofDeg(180.000000000001, 45));
+                    HorizontalCoordinates.ofDeg(180.000000000001, 15));
             viewingParametersBean.setFieldOfViewDeg(70);
             ObservedSky sky = new ObservedSky(when, observerLocationBean.getCoords(),
                     new StereographicProjection(viewingParametersBean.getCenter()),
                     catalogue);
 
-            Searcher searcher = new Searcher(5, p -> true, sky, observerLocationBean, dateTimeBean);
+            Searcher searcher = new Searcher(5, sky, observerLocationBean, dateTimeBean);
 
             StackPane root = new StackPane();
             root.getChildren().add(searcher);
