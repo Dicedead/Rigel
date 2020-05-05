@@ -8,6 +8,7 @@ import javafx.geometry.VPos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.RadioButton;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -36,6 +37,7 @@ public class EpflLogo extends Application {
 
             primaryStage.setScene(new Scene(root, 300, 250));
             primaryStage.show();*/
+            RadioButton lul = new RadioButton();
 
         } catch (IOException e) {
             e.printStackTrace();
