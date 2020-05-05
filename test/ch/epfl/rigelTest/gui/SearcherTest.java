@@ -1,24 +1,26 @@
 package ch.epfl.rigelTest.gui;
 
 import ch.epfl.rigel.astronomy.HygDatabaseLoader;
+import ch.epfl.rigel.astronomy.ObservedSky;
 import ch.epfl.rigel.astronomy.StarCatalogue;
+import ch.epfl.rigel.coordinates.GeographicCoordinates;
+import ch.epfl.rigel.coordinates.HorizontalCoordinates;
+import ch.epfl.rigel.coordinates.StereographicProjection;
+import ch.epfl.rigel.gui.DateTimeBean;
+import ch.epfl.rigel.gui.ObserverLocationBean;
+import ch.epfl.rigel.gui.ViewingParametersBean;
 import ch.epfl.rigel.gui.searchtool.Searcher;
 import javafx.application.Application;
-import javafx.geometry.VPos;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.ZonedDateTime;
 
 public class SearcherTest extends Application {
-    public static void main(String[] args) { System.out.println("lul");launch(args); }
+    public static void main(String[] args) { launch(args); }
 
     @Override
     public void start(Stage primaryStage) {
@@ -27,7 +29,26 @@ public class SearcherTest extends Application {
                     .loadFrom(hs, HygDatabaseLoader.INSTANCE)
                     .build();
 
-            Searcher searcher = new Searcher(5, p -> true, catalogue);
+            ZonedDateTime when =
+                    ZonedDateTime.parse("2020-02-17T20:15:00+01:00");
+            DateTimeBean dateTimeBean = new DateTimeBean();
+            dateTimeBean.setZonedDateTime(when);
+
+            ObserverLocationBean observerLocationBean =
+                    new ObserverLocationBean();
+            observerLocationBean.setCoordinates(
+                    GeographicCoordinates.ofDeg(6.57, 46.52));
+
+            ViewingParametersBean viewingParametersBean =
+                    new ViewingParametersBean();
+            viewingParametersBean.setCenter(
+                    HorizontalCoordinates.ofDeg(180.000000000001, 45));
+            viewingParametersBean.setFieldOfViewDeg(70);
+            ObservedSky sky = new ObservedSky(when, observerLocationBean.getCoords(),
+                    new StereographicProjection(viewingParametersBean.getCenter()),
+                    catalogue);
+
+            Searcher searcher = new Searcher(5, p -> true, sky, observerLocationBean, dateTimeBean);
 
             StackPane root = new StackPane();
             root.getChildren().add(searcher);

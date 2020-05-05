@@ -15,19 +15,24 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
 import java.util.HashSet;
+import static ch.epfl.rigel.math.sets.implement.MathSet.emptySet;
 
-import static ch.epfl.rigel.math.sets.concrete.MathSet.emptySet;
-
-public abstract class AutoCompleter<T> extends TextField {
+/**
+ * Search tool GUI's implementation and functionalities abstraction
+ *
+ * @author Alexandre Sallinen (303162)
+ * @author Salim Najib (310003)
+ */
+public abstract class SearchTextField<T> extends TextField {
 
     private final ObjectProperty<AbstractMathSet<T>> results;
     private final ContextMenu entriesGUI;
     private final int numberOfEntry;
 
-    public AutoCompleter(final int numberOfEntry) {
+    public SearchTextField(final int numberOfEntry) {
         super();
         this.entriesGUI = new ContextMenu();
-        this.numberOfEntry= numberOfEntry;
+        this.numberOfEntry = numberOfEntry;
         results = new SimpleObjectProperty<>(emptySet());
         makeLinks();
     }
@@ -40,45 +45,46 @@ public abstract class AutoCompleter<T> extends TextField {
         return results;
     }
 
-    protected void populate(final AbstractMathSet<String> toPopulate)
-    {
-        AbstractMathSet<MenuItem> menu = new MathSet<>(entriesGUI.getItems());
-        menu = toPopulate.image(e ->
-        {
-            var res = (MenuItem) (new CustomMenuItem(new Label(e), true));
-            res.setGraphic(buildTextFlow(e, getText()));
-            return res;
-        }).minusSet(menu);
+    protected void setResults(AbstractMathSet<T> results) {
+        this.results.set(results);
+    }
 
-        if (menu.cardinality() - numberOfEntry > 0)
+    protected void populate(final AbstractMathSet<String> toPopulate) {
+        entriesGUI.getItems().clear();
+        for (String str : toPopulate) {
+            CustomMenuItem menuItem = new CustomMenuItem(new Label(str), true);
+            menuItem.getContent().setOnMouseClicked(mouse -> clickAction(str));
+            entriesGUI.getItems().add(menuItem);
+        }
+
+        if (entriesGUI.getItems().size() - numberOfEntry > 0)
             entriesGUI.getItems().remove(0, entriesGUI.getItems().size() - numberOfEntry);
 
+    abstract AbstractMathSet<String> process(String s);
 
-        entriesGUI.getItems().addAll();
-        entriesGUI.getItems().retainAll((new HashSet<>(entriesGUI.getItems())));
-
-
-    }
-    abstract AbstractMathSet<String> process(String s, String t);
     abstract AbstractMathSet<T> handleReturn(String t);
 
-    public void makeLinks()
-    {
-        textProperty().addListener((observable, oldValue, newValue) -> {
+    abstract void clickAction(String str);
 
-            if (getText() == null ) {
+    public void makeLinks() {
+        textProperty().addListener((observable, oldValue, newValue) -> {
+            String enteredText = getText();
+            if (enteredText == null) {
                 entriesGUI.hide();
             } else {
-                populate(process(newValue, oldValue));
-
+                populate(process(newValue));
                 if (!entriesGUI.isShowing()) { //optional
                     entriesGUI.show(this, Side.BOTTOM, 0, 0); //position of popup
-                }}});
+                }
+            }
+        });
 
-        focusedProperty().addListener((observableValue, oldValue, newValue) -> entriesGUI.hide());
+        focusedProperty().addListener((observableValue, oldValue, newValue) -> {
+            entriesGUI.hide();
+        });
 
         setOnKeyReleased(event -> {
-            if (event.getCode() == KeyCode.ENTER){
+            if (event.getCode() == KeyCode.ENTER) {
                 results.setValue(handleReturn(getText()));
             }
         });

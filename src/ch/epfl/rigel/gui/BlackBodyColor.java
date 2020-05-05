@@ -26,13 +26,9 @@ public final class BlackBodyColor {
 
     //Non instantiable
     private BlackBodyColor() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Fatal error: Tried to instantiate non" +
+                "instantiable class BlackBodyColor.");
     }
-    /*
-      The constructor of a non instantiable class throwing a UO Exception rather than just being private:
-         a) guarantees that the following code does not create an instance, and
-         b) is immune to reflection (Field.setAccessible)
-     */
 
     /**
      * @return (int) Size of list of colors, a way to initialise and (eventually) debug the colors list
@@ -72,8 +68,9 @@ public final class BlackBodyColor {
                 List<String> linesOfInterest = reader.lines().filter(line -> line.length() > SKIP_LINES_FILTERINT)
                         .collect(Collectors.toUnmodifiableList());
 
-                return IntStream.range(0, FILE_USABLE_LENGTH / 2).mapToObj(
-                        i -> Color.web(linesOfInterest.get(i * 2 + 1).substring(81, 87))).collect(Collectors.toUnmodifiableList());
+                return IntStream.range(0, FILE_USABLE_LENGTH / 2)
+                        .mapToObj(i -> Color.web(linesOfInterest.get(i * 2 + 1).substring(81, 87)))
+                        .collect(Collectors.toUnmodifiableList());
 
             } catch (IOException e) {
                 throw new UncheckedIOException(e);

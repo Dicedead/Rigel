@@ -3,8 +3,8 @@ package ch.epfl.rigel.math.graphs;
 import ch.epfl.rigel.math.sets.*;
 import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
 import ch.epfl.rigel.math.sets.abstraction.AbstractPartitionSet;
-import ch.epfl.rigel.math.sets.concrete.MathSet;
-import ch.epfl.rigel.math.sets.concrete.PartitionSet;
+import ch.epfl.rigel.math.sets.implement.MathSet;
+import ch.epfl.rigel.math.sets.implement.PartitionSet;
 
 import java.util.*;
 
@@ -47,7 +47,8 @@ public final class ConcreteGraph<T> extends MathSet<OptionalPair<T, Link<T>>> im
      */
     public ConcreteGraph(AbstractMathSet<OptionalPair<T, Link<T>>> mathSet) {
         super(mathSet.getData());
-        vertices = new PartitionSet<>(mathSet.image(p -> p.getKey().orElse(null)), (T v, T u) -> neighboursOf(of(u)).contains(v));
+        vertices = new PartitionSet<>(mathSet.image(p -> p.getKey().orElse(null)),
+                (T v, T u) -> neighboursOf(of(u)).contains(v));
         this.edges = new MathSet<>(mathSet.image(p -> p.getValue().orElse(null)));
 
     }

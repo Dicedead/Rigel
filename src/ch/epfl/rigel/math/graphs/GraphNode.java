@@ -2,8 +2,8 @@ package ch.epfl.rigel.math.graphs;
 
 import ch.epfl.rigel.Preconditions;
 import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
-import ch.epfl.rigel.math.sets.concrete.MathSet;
-import ch.epfl.rigel.math.sets.concrete.OrderedTuple;
+import ch.epfl.rigel.math.sets.implement.MathSet;
+import ch.epfl.rigel.math.sets.implement.OrderedTuple;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -21,10 +21,10 @@ import java.util.stream.Collectors;
  */
 public final class GraphNode<T> {
 
-    final private T value;
-    final private GraphNode<T> parent;
-    final private int depth;
-    final private Path<GraphNode<T>> hierarchy;
+    private final T value;
+    private final GraphNode<T> parent;
+    private final int depth;
+    private final Path<GraphNode<T>> hierarchy;
     private int nmbrOfChildren;
     private boolean lockNode;
 
@@ -147,6 +147,7 @@ public final class GraphNode<T> {
      *   The set {1, 2, 3, 4, 5, 6} is partitioned into 5 sets: {4}, {5}, {3, 6}, {2}, {1}.
      *   Generally speaking, two nodes a and b are related iff they are inside the same branch of nodes with exactly 1
      *   child each OR they're the last node in the branch (ie, the first one to not have exactly 1 child node).
+     *   Extremely useful for debugging, a tad expensive though if applied for large node structures.
      *
      * @param node1 (GraphNode<X>)
      * @param node2 (GraphNode<X>)

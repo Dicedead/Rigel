@@ -10,6 +10,7 @@ import ch.epfl.rigel.gui.DateTimeBean;
 import ch.epfl.rigel.gui.ObserverLocationBean;
 import ch.epfl.rigel.gui.SkyCanvasManager;
 import ch.epfl.rigel.gui.ViewingParametersBean;
+import ch.epfl.rigel.gui.searchtool.Searcher;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -21,7 +22,7 @@ import java.io.InputStream;
 import java.time.ZonedDateTime;
 
 
-public final class UseSkyCanvasManager extends Application {
+public final class SearchAndManageUser extends Application {
     public static void main(String[] args) { launch(args); }
 
     private InputStream resourceStream(String resourceName) {
@@ -31,7 +32,7 @@ public final class UseSkyCanvasManager extends Application {
     @Override
     public void start(Stage primaryStage) throws IOException {
         try (InputStream hs = resourceStream("/hygdata_v3.csv");
-        InputStream ast = resourceStream("/asterisms.txt")) {
+             InputStream ast = resourceStream("/asterisms.txt")) {
             StarCatalogue catalogue = new StarCatalogue.Builder()
                     .loadFrom(hs, HygDatabaseLoader.INSTANCE)
                     .loadFrom(ast, AsterismLoader.INSTANCE)
@@ -65,10 +66,11 @@ public final class UseSkyCanvasManager extends Application {
                     (p, o, n) -> n.ifPresent(System.out::println));
 
             Canvas sky = canvasManager.canvas();
-            BorderPane root = new BorderPane(sky);
+            Searcher searcher = canvasManager.searcher();
+            BorderPane root = new BorderPane(null,sky,null, searcher, null);
 
             sky.widthProperty().bind(root.widthProperty());
-            sky.heightProperty().bind(root.heightProperty());
+            sky.heightProperty().bind(root.heightProperty().multiply(0.95));
 
             primaryStage.setMinWidth(800);
             primaryStage.setMinHeight(600);
@@ -77,7 +79,7 @@ public final class UseSkyCanvasManager extends Application {
 
             primaryStage.setTitle("Rigel");
             primaryStage.setScene(new Scene(root));
-
+            primaryStage.setFullScreen(true);
             primaryStage.show();
 
             sky.requestFocus();

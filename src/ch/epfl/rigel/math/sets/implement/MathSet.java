@@ -1,6 +1,7 @@
-package ch.epfl.rigel.math.sets.concrete;
+package ch.epfl.rigel.math.sets.implement;
 
 import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
+import ch.epfl.rigel.math.sets.properties.SetFunction;
 
 import java.util.*;
 import java.util.function.*;
@@ -62,16 +63,30 @@ public class MathSet<T> implements AbstractMathSet<T> {
 
     /**
      * Set theoretical union
+     *
      * @param others the Sets to union with
      * @return A MathSet containing all elements that lies in one of the sets
      */
     @Override
-    public final AbstractMathSet<T> union(final Collection<AbstractMathSet<T>> others) {
+    public final AbstractMathSet<T> union(Collection<AbstractMathSet<T>> others) {
         return Stream.concat(this.stream(), others.stream().flatMap(s -> s.getData().stream())).collect(toMathSet());
     }
 
     /**
+     * Makes a new set, adding given element
+     *
+     * @param elem (T) element to add
+     * @return (AbstractMathSet<T>)
+     */
+    public final AbstractMathSet<T> plus(T elem) {
+        Collection<T> newData = getData();
+        newData.add(elem);
+        return new MathSet<>(newData);
+    }
+
+    /**
      * Allows to select elements according to predicates
+     *
      * @param t the predicates that each element will have to respect
      * @return the set of all elements in this set that complies to all t
      */
@@ -111,13 +126,12 @@ public class MathSet<T> implements AbstractMathSet<T> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof MathSet)) return false;
-        MathSet<?> mathSet = (MathSet<?>) o;
-        return Objects.equals(data, mathSet.data);
+        return Objects.equals(data, ((MathSet<?>) o).data);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(data);
+        return data.hashCode();
     }
 
     @Override

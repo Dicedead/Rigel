@@ -1,5 +1,7 @@
 package ch.epfl.rigel.math.sets.abstraction;
 
+import ch.epfl.rigel.math.sets.properties.SetFunction;
+
 /**
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)

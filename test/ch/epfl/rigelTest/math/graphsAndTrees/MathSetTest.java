@@ -1,6 +1,6 @@
 package ch.epfl.rigelTest.math.graphsAndTrees;
 
-import ch.epfl.rigel.math.sets.concrete.MathSet;
+import ch.epfl.rigel.math.sets.implement.MathSet;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;

@@ -1,4 +1,4 @@
-package ch.epfl.rigel.math.sets.concrete;
+package ch.epfl.rigel.math.sets.implement;
 
 import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
 import ch.epfl.rigel.math.sets.abstraction.AbstractPartitionSet;
@@ -11,7 +11,7 @@ import java.util.Collections;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-public class PartitionSet<T> extends MathSet<T> implements AbstractPartitionSet<T> {
+public final class PartitionSet<T> extends MathSet<T> implements AbstractPartitionSet<T> {
 
     private final IndexedSet<AbstractMathSet<T>, T> components;
 

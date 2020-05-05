@@ -1,8 +1,8 @@
-package ch.epfl.rigel.math.sets.concrete;
+package ch.epfl.rigel.math.sets.implement;
 
 import ch.epfl.rigel.math.sets.abstraction.AbstractIndexedSet;
 import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
-import ch.epfl.rigel.math.sets.abstraction.SetFunction;
+import ch.epfl.rigel.math.sets.properties.SetFunction;
 
 import java.util.Collection;
 import java.util.Map;
@@ -39,5 +39,4 @@ public class IndexedSet<T, I> extends MathSet<T> implements AbstractIndexedSet<T
     public <U> IndexedSet<U, I> image(SetFunction<T, U> f) {
         return new IndexedSet<>(f.apply(this), (i -> f.apply(at(i))));
     }
-
 }

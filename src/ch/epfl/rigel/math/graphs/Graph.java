@@ -2,15 +2,15 @@ package ch.epfl.rigel.math.graphs;
 
 import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
 import ch.epfl.rigel.math.sets.abstraction.AbstractOrderedTuple;
-import ch.epfl.rigel.math.sets.concrete.OrderedTuple;
-import ch.epfl.rigel.math.sets.abstraction.SetFunction;
+import ch.epfl.rigel.math.sets.implement.OrderedTuple;
+import ch.epfl.rigel.math.sets.properties.SetFunction;
 
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-import static ch.epfl.rigel.math.sets.concrete.MathSet.emptySet;
+import static ch.epfl.rigel.math.sets.implement.MathSet.emptySet;
 
 /**
  * @author Alexandre Sallinen (303162)

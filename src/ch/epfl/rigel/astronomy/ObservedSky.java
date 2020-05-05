@@ -87,7 +87,6 @@ public final class ObservedSky {
         this.sun = (Sun) sunMap.keySet().toArray()[0];
         this.moonPosition = (CartesianCoordinates) moonMap.values().toArray()[0];
         this.moon = (Moon) moonMap.keySet().toArray()[0];
-
     }
 
     /**

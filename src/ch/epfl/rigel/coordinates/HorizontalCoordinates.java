@@ -143,4 +143,11 @@ public final class HorizontalCoordinates extends SphericalCoordinates {
     public String toString() {
         return String.format(Locale.ROOT, "(az=%.4f°, alt=%.4f°)", azDeg(), altDeg());
     }
+
+    /**
+     * Had not to throw UOE for performance
+     */
+    public boolean equals(Object o) {
+        return o == this;
+    }
 }

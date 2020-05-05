@@ -1,7 +1,7 @@
-package ch.epfl.rigel.math.sets.concrete;
+package ch.epfl.rigel.math.sets.implement;
 
 import ch.epfl.rigel.math.sets.abstraction.AbstractOrderedTuple;
-import ch.epfl.rigel.math.sets.abstraction.SetFunction;
+import ch.epfl.rigel.math.sets.properties.SetFunction;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,7 +30,7 @@ public class OrderedTuple<T> extends IndexedSet<T, Integer> implements AbstractO
      */
     @SafeVarargs
     public OrderedTuple(T... t) {
-        super(List.of(t), i -> t[i]);
+        this(List.of(t), i -> t[i]);
     }
 
     /**
@@ -41,15 +41,15 @@ public class OrderedTuple<T> extends IndexedSet<T, Integer> implements AbstractO
         this(iterableToList(t));
     }
 
+    public OrderedTuple(List<T> t) {
+        this(t, t::get);
+    }
+
     private static<T> List<T> iterableToList(final Iterable<T> i)
     {
         final List<T> target = new ArrayList<>();
         i.forEach(target::add);
         return target;
-    }
-
-    public OrderedTuple(List<T> t) {
-        super(t, t::get);
     }
 
     @Override

@@ -1,8 +1,9 @@
 package ch.epfl.rigel.math.sets.abstraction;
 
 import ch.epfl.rigel.math.sets.*;
-import ch.epfl.rigel.math.sets.concrete.MathSet;
+import ch.epfl.rigel.math.sets.implement.MathSet;
 import ch.epfl.rigel.math.sets.properties.Equation;
+import ch.epfl.rigel.math.sets.properties.SetFunction;
 import javafx.util.Pair;
 
 import java.util.*;
@@ -26,6 +27,19 @@ public interface AbstractMathSet<T> extends Iterable<T> {
      */
     default <U> AbstractMathSet<U> image(SetFunction<T, U> f) {
         return f.apply(this);
+    }
+
+    /**
+     * Applies given function to the elements of the set that verify the predicate, those that do not are just
+     * ignored
+     *
+     * @param filter (Predicate<T>) said predicate on starting set (this set)
+     * @param f (SetFunction<T,U>) the function to apply upon this set
+     * @param <U> type of returned set
+     * @return (AbstractMathSet<U>)
+     */
+    default <U> AbstractMathSet<U> imageIf(Predicate<T> filter, SetFunction<T, U> f) {
+        return this.suchThat(filter).image(f);
     }
 
     default boolean contains(T t) {
