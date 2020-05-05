@@ -65,7 +65,7 @@ public interface AbstractMathSet<T> extends Iterable<T> {
     /**
      * @return the data wrapped by the set in its raw form
      */
-    Collection<T> getData();
+    Set<T> getData();
 
     /**
      * @return an element from the current set

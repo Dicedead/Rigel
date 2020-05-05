@@ -13,13 +13,21 @@ import java.util.stream.Stream;
  */
 public class MathSet<T> implements AbstractMathSet<T> {
 
-    private final Collection<T> data;
+    private final Set<T> data;
 
     /**
      * Constructor from collection
      * @param t the data to copy
      */
     public MathSet(Collection<T> t) {
+        data = Set.copyOf(t);
+    }
+
+    /**
+     * Constructor from collection
+     * @param t the data to copy
+     */
+    public MathSet(Set<T> t) {
         data = t;
     }
 
@@ -76,7 +84,7 @@ public class MathSet<T> implements AbstractMathSet<T> {
      * @return the data wrapped by the set in its raw form
      */
     @Override
-    public final Collection<T> getData() {
+    public final Set<T> getData() {
         return data;
     }
 

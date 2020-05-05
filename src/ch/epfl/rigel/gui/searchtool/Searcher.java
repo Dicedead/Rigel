@@ -12,7 +12,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static ch.epfl.rigel.math.sets.abstraction.AbstractMathSet.unionOf;
 import static ch.epfl.rigel.math.sets.concrete.MathSet.emptySet;
@@ -21,7 +20,6 @@ import static ch.epfl.rigel.math.sets.concrete.MathSet.of;
 public final class Searcher extends AutoCompleter<CelestialObject> {
 
     private final WeakHashMap<String, CelestialObject> resultCache;
-    private final AbstractMathSet<String> data;
     private final int cacheCapacity;
     private final Predicate<CelestialObject> filter;
     private final IndexedSet<Tree<Character>, Character> unfinishedData;
@@ -29,11 +27,10 @@ public final class Searcher extends AutoCompleter<CelestialObject> {
 
     public Searcher(int cacheCapacity, Predicate<CelestialObject> p, StarCatalogue sky) {
         super(2 * cacheCapacity);
-        this.data = sky.stars().stream().map(CelestialObject::name).collect(MathSet.toMathSet());
         this.resultCache = new WeakHashMap<>(cacheCapacity);
         this.cacheCapacity = cacheCapacity;
         this.filter = p;
-
+        final AbstractMathSet<String> data = sky.stars().stream().map(CelestialObject::name).collect(MathSet.toMathSet());
         Map<Character, Tree<Character>> preDat = new HashMap<>();
         for (char i = 'a'; i <= 'z'; ++i)
         {

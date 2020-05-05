@@ -19,7 +19,7 @@ import java.util.Optional;
 public final class Path<T> extends OrderedTuple<T> implements Graph<T, Path<T>> {
 
 
-    public Path(OrderedTuple<T> vertices) {
+    public Path(AbstractOrderedTuple<T> vertices) {
         super(vertices.toList());
     }
 
@@ -41,6 +41,7 @@ public final class Path<T> extends OrderedTuple<T> implements Graph<T, Path<T>> 
     public Path(T... vertices) {
         super(vertices);
     }
+
     public static Path<GraphNode<Character>> fromString(String s)
     {
         List<GraphNode<Character>> data = new ArrayList<>();
@@ -54,11 +55,6 @@ public final class Path<T> extends OrderedTuple<T> implements Graph<T, Path<T>> 
     @Override
     public Optional<Path<T>> getNeighbours(T point) {
         return Optional.of(new Path<>(prev(point), point, next(point)));
-    }
-
-    @Override
-    public OrderedTuple<T> flow(SetFunction<Path<T>, T> chooser, T point) {
-        return this;
     }
 
     /**

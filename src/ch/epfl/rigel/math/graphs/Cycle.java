@@ -2,12 +2,23 @@ package ch.epfl.rigel.math.graphs;
 
 import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
 import ch.epfl.rigel.math.sets.abstraction.AbstractOrderedTuple;
+import ch.epfl.rigel.math.sets.abstraction.SetFunction;
 import ch.epfl.rigel.math.sets.concrete.MathSet;
 import ch.epfl.rigel.math.sets.concrete.OrderedTuple;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 
-public final class Cycle<T> extends OrderedTuple<T> implements Graph<T, AbstractOrderedTuple<T>> {
+public abstract class Cycle<T> extends OrderedTuple<T> implements Graph<T, AbstractOrderedTuple<T>> {
+
+    public Cycle(List<T> collect) {
+        super(collect);
+    }
+
+    public Cycle(AbstractOrderedTuple<T> collect) {
+        super(collect);
+    }
 
     /**
      * Gets the set of points linked to given point
@@ -30,6 +41,7 @@ public final class Cycle<T> extends OrderedTuple<T> implements Graph<T, Abstract
     public Graph<T, ? extends AbstractMathSet<T>> on(AbstractMathSet<T> points) {
         return new ConcreteGraph<T>(this, edgeSet()).on(points);
     }
+
 
     /**
      * A component is a maximally connected subset of a graph
