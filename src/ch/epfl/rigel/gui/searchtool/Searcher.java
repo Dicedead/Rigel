@@ -46,6 +46,8 @@ public final class Searcher extends SearchTextField<CelestialObject> {
     private final ObserverLocationBean obsLoc;
     private final DateTimeBean dtBean;
 
+
+
     public Searcher(int cacheCapacity, Predicate<CelestialObject> p, ObservedSky sky,
                     ObserverLocationBean obsLoc, DateTimeBean dtBean) {
         super(2 * cacheCapacity);

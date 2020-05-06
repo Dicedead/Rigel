@@ -1,10 +1,8 @@
 package ch.epfl.rigel.gui.searchtool;
 
 import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
-import ch.epfl.rigel.math.sets.concrete.MathSet;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
 import javafx.geometry.Side;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
@@ -14,7 +12,6 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
-import java.util.HashSet;
 import static ch.epfl.rigel.math.sets.implement.MathSet.emptySet;
 
 /**
@@ -28,6 +25,11 @@ public abstract class SearchTextField<T> extends TextField {
     private final ObjectProperty<AbstractMathSet<T>> results;
     private final ContextMenu entriesGUI;
     private final int numberOfEntry;
+
+    public SearchTextField()
+    {
+        this(15);
+    }
 
     public SearchTextField(final int numberOfEntry) {
         super();
@@ -50,15 +52,22 @@ public abstract class SearchTextField<T> extends TextField {
     }
 
     protected void populate(final AbstractMathSet<String> toPopulate) {
+
         entriesGUI.getItems().clear();
         for (String str : toPopulate) {
-            CustomMenuItem menuItem = new CustomMenuItem(new Label(str), true);
+
+            final Label entry = new Label(str);
+            entry.setGraphic(buildTextFlow(str, getText()));
+
+            CustomMenuItem menuItem = new CustomMenuItem(entry, true);
             menuItem.getContent().setOnMouseClicked(mouse -> clickAction(str));
+
             entriesGUI.getItems().add(menuItem);
         }
 
         if (entriesGUI.getItems().size() - numberOfEntry > 0)
             entriesGUI.getItems().remove(0, entriesGUI.getItems().size() - numberOfEntry);
+    }
 
     abstract AbstractMathSet<String> process(String s);
 
@@ -105,8 +114,8 @@ public abstract class SearchTextField<T> extends TextField {
         final Text textFilter   = new Text(text.substring(filterIndex,  filterIndex + filter.length())); //instead of "filter" to keep all "case sensitive"
 
         textFilter.setFill(Color.ORANGE);
-        textFilter.setFont(Font.font("Helvetica", FontWeight.BOLD, 12));
-
-        return new TextFlow(textBefore, textFilter, textAfter);
+        var res = new TextFlow(textBefore, textFilter, textAfter);
+        res.setPrefHeight(5);
+        return res;
     }
 }

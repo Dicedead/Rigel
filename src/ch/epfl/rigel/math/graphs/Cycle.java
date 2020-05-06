@@ -5,10 +5,6 @@ import ch.epfl.rigel.math.sets.abstraction.AbstractOrderedTuple;
 import ch.epfl.rigel.math.sets.implement.IndexedSet;
 import ch.epfl.rigel.math.sets.implement.MathSet;
 import ch.epfl.rigel.math.sets.implement.OrderedTuple;
-import ch.epfl.rigel.math.sets.abstraction.SetFunction;
-import ch.epfl.rigel.math.sets.concrete.MathSet;
-import ch.epfl.rigel.math.sets.concrete.OrderedTuple;
-
 import java.util.List;
 import java.util.Comparator;
 import java.util.List;
@@ -16,12 +12,11 @@ import java.util.Optional;
 
 public abstract class Cycle<T> extends OrderedTuple<T> implements Graph<T, AbstractOrderedTuple<T>> {
 
-    public Cycle(List<T> collect) {
-        super(collect);
-    }
-
     public Cycle(AbstractOrderedTuple<T> collect) {
+
         super(collect);
+        start = collect.head();
+        end = collect.tail();
     }
 
     private final T start;
