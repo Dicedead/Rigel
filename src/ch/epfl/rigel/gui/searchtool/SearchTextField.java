@@ -4,11 +4,12 @@ import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Side;
-import javafx.scene.control.*;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.CustomMenuItem;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
@@ -22,16 +23,18 @@ import static ch.epfl.rigel.math.sets.implement.MathSet.emptySet;
  */
 public abstract class SearchTextField<T> extends TextField {
 
+    private static final int INITIAL_CACHE_SIZE = 15;
+
     private final ObjectProperty<AbstractMathSet<T>> results;
     private final ContextMenu entriesGUI;
     private final int numberOfEntry;
 
     public SearchTextField()
     {
-        this(15);
+        this(INITIAL_CACHE_SIZE);
     }
 
-    public SearchTextField(final int numberOfEntry) {
+    public SearchTextField(int numberOfEntry) {
         super();
         this.entriesGUI = new ContextMenu();
         this.numberOfEntry = numberOfEntry;
@@ -52,17 +55,13 @@ public abstract class SearchTextField<T> extends TextField {
     }
 
     protected void populate(final AbstractMathSet<String> toPopulate) {
-
         entriesGUI.getItems().clear();
         for (String str : toPopulate) {
-
-            final Label entry = new Label(str);
+            Label entry = new Label();
             entry.setGraphic(buildTextFlow(str, getText()));
+            entry.setOnMouseClicked(mouse -> clickAction(str));
 
-            CustomMenuItem menuItem = new CustomMenuItem(entry, true);
-            menuItem.getContent().setOnMouseClicked(mouse -> clickAction(str));
-
-            entriesGUI.getItems().add(menuItem);
+            entriesGUI.getItems().add(new CustomMenuItem(entry, true));
         }
 
         if (entriesGUI.getItems().size() - numberOfEntry > 0)
@@ -75,10 +74,9 @@ public abstract class SearchTextField<T> extends TextField {
 
     abstract void clickAction(String str);
 
-    public void makeLinks() {
+    private void makeLinks() {
         textProperty().addListener((observable, oldValue, newValue) -> {
-            String enteredText = getText();
-            if (enteredText == null) {
+            if (getText() == null) {
                 entriesGUI.hide();
             } else {
                 populate(process(newValue));
@@ -108,13 +106,13 @@ public abstract class SearchTextField<T> extends TextField {
      */
     public static TextFlow buildTextFlow(String text, String filter) {
 
-        final int filterIndex   = text.toLowerCase().indexOf(filter.toLowerCase());
-        final Text textBefore   = new Text(text.substring(0, filterIndex));
-        final Text textAfter    = new Text(text.substring(filterIndex + filter.length()));
-        final Text textFilter   = new Text(text.substring(filterIndex,  filterIndex + filter.length())); //instead of "filter" to keep all "case sensitive"
+        int filterIndex   = text.toLowerCase().indexOf(filter.toLowerCase());
+        Text textFilter   = new Text(text.substring(filterIndex,  filterIndex + filter.length()));
+        //instead of "filter" to keep all "case sensitive"
 
         textFilter.setFill(Color.ORANGE);
-        var res = new TextFlow(textBefore, textFilter, textAfter);
+        TextFlow res = new TextFlow( //new Text(text.substring(0, filterIndex)),
+                textFilter, new Text(text.substring(filterIndex + filter.length())));
         res.setPrefHeight(5);
         return res;
     }

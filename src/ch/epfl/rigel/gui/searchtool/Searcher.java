@@ -19,7 +19,6 @@ import javafx.beans.property.SimpleObjectProperty;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static ch.epfl.rigel.math.sets.abstraction.AbstractMathSet.unionOf;
@@ -81,7 +80,7 @@ public final class Searcher extends SearchTextField<CelestialObject> {
 
         this.treesOfCharacters = new IndexedSet<>(preDat);
         this.stringToCelest = new IndexedSet<CelestialObject, String>(sky.celestialObjMap().keySet().stream()
-                        .collect(Collectors.toMap(CelestialObject::name, Function.identity(), (v1, v2) -> v1)));
+                .collect(Collectors.toMap(CelestialObject::name, Function.identity(), (v1, v2) -> v1)));
     }
 
     private static int findFirstalpha(String str) {

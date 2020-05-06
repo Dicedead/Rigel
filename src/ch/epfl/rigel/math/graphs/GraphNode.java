@@ -30,7 +30,7 @@ public final class GraphNode<T> {
 
     /**
      * Root Node Constructor: creates a node with no parent node
-     * Node<T> is immutable after applying lockNode() iff T is immutable
+     * GraphNode<T> is immutable after applying lockNode() iff T is immutable
      *
      * @param value (T) value stored in the node
      */

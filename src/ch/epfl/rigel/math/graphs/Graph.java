@@ -64,7 +64,7 @@ public interface Graph<T, V extends AbstractMathSet<T>> {
      * @return the OrderedTuple of points traversed by the choice function
      */
     default AbstractOrderedTuple<T> flow(Comparator<T> chooser, T point) {
-        return flow((V vertices) -> Collections.max(vertices.getData(), chooser), point);
+        return flow((V vertices) -> Collections.max(vertices.getRawData(), chooser), point);
     }
 
     /**

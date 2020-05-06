@@ -25,7 +25,7 @@ public interface AbstractOrderedSet<T> extends AbstractMathSet<T> {
      */
     default AbstractMathSet<T> min()
     {
-        return suchThat(p -> getComparator().partialApply(p).apply(this).getData().equals(Set.of(Relation.COMP.LESS)));
+        return suchThat(p -> getComparator().partialApply(p).apply(this).getRawData().equals(Set.of(Relation.COMP.LESS)));
     }
     /**
      *
@@ -33,7 +33,7 @@ public interface AbstractOrderedSet<T> extends AbstractMathSet<T> {
      */
     default AbstractMathSet<T> max()
     {
-        return suchThat(p -> getComparator().partialApply(p).apply(this).getData().equals(Set.of(Relation.COMP.LESS)));
+        return suchThat(p -> getComparator().partialApply(p).apply(this).getRawData().equals(Set.of(Relation.COMP.LESS)));
     }
 
     /**

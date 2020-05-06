@@ -43,11 +43,11 @@ public interface AbstractMathSet<T> extends Iterable<T> {
     }
 
     default boolean contains(T t) {
-        return getData().contains(t);
+        return getRawData().contains(t);
     }
 
     default boolean containsSet(AbstractMathSet<T> other) {
-        return getData().containsAll(other.getData());
+        return getRawData().containsAll(other.getRawData());
     }
 
     /**
@@ -79,7 +79,9 @@ public interface AbstractMathSet<T> extends Iterable<T> {
     /**
      * @return the data wrapped by the set in its raw form
      */
-    Set<T> getData();
+    Collection<T> getRawData();
+
+    Set<T> getSetData();
 
     /**
      * @return an element from the current set
@@ -243,14 +245,14 @@ public interface AbstractMathSet<T> extends Iterable<T> {
      * @return the size of the current set
      */
     default int cardinality() {
-        return getData().size();
+        return getRawData().size();
     }
 
     /**
      * @return wether the set contains at least one element or not
      */
     default boolean isEmpty() {
-        return getData().size() == 0;
+        return getRawData().size() == 0;
     }
 
     /**
@@ -273,14 +275,14 @@ public interface AbstractMathSet<T> extends Iterable<T> {
      * @return allows to traverse the set as a stream
      */
     default Stream<T> stream() {
-        return getData().stream();
+        return getRawData().stream();
     }
 
     /**
      * @return a stream capable of beeing parallelised
      */
     default Stream<T> parallelStream() {
-        return getData().parallelStream();
+        return getRawData().parallelStream();
     }
 
     /**
@@ -291,7 +293,7 @@ public interface AbstractMathSet<T> extends Iterable<T> {
      * @return A sett containing all elements from each sets
      */
     static <T> AbstractMathSet<T> unionOf(AbstractMathSet<AbstractMathSet<T>> sets) {
-        return sets.getElement().orElse(MathSet.emptySet()).union(sets.getData());
+        return sets.getElement().orElse(MathSet.emptySet()).union(sets.getRawData());
     }
 
     /**
@@ -314,7 +316,7 @@ public interface AbstractMathSet<T> extends Iterable<T> {
 
     @Override
     default Iterator<T> iterator() {
-        return getData().iterator();
+        return getRawData().iterator();
     }
 
     @Override
@@ -324,7 +326,7 @@ public interface AbstractMathSet<T> extends Iterable<T> {
 
     @Override
     default Spliterator<T> spliterator() {
-        return getData().spliterator();
+        return getRawData().spliterator();
     }
 
 }

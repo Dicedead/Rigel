@@ -2,13 +2,9 @@ package ch.epfl.rigel.math.sets.abstraction;
 
 import ch.epfl.rigel.math.sets.properties.Relation;
 
-import java.util.Iterator;
 import java.util.List;
-import java.util.Spliterator;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 /**
  * @author Alexandre Sallinen (303162)
@@ -21,7 +17,7 @@ public interface AbstractOrderedTuple<T> extends AbstractIndexedSet<T, Integer>,
     }
 
     static <X> List<X> createList(AbstractOrderedTuple<X> orderedTuple) {
-        return IntStream.range(0, orderedTuple.getData().size())
+        return IntStream.range(0, orderedTuple.getRawData().size())
                 .mapToObj(orderedTuple::at)
                 .collect(Collectors.toList());
     }

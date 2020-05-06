@@ -50,12 +50,12 @@ public class TreeTest {
     @Test
     void flowTest() {
         AbstractOrderedTuple<GraphNode<Integer>> set = intTree.flow(Comparator.comparingInt(GraphNode::getValue),root);
-        assertEquals(Set.of(0,2,4), set.image(GraphNode::getValue).getData());
+        assertEquals(Set.of(0,2,4), set.image(GraphNode::getValue).getRawData());
     }
 
     @Test
     void rootHasMinimalDepth() {
-        assertEquals(root, Collections.min(intTree.getData(), Comparator.comparingInt(GraphNode::getDepth)));
+        assertEquals(root, Collections.min(intTree.getRawData(), Comparator.comparingInt(GraphNode::getDepth)));
     }
 
     @Test

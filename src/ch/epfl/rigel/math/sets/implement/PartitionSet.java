@@ -20,7 +20,7 @@ public final class PartitionSet<T> extends MathSet<T> implements AbstractPartiti
      * @param data the underlying data
      */
     public PartitionSet(Collection<AbstractMathSet<T>> data) {
-        super(AbstractMathSet.unionOf(data).getData());
+        super(AbstractMathSet.unionOf(data).getRawData());
         components = new IndexedSet<>(data, elem -> data.stream().filter(subset -> subset.contains(elem)).findFirst().orElseThrow());
     }
 
@@ -29,7 +29,7 @@ public final class PartitionSet<T> extends MathSet<T> implements AbstractPartiti
      * @param t the underlying data
      */
     public PartitionSet(IndexedSet<AbstractMathSet<T>, T> t) {
-        super(AbstractMathSet.unionOf(t.getData()));
+        super(AbstractMathSet.unionOf(t.getRawData()));
         components = t;
     }
 
@@ -39,7 +39,7 @@ public final class PartitionSet<T> extends MathSet<T> implements AbstractPartiti
      * @param areInRelation the equivalence relation used to partition the set
      */
     public PartitionSet(AbstractMathSet<T> data, Relation.Equivalence<T> areInRelation) {
-        this(data.image( (T elem1) -> areInRelation.partialApply(elem1).preImageOf(true).solveIn(data)).getData());
+        this(data.image( (T elem1) -> areInRelation.partialApply(elem1).preImageOf(true).solveIn(data)).getRawData());
     }
 
     /**

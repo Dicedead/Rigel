@@ -1,7 +1,6 @@
 package ch.epfl.rigel.math.sets.implement;
 
 import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
-import ch.epfl.rigel.math.sets.properties.SetFunction;
 
 import java.util.*;
 import java.util.function.*;
@@ -14,21 +13,13 @@ import java.util.stream.Stream;
  */
 public class MathSet<T> implements AbstractMathSet<T> {
 
-    private final Set<T> data;
+    private final Collection<T> data;
 
     /**
      * Constructor from collection
      * @param t the data to copy
      */
     public MathSet(Collection<T> t) {
-        data = Set.copyOf(t);
-    }
-
-    /**
-     * Constructor from collection
-     * @param t the data to copy
-     */
-    public MathSet(Set<T> t) {
         data = t;
     }
 
@@ -37,7 +28,7 @@ public class MathSet<T> implements AbstractMathSet<T> {
      * @param t the MathSet to copy
      */
     public MathSet(AbstractMathSet<T> t) {
-        data = t.getData();
+        this(t.getRawData());
     }
 
     /**
@@ -58,7 +49,7 @@ public class MathSet<T> implements AbstractMathSet<T> {
     @Override
     public final AbstractMathSet<AbstractMathSet<T>> powerSet()
     {
-        return AbstractMathSet.powerSet(this.getData()).stream().map(MathSet::new).collect(toMathSet());
+        return AbstractMathSet.powerSet(this.getRawData()).stream().map(MathSet::new).collect(toMathSet());
     }
 
     /**
@@ -69,7 +60,7 @@ public class MathSet<T> implements AbstractMathSet<T> {
      */
     @Override
     public final AbstractMathSet<T> union(Collection<AbstractMathSet<T>> others) {
-        return Stream.concat(this.stream(), others.stream().flatMap(s -> s.getData().stream())).collect(toMathSet());
+        return Stream.concat(this.stream(), others.stream().flatMap(s -> s.getRawData().stream())).collect(toMathSet());
     }
 
     /**
@@ -79,7 +70,7 @@ public class MathSet<T> implements AbstractMathSet<T> {
      * @return (AbstractMathSet<T>)
      */
     public final AbstractMathSet<T> plus(T elem) {
-        Collection<T> newData = getData();
+        Collection<T> newData = getRawData();
         newData.add(elem);
         return new MathSet<>(newData);
     }
@@ -99,8 +90,19 @@ public class MathSet<T> implements AbstractMathSet<T> {
      * @return the data wrapped by the set in its raw form
      */
     @Override
-    public final Set<T> getData() {
+    public final Collection<T> getRawData() {
         return data;
+    }
+
+    /**
+     * This Set view is less useful than one would think, hence the O(n) call rather than an immediate O(n) conversion
+     * in constructor. This getter is O(1) if the data is indeed a Set though.
+     *
+     * @return the data wrapped by the set in its set form
+     */
+    @Override
+    public Set<T> getSetData() {
+        return (data instanceof Set) ? (Set<T>) data : Set.copyOf(data);
     }
 
     /**

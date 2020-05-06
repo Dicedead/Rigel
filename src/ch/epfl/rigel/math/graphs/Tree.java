@@ -201,7 +201,7 @@ public final class Tree<V> extends PointedSet<GraphNode<V>> implements Graph<Gra
      * @return (PartitionSet<GraphNode<V>>)
      */
     public PartitionSet<GraphNode<V>> partition() {
-        return new PartitionSet<>(new MathSet<>(getData()), GraphNode::areRelatedRootless);
+        return new PartitionSet<>(new MathSet<>(getRawData()), GraphNode::areRelatedRootless);
     }
 
     @Override

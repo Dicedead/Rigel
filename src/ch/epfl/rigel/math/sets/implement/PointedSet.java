@@ -30,7 +30,7 @@ public abstract class PointedSet<T> extends MathSet<T> {
      * @param special the element to remember
      */
     public PointedSet(AbstractMathSet<T> t, T special) {
-        super(t.getData());
+        super(t.getRawData());
         this.special = special;
     }
 
@@ -40,7 +40,7 @@ public abstract class PointedSet<T> extends MathSet<T> {
      * @param t the special element
      */
     public PointedSet(PointedSet<T> t) {
-        super(t.getData());
+        super(t.getRawData());
         this.special = t.special;
     }
 

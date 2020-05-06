@@ -21,12 +21,12 @@ public class MathSetTest {
 
     @Test
     void unionTest() {
-        assertEquals(Set.of(2,3,4,5,6), set1.union(set2).getData());
+        assertEquals(Set.of(2,3,4,5,6), set1.union(set2).getRawData());
     }
 
     @Test
     void intersectionTest() {
-        assertEquals(Set.of(4), set1.intersection(set2).getData());
+        assertEquals(Set.of(4), set1.intersection(set2).getRawData());
     }
 
     @Test
