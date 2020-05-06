@@ -36,7 +36,6 @@ public final class Searcher extends SearchTextField<CelestialObject> {
     private final WeakHashMap<String, CelestialObject> resultCache;
     private final AbstractMathSet<String> data;
     private final int cacheCapacity;
-    private final ObjectProperty<Predicate<CelestialObject>> filter;
     private final IndexedSet<Tree<Character>, Character> treesOfCharacters;
     private final Set<Character> availableChars;
     private final IndexedSet<CelestialObject, String> stringToCelest;
@@ -46,10 +45,7 @@ public final class Searcher extends SearchTextField<CelestialObject> {
     private final ObserverLocationBean obsLoc;
     private final DateTimeBean dtBean;
 
-
-
-    public Searcher(int cacheCapacity, Predicate<CelestialObject> p, ObservedSky sky,
-                    ObserverLocationBean obsLoc, DateTimeBean dtBean) {
+    public Searcher(int cacheCapacity, ObservedSky sky, ObserverLocationBean obsLoc, DateTimeBean dtBean) {
         super(2 * cacheCapacity);
 
         this.lastSelectedCenter = new SimpleObjectProperty<>();
@@ -67,8 +63,6 @@ public final class Searcher extends SearchTextField<CelestialObject> {
         this.resultCache = new WeakHashMap<>(cacheCapacity);
 
         this.cacheCapacity = cacheCapacity;
-
-        this.filter = new SimpleObjectProperty<>(p);
 
         this.availableChars = new HashSet<>();
 
@@ -153,11 +147,10 @@ public final class Searcher extends SearchTextField<CelestialObject> {
     AbstractMathSet<CelestialObject> handleReturn(String str) {
         if (treesOfCharacters.isEmpty()) {
             prepareCache(MathSet.of(str));
-            return MathSet.of(stringToCelest.at(str)).suchThat(filter.get());
+            return MathSet.of(stringToCelest.at(str));
         } else {
             return potentialSolutions(treesOfCharacters.at(str.charAt(findFirstalpha(str))))
-                    .image(stringToCelest::at)
-                    .suchThat(filter.get());
+                    .image(stringToCelest::at);
         }
     }
 
@@ -175,17 +168,5 @@ public final class Searcher extends SearchTextField<CelestialObject> {
 
     public ObjectProperty<HorizontalCoordinates> lastSelectedCenterProperty() {
         return lastSelectedCenter;
-    }
-
-    public Predicate<CelestialObject> getFilter() {
-        return filter.get();
-    }
-
-    public ObjectProperty<Predicate<CelestialObject>> filterProperty() {
-        return filter;
-    }
-
-    public void setFilter(Predicate<CelestialObject> filter) {
-        this.filter.set(filter);
     }
 }

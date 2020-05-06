@@ -9,6 +9,7 @@ package ch.epfl.rigel.coordinates;
  */
 public final class CartesianCoordinates {
 
+    public static final CartesianCoordinates ORIGIN = CartesianCoordinates.of(0,0);
     private final double x, y;
 
     private CartesianCoordinates(double x, double y) {

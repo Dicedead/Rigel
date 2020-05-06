@@ -26,7 +26,6 @@ import javafx.scene.input.MouseButton;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -64,7 +63,7 @@ public final class SkyCanvasManager {
     private final ObjectBinding<Optional<CelestialObject>> objectUnderMouse;
     private final DoubleBinding mouseAzDeg;
     private final DoubleBinding mouseAltDeg;
-    private final ObjectProperty<CartesianCoordinates> mousePosition = new SimpleObjectProperty<>();
+    private final ObjectProperty<CartesianCoordinates> mousePosition;
 
     //BONUS CONTENT
     private final BooleanProperty extendedAltitudeIsOn = new SimpleBooleanProperty(false);
@@ -83,7 +82,6 @@ public final class SkyCanvasManager {
     //objectsToDraw is not a collection of observables but rather one observable that happened to be a set of immutable
     //objects, it thus made sense for us not to use ObservableSet
     private final ObjectBinding<Set<Class<?>>> drawableClasses;
-    private final ObjectBinding<Predicate<CelestialObject>> drawableContains;
 
     /**
      * SkyCanvasManager constructor
@@ -104,6 +102,8 @@ public final class SkyCanvasManager {
         canvas = new Canvas(1,1); //avoids some ugliness down in planeToCanvas and its inverse
         painter = new SkyCanvasPainter(canvas);
 
+        mousePosition = new SimpleObjectProperty<>(CartesianCoordinates.ORIGIN);
+
         projection = Bindings.createObjectBinding(
                 () -> new StereographicProjection(viewBean.getCenter()),
                 viewBean.centerProperty());
@@ -116,13 +116,8 @@ public final class SkyCanvasManager {
                 () -> objectsToDraw.get().stream().map(DrawableObjects::getCorrespondingClass).collect(Collectors.toSet()),
                 objectsToDraw);
 
-        drawableContains = Bindings.createObjectBinding(
-                () -> celest -> drawableClasses.get().contains(celest.getClass()), drawableClasses);
+        searcher = new Searcher(catalogue.stars().size() + 10, observedSky.get(), obsLocBean, dtBean);
 
-        searcher = new Searcher(catalogue.stars().size() + 10, drawableContains.get(),
-                observedSky.get(), obsLocBean, dtBean);
-
-        searcher.filterProperty().bind(drawableContains);
         searcher.lastSelectedCenterProperty().bindBidirectional(viewBean.centerProperty());
 
         planeToCanvas = Bindings.createObjectBinding(
@@ -138,8 +133,7 @@ public final class SkyCanvasManager {
 
         //TAKING CARE OF MOUSE'S POSITION AND USER INTERACTION
         mouseHorizontalPosition = Bindings.createObjectBinding(
-                () -> mousePosition.get() != null ?
-                projection.get().inverseApply(canvasToPlane.get().apply(mousePosition.get())) : null,
+                () -> projection.get().inverseApply(mousePosition.get()),
                 projection, canvasToPlane, mousePosition);
 
         mouseAzDeg = Bindings.createDoubleBinding(() -> mouseHorizontalPosition.get().azDeg(), mouseHorizontalPosition);
@@ -152,15 +146,16 @@ public final class SkyCanvasManager {
 
         objectUnderMouse = Bindings.createObjectBinding(
                 () -> {
-                if(mousePosition.get() == null) return Optional.empty();
+                if(mousePosition.get() == CartesianCoordinates.ORIGIN) return Optional.empty();
                 Optional<CelestialObject> celest = observedSky.get().objectClosestTo(mousePosition.get(), maxDistConverted.get());
                 if (celest.isEmpty()) return Optional.empty();
                 return drawableClasses.get().contains(celest.get().getClass()) ? celest : Optional.empty(); },
                 observedSky, mousePosition, maxDistConverted, drawableClasses);
-        /* Adding the class filter as a parameter to ObservedSky.objectClosestTo almost breaks the MVC design pattern
-           and actually slows down the execution. */
 
         canvas.setOnMouseMoved(mouse -> mousePosition.set(canvasToPlane.get().apply(mouse.getX(), mouse.getY())));
+        /* We've chosen to convert the mousePosition to the plane's referential (unlike suggested) to avoid having to
+           convert it
+         */
 
         canvas.setOnMousePressed(mouse -> {
             if (mouse.isPrimaryButtonDown() || mouse.getButton() == MouseButton.MIDDLE) {
