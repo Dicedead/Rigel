@@ -2,12 +2,15 @@ package ch.epfl.rigel.gui;
 
 import ch.epfl.rigel.astronomy.CelestialObject;
 import ch.epfl.rigel.astronomy.CelestialObjectModel;
+import ch.epfl.rigel.astronomy.Moon;
+import ch.epfl.rigel.astronomy.MoonModel;
 import ch.epfl.rigel.astronomy.ObservedSky;
 import ch.epfl.rigel.astronomy.Planet;
 import ch.epfl.rigel.astronomy.PlanetModel;
 import ch.epfl.rigel.astronomy.Star;
 import ch.epfl.rigel.astronomy.StarCatalogue;
-import ch.epfl.rigel.astronomy.predict.Orbit;
+import ch.epfl.rigel.astronomy.Orbit;
+import ch.epfl.rigel.astronomy.SunModel;
 import ch.epfl.rigel.coordinates.CartesianCoordinates;
 import ch.epfl.rigel.coordinates.EclipticToEquatorialConversion;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
@@ -21,9 +24,11 @@ import javafx.beans.binding.DoubleBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.canvas.Canvas;
@@ -49,6 +54,7 @@ public final class SkyCanvasManager {
     private static final double AZ_STEP = Angle.ofDeg(10);
     private static final ClosedInterval FOV_INTERVAL = ClosedInterval.of(30, 150);
     private static final double ROTATE_STEP = Angle.ofDeg(10);
+    private static final int ORBIT_SIMULATION_DAYS_DEFAULT = 1400;
 
     private final StarCatalogue catalogue;
     private final DateTimeBean dtBean;
@@ -72,7 +78,7 @@ public final class SkyCanvasManager {
     private final ObjectProperty<CartesianCoordinates> mousePosition;
 
     //BONUS CONTENT
-    private final BooleanProperty extendedAltitudeIsOn = new SimpleBooleanProperty(false);
+    private final BooleanProperty extendedAltitudeIsOn = new SimpleBooleanProperty(true);
 
     private final DoubleProperty mouseXstartOfDrag = new SimpleDoubleProperty();
     private final DoubleProperty mouseYstartOfDrag = new SimpleDoubleProperty();
@@ -88,6 +94,11 @@ public final class SkyCanvasManager {
     //objectsToDraw is not a collection of observables but rather one observable that happened to be a set of immutable
     //objects, it thus made sense for us not to use ObservableSet
     private final ObjectBinding<Set<Class<?>>> drawableClasses;
+
+    private final IntegerProperty resolutionInHours = new SimpleIntegerProperty(5);
+    private final IntegerProperty drawOrbitUntil = new SimpleIntegerProperty(ORBIT_SIMULATION_DAYS_DEFAULT);
+    private final IntegerProperty orbitDrawingStep = new SimpleIntegerProperty(5);
+    private final ObjectProperty<Orbit<? extends CelestialObject>> orbitProperty = new SimpleObjectProperty<>();
 
     /**
      * SkyCanvasManager constructor
@@ -161,8 +172,7 @@ public final class SkyCanvasManager {
 
         canvas.setOnMouseMoved(mouse -> mousePosition.set(canvasToPlane.get().apply(mouse.getX(), mouse.getY())));
         /* We've chosen to convert the mousePosition to the plane's referential (unlike suggested) to avoid having to
-           convert it
-         */
+           convert it later. */
 
         canvas.setOnMousePressed(mouse -> {
             //pour rendu 11: add: if (mouse.isPrimaryButtonDown() || mouse.getButton() == MouseButton.MIDDLE)
@@ -171,10 +181,16 @@ public final class SkyCanvasManager {
             mouseYstartOfDrag.set(mouse.getY());
 
             if (mouse.isSecondaryButtonDown()) {
+                Class<? extends CelestialObject> celestClass;
                 if (objectUnderMouse.get().isPresent() &&
-                       objectUnderMouse.get().get().getClass().equals(Planet.class)) {
-                    painter.drawOrbit(new Orbit<>(400, 40, PlanetModel.VENUS, new EclipticToEquatorialConversion(
-                            dtBean.getZonedDateTime())), observedSky.get(), planeToCanvas.get(), 400);
+                       !(celestClass = objectUnderMouse.get().get().getClass()).equals(Star.class)) {
+
+                    orbitProperty.set(new Orbit<>(dtBean.getZonedDateTime(),
+                            resolutionInHours.get(),
+                            ORBIT_SIMULATION_DAYS_DEFAULT, getModel(celestClass),
+                            new EclipticToEquatorialConversion(dtBean.getZonedDateTime())));
+                } else {
+                    orbitProperty.set(null);
                 }
             }
         });
@@ -226,11 +242,13 @@ public final class SkyCanvasManager {
 
         //ADDING LISTENERS TO REDRAW SKY
         ChangeListener<Object> painterEvent =
-                (p, o, n) -> painter.drawMain(observedSky.get(), planeToCanvas.get(), projection.get(), objectsToDraw.get());
+                (p, o, n) -> painter.drawMain(observedSky.get(), planeToCanvas.get(), projection.get(), objectsToDraw.get(),
+                        orbitProperty.get(), drawOrbitUntil.get(),orbitDrawingStep.get());
 
         observedSky.addListener(painterEvent);
         planeToCanvas.addListener(painterEvent);
         objectsToDraw.addListener(painterEvent);
+        orbitProperty.addListener(painterEvent);
     }
 
     /**
@@ -400,5 +418,15 @@ public final class SkyCanvasManager {
 
     private void modifyRotation(double deltaRad) {
         rotation.set(rotation.get() + deltaRad);
+    }
+
+    private <E extends CelestialObject> CelestialObjectModel<E> getModel(Class<E> celestClass) {
+        if (celestClass.equals(Planet.class)) {
+            return (CelestialObjectModel<E>) PlanetModel.getPlanetModelFromString(objectUnderMouse.get().get().name());
+        } else if (celestClass.equals(Moon.class)) {
+            return (CelestialObjectModel<E>) MoonModel.MOON;
+        } else {
+            return (CelestialObjectModel<E>) SunModel.SUN;
+        }
     }
 }

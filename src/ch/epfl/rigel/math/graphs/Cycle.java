@@ -2,18 +2,17 @@ package ch.epfl.rigel.math.graphs;
 
 import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
 import ch.epfl.rigel.math.sets.abstraction.AbstractOrderedTuple;
-import ch.epfl.rigel.math.sets.implement.IndexedSet;
 import ch.epfl.rigel.math.sets.implement.MathSet;
 import ch.epfl.rigel.math.sets.implement.OrderedTuple;
-import java.util.List;
-import java.util.Comparator;
+import ch.epfl.rigel.math.sets.properties.SetFunction;
+
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 public abstract class Cycle<T> extends OrderedTuple<T> implements Graph<T, AbstractOrderedTuple<T>> {
 
     public Cycle(AbstractOrderedTuple<T> collect) {
-
         super(collect);
         start = collect.head();
         end = collect.tail();
@@ -36,7 +35,7 @@ public abstract class Cycle<T> extends OrderedTuple<T> implements Graph<T, Abstr
      * Gets the set of points linked to given point
      *
      * @param point (T) given point
-     * @return (Set < T >) said set
+     * @return (Set<T>) said set
      */
     @Override
     public Optional<AbstractOrderedTuple<T>> getNeighbours(T point) {
@@ -47,7 +46,7 @@ public abstract class Cycle<T> extends OrderedTuple<T> implements Graph<T, Abstr
      * Creates a graph ON given set of vertices
      *
      * @param points (Set<T>)
-     * @return (Graph < T, U >) some implementation of Graph<T,U>
+     * @return (Graph <T, U>) some implementation of Graph<T,U>
      */
     @Override
     public Graph<T, ? extends AbstractMathSet<T>> on(AbstractMathSet<T> points) {
@@ -71,6 +70,19 @@ public abstract class Cycle<T> extends OrderedTuple<T> implements Graph<T, Abstr
     @Override
     public AbstractMathSet<Graph<T, AbstractOrderedTuple<T>>> connectedComponents() {
         return MathSet.of(this);
+    }
+
+    @Override
+    public AbstractOrderedTuple<T> flow(SetFunction<AbstractOrderedTuple<T>, T> chooser, T point) {
+        return flow(indexOf(point));
+    }
+
+    public AbstractOrderedTuple<T> flow(T point) {
+        return flow(indexOf(point));
+    }
+
+    public AbstractOrderedTuple<T> flow(int index) {
+        return new OrderedTuple<>(toList().subList(0, index % cardinality()));
     }
 
     public T getStart() {

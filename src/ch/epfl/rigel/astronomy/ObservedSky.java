@@ -100,19 +100,13 @@ public final class ObservedSky {
      */
     public Optional<CelestialObject> objectClosestTo(CartesianCoordinates point, double maxDistance) {
         return celestObjToCoordsMap.keySet().parallelStream().min((celestObj1, celestObj2) -> CLOSEST_TO_C.apply(point)
-                .apply(celestObjToCoordsMap.get(celestObj1), celestObjToCoordsMap.get(celestObj2))) //(*)
-                .filter(celestObj -> euclideanDistance(celestObjToCoordsMap.get(celestObj), point) <= maxDistance); //(**)
+                .apply(celestObjToCoordsMap.get(celestObj1), celestObjToCoordsMap.get(celestObj2)))
+                .filter(celestObj -> euclideanDistance(celestObjToCoordsMap.get(celestObj), point) <= maxDistance);
         /*
-        Constructing celestObjToCoordsMap beforehand allows this method to run in linear time, and although it causes
-        spatial complexity, finding the minimum of each map then comparing them all proved to be a lot slower (5 times).
-        (*) is a linear scan, comparing keySet's elements by their distance (squared) to the target, and (**) checks
-        whether the closest object found (ie the 'minimum') is within a maxDistance radius of the target.
-        Applying a first approximate filter to the celestial objects before running the linear scan has also proven to
-        be slower, for a parallel stream.
-
         parallelStream proved to greatly shorten the execution time on testing (at least 33%),
         making the map worthwhile when compared to 2 identically ordered lists, especially after
         the initial expensive threads' initialisation.
+        Also upon testing: applying a first approximate filter slows down the execution a great deal.
          */
     }
 
@@ -209,8 +203,6 @@ public final class ObservedSky {
                 .map(f)
                 .collect(Collectors.toMap(Function.identity(),
                         celestObj -> stereoProj.apply(eqToHor.apply(celestObj.equatorialPos())), (u, v) -> v, HashMap::new)));
-        //In our uses, f is either the identity -when data already contains CelestialObjects of type S-
-        //or applyModel via method reference    -when data contains CelestialObjectModels<S>.
     }
 
     /**

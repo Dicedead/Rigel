@@ -98,4 +98,18 @@ public enum PlanetModel implements CelestialObjectModel<Planet> {
                 (float) (theta0 / rho),
                 (float) (V0 + 5 * Math.log10(distanceToSun * rho / Math.sqrt((1 + Math.cos(lambda - helioLon)) / 2))));
     }
+
+    /**
+     * @param s (String)
+     * @return (PlanetModel) the planetModel such that its name equals given string
+     * @throws IllegalArgumentException if given string is not a planet's name
+     */
+    public static PlanetModel getPlanetModelFromString(String s) {
+        for(PlanetModel planetModel : PlanetModel.values()) {
+            if (planetModel.name.equals(s)) {
+                return planetModel;
+            }
+        }
+        throw new IllegalArgumentException("Fatal error (PlanetModel): Given string is not a Planet's name.");
+    }
 }

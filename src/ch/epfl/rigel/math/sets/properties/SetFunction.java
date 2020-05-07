@@ -12,6 +12,7 @@ import static ch.epfl.rigel.math.sets.implement.MathSet.toMathSet;
  * @author Salim Najib (310003)
  */
 public interface SetFunction<T, U> extends Function<T, U> {
+
     /**
      * @param u the codomain set
      * @return An equation locating all elements that will be mapped in u by this function

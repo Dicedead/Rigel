@@ -1,7 +1,7 @@
 package ch.epfl.rigel.gui;
 
 import ch.epfl.rigel.astronomy.*;
-import ch.epfl.rigel.astronomy.predict.Orbit;
+import ch.epfl.rigel.astronomy.Orbit;
 import ch.epfl.rigel.coordinates.CartesianCoordinates;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.coordinates.StereographicProjection;
@@ -16,7 +16,6 @@ import javafx.scene.text.TextAlignment;
 
 import java.util.EnumSet;
 import java.util.Map;
-import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -72,8 +71,11 @@ public final class SkyCanvasPainter {
      *                      objects
      */
     public void drawMain(ObservedSky sky, PlanarTransformation transform, StereographicProjection proj,
-                         EnumSet<DrawableObjects> objectsToDraw) {
+                         EnumSet<DrawableObjects> objectsToDraw, Orbit<? extends CelestialObject> orbit,
+                         int orbitUntil, int orbitStep) {
         clear();
+        if(orbit != null) drawOrbit(orbit, sky, transform, orbitUntil, orbitStep);
+
         for(DrawableObjects toDraw : objectsToDraw)
             switch (toDraw) {
                 case ASTERISMS: drawAsterisms(sky, transform); break;
@@ -86,8 +88,9 @@ public final class SkyCanvasPainter {
             }
     }
 
-    public void drawOrbit(Orbit<? extends CelestialObject> orbit, ObservedSky sky, PlanarTransformation transform, int step) {
-        pipeline(sky.mapObjectToPosition(orbit.representatives(step).toList(), Function.identity()).entrySet().stream(),
+    public void drawOrbit(Orbit<? extends CelestialObject> orbit, ObservedSky sky, PlanarTransformation transform,
+                          int until, int step) {
+        pipeline(sky.mapObjectToPosition(orbit.representatives(until, step), Function.identity()).entrySet().stream(),
                 celest -> ORBIT_CIRCLE_SIZE, celest -> ORBIT_COLOR, transform);
     }
 

@@ -242,14 +242,14 @@ public interface AbstractMathSet<T> extends Iterable<T> {
 
 
     /**
-     * @return the size of the current set
+     * @return cardinality of the underlying raw collection
      */
     default int cardinality() {
         return getRawData().size();
     }
 
     /**
-     * @return wether the set contains at least one element or not
+     * @return whether the set contains at least one element or not
      */
     default boolean isEmpty() {
         return getRawData().size() == 0;

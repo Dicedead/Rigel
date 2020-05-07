@@ -77,7 +77,7 @@ public interface Graph<T, V extends AbstractMathSet<T>> {
     default AbstractOrderedTuple<T> flow(SetFunction<V, T> chooser, T point) {
         if (getNeighbours(point).isEmpty())
             return new OrderedTuple<>(point);
-        final List<T> flowList = flow(chooser, chooser.apply(getNeighbours(point).get())).toList();
+        List<T> flowList = flow(chooser, chooser.apply(getNeighbours(point).get())).toList();
         flowList.add(point);
         Collections.reverse(flowList);
         return new OrderedTuple<>(flowList);
