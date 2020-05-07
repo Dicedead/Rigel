@@ -1,6 +1,7 @@
 package ch.epfl.rigel.gui;
 
 import ch.epfl.rigel.astronomy.*;
+import ch.epfl.rigel.astronomy.predict.Orbit;
 import ch.epfl.rigel.coordinates.CartesianCoordinates;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.coordinates.StereographicProjection;
@@ -31,6 +32,8 @@ import static ch.epfl.rigel.math.Angle.ofDeg;
 public final class SkyCanvasPainter {
 
     private static final double CELEST_SIZE_COEFF = applyToAngle(ofDeg(0.5)) / 140;
+    private static final double ORBIT_CIRCLE_SIZE = 3e-3;
+    private static final Color ORBIT_COLOR = Color.CADETBLUE;
     private static final ClosedInterval CLIP_INTERVAL = ClosedInterval.of(-2, 5);
     private static final Color YELLOW_HALO = Color.YELLOW.deriveColor(1, 1, 1, 0.25);
     private static final HorizontalCoordinates PARALLEL = HorizontalCoordinates.ofDeg(0, 0);
@@ -68,8 +71,8 @@ public final class SkyCanvasPainter {
      * @param objectsToDraw (EnumSet<DrawableObjects>) possible filters - taking advantage of EnumSet's inner order of
      *                      objects
      */
-    public void draw(ObservedSky sky, PlanarTransformation transform, StereographicProjection proj,
-                     EnumSet<DrawableObjects> objectsToDraw) {
+    public void drawMain(ObservedSky sky, PlanarTransformation transform, StereographicProjection proj,
+                         EnumSet<DrawableObjects> objectsToDraw) {
         clear();
         for(DrawableObjects toDraw : objectsToDraw)
             switch (toDraw) {
@@ -81,6 +84,11 @@ public final class SkyCanvasPainter {
                 case HORIZON: drawHorizon(proj, transform); break;
                 default: throw new IllegalStateException("SkyCanvasPainter: unknown drawable object type given.");
             }
+    }
+
+    public void drawOrbit(Orbit<? extends CelestialObject> orbit, ObservedSky sky, PlanarTransformation transform, int step) {
+        pipeline(sky.mapObjectToPosition(orbit.representatives(step).toList(), Function.identity()).entrySet().stream(),
+                celest -> ORBIT_CIRCLE_SIZE, celest -> ORBIT_COLOR, transform);
     }
 
     /**

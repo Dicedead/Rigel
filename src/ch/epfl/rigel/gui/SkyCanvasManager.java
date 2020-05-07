@@ -1,9 +1,15 @@
 package ch.epfl.rigel.gui;
 
 import ch.epfl.rigel.astronomy.CelestialObject;
+import ch.epfl.rigel.astronomy.CelestialObjectModel;
 import ch.epfl.rigel.astronomy.ObservedSky;
+import ch.epfl.rigel.astronomy.Planet;
+import ch.epfl.rigel.astronomy.PlanetModel;
+import ch.epfl.rigel.astronomy.Star;
 import ch.epfl.rigel.astronomy.StarCatalogue;
+import ch.epfl.rigel.astronomy.predict.Orbit;
 import ch.epfl.rigel.coordinates.CartesianCoordinates;
+import ch.epfl.rigel.coordinates.EclipticToEquatorialConversion;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.coordinates.PlanarTransformation;
 import ch.epfl.rigel.coordinates.StereographicProjection;
@@ -37,8 +43,8 @@ import java.util.stream.Collectors;
 public final class SkyCanvasManager {
 
     private static final int MAX_CANVAS_DISTANCE = 10;
-    private static final ClosedInterval NORMAL_ALT_INTERVAL = ClosedInterval.of(Angle.ofDeg(5), Math.PI/2);
-    private static final ClosedInterval EXTENDED_ALT_INTERVAL = ClosedInterval.of(-Math.PI/2, Math.PI/2);
+    private static final ClosedInterval NORMAL_ALT_INTERVAL = ClosedInterval.of(Angle.ofDeg(5), Math.PI / 2);
+    private static final ClosedInterval EXTENDED_ALT_INTERVAL = ClosedInterval.of(-Math.PI / 2, Math.PI / 2);
     private static final double ALT_STEP = Angle.ofDeg(5);
     private static final double AZ_STEP = Angle.ofDeg(10);
     private static final ClosedInterval FOV_INTERVAL = ClosedInterval.of(30, 150);
@@ -70,10 +76,10 @@ public final class SkyCanvasManager {
 
     private final DoubleProperty mouseXstartOfDrag = new SimpleDoubleProperty();
     private final DoubleProperty mouseYstartOfDrag = new SimpleDoubleProperty();
-    private final DoubleProperty mouseDragSensitivity = new SimpleDoubleProperty(1/2e4);
+    private final DoubleProperty mouseDragSensitivity = new SimpleDoubleProperty(1 / 2e4);
     private final DoubleProperty mouseScrollSensitivity = new SimpleDoubleProperty(0.75);
     //suggested interval is [1/4e4; 4/1e4]
-    private static final double ROTATION_ATTENUATION = 1/10d;
+    private static final double ROTATION_ATTENUATION = 1 / 10d;
 
     private final DoubleProperty rotation = new SimpleDoubleProperty(0);
 
@@ -86,20 +92,20 @@ public final class SkyCanvasManager {
     /**
      * SkyCanvasManager constructor
      *
-     * @param catalogue (StarCatalogue) set of stars and asterisms
-     * @param dtBean (DateTimeBean) bean representing a mutable ZonedDateTime object
+     * @param catalogue  (StarCatalogue) set of stars and asterisms
+     * @param dtBean     (DateTimeBean) bean representing a mutable ZonedDateTime object
      * @param obsLocBean (ObserverLocationBean) bean representing a mutable GeographicCoordinates object
-     * @param viewBean (ViewingParametersBean) bean comprised of an fov parameter and the center of projection property
+     * @param viewBean   (ViewingParametersBean) bean comprised of an fov parameter and the center of projection property
      */
     public SkyCanvasManager(StarCatalogue catalogue, DateTimeBean dtBean,
-           ObserverLocationBean obsLocBean, ViewingParametersBean viewBean) {
+                            ObserverLocationBean obsLocBean, ViewingParametersBean viewBean) {
 
         this.catalogue = catalogue;
         this.dtBean = dtBean;
         this.viewBean = viewBean;
         this.obsLocBean = obsLocBean;
 
-        canvas = new Canvas(1,1); //avoids some ugliness down in planeToCanvas and its inverse
+        canvas = new Canvas(1, 1); //avoids some ugliness down in planeToCanvas and its inverse
         painter = new SkyCanvasPainter(canvas);
 
         mousePosition = new SimpleObjectProperty<>(CartesianCoordinates.ORIGIN);
@@ -109,7 +115,7 @@ public final class SkyCanvasManager {
                 viewBean.centerProperty());
 
         observedSky = Bindings.createObjectBinding(
-                () -> new ObservedSky(dtBean.getZonedDateTime(), obsLocBean.getCoords(), projection.get(),catalogue),
+                () -> new ObservedSky(dtBean.getZonedDateTime(), obsLocBean.getCoords(), projection.get(), catalogue),
                 dtBean.zdtProperty(), obsLocBean.coordsProperty(), projection);
 
         drawableClasses = Bindings.createObjectBinding(
@@ -122,11 +128,11 @@ public final class SkyCanvasManager {
 
         planeToCanvas = Bindings.createObjectBinding(
                 () ->
-                    PlanarTransformation.ofDilatAndTrans(
-                            canvas.getWidth()/StereographicProjection.applyToAngle(
-                                    Angle.ofDeg(viewBean.getFieldOfViewDeg())),
-                    canvas.getWidth()/2, canvas.getHeight()/2)
-                            .concat(PlanarTransformation.rotation(rotation.get())),
+                        PlanarTransformation.ofDilatAndTrans(
+                                canvas.getWidth() / StereographicProjection.applyToAngle(
+                                        Angle.ofDeg(viewBean.getFieldOfViewDeg())),
+                                canvas.getWidth() / 2, canvas.getHeight() / 2)
+                                .concat(PlanarTransformation.rotation(rotation.get())),
                 canvas.widthProperty(), canvas.heightProperty(), viewBean.fieldOfViewDegProperty(), rotation);
 
         canvasToPlane = Bindings.createObjectBinding(() -> planeToCanvas.get().invert(), planeToCanvas);
@@ -146,10 +152,11 @@ public final class SkyCanvasManager {
 
         objectUnderMouse = Bindings.createObjectBinding(
                 () -> {
-                if(mousePosition.get() == CartesianCoordinates.ORIGIN) return Optional.empty();
-                Optional<CelestialObject> celest = observedSky.get().objectClosestTo(mousePosition.get(), maxDistConverted.get());
-                if (celest.isEmpty()) return Optional.empty();
-                return drawableClasses.get().contains(celest.get().getClass()) ? celest : Optional.empty(); },
+                    if (mousePosition.get() == CartesianCoordinates.ORIGIN) return Optional.empty();
+                    Optional<CelestialObject> celest = observedSky.get().objectClosestTo(mousePosition.get(), maxDistConverted.get());
+                    if (celest.isEmpty()) return Optional.empty();
+                    return drawableClasses.get().contains(celest.get().getClass()) ? celest : Optional.empty();
+                },
                 observedSky, mousePosition, maxDistConverted, drawableClasses);
 
         canvas.setOnMouseMoved(mouse -> mousePosition.set(canvasToPlane.get().apply(mouse.getX(), mouse.getY())));
@@ -158,22 +165,42 @@ public final class SkyCanvasManager {
          */
 
         canvas.setOnMousePressed(mouse -> {
-            if (mouse.isPrimaryButtonDown() || mouse.getButton() == MouseButton.MIDDLE) {
-                if (!canvas.isFocused()) canvas.requestFocus();
-                mouseXstartOfDrag.set(mouse.getX());
-                mouseYstartOfDrag.set(mouse.getY());
+            //pour rendu 11: add: if (mouse.isPrimaryButtonDown() || mouse.getButton() == MouseButton.MIDDLE)
+            if (!canvas.isFocused()) canvas.requestFocus();
+            mouseXstartOfDrag.set(mouse.getX());
+            mouseYstartOfDrag.set(mouse.getY());
+
+            if (mouse.isSecondaryButtonDown()) {
+                if (objectUnderMouse.get().isPresent() &&
+                       objectUnderMouse.get().get().getClass().equals(Planet.class)) {
+                    painter.drawOrbit(new Orbit<>(400, 40, PlanetModel.VENUS, new EclipticToEquatorialConversion(
+                            dtBean.getZonedDateTime())), observedSky.get(), planeToCanvas.get(), 400);
+                }
             }
         });
 
         canvas.setOnKeyPressed(key -> {
             switch (key.getCode()) {
-                case LEFT: modifyViewBean(-AZ_STEP, 0); break;
-                case RIGHT: modifyViewBean(+AZ_STEP, 0); break;
-                case UP: modifyViewBean(0, +ALT_STEP); break;
-                case DOWN: modifyViewBean(0, -ALT_STEP); break;
-                case J: modifyRotation(ROTATE_STEP); break;
-                case L: modifyRotation(-ROTATE_STEP); break;
-                case K: if (rotation.get() != 0) modifyRotation(-rotation.get());
+                case LEFT:
+                    modifyViewBean(-AZ_STEP, 0);
+                    break;
+                case RIGHT:
+                    modifyViewBean(+AZ_STEP, 0);
+                    break;
+                case UP:
+                    modifyViewBean(0, +ALT_STEP);
+                    break;
+                case DOWN:
+                    modifyViewBean(0, -ALT_STEP);
+                    break;
+                case J:
+                    modifyRotation(ROTATE_STEP);
+                    break;
+                case L:
+                    modifyRotation(-ROTATE_STEP);
+                    break;
+                case K:
+                    if (rotation.get() != 0) modifyRotation(-rotation.get());
             }
             key.consume();
         });
@@ -185,21 +212,21 @@ public final class SkyCanvasManager {
         canvas.setOnMouseDragged(mouse -> {
             if (mouse.isPrimaryButtonDown()) {
                 modifyViewBean(
-                mouseDragSensitivity.get() * (mouse.getX() - mouseXstartOfDrag.get()),
-                mouseDragSensitivity.get() * (mouseYstartOfDrag.get() - mouse.getY()));
+                        mouseDragSensitivity.get() * (mouse.getX() - mouseXstartOfDrag.get()),
+                        mouseDragSensitivity.get() * (mouseYstartOfDrag.get() - mouse.getY()));
             }
             if (mouse.getButton() == MouseButton.MIDDLE) {
-            modifyRotation(mouseDragSensitivity.get() * ROTATION_ATTENUATION *
-                    (mouseXstartOfDrag.get() + mouseYstartOfDrag.get() - mouse.getX() - mouse.getY()));
+                modifyRotation(mouseDragSensitivity.get() * ROTATION_ATTENUATION *
+                        (mouseXstartOfDrag.get() + mouseYstartOfDrag.get() - mouse.getX() - mouse.getY()));
             }
         });
 
-        extendedAltitudeIsOn.addListener((p, o, n) -> modifyViewBean(0,0));
+        extendedAltitudeIsOn.addListener((p, o, n) -> modifyViewBean(0, 0));
         //clips to smaller [5; -90] if extentedAltitude is turned off.
 
         //ADDING LISTENERS TO REDRAW SKY
         ChangeListener<Object> painterEvent =
-                (p, o, n) -> painter.draw(observedSky.get(), planeToCanvas.get(), projection.get(), objectsToDraw.get());
+                (p, o, n) -> painter.drawMain(observedSky.get(), planeToCanvas.get(), projection.get(), objectsToDraw.get());
 
         observedSky.addListener(painterEvent);
         planeToCanvas.addListener(painterEvent);
@@ -221,7 +248,7 @@ public final class SkyCanvasManager {
     }
 
     /**
-     * @return (ObjectBinding<Optional<CelestialObject>>) observable: Celestial object under mouse
+     * @return (ObjectBinding < Optional < CelestialObject > >) observable: Celestial object under mouse
      */
     public ObjectBinding<Optional<CelestialObject>> objectUnderMouseProperty() {
         return objectUnderMouse;
@@ -263,16 +290,18 @@ public final class SkyCanvasManager {
     }
 
     /**
-     * @return (Set<DrawableObjects>) value of observable: set of objects to draw
+     * @return (Set < DrawableObjects >) value of observable: set of objects to draw
      */
     public Set<DrawableObjects> getObjectsToDraw() {
         return objectsToDraw.get();
     }
 
     /**
-     * @return (ObjectProperty<EnumSet<DrawableObjects>>) observable: set of objects to draw
+     * @return (ObjectProperty < EnumSet < DrawableObjects > >) observable: set of objects to draw
      */
-    public ObjectProperty<EnumSet<DrawableObjects>> objectsToDrawProperty() { return objectsToDraw; }
+    public ObjectProperty<EnumSet<DrawableObjects>> objectsToDrawProperty() {
+        return objectsToDraw;
+    }
 
     /**
      * Setter for observable: set of objects to draw
@@ -281,7 +310,7 @@ public final class SkyCanvasManager {
      */
     public void setObjectsToDraw(EnumSet<DrawableObjects> setToDraw) {
         if (!setToDraw.equals(objectsToDraw.get()))
-        objectsToDraw.set(setToDraw);
+            objectsToDraw.set(setToDraw);
     }
 
     /**
@@ -357,15 +386,15 @@ public final class SkyCanvasManager {
      * Modifies the center of projection with given deltas. With the freedom mouse movement lends, we would have felt
      * bad not to give an option to extend the allowed interval of latitude - it is turned OFF by default though.
      *
-     * @param azDelta (double) change in azimuth
+     * @param azDelta  (double) change in azimuth
      * @param altDelta (double) change in altitude
      */
     private void modifyViewBean(double azDelta, double altDelta) {
         viewBean.setCenter(HorizontalCoordinates.of(
                 Angle.normalizePositive(viewBean.getCenter().az() + azDelta),
                 (extendedAltitudeIsOn.get()) ?
-                EXTENDED_ALT_INTERVAL.clip(viewBean.getCenter().alt() + altDelta) :
-                NORMAL_ALT_INTERVAL.clip(viewBean.getCenter().alt() + altDelta)
+                        EXTENDED_ALT_INTERVAL.clip(viewBean.getCenter().alt() + altDelta) :
+                        NORMAL_ALT_INTERVAL.clip(viewBean.getCenter().alt() + altDelta)
         ));
     }
 

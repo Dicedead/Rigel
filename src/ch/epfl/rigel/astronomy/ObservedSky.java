@@ -195,18 +195,6 @@ public final class ObservedSky {
     }
 
     /**
-     * Applies at() method of given CelestialObjectModel and returns corresponding CelestialObject
-     *
-     * @param <K>                  CelestialObject's type to be computed and returned
-     * @param celestialObjectModel (CelestialObjectModel<K>) corresponding Model
-     * @return (K extends CelestialObject) parametrized CelestialObject
-     * @see CelestialObjectModel#at(double, EclipticToEquatorialConversion)
-     */
-    private <K extends CelestialObject> K applyModel(CelestialObjectModel<K> celestialObjectModel) {
-        return celestialObjectModel.at(daysUntilJ2010, eclToEqu);
-    }
-
-    /**
      * Map creator: Keys: data's elements after applying f on them (identical keys are merged)
      * Values: data's element CartesianCoordinates
      *
@@ -216,12 +204,24 @@ public final class ObservedSky {
      * @param f    (Function<T,S>) function to apply on data
      * @return (Map <S, CartesianCoordinates>) map associating CelestialObjects with their CartesianCoordinates
      */
-    private <T, S extends CelestialObject> Map<S, CartesianCoordinates> mapObjectToPosition(List<T> data, Function<T, S> f) {
+    public <T, S extends CelestialObject> Map<S, CartesianCoordinates> mapObjectToPosition(List<T> data, Function<T, S> f) {
         return Collections.unmodifiableMap(data.stream()
                 .map(f)
                 .collect(Collectors.toMap(Function.identity(),
-                celestObj -> stereoProj.apply(eqToHor.apply(celestObj.equatorialPos())), (u, v) -> v, HashMap::new)));
+                        celestObj -> stereoProj.apply(eqToHor.apply(celestObj.equatorialPos())), (u, v) -> v, HashMap::new)));
         //In our uses, f is either the identity -when data already contains CelestialObjects of type S-
         //or applyModel via method reference    -when data contains CelestialObjectModels<S>.
+    }
+
+    /**
+     * Applies at() method of given CelestialObjectModel and returns corresponding CelestialObject
+     *
+     * @param <K>                  CelestialObject's type to be computed and returned
+     * @param celestialObjectModel (CelestialObjectModel<K>) corresponding Model
+     * @return (K extends CelestialObject) parametrized CelestialObject
+     * @see CelestialObjectModel#at(double, EclipticToEquatorialConversion)
+     */
+    private <K extends CelestialObject> K applyModel(CelestialObjectModel<K> celestialObjectModel) {
+        return celestialObjectModel.at(daysUntilJ2010, eclToEqu);
     }
 }
