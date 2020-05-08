@@ -1,0 +1,6 @@
+If Main class does not run due to the fxml file, add javafx.fxml module in VM options (as well as javafx.controls), i.e:
+Set following VM options to Main's Run configuration:
+--module-path $Path_to_JavaFXLib$ --add-modules=javafx.controls,javafx.fxml
+
+Ex:
+--module-path "D:\Programmes slow\JAVA\javafx-sdk-11.0.2\lib" --add-modules=javafx.controls,javafx.fxml

@@ -47,7 +47,11 @@ import java.util.stream.Collectors;
  */
 public final class SkyCanvasManager {
 
+    private static final int INIT_WIDTH = 800;
+    private static final int INIT_HEIGHT = 600;
+
     private static final int MAX_CANVAS_DISTANCE = 10;
+    private static final int CACHE_CAPACITY = 7;
     private static final ClosedInterval NORMAL_ALT_INTERVAL = ClosedInterval.of(Angle.ofDeg(5), Math.PI / 2);
     private static final ClosedInterval EXTENDED_ALT_INTERVAL = ClosedInterval.of(-Math.PI / 2, Math.PI / 2);
     private static final double ALT_STEP = Angle.ofDeg(5);
@@ -83,9 +87,9 @@ public final class SkyCanvasManager {
     private final DoubleProperty mouseXstartOfDrag = new SimpleDoubleProperty();
     private final DoubleProperty mouseYstartOfDrag = new SimpleDoubleProperty();
     private final DoubleProperty mouseDragSensitivity = new SimpleDoubleProperty(1 / 2e4);
-    private final DoubleProperty mouseScrollSensitivity = new SimpleDoubleProperty(0.75);
     //suggested interval is [1/4e4; 4/1e4]
-    private static final double ROTATION_ATTENUATION = 1 / 10d;
+    private final DoubleProperty mouseScrollSensitivity = new SimpleDoubleProperty(0.75);
+    private static final double ROTATION_ATTENUATION = 1/2d;
 
     private final DoubleProperty rotation = new SimpleDoubleProperty(0);
 
@@ -116,7 +120,7 @@ public final class SkyCanvasManager {
         this.viewBean = viewBean;
         this.obsLocBean = obsLocBean;
 
-        canvas = new Canvas(1, 1); //avoids some ugliness down in planeToCanvas and its inverse
+        canvas = new Canvas(INIT_WIDTH, INIT_HEIGHT); //avoids some ugliness down in planeToCanvas and its inverse
         painter = new SkyCanvasPainter(canvas);
 
         mousePosition = new SimpleObjectProperty<>(CartesianCoordinates.ORIGIN);
@@ -133,7 +137,7 @@ public final class SkyCanvasManager {
                 () -> objectsToDraw.get().stream().map(DrawableObjects::getCorrespondingClass).collect(Collectors.toSet()),
                 objectsToDraw);
 
-        searcher = new Searcher(catalogue.stars().size() + 10, observedSky.get(), obsLocBean, dtBean);
+        searcher = new Searcher(CACHE_CAPACITY, observedSky.get(), obsLocBean, dtBean);
 
         searcher.lastSelectedCenterProperty().bindBidirectional(viewBean.centerProperty());
 
