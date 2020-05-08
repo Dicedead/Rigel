@@ -54,7 +54,7 @@
     </top>
 
     <center>
-        <Pane fx:id="canvasBorder" prefHeight="800" prefWidth="400" VBox.vgrow="ALWAYS"/>
+        <Pane fx:id="canvasBorder"/>
     </center>
 
     <bottom>

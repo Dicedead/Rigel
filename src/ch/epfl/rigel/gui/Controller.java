@@ -116,7 +116,7 @@ public final class Controller {
 
         lon.setTextFormatter(lonTextFormatter);
         lat.setTextFormatter(latTextFormatter);
-        
+
         lonTextFormatter.valueProperty().bindBidirectional(observerLoc.lonDegProperty());
         latTextFormatter.valueProperty().bindBidirectional(observerLoc.latDegProperty());
 
