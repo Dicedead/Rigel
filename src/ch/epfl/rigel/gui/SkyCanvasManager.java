@@ -92,6 +92,7 @@ public final class SkyCanvasManager {
     private static final double ROTATION_ATTENUATION = 1/2d;
 
     private final DoubleProperty rotation = new SimpleDoubleProperty(0);
+    private final ObjectBinding<PlanarTransformation> rotationMatrix;
 
     private final ObjectProperty<EnumSet<DrawableObjects>> objectsToDraw = new SimpleObjectProperty<>(
             EnumSet.allOf(DrawableObjects.class));
@@ -141,14 +142,17 @@ public final class SkyCanvasManager {
 
         searcher.lastSelectedCenterProperty().bindBidirectional(viewBean.centerProperty());
 
+        rotationMatrix = Bindings.createObjectBinding(
+                () -> PlanarTransformation.rotation(rotation.get()), rotation);
+
         planeToCanvas = Bindings.createObjectBinding(
                 () ->
                         PlanarTransformation.ofDilatAndTrans(
                                 canvas.getWidth() / StereographicProjection.applyToAngle(
                                         Angle.ofDeg(viewBean.getFieldOfViewDeg())),
                                 canvas.getWidth() / 2, canvas.getHeight() / 2)
-                                .concat(PlanarTransformation.rotation(rotation.get())),
-                canvas.widthProperty(), canvas.heightProperty(), viewBean.fieldOfViewDegProperty(), rotation);
+                                .concat(rotationMatrix.get()),
+                canvas.widthProperty(), canvas.heightProperty(), viewBean.fieldOfViewDegProperty(), rotationMatrix);
 
         canvasToPlane = Bindings.createObjectBinding(() -> planeToCanvas.get().invert(), planeToCanvas);
 

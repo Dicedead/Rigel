@@ -2,26 +2,22 @@ package ch.epfl.rigel.gui;
 
 import ch.epfl.rigel.astronomy.AsterismLoader;
 import ch.epfl.rigel.astronomy.HygDatabaseLoader;
-import ch.epfl.rigel.astronomy.ObservedSky;
 import ch.epfl.rigel.astronomy.StarCatalogue;
 import ch.epfl.rigel.coordinates.GeographicCoordinates;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
-import ch.epfl.rigel.coordinates.StereographicProjection;
-import ch.epfl.rigel.gui.searchtool.Searcher;
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 
-import static javafx.application.Application.launch;
+public final class Main extends Application {
 
-public class Main extends Application {
+    private static final GeographicCoordinates INITIAL_GEO_COORDS = GeographicCoordinates.ofDeg(6.57, 46.52);
+    private static final HorizontalCoordinates INITIAL_CENTER = HorizontalCoordinates.ofDeg(180.000000000001, 15);
+    private static final double INITIAL_FOV = 100;
 
     public static void main(String[] args) {
         launch(args);
@@ -45,15 +41,17 @@ public class Main extends Application {
             dateTimeBean.setZonedDateTime(when);
 
             ObserverLocationBean observerLocationBean = new ObserverLocationBean();
-            observerLocationBean.setCoordinates(GeographicCoordinates.ofDeg(6.57, 46.52));
+            observerLocationBean.setCoordinates(INITIAL_GEO_COORDS);
 
             ViewingParametersBean viewingParametersBean = new ViewingParametersBean();
-            viewingParametersBean.setCenter(HorizontalCoordinates.ofDeg(180.000000000001, 15));
-            viewingParametersBean.setFieldOfViewDeg(100);
+            viewingParametersBean.setCenter(INITIAL_CENTER);
+            viewingParametersBean.setFieldOfViewDeg(INITIAL_FOV);
 
-            Controller m = new Controller(catalogue, dateTimeBean, observerLocationBean, viewingParametersBean, fontAwesome);
+            Controller m = new Controller(catalogue, dateTimeBean, observerLocationBean, viewingParametersBean, fontAwesome,
+                    primaryStage);
+            m.getThisStage().setFullScreen(true);
             m.getThisStage().show();
-            m.canvas.requestFocus();
+            m.canvasRequestFocus();
 
         } catch (IOException e) {
             e.printStackTrace();

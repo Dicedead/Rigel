@@ -49,6 +49,6 @@ public interface TimeAccelerator {
      * @return TimeAccelerator
      */
     static TimeAccelerator discrete(int freq, Duration step) {
-        return (time, nanos) -> time.plusNanos(step.toNanos() * (long) Math.floor(nanos * freq * 1e-9));
+        return (time, nanos) -> time.plusNanos((long) (step.toNanos() * Math.floor(nanos * freq * 1e-9)));
     }
 }

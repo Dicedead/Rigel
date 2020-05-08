@@ -11,6 +11,7 @@
 
     <fx:define>
         <Color red="0.225" green="0.225" blue="0.225" fx:id="SUBTLE_BLACK"/>
+        <Color red="0.625" green="0.625" blue="0.625" fx:id="LIGHT_GREY"/>
         <String fx:id="RESET_BUTTON_STRING" fx:value="&#xf0e2;"/>
         <String fx:id="PLAY_BUTTON_STRING" fx:value="&#xf04b;"/>
     </fx:define>
@@ -20,17 +21,16 @@
         <HBox fx:id="mainTopBar" style="-fx-spacing: 4;-fx-padding: 4;">
 
             <HBox fx:id="searchSection" style="-fx-spacing: inherit;-fx-alignment: baseline-left;">
-                <Label text="Search" textFill="$SUBTLE_BLACK">
-                </Label>
+                <Label text="Search" textFill="$SUBTLE_BLACK"/>
             </HBox>
 
             <Separator orientation="VERTICAL"/>
 
-            <HBox fx:id="observationPosition" style="-fx-spacing: inherit;-fx-alignment: baseline-left;">
+            <HBox fx:id="observationPosition" alignment="BASELINE_LEFT" style="-fx-spacing: inherit;">
                 <Label text="Longitude (°):" textFill="$SUBTLE_BLACK"/>
-                <TextField fx:id="lon" style="-fx-pref-width: 60;-fx-alignment: baseline-right;"/>
+                <TextField fx:id="lon" prefWidth="60" alignment="BASELINE_RIGHT"/>
                 <Label text="Latitude (°):" textFill="$SUBTLE_BLACK"/>
-                <TextField fx:id="lat" style="-fx-pref-width: 60;-fx-alignment: baseline-right;"/>
+                <TextField fx:id="lat" prefWidth="60" alignment="BASELINE_RIGHT"/>
             </HBox>
 
             <Separator orientation="VERTICAL"/>

@@ -31,32 +31,32 @@ import java.util.stream.Collectors;
 public final class Controller {
 
     @FXML
-    public TextField lon, lat, heure;
+    private TextField lon, lat, heure;
 
     @FXML
-    public DatePicker date;
+    private DatePicker date;
 
     @FXML
-    public ComboBox<ZoneId> zone;
+    private ComboBox<ZoneId> zone;
 
     @FXML
-    public ComboBox<NamedTimeAccelerator> acceleration;
+    private ComboBox<NamedTimeAccelerator> acceleration;
     //we thought a combobox looked slightly better than a ChoiceBox here
 
     @FXML
-    public Button replay, goStop;
+    private Button replay, goStop;
 
     @FXML
-    public Canvas canvas;
+    private Canvas canvas;
 
     @FXML
-    public HBox searchSection;
+    private HBox searchSection;
 
     @FXML
-    public Text objectUnderMouseTxt, fovText, mousePositionText;
+    private Text objectUnderMouseTxt, fovText, mousePositionText;
 
     @FXML
-    public Pane canvasBorder;
+    private Pane canvasBorder;
 
     private static final int MIN_WIDTH = 800;
     private static final int MIN_HEIGHT = 600;
@@ -73,7 +73,7 @@ public final class Controller {
     private final Font specialFont;
 
     public Controller(StarCatalogue catalogue, DateTimeBean dateTimeBean, ObserverLocationBean observer,
-                      ViewingParametersBean view, Font specialFont) throws IOException {
+                      ViewingParametersBean view, Font specialFont, Stage mainStage) throws IOException {
 
         this.dateTimeBean = dateTimeBean;
         this.observerLoc = observer;
@@ -89,7 +89,7 @@ public final class Controller {
         this.canvas = manager.canvas();
 
         loader.setController(this);
-        thisStage = new Stage();
+        thisStage = mainStage;
 
         thisStage.setMinWidth(MIN_WIDTH);
         thisStage.setMinHeight(MIN_HEIGHT);
@@ -127,29 +127,19 @@ public final class Controller {
         heure.setTextFormatter(timeFormatter);
         timeFormatter.setValue(dateTimeBean.getTime());
         date.setValue(dateTimeBean.getDate());
-        dateTimeBean.timeProperty().bindBidirectional(timeFormatter.valueProperty());
-        dateTimeBean.dateProperty().bindBidirectional(date.valueProperty());
+        timeFormatter.valueProperty().bindBidirectional(dateTimeBean.timeProperty());
+        date.valueProperty().bindBidirectional(dateTimeBean.dateProperty());
 
         zone.setValue(dateTimeBean.getZone());
         zone.getItems().addAll(ZoneId.getAvailableZoneIds()
                 .stream()
+                .sorted()
                 .map(ZoneId::of)
-                .collect(Collectors.toSet()));
-
+                .collect(Collectors.toList()));
         zone.valueProperty().bindBidirectional(dateTimeBean.zoneProperty());
 
         acceleration.setItems(FXCollections.observableArrayList(NamedTimeAccelerator.values()));
-
-        acceleration.valueProperty().addListener((p, o, newValue) -> {
-            if (animator.isRunning()) {
-                animator.stop();
-                animator.setAccelerator(newValue.getAccelerator());
-                animator.start();
-            } else {
-                animator.setAccelerator(newValue.getAccelerator());
-            }
-        });
-
+        acceleration.valueProperty().addListener((p, o, n) -> animator.setAccelerator(n.getAccelerator()));
         acceleration.valueProperty().set(NamedTimeAccelerator.TIMES_300);
 
         goStop.setOnAction(ae -> {
@@ -162,17 +152,13 @@ public final class Controller {
             }
         });
 
-        replay.setOnAction(click -> {
-            boolean rerun = animator.isRunning();
-            animator.stop();
-            dateTimeBean.setZonedDateTime(ZonedDateTime.now());
-            if (rerun) animator.start();
-        });
+        replay.setOnAction(click -> dateTimeBean.setZonedDateTime(ZonedDateTime.now()));
 
-        lon.disableProperty().bind(animator.runningProperty());
-        lat.disableProperty().bind(animator.runningProperty());
         heure.disableProperty().bind(animator.runningProperty());
         date.disableProperty().bind(animator.runningProperty());
+        zone.disableProperty().bind(animator.runningProperty());
+        acceleration.disableProperty().bind(animator.runningProperty());
+        replay.disableProperty().bind(animator.runningProperty());
 
         replay.setFont(specialFont);
         goStop.setFont(specialFont);
@@ -190,6 +176,8 @@ public final class Controller {
     public Stage getThisStage() {
         return thisStage;
     }
+
+    public void canvasRequestFocus() { canvas.requestFocus(); }
 
     private UnaryOperator<TextFormatter.Change> coordFilter(NumberStringConverter stringConverter, boolean isLon) {
         return (change -> {

@@ -22,17 +22,18 @@ public final class Orbit<T extends CelestialObject> extends Cycle<Supplier<T>> {
     private int currentModulo;
     private List<T> currentRepresentativeList;
 
-    public Orbit(ZonedDateTime initialTime, int resolutionInHours, int maxDays, CelestialObjectModel<T> function,
+    public Orbit(ZonedDateTime initialTime, int resolutionInHours, long maxDays, CelestialObjectModel<T> function,
                  EclipticToEquatorialConversion conversion) {
         super(construct(Epoch.J2010.daysUntil(initialTime), resolutionInHours, maxDays, function, conversion));
     }
 
     private static <T extends CelestialObject> List<Supplier<T>> construct(double initialDaysSince2010, int resolutionInHours,
-            int maxDays, CelestialObjectModel<T> model, EclipticToEquatorialConversion eclToEqu) {
+            long maxDays, CelestialObjectModel<T> model, EclipticToEquatorialConversion eclToEqu) {
         DoubleFunction<Supplier<T>> f = daysSinceJ2010 -> (Supplier<T>) (() -> model.at(daysSinceJ2010, eclToEqu));
 
-        return DoubleStream.iterate(initialDaysSince2010, daysSince2010 -> daysSince2010 < initialDaysSince2010 + maxDays,
-                daysSince2010 -> daysSince2010 + resolutionInHours/HOURS_IN_DAY)
+        //TODO - reso and < - maxdays?
+        return DoubleStream.iterate(initialDaysSince2010, daysSince2010 -> daysSince2010 > initialDaysSince2010 - maxDays,
+                daysSince2010 -> daysSince2010 - resolutionInHours/HOURS_IN_DAY)
                 .mapToObj(f)
                 .collect(Collectors.toList());
     }
