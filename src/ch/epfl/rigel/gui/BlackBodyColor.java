@@ -15,7 +15,7 @@ import java.util.stream.IntStream;
 import static ch.epfl.rigel.Preconditions.checkInInterval;
 
 /**
- * Utility class for translating temperatures into colors
+ * Utility class for converting temperatures into colors
  *
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
@@ -59,6 +59,8 @@ public final class BlackBodyColor {
         private static final int SKIP_LINES_FILTERINT = 80;
 
         private ColorListSingleton() {
+            throw new UnsupportedOperationException("Fatal error: tried to instantiate non instantiable class" +
+                    "ColorListSingleton.");
         }
 
         private static List<Color> initList() {

@@ -53,6 +53,10 @@
         </HBox>
     </top>
 
+    <center>
+        <Pane fx:id="canvasPane"/>
+    </center>
+
     <bottom>
         <!-- Bottom bar -->
         <BorderPane fx:id="bottomBar" style="-fx-spacing: 4;-fx-padding: 4;-fx-background-color: white;">

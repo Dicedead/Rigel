@@ -6,7 +6,7 @@ import java.util.function.UnaryOperator;
 
 /**
  * Functional class representing a 2x3 matrix for scaling, translating and rotating transformations.
- * Lighter subsidiary for JavaFX's Transform.
+ * Lighter subsidiary to JavaFX's Transform.
  * @see javafx.scene.transform.Transform
  *
  * @author Alexandre Sallinen (303162)

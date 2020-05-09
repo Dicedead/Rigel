@@ -28,11 +28,11 @@ public final class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-
         try (InputStream hs = resourceStream("/hygdata_v3.csv");
              InputStream ast = resourceStream("/asterisms.txt");
              InputStream fs = resourceStream("/Font Awesome 5 Free-Solid-900.otf")) {
             Font fontAwesome = Font.loadFont(fs, 15);
+            BlackBodyColor.init();
 
             StarCatalogue catalogue = new StarCatalogue.Builder()
                     .loadFrom(hs, HygDatabaseLoader.INSTANCE)
@@ -54,8 +54,7 @@ public final class Main extends Application {
             primaryStage.setMinWidth(MIN_WIDTH);
             primaryStage.setMinHeight(MIN_HEIGHT);
             primaryStage.setTitle("Rigel");
-            primaryStage.setScene(new Scene(m.getRoot()));
-            primaryStage.setFullScreen(true);
+            primaryStage.setScene(new Scene(m.getLoader().load()));
             primaryStage.show();
             m.canvasRequestFocus();
 

@@ -32,6 +32,7 @@ public final class SkyCanvasPainter {
 
     private static final double CELEST_SIZE_COEFF = applyToAngle(ofDeg(0.5)) / 140;
     private static final double ORBIT_CIRCLE_SIZE = 3e-3;
+    private static final double OCTANTS_ALT_OFFSET = -0.5;
     private static final Color ORBIT_COLOR = Color.CADETBLUE;
     private static final ClosedInterval CLIP_INTERVAL = ClosedInterval.of(-2, 5);
     private static final Color YELLOW_HALO = Color.YELLOW.deriveColor(1, 1, 1, 0.25);
@@ -55,42 +56,64 @@ public final class SkyCanvasPainter {
      * Resets the canvas to a black rectangle state of the same size
      */
     public void clear() {
-        synchronized (graphicsContext) {
-            graphicsContext.setFill(Color.BLACK);
-            graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        }
+        graphicsContext.setFill(Color.BLACK);
+        graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
     }
 
     /**
      * Draws objects with possible filters
      *
-     * @param sky (ObservedSky) current observed sky
-     * @param transform (PlanarTransformation) current transformation to the canvas
-     * @param proj (StereographicProjection) current projection to the 2D plane
+     * @param sky           (ObservedSky) current observed sky
+     * @param transform     (PlanarTransformation) current transformation to the canvas
+     * @param proj          (StereographicProjection) current projection to the 2D plane
      * @param objectsToDraw (EnumSet<DrawableObjects>) possible filters - taking advantage of EnumSet's inner order of
      *                      objects
      */
     public void drawMain(ObservedSky sky, PlanarTransformation transform, StereographicProjection proj,
                          EnumSet<DrawableObjects> objectsToDraw, Orbit<? extends CelestialObject> orbit,
                          int orbitUntil, int orbitStep) {
-        clear();
-        if(orbit != null) drawOrbit(orbit, sky, transform, orbitUntil, orbitStep);
 
-        for(DrawableObjects toDraw : objectsToDraw)
+        clear();
+        if (orbit != null) drawOrbit(orbit, sky, transform, orbitUntil, orbitStep);
+
+        for (DrawableObjects toDraw : objectsToDraw)
             switch (toDraw) {
-                case ASTERISMS: drawAsterisms(sky, transform); break;
-                case STARS: drawStars(sky, transform); break;
-                case PLANETS: drawPlanets(sky, transform); break;
-                case SUN: drawSun(sky, transform); break;
-                case MOON: drawMoon(sky, transform); break;
-                case HORIZON: drawHorizon(proj, transform); break;
-                default: throw new IllegalStateException("SkyCanvasPainter: unknown drawable object type given.");
+                case ASTERISMS:
+                    drawAsterisms(sky, transform);
+                    break;
+                case STARS:
+                    drawStars(sky, transform);
+                    break;
+                case PLANETS:
+                    drawPlanets(sky, transform);
+                    break;
+                case SUN:
+                    drawSun(sky, transform);
+                    break;
+                case MOON:
+                    drawMoon(sky, transform);
+                    break;
+                case HORIZON:
+                    drawHorizon(proj, transform);
+                    break;
+                default:
+                    throw new IllegalStateException("SkyCanvasPainter: unknown drawable object type given.");
             }
     }
 
+
+    /**
+     * Draws predicted orbit of a celestial object with given parameters
+     *
+     * @param orbit     (Orbit<? extends CelestialObject>) a list of celestial object suppliers
+     * @param sky       (ObservedSky) current observed sky
+     * @param transform (PlanarTransformation) current transformation to the canvas
+     * @param length    (int) show up to "length" circles representing the orbit
+     * @param step      (int) show every "step" position computed (this is the resolution)
+     */
     public void drawOrbit(Orbit<? extends CelestialObject> orbit, ObservedSky sky, PlanarTransformation transform,
-                          int until, int step) {
-        pipeline(sky.mapObjectToPosition(orbit.representatives(until, step), Function.identity()).entrySet().stream(),
+                          int length, int step) {
+        pipeline(sky.mapObjectToPosition(orbit.representatives(length, step), Function.identity()).entrySet().stream(),
                 celest -> ORBIT_CIRCLE_SIZE, celest -> ORBIT_COLOR, transform);
     }
 
@@ -119,9 +142,8 @@ public final class SkyCanvasPainter {
      * @param transform (PlanarTransformation) current transformation to the canvas
      */
     public void drawStars(ObservedSky sky, PlanarTransformation transform) {
-        pipeline(sky.starsMap().entrySet().parallelStream(), SkyCanvasPainter::apparentSize, STAR_COLOR,
+        pipeline(sky.starsMap().entrySet().stream(), SkyCanvasPainter::apparentSize, STAR_COLOR,
                 transform);
-        //Once again, parallelStream shortened the initialisation time upon testing.
     }
 
     /**
@@ -172,17 +194,18 @@ public final class SkyCanvasPainter {
     public void drawHorizon(StereographicProjection projection, PlanarTransformation transform) {
         double size = transform.applyDistance(2 * projection.circleRadiusForParallel(PARALLEL));
         CartesianCoordinates transformedCenter = transform.apply(projection.circleCenterForParallel(PARALLEL));
+        double halfSize = size / 2;
 
         synchronized (graphicsContext) {
             graphicsContext.setStroke(Color.RED);
             graphicsContext.setLineWidth(2);
-            graphicsContext.strokeOval(transformedCenter.x() - size / 2, transformedCenter.y() - size / 2, size, size);
+            graphicsContext.strokeOval(transformedCenter.x() - halfSize, transformedCenter.y() - halfSize, size, size);
             graphicsContext.setFill(Color.RED);
             graphicsContext.setTextAlign(TextAlignment.CENTER);
             graphicsContext.setTextBaseline(VPos.TOP);
         }
         for (int i = 0; i < 8; ++i) {
-            HorizontalCoordinates octantHorizCoords = HorizontalCoordinates.ofDeg(45 * i, -0.5);
+            HorizontalCoordinates octantHorizCoords = HorizontalCoordinates.ofDeg(45 * i, OCTANTS_ALT_OFFSET);
             CartesianCoordinates octantTransCoords = transform.apply(projection.apply(octantHorizCoords));
             graphicsContext.fillText(octantHorizCoords.azOctantName("N", "E", "S", "O"),
                     octantTransCoords.x(), octantTransCoords.y());
@@ -199,8 +222,10 @@ public final class SkyCanvasPainter {
      * @param <T>            (extends CelestialObject)
      */
     private <T extends CelestialObject> void pipeline(Stream<Map.Entry<T, CartesianCoordinates>> positions,
-             Function<T, Double> radiusFunction, Function<T, Paint> color, PlanarTransformation transform) {
+            Function<T, Double> radiusFunction, Function<T, Paint> color, PlanarTransformation transform) {
         drawCelestial(checkInCanvas(applyTransform(positions, transform)), radiusFunction, color, transform);
+        /*It's worth pointing out that positions is always a non parallel Stream in the first version of this program
+         (ie pre step 12) but may become parallel in the case of drawStars for step 12.*/
     }
 
     /**
@@ -221,7 +246,7 @@ public final class SkyCanvasPainter {
      *
      * @param positions (Stream<Map.Entry<T, CartesianCoordinates>>)
      * @param <T>       (extends CelestialObject)
-     * @return (Stream<Map.Entry<T, CartesianCoordinates>>) filtered positions
+     * @return (Stream <Map.Entry<T, CartesianCoordinates>>) filtered positions
      */
     private <T extends CelestialObject> Stream<Map.Entry<T, CartesianCoordinates>> checkInCanvas(
             Stream<Map.Entry<T, CartesianCoordinates>> positions) {
@@ -252,7 +277,7 @@ public final class SkyCanvasPainter {
      * @param cartesCoords (CartesianCoordinates) transformed coordinates
      * @param size         (double) radius
      */
-    private synchronized void drawCircle(Paint color, CartesianCoordinates cartesCoords, double size) {
+    private void drawCircle(Paint color, CartesianCoordinates cartesCoords, double size) {
         graphicsContext.setFill(color);
         final double halfSize = size / 2;
         graphicsContext.fillOval(cartesCoords.x() - halfSize, cartesCoords.y() - halfSize, size, size);
@@ -270,7 +295,7 @@ public final class SkyCanvasPainter {
      * @param transform        (PlanarTransformation) current transformation to the canvas
      */
     private void asterismLineRecurr(CartesianCoordinates c1, CartesianCoordinates c2,
-            int currentStartStar, Asterism asterism, ObservedSky sky, PlanarTransformation transform) {
+                 int currentStartStar, Asterism asterism, ObservedSky sky, PlanarTransformation transform) {
 
         if (isInCanvas(c1) || isInCanvas(c2)) {
             graphicsContext.strokeLine(c1.x(), c1.y(), c2.x(), c2.y());

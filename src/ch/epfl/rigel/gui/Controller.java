@@ -51,16 +51,13 @@ public final class Controller {
     private Canvas canvas;
 
     @FXML
-    private HBox searchSection, mainTopBar;
+    private HBox searchSection;
+
+    @FXML
+    private Pane canvasPane;
 
     @FXML
     private Text objectUnderMouseTxt, fovText, mousePositionText;
-
-    @FXML
-    private BorderPane bottomBar;
-
-    @FXML
-    private final BorderPane mainBorder;
 
     private static final String PLAY_BUTTON_TEXT = "\uf04b";
     private static final String PAUSE_BUTTON_TEXT = "\uf04c";
@@ -91,10 +88,6 @@ public final class Controller {
         this.canvas = manager.canvas();
 
         loader.setController(this);
-        mainBorder = loader.load();
-        mainBorder.setCenter(canvas);
-        canvas.widthProperty().bind(mainBorder.widthProperty());
-        canvas.heightProperty().bind(mainBorder.heightProperty().subtract(bottomBar.heightProperty()).subtract(mainTopBar.heightProperty()));
     }
 
 
@@ -102,6 +95,9 @@ public final class Controller {
     public void initialize() {
 
         searchSection.getChildren().add(searcher);
+        canvasPane.getChildren().add(canvas);
+        canvas.widthProperty().bind(canvasPane.widthProperty());
+        canvas.heightProperty().bind(canvasPane.heightProperty());
 
         NumberStringConverter stringConverter = new NumberStringConverter("#0.00");
 
@@ -120,10 +116,7 @@ public final class Controller {
         DateTimeFormatter hmsFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
         LocalTimeStringConverter stringConverter2 = new LocalTimeStringConverter(hmsFormatter, hmsFormatter);
         TextFormatter<LocalTime> timeFormatter = new TextFormatter<>(stringConverter2);
-
         heure.setTextFormatter(timeFormatter);
-        timeFormatter.setValue(dateTimeBean.getTime());
-        date.setValue(dateTimeBean.getDate());
         timeFormatter.valueProperty().bindBidirectional(dateTimeBean.timeProperty());
         date.valueProperty().bindBidirectional(dateTimeBean.dateProperty());
 
@@ -165,12 +158,12 @@ public final class Controller {
                         () -> objectUnderMouseTxt.setText("")));
 
         fovText.textProperty().bind(Bindings.format(Locale.ROOT,"Champ de vue : %.1f°",view.fieldOfViewDegProperty()));
-        mousePositionText.textProperty().bind(
-                Bindings.format(Locale.ROOT,"Azimut : %.2f°, hauteur : %.2f°", manager.mouseAzDegProperty(),
-                        manager.mouseAltDegProperty()));
+
+        mousePositionText.textProperty().bind(Bindings.format(Locale.ROOT,"Azimut : %.2f°, hauteur : %.2f°",
+                manager.mouseAzDegProperty(), manager.mouseAltDegProperty()));
     }
 
-    public Pane getRoot() { return mainBorder; }
+    public FXMLLoader getLoader() { return loader; }
 
     public void canvasRequestFocus() { canvas.requestFocus(); }
 
