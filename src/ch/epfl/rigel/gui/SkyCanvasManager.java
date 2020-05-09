@@ -51,7 +51,7 @@ public final class SkyCanvasManager {
     private static final int INIT_HEIGHT = 600;
 
     private static final int MAX_CANVAS_DISTANCE = 10;
-    private static final int CACHE_CAPACITY = 7;
+    private static final int SEARCH_CACHE_CAPACITY = 14;
     private static final ClosedInterval NORMAL_ALT_INTERVAL = ClosedInterval.of(Angle.ofDeg(5), Math.PI / 2);
     private static final ClosedInterval EXTENDED_ALT_INTERVAL = ClosedInterval.of(-Math.PI / 2, Math.PI / 2);
     private static final double ALT_STEP = Angle.ofDeg(5);
@@ -83,7 +83,7 @@ public final class SkyCanvasManager {
 
     //BONUS CONTENT
     private final BooleanProperty extendedAltitudeIsOn = new SimpleBooleanProperty(true);
-
+    
     private final DoubleProperty mouseXstartOfDrag = new SimpleDoubleProperty();
     private final DoubleProperty mouseYstartOfDrag = new SimpleDoubleProperty();
     private final DoubleProperty mouseDragSensitivity = new SimpleDoubleProperty(1 / 2e4);
@@ -138,7 +138,7 @@ public final class SkyCanvasManager {
                 () -> objectsToDraw.get().stream().map(DrawableObjects::getCorrespondingClass).collect(Collectors.toSet()),
                 objectsToDraw);
 
-        searcher = new Searcher(CACHE_CAPACITY, observedSky.get(), obsLocBean, dtBean);
+        searcher = new Searcher(SEARCH_CACHE_CAPACITY, observedSky.get(), obsLocBean, dtBean);
 
         searcher.lastSelectedCenterProperty().bindBidirectional(viewBean.centerProperty());
 

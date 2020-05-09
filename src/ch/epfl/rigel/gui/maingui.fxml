@@ -6,7 +6,7 @@
 <?import javafx.scene.text.*?>
 
 <?import java.lang.String?>
-<BorderPane prefHeight="642.0" prefWidth="1163.0" xmlns="http://javafx.com/javafx/11.0.2-internal"
+<BorderPane fx:id="mainBorder" prefHeight="642.0" prefWidth="1163.0" xmlns="http://javafx.com/javafx/11.0.2-internal"
             xmlns:fx="http://javafx.com/fxml/1">
 
     <fx:define>
@@ -52,10 +52,6 @@
             </HBox>
         </HBox>
     </top>
-
-    <center>
-        <Pane fx:id="canvasBorder"/>
-    </center>
 
     <bottom>
         <!-- Bottom bar -->

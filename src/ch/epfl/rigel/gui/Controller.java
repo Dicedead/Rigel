@@ -11,6 +11,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
@@ -50,22 +51,23 @@ public final class Controller {
     private Canvas canvas;
 
     @FXML
-    private HBox searchSection;
+    private HBox searchSection, mainTopBar;
 
     @FXML
     private Text objectUnderMouseTxt, fovText, mousePositionText;
 
     @FXML
-    private Pane canvasBorder;
+    private BorderPane bottomBar;
 
-    private static final int MIN_WIDTH = 800;
-    private static final int MIN_HEIGHT = 600;
+    @FXML
+    private final BorderPane mainBorder;
+
     private static final String PLAY_BUTTON_TEXT = "\uf04b";
     private static final String PAUSE_BUTTON_TEXT = "\uf04c";
 
     private final SkyCanvasManager manager;
     private final Searcher searcher;
-    private final Stage thisStage;
+    private final FXMLLoader loader;
     private final DateTimeBean dateTimeBean;
     private final ObserverLocationBean observerLoc;
     private final ViewingParametersBean view;
@@ -73,7 +75,7 @@ public final class Controller {
     private final Font specialFont;
 
     public Controller(StarCatalogue catalogue, DateTimeBean dateTimeBean, ObserverLocationBean observer,
-                      ViewingParametersBean view, Font specialFont, Stage mainStage) throws IOException {
+                      ViewingParametersBean view, Font specialFont) throws IOException {
 
         this.dateTimeBean = dateTimeBean;
         this.observerLoc = observer;
@@ -84,17 +86,15 @@ public final class Controller {
         this.manager = new SkyCanvasManager(catalogue, dateTimeBean, observer, view);
         this.searcher = manager.searcher();
 
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("maingui.fxml"));
+        loader = new FXMLLoader(getClass().getResource("maingui.fxml"));
 
         this.canvas = manager.canvas();
 
         loader.setController(this);
-        thisStage = mainStage;
-
-        thisStage.setMinWidth(MIN_WIDTH);
-        thisStage.setMinHeight(MIN_HEIGHT);
-        thisStage.setTitle("Rigel");
-        thisStage.setScene(new Scene(loader.load()));
+        mainBorder = loader.load();
+        mainBorder.setCenter(canvas);
+        canvas.widthProperty().bind(mainBorder.widthProperty());
+        canvas.heightProperty().bind(mainBorder.heightProperty().subtract(bottomBar.heightProperty()).subtract(mainTopBar.heightProperty()));
     }
 
 
@@ -102,9 +102,6 @@ public final class Controller {
     public void initialize() {
 
         searchSection.getChildren().add(searcher);
-        canvasBorder.getChildren().add(canvas);
-        canvas.widthProperty().bind(canvasBorder.widthProperty());
-        canvas.heightProperty().bind(canvasBorder.heightProperty());
 
         NumberStringConverter stringConverter = new NumberStringConverter("#0.00");
 
@@ -173,9 +170,7 @@ public final class Controller {
                         manager.mouseAltDegProperty()));
     }
 
-    public Stage getThisStage() {
-        return thisStage;
-    }
+    public Pane getRoot() { return mainBorder; }
 
     public void canvasRequestFocus() { canvas.requestFocus(); }
 

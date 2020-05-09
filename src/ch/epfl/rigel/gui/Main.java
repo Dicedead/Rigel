@@ -6,6 +6,7 @@ import ch.epfl.rigel.astronomy.StarCatalogue;
 import ch.epfl.rigel.coordinates.GeographicCoordinates;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import javafx.application.Application;
+import javafx.scene.Scene;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
@@ -18,6 +19,8 @@ public final class Main extends Application {
     private static final GeographicCoordinates INITIAL_GEO_COORDS = GeographicCoordinates.ofDeg(6.57, 46.52);
     private static final HorizontalCoordinates INITIAL_CENTER = HorizontalCoordinates.ofDeg(180.000000000001, 15);
     private static final double INITIAL_FOV = 100;
+    private static final int MIN_WIDTH = 800;
+    private static final int MIN_HEIGHT = 600;
 
     public static void main(String[] args) {
         launch(args);
@@ -47,10 +50,13 @@ public final class Main extends Application {
             viewingParametersBean.setCenter(INITIAL_CENTER);
             viewingParametersBean.setFieldOfViewDeg(INITIAL_FOV);
 
-            Controller m = new Controller(catalogue, dateTimeBean, observerLocationBean, viewingParametersBean, fontAwesome,
-                    primaryStage);
-            m.getThisStage().setFullScreen(true);
-            m.getThisStage().show();
+            Controller m = new Controller(catalogue, dateTimeBean, observerLocationBean, viewingParametersBean, fontAwesome);
+            primaryStage.setMinWidth(MIN_WIDTH);
+            primaryStage.setMinHeight(MIN_HEIGHT);
+            primaryStage.setTitle("Rigel");
+            primaryStage.setScene(new Scene(m.getRoot()));
+            primaryStage.setFullScreen(true);
+            primaryStage.show();
             m.canvasRequestFocus();
 
         } catch (IOException e) {
