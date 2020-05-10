@@ -67,6 +67,7 @@ public final class TimeAnimator extends AnimationTimer {
      */
     @Override
     public void stop() {
+        dateTimeBean.setZone(startTime.getZone());
         super.stop();
         running.set(false);
     }

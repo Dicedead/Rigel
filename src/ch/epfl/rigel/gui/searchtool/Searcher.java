@@ -79,7 +79,7 @@ public final class Searcher extends SearchTextField<CelestialObject> {
         }
 
         this.treesOfCharacters = new IndexedSet<>(preDat);
-        this.stringToCelest = new IndexedSet<CelestialObject, String>(sky.celestialObjMap().keySet().stream()
+        this.stringToCelest = new IndexedSet<>(sky.celestialObjMap().keySet().stream()
                 .collect(Collectors.toMap(CelestialObject::name, Function.identity(), (v1, v2) -> v1)));
     }
 
