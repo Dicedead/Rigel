@@ -58,7 +58,7 @@ public final class SkyCanvasManager {
     private static final double AZ_STEP = Angle.ofDeg(10);
     private static final ClosedInterval FOV_INTERVAL = ClosedInterval.of(30, 150);
     private static final double ROTATE_STEP = Angle.ofDeg(10);
-    private static final int ORBIT_SIMULATION_DAYS_DEFAULT = 1400;
+    private static final int ORBIT_SIMULATION_DAYS_DEFAULT = 1000;
 
     private final StarCatalogue catalogue;
     private final DateTimeBean dtBean;
@@ -140,7 +140,7 @@ public final class SkyCanvasManager {
 
         searcher = new Searcher(SEARCH_CACHE_CAPACITY, observedSky.get(), obsLocBean, dtBean);
 
-        searcher.lastSelectedCenterProperty().bindBidirectional(viewBean.centerProperty());
+        searcher.lastSelectedCenterProperty().addListener((p, o, n) -> viewBean.setCenter(n));
 
         rotationMatrix = Bindings.createObjectBinding(
                 () -> PlanarTransformation.rotation(rotation.get()), rotation);

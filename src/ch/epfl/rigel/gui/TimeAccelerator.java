@@ -1,7 +1,6 @@
 package ch.epfl.rigel.gui;
 
 import java.time.Duration;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 /**

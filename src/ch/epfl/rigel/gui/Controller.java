@@ -28,6 +28,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class Controller {
 
@@ -132,23 +133,22 @@ public final class Controller {
         acceleration.valueProperty().addListener((p, o, n) -> animator.setAccelerator(n.getAccelerator()));
         acceleration.valueProperty().set(NamedTimeAccelerator.TIMES_300);
 
-        goStop.setOnAction(ae -> {
-            if (!animator.isRunning()) {
-                animator.start();
-                goStop.setText(PAUSE_BUTTON_TEXT);
-            } else {
+        goStop.setOnAction(e -> {
+            if (animator.isRunning()) {
                 animator.stop();
-                goStop.setText(PLAY_BUTTON_TEXT);
+            } else {
+                animator.start();
             }
         });
+        goStop.textProperty().bind(Bindings.when(animator.runningProperty())
+                .then(PAUSE_BUTTON_TEXT)
+                .otherwise(PLAY_BUTTON_TEXT));
 
         replay.setOnAction(click -> dateTimeBean.setZonedDateTime(ZonedDateTime.now()));
 
-        heure.disableProperty().bind(animator.runningProperty());
-        date.disableProperty().bind(animator.runningProperty());
-        zone.disableProperty().bind(animator.runningProperty());
-        acceleration.disableProperty().bind(animator.runningProperty());
-        replay.disableProperty().bind(animator.runningProperty());
+        Stream.of(heure, date, zone, acceleration, replay)
+                .forEach(node -> node.disableProperty()
+                        .bind(animator.runningProperty()));
 
         replay.setFont(specialFont);
         goStop.setFont(specialFont);

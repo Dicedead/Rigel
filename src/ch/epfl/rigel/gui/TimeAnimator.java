@@ -67,7 +67,7 @@ public final class TimeAnimator extends AnimationTimer {
      */
     @Override
     public void stop() {
-        dateTimeBean.setZone(startTime.getZone());
+        dateTimeBean.setZone(startTime.getZone()); //accounts for possible daylight saving time modification
         super.stop();
         running.set(false);
     }

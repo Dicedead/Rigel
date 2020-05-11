@@ -55,6 +55,7 @@ public final class Main extends Application {
             primaryStage.setMinHeight(MIN_HEIGHT);
             primaryStage.setTitle("Rigel");
             primaryStage.setScene(new Scene(m.getLoader().load()));
+            primaryStage.setFullScreen(true);
             primaryStage.show();
             m.canvasRequestFocus();
 
