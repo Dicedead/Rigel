@@ -99,15 +99,16 @@ public final class ObservedSky {
      * closest CelestialObject wrapped in an Optional cell.
      */
     public Optional<CelestialObject> objectClosestTo(CartesianCoordinates point, double maxDistance) {
-        return celestObjToCoordsMap.keySet().parallelStream().min((celestObj1, celestObj2) -> CLOSEST_TO_C.apply(point)
-                .apply(celestObjToCoordsMap.get(celestObj1), celestObjToCoordsMap.get(celestObj2)))
-                .filter(celestObj -> euclideanDistance(celestObjToCoordsMap.get(celestObj), point) <= maxDistance);
-        /*
-        parallelStream proved to greatly shorten the execution time on testing (at least 33%),
-        making the map worthwhile when compared to 2 identically ordered lists, especially after
-        the initial expensive threads' initialisation.
-        Also upon testing: applying a first approximate filter slows down the execution a great deal.
-         */
+        return celestObjToCoordsMap.entrySet().parallelStream()
+                .filter(celest -> celest.getValue().x() - point.x() <= maxDistance
+                        && celest.getValue().y() - point.y() <= maxDistance)
+                .min((celestObj1, celestObj2) -> CLOSEST_TO_C.apply(point)
+                        .apply(celestObj1.getValue(), celestObj2.getValue()))
+                .filter(celestObj -> euclideanDistance(celestObj.getValue(), point) <= maxDistance)
+                .map(Map.Entry::getKey);
+
+        /* parallelStream proved to shorten the execution time upon testing (0.55 ms to 0.40 ms at step 11, may be
+           reduced at step 12 with improved thread management) */
     }
 
     /**

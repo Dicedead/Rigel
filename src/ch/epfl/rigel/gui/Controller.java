@@ -119,9 +119,9 @@ public final class Controller {
         TextFormatter<LocalTime> timeFormatter = new TextFormatter<>(stringConverter2);
         heure.setTextFormatter(timeFormatter);
         timeFormatter.valueProperty().bindBidirectional(dateTimeBean.timeProperty());
+        
         date.valueProperty().bindBidirectional(dateTimeBean.dateProperty());
 
-        zone.setValue(dateTimeBean.getZone());
         zone.getItems().addAll(ZoneId.getAvailableZoneIds()
                 .stream()
                 .sorted()
@@ -147,8 +147,7 @@ public final class Controller {
         replay.setOnAction(click -> dateTimeBean.setZonedDateTime(ZonedDateTime.now()));
 
         Stream.of(heure, date, zone, acceleration, replay)
-                .forEach(node -> node.disableProperty()
-                        .bind(animator.runningProperty()));
+                .forEach(node -> node.disableProperty().bind(animator.runningProperty()));
 
         replay.setFont(specialFont);
         goStop.setFont(specialFont);
