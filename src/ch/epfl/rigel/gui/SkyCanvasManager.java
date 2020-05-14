@@ -87,7 +87,8 @@ public final class SkyCanvasManager {
 
     private final DoubleProperty mouseXstartOfDrag = new SimpleDoubleProperty();
     private final DoubleProperty mouseYstartOfDrag = new SimpleDoubleProperty();
-    private final DoubleProperty mouseDragSensitivity = new SimpleDoubleProperty(1 / 2e4);
+    private static final double MOUSE_DRAG_FACTOR = 2e4;
+    private final DoubleProperty mouseDragSensitivity = new SimpleDoubleProperty(1 / MOUSE_DRAG_FACTOR);
     //suggested interval is [1/4e4; 4/1e4]
     private final DoubleProperty mouseScrollSensitivity = new SimpleDoubleProperty(0.75);
 
@@ -290,7 +291,7 @@ public final class SkyCanvasManager {
     }
 
     /**
-     * @return (ObjectBinding < Optional < CelestialObject > >) observable: Celestial object under mouse
+     * @return (ObjectBinding<Optional<CelestialObject>>) observable: Celestial object under mouse
      */
     public ObjectBinding<Optional<CelestialObject>> objectUnderMouseProperty() {
         return objectUnderMouse;
@@ -332,14 +333,14 @@ public final class SkyCanvasManager {
     }
 
     /**
-     * @return (Set < DrawableObjects >) value of observable: set of objects to draw
+     * @return (Set<DrawableObjects>) value of observable: set of objects to draw
      */
     public Set<DrawableObjects> getObjectsToDraw() {
         return objectsToDraw.get();
     }
 
     /**
-     * @return (ObjectProperty < EnumSet < DrawableObjects > >) observable: set of objects to draw
+     * @return (ObjectProperty<EnumSet<DrawableObjects>>) observable: set of objects to draw
      */
     public ObjectProperty<EnumSet<DrawableObjects>> objectsToDrawProperty() {
         return objectsToDraw;
@@ -376,6 +377,10 @@ public final class SkyCanvasManager {
      */
     public void setMouseDragSensitivity(double mouseDragSensitivity) {
         this.mouseDragSensitivity.set(mouseDragSensitivity);
+    }
+
+    public double getMouseDragFactor() {
+        return MOUSE_DRAG_FACTOR;
     }
 
     /**

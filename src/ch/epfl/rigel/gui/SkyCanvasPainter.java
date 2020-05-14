@@ -74,10 +74,12 @@ public final class SkyCanvasPainter {
                          int orbitUntil, int orbitStep) {
 
         clear();
-        if (orbit != null) drawOrbit(orbit, sky, transform, orbitUntil, orbitStep);
 
         for (DrawableObjects toDraw : objectsToDraw)
             switch (toDraw) {
+                case ORBIT:
+                    if (orbit != null) drawOrbit(orbit, sky, transform, orbitUntil, orbitStep);
+                    break;
                 case ASTERISMS:
                     drawAsterisms(sky, transform);
                     break;
