@@ -76,7 +76,7 @@ public abstract class SearchTextField<T> extends TextField {
 
     private void makeLinks() {
         textProperty().addListener((observable, oldValue, newValue) -> {
-            if (getText() == null) {
+            if (getText().equals("")) {
                 entriesGUI.hide();
             } else {
                 populate(process(newValue));
@@ -111,7 +111,7 @@ public abstract class SearchTextField<T> extends TextField {
         //instead of "filter" to keep all "case sensitive"
 
         textFilter.setFill(Color.ORANGE);
-        TextFlow res = new TextFlow( //new Text(text.substring(0, filterIndex)),
+        TextFlow res = new TextFlow(
                 textFilter, new Text(text.substring(filterIndex + filter.length())));
         res.setPrefHeight(5);
         return res;

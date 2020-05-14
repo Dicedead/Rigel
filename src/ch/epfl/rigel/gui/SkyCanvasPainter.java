@@ -81,6 +81,9 @@ public final class SkyCanvasPainter {
                 case ASTERISMS:
                     drawAsterisms(sky, transform);
                     break;
+                case GRID:
+                    //TODO draw grid
+                    break;
                 case STARS:
                     drawStars(sky, transform);
                     break;

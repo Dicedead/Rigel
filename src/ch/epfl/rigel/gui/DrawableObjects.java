@@ -14,6 +14,7 @@ import ch.epfl.rigel.astronomy.Sun;
  */
 public enum DrawableObjects {
     ASTERISMS(Asterism.class),
+    GRID(null),
     STARS(Star.class),
     PLANETS(Planet.class),
     SUN(Sun.class),

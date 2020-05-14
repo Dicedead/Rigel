@@ -191,7 +191,7 @@ public final class ObservedSky {
 
     /**
      * Map creator: Keys: data's elements after applying f on them (identical keys are merged)
-     * Values: data's element CartesianCoordinates
+     * Values: data's elements CartesianCoordinates
      *
      * @param <T>  data's elements' type
      * @param <S>  f's output type -> the returned Map's keys' type
