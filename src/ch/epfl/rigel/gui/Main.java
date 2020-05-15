@@ -64,7 +64,8 @@ import java.util.stream.Stream;
 public final class Main extends Application {
 
     private static final GeographicCoordinates INITIAL_GEO_COORDS = GeographicCoordinates.ofDeg(6.57, 46.52);
-    private static final HorizontalCoordinates INITIAL_CENTER = HorizontalCoordinates.ofDeg(180.000000000001, 15);
+    private static final HorizontalCoordinates INITIAL_CENTER =
+            HorizontalCoordinates.ofDeg(180.001, 15.001);
     private static final NamedTimeAccelerator INITIAL_ACCELERATOR = NamedTimeAccelerator.TIMES_300;
     private static final double INITIAL_FOV = 100;
     private static final int MIN_WIDTH = 800;

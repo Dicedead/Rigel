@@ -39,6 +39,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ch.epfl.rigel.Preconditions.epsilonIfZero;
+
 /**
  * Draws the sky on canvas continuously
  *
@@ -51,8 +53,11 @@ public final class SkyCanvasManager {
     private static final int INIT_HEIGHT = 600;
 
     private static final int MAX_CANVAS_DISTANCE = 10;
-    private static final ClosedInterval NORMAL_ALT_INTERVAL = ClosedInterval.of(Angle.ofDeg(5), Math.PI / 2);
-    private static final ClosedInterval EXTENDED_ALT_INTERVAL = ClosedInterval.of(-Math.PI / 2, Math.PI / 2);
+    private static final double EPSILON = 5e-2;
+    private static final ClosedInterval NORMAL_ALT_INTERVAL =
+            ClosedInterval.of(Angle.ofDeg(5) + EPSILON, Math.PI / 2 - EPSILON);
+    private static final ClosedInterval EXTENDED_ALT_INTERVAL =
+            ClosedInterval.of(-Math.PI / 2 + EPSILON, Math.PI / 2 - EPSILON);
     private static final double ALT_STEP = Angle.ofDeg(5);
     private static final double AZ_STEP = Angle.ofDeg(10);
     private static final ClosedInterval FOV_INTERVAL = ClosedInterval.of(30, 150);
@@ -472,8 +477,9 @@ public final class SkyCanvasManager {
         viewBean.setCenter(HorizontalCoordinates.of(
                 Angle.normalizePositive(viewBean.getCenter().az() + modifVector.x()),
                 (extendedAltitudeIsOn.get()) ?
-                        EXTENDED_ALT_INTERVAL.clip(viewBean.getCenter().alt() + modifVector.y()) :
+                        EXTENDED_ALT_INTERVAL.clip(epsilonIfZero(viewBean.getCenter().alt() + modifVector.y())) :
                         NORMAL_ALT_INTERVAL.clip(viewBean.getCenter().alt() + modifVector.y())
+                        //the altitude is never zero in interval [5, 90]
         ));
     }
 

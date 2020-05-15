@@ -4,6 +4,7 @@ import ch.epfl.rigel.math.Angle;
 
 import java.util.function.Function;
 
+import static ch.epfl.rigel.Preconditions.epsilonIfZero;
 import static java.lang.Math.*;
 
 /**
@@ -15,7 +16,7 @@ import static java.lang.Math.*;
 public final class StereographicProjection implements Function<HorizontalCoordinates, CartesianCoordinates> {
 
     private final HorizontalCoordinates centerOfProjection;
-    private final double cosPhi1, sinPhi1;
+    private final double cosPhi1, sinPhi1, minTanPhi1;
 
     /**
      * Initialize projection for some given center of projection
@@ -26,6 +27,7 @@ public final class StereographicProjection implements Function<HorizontalCoordin
         this.centerOfProjection = center;
         this.cosPhi1 = cos(center.alt());
         this.sinPhi1 = sin(center.alt());
+        this.minTanPhi1 = -sinPhi1/epsilonIfZero(cosPhi1);
     }
 
     /**
@@ -62,6 +64,22 @@ public final class StereographicProjection implements Function<HorizontalCoordin
      */
     public double circleRadiusForParallel(HorizontalCoordinates parallel) {
         return cos(parallel.alt()) / (sin(parallel.alt()) + sinPhi1);
+    }
+
+    /**
+     * @param meridian (HorizontalCoordinates) the corresponding meridian on earth
+     * @return (CartesianCoordinates) the center of the circle projected from meridian
+     */
+    public CartesianCoordinates circleCenterForMeridian(HorizontalCoordinates meridian) {
+        return CartesianCoordinates.of(-1 / epsilonIfZero(cosPhi1 * tan(meridian.az() - centerOfProjection.az())), minTanPhi1);
+    }
+
+    /**
+     * @param meridian (HorizontalCoordinates) the corresponding parallel on earth
+     * @return (double) the radius of the circle projected from meridian
+     */
+    public double circleRadiusForMeridian(HorizontalCoordinates meridian) {
+        return 1 / epsilonIfZero(sin(meridian.az() - centerOfProjection.az()) * cosPhi1);
     }
 
     /**

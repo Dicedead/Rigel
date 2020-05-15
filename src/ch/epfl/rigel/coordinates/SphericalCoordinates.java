@@ -61,7 +61,7 @@ abstract class SphericalCoordinates {
      * @see Object#equals(Object)
      */
     @Override
-    public boolean equals(Object o) {
+    public final boolean equals(Object o) {
         throw new UnsupportedOperationException("Fatal error : tried to test equality but double precision does not \n" +
                 "allow it.");
     }
