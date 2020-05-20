@@ -5,6 +5,7 @@ import ch.epfl.rigel.astronomy.SiderealTime;
 import java.time.ZonedDateTime;
 import java.util.function.Function;
 
+import static ch.epfl.rigel.Preconditions.epsilonIfZero;
 import static ch.epfl.rigel.math.Angle.normalizePositive;
 import static java.lang.Math.*;
 
@@ -29,7 +30,9 @@ public final class EquatorialToHorizontalConversion implements Function<Equatori
     public EquatorialToHorizontalConversion(ZonedDateTime when, GeographicCoordinates where) {
         this.localTime = SiderealTime.local(when, where);
         this.sinPhi = sin(where.lat());
-        this.cosPhi = cos(where.lat());
+        this.cosPhi = epsilonIfZero(cos(where.lat()));
+        //added for step 12 to correct latitude at the poles, was causing 1/0 divisions down the line in Stereographic
+        //projection which created peculiar skies in 90 and -90 latitudes
     }
 
     /**

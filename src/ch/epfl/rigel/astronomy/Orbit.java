@@ -18,7 +18,7 @@ import java.util.stream.DoubleStream;
  */
 public final class Orbit<T extends CelestialObject> extends Cycle<Supplier<T>> {
 
-    private final static double HOURS_IN_DAY = 24d;
+    private final static double HOURS_IN_DAY = 24d; //(non sideral)
     private int currentModulo;
     private List<T> currentRepresentativeList;
     //Even though these 2 attributes are not final, to the outside world, Orbit is indeed immutable. This simply avoids

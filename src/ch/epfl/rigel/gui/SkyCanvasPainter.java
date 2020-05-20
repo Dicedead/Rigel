@@ -1,5 +1,6 @@
 package ch.epfl.rigel.gui;
 
+import ch.epfl.rigel.Preconditions;
 import ch.epfl.rigel.astronomy.*;
 import ch.epfl.rigel.astronomy.Orbit;
 import ch.epfl.rigel.coordinates.CartesianCoordinates;
@@ -7,6 +8,7 @@ import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.coordinates.StereographicProjection;
 import ch.epfl.rigel.coordinates.PlanarTransformation;
 import ch.epfl.rigel.math.ClosedInterval;
+import ch.epfl.rigel.math.RightOpenInterval;
 import javafx.geometry.VPos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -30,22 +32,22 @@ import static ch.epfl.rigel.math.Angle.ofDeg;
  */
 public final class SkyCanvasPainter {
 
-    private static final HorizontalCoordinates PARALLEL = HorizontalCoordinates.ofDeg(0, 0);
+    private static final HorizontalCoordinates EQUATOR = HorizontalCoordinates.ofDeg(0, 0);
 
     private static final int ASTERISMS_LINE_WIDTH = 1;
     private static final int HORIZON_LINE_WIDTH = 2;
+    private static final double GRID_LINE_WIDTH = 0.5;
     private static final double CELEST_SIZE_COEFF = applyToAngle(ofDeg(0.5)) / 140;
     private static final double OCTANTS_ALT_OFFSET = -0.5;
     private static final double ORBIT_CIRCLE_SIZE = 3e-3;
 
     private static final ClosedInterval CLIP_INTERVAL = ClosedInterval.of(-2, 5);
+    private static final RightOpenInterval INTERVAL_SYM180 = RightOpenInterval.symmetric(180);
 
-    private static final Color ASTERISMS_COLOR = Color.BLUE;
-    private static final Color HORIZON_COLOR = Color.RED;
-    private static final Color SUN_COLOR_1_HALO = Color.YELLOW.deriveColor(1, 1, 1, 0.25);
+    private static final Color SUN_COLOR_1_HALO = Color.YELLOW.deriveColor(1, 1, 1,
+            0.25);
     private static final Color SUN_COLOR_2_YELLOW = Color.YELLOW;
     private static final Color SUN_COLOR_3_WHITE = Color.WHITE;
-    private static final Color ORBIT_COLOR = Color.CADETBLUE;
 
     private static final Function<Star, Paint> STAR_COLOR = s -> BlackBodyColor.colorForTemperature(s.colorTemperature());
     private static final Function<Planet, Paint> PLANET_COLOR = planet -> Color.LIGHTGRAY;
@@ -78,25 +80,32 @@ public final class SkyCanvasPainter {
      * @param sky           (ObservedSky) current observed sky
      * @param transform     (PlanarTransformation) current transformation to the canvas
      * @param proj          (StereographicProjection) current projection to the 2D plane
-     * @param objectsToDraw (EnumSet<DrawableObjects>) possible filters - taking advantage of EnumSet's inner order of
-     *                      objects
+     * @param objectsToDraw (EnumSet<DrawableObjects>) possible filters
+     * @param orbit         (Orbit<? extends CelestialObject>) possible orbit to draw
+     * @param orbitUntil    (int) max number of representatives to draw
+     * @param orbitStep     (int) draw every orbitStep representative
+     * @param astColor      (Color) desired asterisms color
+     * @param horColor      (Color) desired horizon color
+     * @param orbitColor    (Color) desired orbit color
+     * @param gridColor     (Color) desired grid color
+     * @param gridSpaceDeg  (int) in degrees: the angular spacing between grid lines
      */
     public void drawMain(ObservedSky sky, PlanarTransformation transform, StereographicProjection proj,
                          EnumSet<DrawableObjects> objectsToDraw, Orbit<? extends CelestialObject> orbit,
-                         int orbitUntil, int orbitStep) {
+                         int orbitUntil, int orbitStep, Color astColor, Color horColor, Color orbitColor,
+                         Color gridColor, int gridSpaceDeg) {
 
         clear();
-
         for (DrawableObjects toDraw : objectsToDraw)
             switch (toDraw) {
                 case ORBIT:
-                    if (orbit != null) drawOrbit(orbit, sky, transform, orbitUntil, orbitStep);
+                    if (orbit != null) drawOrbit(orbit, sky, transform, orbitUntil, orbitStep, orbitColor);
                     break;
                 case ASTERISMS:
-                    drawAsterisms(sky, transform);
+                    drawAsterisms(sky, transform, astColor);
                     break;
                 case GRID:
-                    //TODO draw grid
+                    drawGrid(proj, transform, gridColor, gridSpaceDeg);
                     break;
                 case STARS:
                     drawStars(sky, transform);
@@ -111,11 +120,41 @@ public final class SkyCanvasPainter {
                     drawMoon(sky, transform);
                     break;
                 case HORIZON:
-                    drawHorizon(proj, transform);
+                    drawHorizon(proj, transform, horColor);
                     break;
                 default:
                     throw new IllegalStateException("SkyCanvasPainter: unknown drawable object type given.");
             }
+    }
+
+    /**
+     * Draws the horizontal coordinates grid
+     *
+     * @param projection (StereographicProjection) current projection
+     * @param transform  (PlanarTransformation) current transformation to the canvas
+     * @param gridColor  (Color) current grid color
+     * @param spacingDeg (int) current spacing between parallels/meridians, in deg
+     * @throws IllegalArgumentException if spacing deg does not divide 360 or does not divide 90
+     */
+    public void drawGrid(StereographicProjection projection, PlanarTransformation transform,
+                         Color gridColor, int spacingDeg) {
+        Preconditions.checkArgument(360 % spacingDeg == 0 && 90 % spacingDeg == 0,
+                "SkyCanvasPainter.drawGrid: given grid spacing does not divide 360 and 90.");
+
+        HorizontalCoordinates currHorizCoords;
+        for (int i = 0; i < 180 / spacingDeg; ++i) {
+            currHorizCoords = HorizontalCoordinates.ofDeg(0, INTERVAL_SYM180.reduce(i * spacingDeg));
+            drawStrokeCircle(transform.apply(projection.circleCenterForParallel(currHorizCoords)),
+                    transform.applyDistance(2 * projection.circleRadiusForParallel(currHorizCoords)),
+                    gridColor, GRID_LINE_WIDTH);
+        }
+
+        for (int i = 0; i < 360 / spacingDeg; ++i) {
+            currHorizCoords = HorizontalCoordinates.ofDeg(i * spacingDeg, 0);
+            drawStrokeCircle(transform.apply(projection.circleCenterForMeridian(currHorizCoords)),
+                    transform.applyDistance(2 * projection.circleRadiusForMeridian(currHorizCoords)),
+                    gridColor, GRID_LINE_WIDTH);
+        }
     }
 
 
@@ -127,23 +166,25 @@ public final class SkyCanvasPainter {
      * @param transform (PlanarTransformation) current transformation to the canvas
      * @param length    (int) show up to "length" circles representing the orbit
      * @param step      (int) show every "step" position computed (this is the resolution)
+     * @param orbColor  (Color) current orbit color
      */
     public void drawOrbit(Orbit<? extends CelestialObject> orbit, ObservedSky sky, PlanarTransformation transform,
-                          int length, int step) {
+                          int length, int step, Color orbColor) {
         pipeline(sky.mapObjectToPosition(orbit.representatives(length, step), Function.identity()).entrySet().stream(),
-                orb -> ORBIT_CIRCLE_SIZE, orb -> ORBIT_COLOR, transform);
+                orb -> ORBIT_CIRCLE_SIZE, orb -> orbColor, transform);
     }
 
     /**
      * Draws blue lines representing asterisms in current sky
      * We've separated asterism drawing from star drawing in view of step 12 where the possibility of not drawing the
-     * stars (for example) will be given.
+     * stars (for example) is given in the settings menu.
      *
      * @param sky       (ObservedSky) current sky
      * @param transform (PlanarTransformation) current transformation to the canvas
+     * @param astColor  (Color) current asterism color
      */
-    public void drawAsterisms(ObservedSky sky, PlanarTransformation transform) {
-        graphicsContext.setStroke(ASTERISMS_COLOR);
+    public void drawAsterisms(ObservedSky sky, PlanarTransformation transform, Color astColor) {
+        graphicsContext.setStroke(astColor);
         graphicsContext.setLineWidth(ASTERISMS_LINE_WIDTH);
         sky.asterisms().forEach(
                 asterism -> {
@@ -209,20 +250,17 @@ public final class SkyCanvasPainter {
      *
      * @param projection (StereographicProjection) centered projection to the 2D plane
      * @param transform  (PlanarTransformation) current transformation to the canvas
+     * @param horColor   (Color) current horizon color
      */
-    public void drawHorizon(StereographicProjection projection, PlanarTransformation transform) {
-        double size = transform.applyDistance(2 * projection.circleRadiusForParallel(PARALLEL));
-        CartesianCoordinates transformedCenter = transform.apply(projection.circleCenterForParallel(PARALLEL));
-        double halfSize = size / 2;
+    public void drawHorizon(StereographicProjection projection, PlanarTransformation transform, Color horColor) {
+        drawStrokeCircle(transform.apply(projection.circleCenterForParallel(EQUATOR)),
+                transform.applyDistance(2 * projection.circleRadiusForParallel(EQUATOR)),
+                horColor,
+                HORIZON_LINE_WIDTH);
 
-        synchronized (graphicsContext) {
-            graphicsContext.setStroke(HORIZON_COLOR);
-            graphicsContext.setLineWidth(HORIZON_LINE_WIDTH);
-            graphicsContext.strokeOval(transformedCenter.x() - halfSize, transformedCenter.y() - halfSize, size, size);
-            graphicsContext.setFill(HORIZON_COLOR);
-            graphicsContext.setTextAlign(TextAlignment.CENTER);
-            graphicsContext.setTextBaseline(VPos.TOP);
-        }
+        graphicsContext.setFill(horColor);
+        graphicsContext.setTextAlign(TextAlignment.CENTER);
+        graphicsContext.setTextBaseline(VPos.TOP);
         for (int i = 0; i < 8; ++i) {
             HorizontalCoordinates octantHorizCoords = HorizontalCoordinates.ofDeg(45 * i, OCTANTS_ALT_OFFSET);
             CartesianCoordinates octantTransCoords = transform.apply(projection.apply(octantHorizCoords));
@@ -243,8 +281,6 @@ public final class SkyCanvasPainter {
     private <T extends CelestialObject> void pipeline(Stream<Map.Entry<T, CartesianCoordinates>> positions,
             Function<T, Double> radiusFunction, Function<T, Paint> color, PlanarTransformation transform) {
         drawCelestial(checkInCanvas(applyTransform(positions, transform)), radiusFunction, color, transform);
-        /*It's worth pointing out that positions is always a non parallel Stream in the first version of this program
-         (ie pre step 12) but may become parallel in the case of drawStars for step 12.*/
     }
 
     /**
@@ -290,7 +326,7 @@ public final class SkyCanvasPainter {
     }
 
     /**
-     * Synchronized circle drawing helper method
+     * Circle drawing helper method
      *
      * @param color        (Paint) color to apply
      * @param cartesCoords (CartesianCoordinates) transformed coordinates
@@ -304,6 +340,23 @@ public final class SkyCanvasPainter {
     }
 
     /**
+     * Stroke circle drawing method
+     *
+     * @param transformedCenter (CartesianCoordinates) center of the circle
+     * @param radius            (double) circle's radius
+     * @param color             (Color) circle's color
+     * @param width             (double) circle's stroke's width
+     */
+    private void drawStrokeCircle(CartesianCoordinates transformedCenter, double radius, Color color, double width) {
+        double halfRadius = radius / 2;
+        graphicsContext.setStroke(color);
+        graphicsContext.setLineWidth(width);
+        graphicsContext.strokeOval(transformedCenter.x() - halfRadius, transformedCenter.y() - halfRadius,
+                radius, radius);
+        //used in drawGrid and drawHorizon
+    }
+
+    /**
      * Recursive asterism drawing method: follows its list of stars from stars to finish, drawing lines on the way
      *
      * @param c1               (CartesianCoordinates) transformed
@@ -314,7 +367,8 @@ public final class SkyCanvasPainter {
      * @param transform        (PlanarTransformation) current transformation to the canvas
      */
     private void asterismLineRecurr(CartesianCoordinates c1, CartesianCoordinates c2,
-                                    int currentStartStar, Asterism asterism, ObservedSky sky, PlanarTransformation transform, boolean c1InCanvas) {
+                                    int currentStartStar, Asterism asterism, ObservedSky sky, PlanarTransformation transform,
+                                    boolean c1InCanvas) {
 
         boolean c2InCanvas = isInCanvas(c2);
         if (c1InCanvas || isInCanvas(c2)) {

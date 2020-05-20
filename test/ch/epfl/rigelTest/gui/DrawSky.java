@@ -68,12 +68,12 @@ public final class DrawSky extends Application {
             //££ThreadManager.getGui().execute(
                 //££    () ->
                     //££{
-                paint.drawAsterisms(sky, transform);
+
                 paint.drawStars(sky, transform);
                 paint.drawPlanets(sky, transform);
                 paint.drawSun(sky, transform);
                 paint.drawMoon(sky, transform);
-                paint.drawHorizon(proj, transform);
+
                 //££});
 
             ImageIO.write(SwingFXUtils.fromFXImage(canvasFuture.snapshot(null, null),

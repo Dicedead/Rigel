@@ -7,7 +7,7 @@ import ch.epfl.rigel.astronomy.Star;
 import ch.epfl.rigel.astronomy.Sun;
 
 /**
- * Simple enum used to mask / draw objects, also controls the order of drawing these objects in SkyCanvasPainter
+ * Simple enum used to mask / draw objects, also suggests an order for drawing them (use EnumSet)
  *
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)

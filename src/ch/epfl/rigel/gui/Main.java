@@ -1,5 +1,6 @@
 package ch.epfl.rigel.gui;
 
+import ch.epfl.rigel.Preconditions;
 import ch.epfl.rigel.astronomy.AsterismLoader;
 import ch.epfl.rigel.astronomy.HygDatabaseLoader;
 import ch.epfl.rigel.astronomy.StarCatalogue;
@@ -13,19 +14,25 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.HPos;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -35,6 +42,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.util.converter.LocalTimeStringConverter;
@@ -65,7 +73,7 @@ public final class Main extends Application {
 
     private static final GeographicCoordinates INITIAL_GEO_COORDS = GeographicCoordinates.ofDeg(6.57, 46.52);
     private static final HorizontalCoordinates INITIAL_CENTER =
-            HorizontalCoordinates.ofDeg(180.001, 15.001);
+            HorizontalCoordinates.ofDeg(181.001, 15.001);
     private static final NamedTimeAccelerator INITIAL_ACCELERATOR = NamedTimeAccelerator.TIMES_300;
     private static final double INITIAL_FOV = 100;
     private static final int MIN_WIDTH = 800;
@@ -86,6 +94,7 @@ public final class Main extends Application {
     private static final String INFO_BAR_STYLE = "-fx-padding: 4; -fx-background-color: white;";
     private static final String SETTINGS_BOX_STYLE = "-fx-spacing: 10; -fx-padding: 4; -fx-background-color: #c3c3c3;";
     private static final String SEPARATOR_STYLE = "-fx-background-color: #4f4f4f";
+    private static final String COLORPICKER_STYLE = "-fx-color-label-visible: false ;";
 
     private static final String TOOLTIP_DEFAULT_STYLE = "-fx-background-color: #FF0000;";
     private static final Duration TOOLTIP_SHOW_WAIT = Duration.millis(250);
@@ -106,6 +115,7 @@ public final class Main extends Application {
     private static final String SCROLL_LABEL = "\uF00E";
     private static final String SEARCH_LABEL = "\uF002";
     private static final String RESETDEFAULT_BUTTON = "\uF021";
+    private static final String GRID_LABEL = "\uF0AC";
 
     private static final String HELPTXT_SEARCH = "Recherche d'un corps céleste\nà partir du nom, cliquez\nsur un résultat pour" +
             "\ncentrer la projection sur\nl'objet choisi, même s'il\nne figure pas parmi les\nobjets à dessiner (configurés\n" +
@@ -129,10 +139,23 @@ public final class Main extends Application {
             "zoom, ie le champ\nde vue.";
     private static final String HELPTXT_RESETDEF = "Remet les valeurs des\nsensibilités par défaut.";
     private static final String HELPTXT_OBJECTS_TO_DRAW = "Sélectionnez les objets à dessiner.";
+    private static final String HELPTXT_FULLSCREEN = "Appuyez sur ECHAP pour quitter le mode plein écran.";
+    private static final String HELPTXT_GRIDSPACE = "Choisissez l'espacement entre les\nparallèles représentés sur la grille.\n" +
+            "(unité : degrés) Possible perte de\nfluidité dans les déplacements\nà glissements de souris pour <= 15°:\n" +
+            "augmentez la sensibilité au besoin.";
+    private static final String HELPTXT_GUILESS_POPUP = "Appuyez sur F pour afficher la GUI.\nCliquez pour cacher ce message.";
+                         //Actually, any key that is not mapped to anything else works, and any mouse input suffices to
+                         //hide this tooltip, but let's keep things simple.
 
     private static final Color CONTROLBAR_TEXT_COLOR = Color.color(0.225, 0.225, 0.225);
     private static final double PARAMS_GRIDGAP = 4d;
+    private static final int GRID_TODRAW_WIDTH = 2;
+    private static final int GRID_TODRAW_HEIGHT = 4;
     private static final double SLIDER_WIDTH = 125d;
+    private static final double TRANSSLIDER_MIN = 0.25;
+    private static final double TRANSSLIDER_MAX = 6;
+    private static final double SCROLLSLIDER_MIN = 0.5;
+    private static final double SCROLLSLIDER_MAX = 1.5;
 
     private static BorderPane mainBorder;
 
@@ -327,10 +350,14 @@ public final class Main extends Application {
 
             BooleanProperty guiIsON = new SimpleBooleanProperty(true);
 
+            Tooltip guiPopup = new Tooltip(HELPTXT_GUILESS_POPUP);
+            guiPopup.setAutoHide(true);
+
             toggleGUI.setOnAction(e -> {
                 manager.setNonFunctionalKeyPressed(false);
                 guiIsON.set(false);
                 manager.canvas().requestFocus();
+                guiPopup.show(primaryStage);
             });
 
             guiIsON.addListener((p, o, newBoolean) ->
@@ -340,6 +367,7 @@ public final class Main extends Application {
             manager.nonFunctionalKeyPressedProperty().addListener((p, o, n) -> {
                 if (!guiIsON.get() && n) {
                     guiIsON.set(true);
+                    guiPopup.hide();
                 }
             });
 
@@ -355,7 +383,7 @@ public final class Main extends Application {
             bindTextToBoolean(toggleFullscreen.textProperty(),
                     primaryStage.fullScreenProperty(), FULLSCREEN_SET_OFF, FULLSCREEN_SET_ON);
 
-            //TODO rightPanelIsON: add listener to activate/deactive information right panel
+            //TODO rightPanelIsON: add listener to activate/deactivate information right panel
             Button rightClickInfo = new Button();
             rightClickInfo.setFont(fontAwesome);
             Tooltip rightClickToolTip = new Tooltip();
@@ -399,8 +427,8 @@ public final class Main extends Application {
             toolTipList.add(dragSensTooltip);
             dragSensLabel.setTooltip(dragSensTooltip);
 
-            Slider translationSlider = new Slider(0.25, 6, manager.getMouseDragSensitivity()
-                    * manager.getMouseDragFactor());
+            Slider translationSlider = new Slider(TRANSSLIDER_MIN, TRANSSLIDER_MAX,
+                    manager.getMouseDragSensitivity() * manager.getMouseDragFactor());
             manager.mouseDragSensitivityProperty().bind(translationSlider.valueProperty().divide(manager.getMouseDragFactor()));
 
             Label scrollSensLabel = new Label(SCROLL_LABEL);
@@ -409,7 +437,7 @@ public final class Main extends Application {
             toolTipList.add(scrollSensToolTip);
             scrollSensLabel.setTooltip(scrollSensToolTip);
 
-            Slider scrollSlider = new Slider(0.5, 1.5, manager.getMouseScrollSensitivity());
+            Slider scrollSlider = new Slider(SCROLLSLIDER_MIN, SCROLLSLIDER_MAX, manager.getMouseScrollSensitivity());
             manager.mouseScrollSensitivityProperty().bind(scrollSlider.valueProperty());
 
             Stream.of(translationSlider, scrollSlider)
@@ -419,35 +447,34 @@ public final class Main extends Application {
                         slider.setMaxWidth(SLIDER_WIDTH);
                     });
 
-            Button resetDef = new Button(RESETDEFAULT_BUTTON);
-            resetDef.setFont(fontAwesome);
-            resetDef.setOnAction(e -> {
+            Button resetSensButton = new Button(RESETDEFAULT_BUTTON);
+            resetSensButton.setFont(fontAwesome);
+            resetSensButton.setOnAction(e -> {
                 translationSlider.setValue(MOUSE_DRAG_DEFAULTSENS);
                 scrollSlider.setValue(MOUSE_SCROLL_DEFAULTSENNS);
             });
             Tooltip resetDefaultToolTip = new Tooltip(HELPTXT_RESETDEF);
             toolTipList.add(resetDefaultToolTip);
-            resetDef.setTooltip(resetDefaultToolTip);
+            resetSensButton.setTooltip(resetDefaultToolTip);
 
-            VBox slidersVBox = new VBox(sensLabel, spaceLabel(), dragSensLabel, translationSlider, spaceLabel(),
-                    scrollSensLabel, scrollSlider, resetDef);
+            VBox slidersVBox = new VBox(sensLabel, spaceLabel(), dragSensLabel, translationSlider,
+                    scrollSensLabel, scrollSlider, resetSensButton);
             slidersVBox.setAlignment(Pos.CENTER);
 
             Separator secondSeparator = new Separator(Orientation.HORIZONTAL);
             secondSeparator.setStyle(SEPARATOR_STYLE);
 
-            // c/ Final checkboxes:
+            // c/ Final checkboxes and color pickers:
             Label drawLabel = new Label("Dessiner :");
             Tooltip drawLabelToolTip = new Tooltip(HELPTXT_OBJECTS_TO_DRAW);
             drawLabel.setTooltip(drawLabelToolTip);
             toolTipList.add(drawLabelToolTip);
-            drawLabel.setAlignment(Pos.CENTER);
 
             GridPane checkBoxesToDraw = new GridPane();
             ObservableList<CheckBox> drawablesList = FXCollections.observableArrayList();
             for (DrawableObjects drawable : DrawableObjects.values()) {
                 CheckBox draw = new CheckBox(drawable.getName());
-                draw.setSelected(true);
+                draw.setSelected(drawable != DrawableObjects.GRID);
                 draw.selectedProperty().addListener((p, o, n) -> {
                     EnumSet<DrawableObjects> nextSet = EnumSet.copyOf(manager.getObjectsToDraw());
                     if (n) {
@@ -459,13 +486,14 @@ public final class Main extends Application {
                 });
                 drawablesList.add(draw);
             }
-            CheckBox index7 = drawablesList.get(7);
+
+            CheckBox horizonCheckbox = drawablesList.get(7);
             drawablesList.set(7, drawablesList.get(3));
-            drawablesList.set(3, index7);
+            drawablesList.set(3, horizonCheckbox);
 
             Iterator<CheckBox> checkBoxIt = drawablesList.iterator();
-            for (int i = 0; i < 2; ++i) {
-                for (int j = 0; j < 4; ++j) {
+            for (int i = 0; i < GRID_TODRAW_WIDTH; ++i) {
+                for (int j = 0; j < GRID_TODRAW_HEIGHT; ++j) {
                     checkBoxesToDraw.add(checkBoxIt.next(), i, j);
                 }
             }
@@ -473,13 +501,56 @@ public final class Main extends Application {
             checkBoxesToDraw.setVgap(PARAMS_GRIDGAP);
             checkBoxesToDraw.setHgap(PARAMS_GRIDGAP);
 
+            GridPane colorsGrid = new GridPane();
+            Label[] colorLabels = new Label[manager.colorLabelsList().size()];
+            ColorPicker[] colorPickers = new ColorPicker[manager.colorLabelsList().size()];
+
+            for (int i = 0; i < manager.colorLabelsList().size(); ++i) {
+                colorPickers[i] = new ColorPicker();
+                colorPickers[i].valueProperty().bindBidirectional(manager.colorPropertiesList().get(i));
+                colorPickers[i].setStyle(COLORPICKER_STYLE);
+                colorLabels[i] = new Label(manager.colorLabelsList().get(i));
+                GridPane.setHalignment(colorLabels[i], HPos.RIGHT);
+            }
+
+            colorsGrid.addColumn(0, colorLabels);
+            colorsGrid.addColumn(1, colorPickers);
+
+            Label gridSpaceLabel = new Label(GRID_LABEL);
+            gridSpaceLabel.setFont(fontAwesome);
+            Tooltip gridSpaceTooltip = new Tooltip(HELPTXT_GRIDSPACE);
+            gridSpaceLabel.setTooltip(gridSpaceTooltip);
+            toolTipList.add(gridSpaceTooltip);
+
+            ComboBox<String> spacingsBox = new ComboBox<>();
+            spacingsBox.setItems(FXCollections.observableArrayList(manager.suggestedGridSpacings()));
+            spacingsBox.setValue(manager.getHorizCoordsGridSpacingDeg() + "°");
+            spacingsBox.valueProperty().addListener((p, o, n) ->
+                    manager.setHorizCoordsGridSpacingDeg(Integer.parseInt(n.substring(0, n.length()-1))));
+
+            HBox gridSizeHBox = new HBox(gridSpaceLabel, spacingsBox);
+            gridSizeHBox.setSpacing(PARAMS_GRIDGAP);
+            gridSizeHBox.setAlignment(Pos.CENTER);
+
+            VBox drawingVbox = new VBox(drawLabel, checkBoxesToDraw, spaceLabel(), gridSizeHBox,  spaceLabel(), colorsGrid);
+
             // d/ Finalization
-            VBox parametersBox = new VBox(layerOneGrid, firstSeparator, slidersVBox, secondSeparator, drawLabel, checkBoxesToDraw);
+            VBox parametersBox = new VBox(layerOneGrid, firstSeparator, slidersVBox, secondSeparator, drawingVbox);
             parametersBox.setStyle(SETTINGS_BOX_STYLE);
             setVisibleAndManaged(parametersBox, false);
 
             // NEW VI/ Information on celestial object panel (right border):
             VBox rightBox = new VBox();
+
+            manager.wantNewInformationPanelProperty().addListener((p, o, n) -> {
+                if (n == null) {
+                    setVisibleAndManaged(rightBox, false);
+                } else {
+                    if (rightPanelIsON.get()) {
+                        //TODO load info
+                    }
+                }
+            });
 
             // VII/ Misc controls and styles: ------------------------------
             mainBorder = new BorderPane(canvasPane, controlBar, rightBox, informationBar, parametersBox);
@@ -495,6 +566,7 @@ public final class Main extends Application {
 
             // VIII/ Showtime: ----------------------------------------------
             Scene mainScene = new Scene(mainBorder);
+            primaryStage.setFullScreenExitHint(HELPTXT_FULLSCREEN);
             primaryStage.setScene(mainScene);
             primaryStage.show();
             manager.canvas().requestFocus();
@@ -544,5 +616,19 @@ public final class Main extends Application {
 
     private static Label spaceLabel() {
         return new Label("\n");
+    }
+
+    /**
+     * Returns given double in percentage format up to given decimal
+     *
+     * @param doubleToFormat (double) given double, does NOT have to be in [0, 1]
+     * @param numberOfDecimals (int) given decimal
+     * @return (String) formatted double
+     * @throws IllegalArgumentException if given number of decimals is (strictly) negative
+     */
+    private static String doubleToPercent(double doubleToFormat, int numberOfDecimals) {
+        Preconditions.checkArgument(numberOfDecimals >= 0, "Main.doubleToPercent: given number" +
+                " of decimals is < 0.");
+        return String.format(Locale.ROOT, "%."+numberOfDecimals+"f%%", doubleToFormat * 100);
     }
 }
