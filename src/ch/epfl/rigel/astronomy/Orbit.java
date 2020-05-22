@@ -19,9 +19,9 @@ import java.util.stream.DoubleStream;
 public final class Orbit<T extends CelestialObject> extends Cycle<Supplier<T>> {
 
     private final static double HOURS_IN_DAY = 24d; //(non sideral)
-    private int currentModulo;
+    private int currentModulo, currentLength;
     private List<T> currentRepresentativeList;
-    //Even though these 2 attributes are not final, to the outside world, Orbit is indeed immutable. This simply avoids
+    //Even though these 3 attributes are not final, to the outside world, Orbit is indeed immutable. This simply avoids
     //unnecessary re-computation.
 
     /**
@@ -46,11 +46,12 @@ public final class Orbit<T extends CelestialObject> extends Cycle<Supplier<T>> {
      * @return (List<T>) said list
      */
     public List<T> representatives(int indexUntil, int stepModulo) {
-        if (currentRepresentativeList == null || stepModulo != currentModulo) {
+        if (currentRepresentativeList == null || stepModulo != currentModulo || indexUntil != currentLength) {
             currentRepresentativeList = List.copyOf(flow(indexUntil)
                     .suchThat(supplier -> indexOf(supplier) % stepModulo == 0)
                     .image(Supplier::get).getRawData());
             currentModulo = stepModulo;
+            currentLength = indexUntil;
         }
         return currentRepresentativeList;
     }

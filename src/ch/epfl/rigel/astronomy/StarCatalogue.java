@@ -1,17 +1,24 @@
 package ch.epfl.rigel.astronomy;
 
 import ch.epfl.rigel.Preconditions;
+import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
+import ch.epfl.rigel.math.sets.implement.MathSet;
+import ch.epfl.rigel.math.sets.implement.PartitionSet;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * Catalogue of stars and asterisms
@@ -25,6 +32,8 @@ public final class StarCatalogue {
     private final Map<Asterism, List<Integer>> asterismMap;
     private final Map<Star, Integer> starToIndexMap;
     private final Set<Asterism> immutableAsterismSet;
+    private final Map<Star, AbstractMathSet<Star>> constellationsMap;
+
     /**
      * Constructs a catalogue of stars in and possibly out of asterisms
      *
@@ -39,13 +48,43 @@ public final class StarCatalogue {
         //Although this map causes some spatial complexity, it avoids an O(n*m) call to indexOf below
 
         this.asterismMap = asterisms.stream().collect(Collectors.toMap(Function.identity(),
-                asterism -> { Preconditions.checkArgument(starToIndexMap.keySet().containsAll(asterism.stars())); //(*)
+                asterism -> {
+                Preconditions.checkArgument(starToIndexMap.keySet().containsAll(asterism.stars())); //(*)
                 return asterism.stars().stream().map(starToIndexMap::get).collect(Collectors.toUnmodifiableList());},
                 (v, u) -> u));
 
         /* (*): starToIndexMap is a HashMap, therefore calling containsAll upon its keySet may be better but no worse
                 than upon a List - depends of the hash. In this case, it proved to speed up the construction of
                 StarCatalogue instances by 20+ times in average.*/
+
+        //Step 12:
+        constellationsMap = new HashMap<>();
+
+        PartitionSet<List<Star>> constellations =
+                new PartitionSet<>(asterismMap.keySet().stream()
+                .map(Asterism::stars)
+                .collect(MathSet.toMathSet()), (list1, list2) -> {
+                    List<Star> nonFinalList1 = new ArrayList<>(list1);
+                    nonFinalList1.retainAll(list2);
+                    return nonFinalList1.size() > 0;});
+
+        constellations.components().forEach(setOfStars -> {
+
+            AbstractMathSet<Star> starsInConstellation =
+                    setOfStars.stream()
+                    .flatMap(Collection::stream)
+                    .collect(MathSet.toMathSet());
+
+            starsInConstellation.forEach(
+            star -> {
+                if (constellationsMap.containsKey(star)) {
+                    constellationsMap.put(star,
+                            constellationsMap.get(star).union(starsInConstellation.suchThat(otherStar -> otherStar != star)));
+                } else {
+                    constellationsMap.put(star, starsInConstellation.suchThat(otherStar -> otherStar != star));
+                }});
+
+        });
 
         this.starList = List.copyOf(stars);
         this.immutableAsterismSet = Collections.unmodifiableSet(asterismMap.keySet());
@@ -79,7 +118,19 @@ public final class StarCatalogue {
         return asterismMap.get(asterism);
     }
 
-    /***
+    /**
+     * Gets the constellation a star is in minus the star itself, if the star is in a constellation
+     *
+     * @param targetStar (Star) input star
+     * @return (Optional<Set<Star>>) empty if star is not in any constellation, set of said
+     *         stars otherwise
+     */
+    public Optional<Set<Star>> constellationOfStar(Star targetStar) {
+        return constellationsMap.get(targetStar) != null ? Optional.of(constellationsMap.get(targetStar).getSetData()) :
+                Optional.empty();
+    }
+
+    /**
      * Builds a StarCatalogue instance
      */
     public static final class Builder {

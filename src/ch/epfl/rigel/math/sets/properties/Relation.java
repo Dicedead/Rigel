@@ -29,7 +29,6 @@ public interface Relation<T, U> {
         return l -> areInRelation(t, l);
     }
 
-    @FunctionalInterface
     interface Equivalence<T> extends Relation<T, Boolean>{
         default boolean areInRelation(MathSet<T> pair)
         {
