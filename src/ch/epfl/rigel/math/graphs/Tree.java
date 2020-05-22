@@ -151,6 +151,20 @@ public final class Tree<V> extends PointedSet<GraphNode<V>> implements Graph<Gra
         return new Tree<>(nodes.suchThat(node -> node.getDepth() >= point.getDepth() && GraphNode.areRelated(node, point)),
                 false, point, maxDepth);
     }
+
+    public Optional<AbstractOrderedTuple<GraphNode<V>>> branchAtPoint(GraphNode<V> point)
+    {
+        Preconditions.checkArgument(contains(point));
+        var top = point
+                .hierarchy()
+                .stream()
+                .filter(n ->getNodesAtDepth(n.getDepth() + 1)
+                        .suchThat(n::isParentOf)
+                        .cardinality() == 1)
+                .findFirst();
+
+        return findPathBetween(point, top.orElse(point));
+    }
     /**
      * Finds the shortest path between two nodes
      *
