@@ -113,7 +113,7 @@ public final class Main extends Application {
 
     private static final String TOOLTIP_DEFAULT_STYLE = "-fx-background-color: #FF0000;";
     private static final Duration TOOLTIP_SHOW_WAIT = Duration.millis(250);
-    private static final Duration TOOLTIP_HIDE_WAIT = Duration.ZERO;
+    private static final Duration TOOLTIP_HIDE_WAIT = Duration.millis(50);
 
     private static final String PLAY_BUTTON_TEXT = "\uf04b";
     private static final String PAUSE_BUTTON_TEXT = "\uf04c";
@@ -134,6 +134,7 @@ public final class Main extends Application {
     private static final String PHASE_LABEL = "\uF042";
     private static final String ORBIT_LENGTH_LABEL = "\uF060\uF061";
     private static final String ORBIT_RESO_LABEL = "\uF041";
+    private static final String EXIT_BUTTON_LABEL = "\uF057";
     private static final String MIN_LENGTH_LABEL = "-";
     private static final String MAX_LENGTH_LABEL = "+";
 
@@ -195,6 +196,9 @@ public final class Main extends Application {
     private static final String HELPTXT_LENGTH = "Longueur de l'orbite simulée.";
     private static final String HELPTXT_ORBITPARAMS = "Modification de la résolution\net la longueur de l'orbite,\nla couleur" +
             " peut être modifiée\ndans le menu de paramètres.";
+    private static final String HELPTXT_EXITINFO = "Fermer cette fenêtre sans effacer\nl'éventuelle orbite dessinée.\n" +
+            "Clic droit sur un espace vide\ndu ciel fermera cette fenêtre et\n" +
+            "effacera l'éventuelle orbite.\nAppuyer sur O efface seulement\nl'éventuelle orbite,I seulement\ncette fenêtre.";
     private static final String HELPTXT_GUILESS_POPUP = "Appuyez sur F pour afficher la GUI.\nCliquez pour cacher ce message.";
     //Actually, any key that is not mapped to anything else works, and any mouse input suffices to
     //hide this tooltip, but let's keep things simple.
@@ -214,6 +218,7 @@ public final class Main extends Application {
     private static final double RESOSLIDER_MAX = 40;
     private static final double LENGTHSLIDER_MIN = 200;
     private static final double LENGTHSLIDER_MAX = 3000;
+    private static final double INFO_HBOX_SPACING = 5;
 
     private static BorderPane mainBorder;
     private static final List<Tooltip> toolTipList = new ArrayList<>();
@@ -617,8 +622,20 @@ public final class Main extends Application {
 
             // NEW VI/ Information on celestial object panel (right border):
             // a/ Common information:
+            Button exitButton = new Button(EXIT_BUTTON_LABEL);
+            exitButton.setFont(fontAwesomeDefault);
+            addTooltip(exitButton, HELPTXT_EXITINFO);
+            exitButton.setOnAction(e -> manager.resetInformationPanel());
+            rightPanelIsON.addListener((p, o, n) -> {
+                if (!n) exitButton.fire();
+            });
+
             Text celestNameLabel = new Text();
             celestNameLabel.setStyle(CELEST_TITLE_STYLE);
+
+            VBox topInfoVBox = new VBox(exitButton, celestNameLabel);
+            topInfoVBox.setSpacing(INFO_HBOX_SPACING);
+            topInfoVBox.setAlignment(Pos.CENTER);
 
             Separator firstRightSeparator = new Separator(Orientation.HORIZONTAL);
             firstRightSeparator.setStyle(SEPARATOR_STYLE);
@@ -739,7 +756,7 @@ public final class Main extends Application {
             orbitSliders.setAlignment(Pos.CENTER);
 
             // f/ Finalization and update:
-            VBox rightBox = new VBox(celestNameLabel, firstRightSeparator, basicInfo, secondRightSeparator, sunSpecifics,
+            VBox rightBox = new VBox(topInfoVBox, firstRightSeparator, basicInfo, secondRightSeparator, sunSpecifics,
                     moonSpecifics, starsSpecifics, possibleSeparator, orbitSliders);
             rightBox.setStyle(BONUS_BOXES_STYLE);
             rightBox.setAlignment(Pos.CENTER);
@@ -760,7 +777,7 @@ public final class Main extends Application {
                             dateTimeBean.getZone().toString(),
                             doubleWithXdecimals(observerLocationBean.getLonDeg(), DEFAULT_NBR_DECIMALS),
                             doubleWithXdecimals(observerLocationBean.getLatDeg(), DEFAULT_NBR_DECIMALS));
-                    setVisibleAndManaged(true, celestNameLabel, firstRightSeparator, basicInfo,
+                    setVisibleAndManaged(true, topInfoVBox, firstRightSeparator, basicInfo,
                             secondRightSeparator, rightBox);
                     if (n instanceof Star) {
                         setTexts(starsInfoValues, String.valueOf(((Star) n).colorTemperature()),

@@ -269,9 +269,11 @@ public final class SkyCanvasManager {
                 case K:
                     if (rotation.get() != 0) modifyRotation(-rotation.get());
                     break;
-                case N:
+                case O:
                     orbitProperty.set(null);
-                    wantNewInformationPanel.set(null);
+                    break;
+                case I:
+                    resetInformationPanel();
                     break;
                 default:
                     nonFunctionalKeyPressed.set(true);
@@ -424,6 +426,8 @@ public final class SkyCanvasManager {
     public ObjectProperty<CelestialObject> wantNewInformationPanelProperty() {
         return wantNewInformationPanel;
     }
+
+    public void resetInformationPanel() { wantNewInformationPanel.set(null); }
 
     //TODO javadoc
     public int getHorizCoordsGridSpacingDeg() {
