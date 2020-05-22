@@ -113,21 +113,22 @@ public final class SkyCanvasManager {
     //objects, it thus made sense for us not to use ObservableSet
     private final ObjectBinding<Set<Class<?>>> drawableClasses;
 
-    private final ObjectProperty<Color> orbitColor = new SimpleObjectProperty<>(Color.CADETBLUE);
-    private final ObjectProperty<Color> horizonColor = new SimpleObjectProperty<>(Color.RED);
-    private final ObjectProperty<Color> gridColor = new SimpleObjectProperty<>(Color.FIREBRICK
-            .deriveColor(1,1,1,0.5));
-    private final ObjectProperty<Color> asterismColor = new SimpleObjectProperty<>(Color.BLUE);
+    private static final List<Color> defaultColorsList = List.of(Color.BLUE, Color.CADETBLUE, Color.FIREBRICK
+            .deriveColor(1,1,1,0.5), Color.RED);
+    private final ObjectProperty<Color> orbitColor = new SimpleObjectProperty<>(defaultColorsList.get(1));
+    private final ObjectProperty<Color> horizonColor = new SimpleObjectProperty<>(defaultColorsList.get(3));
+    private final ObjectProperty<Color> gridColor = new SimpleObjectProperty<>(defaultColorsList.get(2));
+    private final ObjectProperty<Color> asterismColor = new SimpleObjectProperty<>(defaultColorsList.get(0));
     private final List<ObjectProperty<Color>> colorsList = List.of(asterismColor, orbitColor, gridColor, horizonColor);
     private final List<String> correspColorStringList = List.of("Astérismes ", "Orbites ", "Grille ", "Horizon ");
 
-    private final IntegerProperty resolutionInHours = new SimpleIntegerProperty(5);
+    private static final int RESOLUTION_DEFAULT = 5;
     private final IntegerProperty drawOrbitUntil = new SimpleIntegerProperty(ORBIT_SIMULATION_DAYS_DEFAULT);
     private final IntegerProperty orbitDrawingStep = new SimpleIntegerProperty(5);
     private final ObjectProperty<CelestialObject> wantNewInformationPanel = new SimpleObjectProperty<>();
 
     private final ObjectProperty<Orbit<? extends CelestialObject>> orbitProperty = new SimpleObjectProperty<>();
-    private final List<String> suggestedGridSpacings = List.of("10°", "15°", "30°", "45°");
+    private static final List<String> suggestedGridSpacings = List.of("5°","10°", "15°", "30°", "45°", "90°");
     private final IntegerProperty horizCoordsGridSpacingDeg = new SimpleIntegerProperty(15);
 
     /**
@@ -233,13 +234,13 @@ public final class SkyCanvasManager {
 
                     if (!(celestClass = objectUnderMouse.get().get().getClass()).equals(Star.class)) {
                         orbitProperty.set(new Orbit<>(dtBean.getZonedDateTime(),
-                                resolutionInHours.get(),
-                                ORBIT_SIMULATION_DAYS_DEFAULT, getModel(celestClass),
+                                RESOLUTION_DEFAULT, ORBIT_SIMULATION_DAYS_DEFAULT, getModel(celestClass),
                                 new EclipticToEquatorialConversion(dtBean.getZonedDateTime())));
                     } else {
                         orbitProperty.set(null);
                     }
                 } else {
+                    orbitProperty.set(null);
                     wantNewInformationPanel.set(null);
                 }
             }
@@ -267,6 +268,10 @@ public final class SkyCanvasManager {
                     break;
                 case K:
                     if (rotation.get() != 0) modifyRotation(-rotation.get());
+                    break;
+                case N:
+                    orbitProperty.set(null);
+                    wantNewInformationPanel.set(null);
                     break;
                 default:
                     nonFunctionalKeyPressed.set(true);
@@ -302,6 +307,7 @@ public final class SkyCanvasManager {
         Stream.of(observedSky, planeToCanvas, objectsToDraw, orbitProperty, orbitColor, asterismColor, horizonColor,
                 gridColor, horizCoordsGridSpacingDeg, drawOrbitUntil, orbitDrawingStep)
                 .forEach(prop -> prop.addListener(painterEvent));
+
     }
 
     /**
@@ -326,24 +332,10 @@ public final class SkyCanvasManager {
     }
 
     /**
-     * @return (CelestialObject) value of observable: Celestial object under mouse
-     */
-    public Optional<CelestialObject> getObjectUnderMouse() {
-        return objectUnderMouse.get();
-    }
-
-    /**
      * @return (DoubleBinding) observable: mouse's azimuthal coordinate in degrees
      */
     public DoubleBinding mouseAzDegProperty() {
         return mouseAzDeg;
-    }
-
-    /**
-     * @return (double) value of observable: mouse's azimuthal coordinate in degrees
-     */
-    public double getMouseAzDeg() {
-        return mouseAzDeg.get();
     }
 
     /**
@@ -354,24 +346,10 @@ public final class SkyCanvasManager {
     }
 
     /**
-     * @return (double) value of observable: mouse's altitude coordinate in degrees
-     */
-    public double getMouseAltDeg() {
-        return mouseAltDeg.get();
-    }
-
-    /**
      * @return (Set < DrawableObjects >) value of observable: set of objects to draw
      */
     public Set<DrawableObjects> getObjectsToDraw() {
         return objectsToDraw.get();
-    }
-
-    /**
-     * @return (ObjectProperty < EnumSet < DrawableObjects > >) observable: set of objects to draw
-     */
-    public ObjectProperty<EnumSet<DrawableObjects>> objectsToDrawProperty() {
-        return objectsToDraw;
     }
 
     /**
@@ -398,15 +376,6 @@ public final class SkyCanvasManager {
         return mouseDragSensitivity;
     }
 
-    /**
-     * Setter for observable: mouse's drag sensitivity
-     *
-     * @param mouseDragSensitivity (double) mouse sensitivity to be set to
-     */
-    public void setMouseDragSensitivity(double mouseDragSensitivity) {
-        this.mouseDragSensitivity.set(mouseDragSensitivity);
-    }
-
     public double getMouseDragFactor() {
         return MOUSE_DRAG_FACTOR;
     }
@@ -426,42 +395,10 @@ public final class SkyCanvasManager {
     }
 
     /**
-     * Setter for observable: mouse scroll sensitivity
-     *
-     * @param mouseScrollSensitivity (double) sensitivity to be set to
-     */
-    public void setMouseScrollSensitivity(double mouseScrollSensitivity) {
-        this.mouseScrollSensitivity.set(mouseScrollSensitivity);
-    }
-
-    /**
-     * @return (boolean) value of observable: enabled extended altitude interval
-     */
-    public boolean isExtendedAltitudeIsOn() {
-        return extendedAltitudeIsOn.get();
-    }
-
-    /**
      * @return (BooleanProperty) observable: enabled extended altitude interval
      */
     public BooleanProperty extendedAltitudeIsOnProperty() {
         return extendedAltitudeIsOn;
-    }
-
-    /**
-     * Setter for observable: enabled extended altitude interval
-     *
-     * @param extendedAltitudeIsOn (boolean) value to be set to
-     */
-    public void setExtendedAltitudeIsOn(boolean extendedAltitudeIsOn) {
-        this.extendedAltitudeIsOn.set(extendedAltitudeIsOn);
-    }
-
-    /**
-     * @return (boolean) value of observable: non functional key has been pressed (ie a key that does nothing in the canvas)
-     */
-    public boolean isNonFunctionalKeyPressed() {
-        return nonFunctionalKeyPressed.get();
     }
 
     /**
@@ -481,13 +418,6 @@ public final class SkyCanvasManager {
     }
 
     /**
-     * @return (CelestialObject) selected celestial object to get more information on (null if none selected)
-     */
-    public CelestialObject getWantNewInformationPanel() {
-        return wantNewInformationPanel.get();
-    }
-
-    /**
      * @return (ObjectProperty<CelestialObject>) property of the potential selected celestial object the user wants more
      *         information on
      */
@@ -495,85 +425,54 @@ public final class SkyCanvasManager {
         return wantNewInformationPanel;
     }
 
-    /**
-     * Setter for the celestial object the user wants more information on
-     *
-     * @param wantNewInformationPanel (CelestialObject)
-     */
-    public void setWantNewInformationPanel(CelestialObject wantNewInformationPanel) {
-        this.wantNewInformationPanel.set(wantNewInformationPanel);
-    }
-
+    //TODO javadoc
     public int getHorizCoordsGridSpacingDeg() {
         return horizCoordsGridSpacingDeg.get();
     }
 
-    public IntegerProperty horizCoordsGridSpacingDegProperty() {
-        return horizCoordsGridSpacingDeg;
-    }
-
+    //TODO javadoc
     public void setHorizCoordsGridSpacingDeg(int horizCoordsGridSpacingDeg) {
         this.horizCoordsGridSpacingDeg.set(horizCoordsGridSpacingDeg);
     }
 
+    //TODO javadoc
     public List<String> suggestedGridSpacings() {
         return suggestedGridSpacings;
     }
 
-    public Color getOrbitColor() {
-        return orbitColor.get();
-    }
-
-    public ObjectProperty<Color> orbitColorProperty() {
-        return orbitColor;
-    }
-
-    public void setOrbitColor(Color orbitColor) {
-        this.orbitColor.set(orbitColor);
-    }
-
-    public Color getHorizonColor() {
-        return horizonColor.get();
-    }
-
-    public ObjectProperty<Color> horizonColorProperty() {
-        return horizonColor;
-    }
-
-    public void setHorizonColor(Color horizonColor) {
-        this.horizonColor.set(horizonColor);
-    }
-
-    public Color getGridColor() {
-        return gridColor.get();
-    }
-
-    public ObjectProperty<Color> gridColorProperty() {
-        return gridColor;
-    }
-
-    public void setGridColor(Color gridColor) {
-        this.gridColor.set(gridColor);
-    }
-
-    public Color getAsterismColor() {
-        return asterismColor.get();
-    }
-
-    public ObjectProperty<Color> asterismColorProperty() {
-        return asterismColor;
-    }
-
-    public void setAsterismColor(Color asterismColor) {
-        this.asterismColor.set(asterismColor);
-    }
-
+    //TODO javadoc
     public List<ObjectProperty<Color>> colorPropertiesList() {
         return colorsList;
     }
 
+    //TODO javadoc
     public List<String> colorLabelsList() {
         return correspColorStringList;
+    }
+
+    //TODO javadoc
+    public static List<Color> getDefaultColorsList() {
+        return defaultColorsList;
+    }
+
+    //TODO javadoc
+    public int getDrawOrbitUntil() {
+        return drawOrbitUntil.get();
+    }
+
+    //TODO javadoc
+    public IntegerProperty drawOrbitUntilProperty() {
+        return drawOrbitUntil;
+    }
+
+    //TODO javadoc
+    public int getOrbitDrawingStep() {
+        return orbitDrawingStep.get();
+    }
+
+    //TODO javadoc (in sets and graphs too)
+    public IntegerProperty orbitDrawingStepProperty() {
+        return orbitDrawingStep;
     }
 
     /**

@@ -27,7 +27,7 @@ public final class Tree<V> extends PointedSet<GraphNode<V>> implements Graph<Gra
 
     /**
      * Constructor of Tree using parameter Nodes' inner hierarchy to construct the directed graph
-     * Supposes a connected tree AKA not a forest
+     * Creates a connected tree aka not a forest (one and unique root node)
      *
      * @param t (Collection<Node<T>>)
      * @throws IllegalArgumentException if given leaves aren't all connected to the same root
@@ -38,7 +38,7 @@ public final class Tree<V> extends PointedSet<GraphNode<V>> implements Graph<Gra
 
     /**
      * Main Constructor of Tree using parameter Nodes' inner hierarchy to construct the directed graph
-     * Supposes a connected tree AKA not a forest
+     * Creates a connected tree aka not a forest (one and unique root node)
      *
      * @param nodes (Collection<Node<T>>)
      * @throws IllegalArgumentException if given leaves aren't all connected to the same root

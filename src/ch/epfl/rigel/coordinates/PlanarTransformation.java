@@ -169,7 +169,8 @@ public final class PlanarTransformation implements UnaryOperator<CartesianCoordi
      * @return (CartesianCoordinates) 2x1 vector resulting of the product
      */
     public CartesianCoordinates apply(double x, double y) {
-        return CartesianCoordinates.of(Mxx * x + Mxy * y + Tx, Myx * x + Myy * y + Ty);
+        return isDiagonal ? CartesianCoordinates.of(Mxx * x + Tx, Myy * y + Ty) :
+                CartesianCoordinates.of(Mxx * x + Mxy * y + Tx, Myx * x + Myy * y + Ty);
     }
 
     /**
@@ -194,7 +195,8 @@ public final class PlanarTransformation implements UnaryOperator<CartesianCoordi
      * @return (CartesianCoordinates) 2x1 vector resulting of the product
      */
     public CartesianCoordinates applyVector(double x, double y) {
-        return CartesianCoordinates.of(Mxx * x + Mxy * y, Myx * x + Myy * y);
+        return isDiagonal ? CartesianCoordinates.of(Mxx * x, Myy * y) :
+        CartesianCoordinates.of(Mxx * x + Mxy * y, Myx * x + Myy * y);
     }
 
     /**
@@ -206,7 +208,7 @@ public final class PlanarTransformation implements UnaryOperator<CartesianCoordi
      * @return (double) distance after transformation
      */
     public double applyDistance(double initialDistance) {
-        return (isDiagonal) ? Math.abs(Mxx * initialDistance) :
+        return isDiagonal ? Math.abs(Mxx * initialDistance) :
                 euclideanNormOf(Mxx * initialDistance, Myx * initialDistance);
     }
 
