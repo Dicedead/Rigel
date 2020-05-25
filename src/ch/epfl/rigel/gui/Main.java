@@ -200,7 +200,7 @@ public final class Main extends Application {
             " peut être modifiée\ndans le menu de paramètres.";
     private static final String HELPTXT_EXITINFO = "Fermer cette fenêtre sans effacer\nl'éventuelle orbite dessinée.\n" +
             "Clic droit sur un espace vide\ndu ciel fermera cette fenêtre et\n" +
-            "effacera l'éventuelle orbite.\nAppuyer sur O efface seulement\nl'éventuelle orbite,I seulement\ncette fenêtre.";
+            "effacera l'éventuelle orbite.\nAppuyer sur O efface seulement\nl'éventuelle orbite, I seulement\ncette fenêtre.";
     private static final String HELPTXT_GUILESS_POPUP = "Appuyez sur F pour afficher la GUI.\nCliquez pour cacher ce message.";
     //Actually, any key that is not mapped to anything else works, and any mouse input suffices to
     //hide this tooltip, but let's keep things simple.
