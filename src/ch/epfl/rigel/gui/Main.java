@@ -246,7 +246,7 @@ public final class Main extends Application {
              InputStream fs = resourceStream(INPUT_FONT);
              InputStream fsSmall = resourceStream(INPUT_FONT)) {
 
-            // I/ Initialization -------------------------------------------
+        // I/ Initialization -------------------------------------------
             Font fontAwesomeDefault = Font.loadFont(fs, CUSTOM_FONT_DEFAULT_SIZE);
             Font fontAwesomeSmall = Font.loadFont(fsSmall, CUSTOM_FONT_SMALL_SIZE);
 
@@ -274,7 +274,7 @@ public final class Main extends Application {
 
             List<Label> labelList = new ArrayList<>();
 
-            // II/ Top bar: ------------------------------------------------
+        // II/ Top bar: ------------------------------------------------
             // NEW a/ Search and options:
             Label searchLabel = new Label(SEARCH_LABEL);
             searchLabel.setFont(fontAwesomeDefault);
@@ -400,12 +400,12 @@ public final class Main extends Application {
                     new Separator(Orientation.VERTICAL), accelerationHbox);
             controlBar.setStyle(CONTROL_BAR_STYLE);
 
-            // III/ Canvas: ------------------------------------------------
+        // III/ Canvas: ------------------------------------------------
             Pane canvasPane = new Pane(manager.canvas());
             manager.canvas().widthProperty().bind(canvasPane.widthProperty());
             manager.canvas().heightProperty().bind(canvasPane.heightProperty());
 
-            // IV/ Bottom bar: ---------------------------------------------
+        // IV/ Bottom bar: ---------------------------------------------
             Text fovText = new Text();
             fovText.textProperty().bind(Bindings.format(Locale.ROOT, "Champ de vue : %.1f°",
                     viewingParametersBean.fieldOfViewDegProperty()));
@@ -422,7 +422,7 @@ public final class Main extends Application {
             BorderPane informationBar = new BorderPane(objectUnderMouseText, null, mousePosText, null, fovText);
             informationBar.setStyle(INFO_BAR_STYLE);
 
-            // NEW V/ Parameters menu (left border): -----------------------
+        // NEW V/ Parameters menu (left border): -----------------------
             // a/ Top check buttons:
             /* Using buttons instead of checkboxes for graphical malleability */
             Button toggleGUI = new Button(TOGGLE_GUI);
@@ -626,7 +626,7 @@ public final class Main extends Application {
             parametersBox.setStyle(BONUS_BOXES_STYLE);
             setVisibleAndManaged(parametersBox, false);
 
-            // NEW VI/ Information on celestial object panel (right border):
+        // NEW VI/ Information on celestial object panel (right border):
             // a/ Common information:
             Button exitButton = new Button(EXIT_BUTTON_LABEL);
             exitButton.setFont(fontAwesomeDefault);
@@ -814,7 +814,7 @@ public final class Main extends Application {
             setVisibleAndManaged(false, rightBox.getChildren());
             setVisibleAndManaged(false, starsSpecifics.getChildren());
 
-            // VII/ Misc controls and styles: ------------------------------
+        // VII/ Misc controls and styles: ------------------------------
             mainBorder = new BorderPane(canvasPane, controlBar, rightBox, informationBar, parametersBox);
 
             toOptionsButton.setOnAction(e -> setVisibleAndManaged(parametersBox, !parametersBox.isVisible()));

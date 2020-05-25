@@ -50,8 +50,10 @@ public final class ObservedSky {
 
     private static final Function<CartesianCoordinates, BiFunction<CartesianCoordinates, CartesianCoordinates, Integer>>
             CLOSEST_TO_C = c -> (a, b) -> Double.compare(euclideanDistSquared(a, c), euclideanDistSquared(b, c));
-    /*This Function assigns a target point c in Cartesian Coordinates, then returns a BiFunction of this
-     * target point c and two CartesianCoordinates, comparing which one's closest to c.*/
+
+    private static final Function<CartesianCoordinates, BiFunction<CartesianCoordinates, Double, Boolean>>
+            IS_IN_SQUARE_AROUND = point -> (cartes, distance) -> cartes.x() - point.x() <= distance &&
+                                                                 cartes.y() - point.y() <= distance;
 
     /**
      * Constructs an ObservedSky at a given time, place, center of projection and a set list of stars,
@@ -100,8 +102,7 @@ public final class ObservedSky {
      */
     public Optional<CelestialObject> objectClosestTo(CartesianCoordinates point, double maxDistance) {
         return celestObjToCoordsMap.entrySet().parallelStream()
-                .filter(celest -> celest.getValue().x() - point.x() <= maxDistance
-                        && celest.getValue().y() - point.y() <= maxDistance)
+                .filter(celest -> IS_IN_SQUARE_AROUND.apply(point).apply(celest.getValue(), maxDistance))
                 .min((celestObj1, celestObj2) -> CLOSEST_TO_C.apply(point)
                         .apply(celestObj1.getValue(), celestObj2.getValue()))
                 .filter(celestObj -> euclideanDistance(celestObj.getValue(), point) <= maxDistance)

@@ -32,6 +32,26 @@ import static ch.epfl.rigel.math.sets.implement.MathSet.of;
  */
 public final class  ThreadManager<T> {
 
+    private final static int CPU_CORES = Runtime.getRuntime().availableProcessors();
+    private final ExecutorService threadPool;
+    private final ObservableSet<List<Task<?>>> tasksQueue;
+    private final AbstractMathSet<Tree<Function<T , Task<?>>>> taskForest;
+
+    /**
+     * Main constructor
+     */
+    public ThreadManager(Class<T> t, T ob)
+    {
+        threadPool          = Executors.newCachedThreadPool();
+        tasksQueue          = FXCollections.synchronizedObservableSet(FXCollections.observableSet(new ArrayList<>()));
+        taskForest            = constructTaskTree(t);
+        tasksQueue.addListener((SetChangeListener<List<Task<?>>>)c -> {
+            if (c.wasAdded())
+                c.getElementAdded().forEach(threadPool::submit);
+            else if (c.wasRemoved())
+                c.getElementRemoved().forEach(Task::cancel);
+        });
+    }
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
@@ -47,8 +67,8 @@ public final class  ThreadManager<T> {
     public @interface Export {
     }
 
-    final static Predicate<Method> isLeaf = m -> m.getAnnotation(Requires.class).requirements().length == 0;
-    final static Function<Method, Predicate<Method>> hasMethodAsRequirement = m ->
+    private static final Predicate<Method> isLeaf = m -> m.getAnnotation(Requires.class).requirements().length == 0;
+    private static final Function<Method, Predicate<Method>> hasMethodAsRequirement = m ->
             (t -> Arrays.stream(t.getAnnotation(Requires.class).requirements()).anyMatch(s -> s.equals(m.getName())));
 
     private static <T> GraphNode<Function<T , Task<?>>> root(Class<T> indicator)
@@ -132,27 +152,6 @@ public final class  ThreadManager<T> {
         }
 
     }
-
-    private final static int CPU_CORES = Runtime.getRuntime().availableProcessors();
-    private final ExecutorService threadPool;
-    private final ObservableSet<List<Task<?>>> tasksQueue;
-    private final AbstractMathSet<Tree<Function<T , Task<?>>>> taskForest;
-    /**
-     * Main constructor
-     */
-    public ThreadManager(Class<T> t, T ob)
-    {
-        threadPool          = Executors.newCachedThreadPool();
-        tasksQueue          = FXCollections.synchronizedObservableSet(FXCollections.observableSet(new ArrayList<>()));
-        taskForest            = constructTaskTree(t);
-        tasksQueue.addListener((SetChangeListener<List<Task<?>>>)c -> {
-            if (c.wasAdded())
-                c.getElementAdded().forEach(threadPool::submit);
-            else if (c.wasRemoved())
-                c.getElementRemoved().forEach(Task::cancel);
-        });
-    }
-
 
     /**
      *

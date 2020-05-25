@@ -61,8 +61,10 @@ public final class SkyCanvasManager {
             ClosedInterval.of(Angle.ofDeg(5) + EPSILON, Math.PI / 2 - EPSILON);
     private static final ClosedInterval EXTENDED_ALT_INTERVAL =
             ClosedInterval.of(-Math.PI / 2 + EPSILON, Math.PI / 2 - EPSILON);
-    private static final double ALT_STEP = Angle.ofDeg(5);
-    private static final double AZ_STEP = Angle.ofDeg(10);
+    private static final double ALT_STEP_POS = Angle.ofDeg(5);
+    private static final double AZ_STEP_POS = Angle.ofDeg(10);
+    private static final double ALT_STEP_NEG = -ALT_STEP_POS;
+    private static final double AZ_STEP_NEG = -AZ_STEP_POS;
     private static final ClosedInterval FOV_INTERVAL = ClosedInterval.of(30, 150);
 
     private final StarCatalogue catalogue;
@@ -103,7 +105,8 @@ public final class SkyCanvasManager {
     private final BooleanProperty nonFunctionalKeyPressed = new SimpleBooleanProperty(false);
 
     private static final double ROTATION_ATTENUATION = 1 / 2d;
-    private static final double ROTATE_STEP = Angle.ofDeg(10);
+    private static final double ROTATE_STEP_POS = Angle.ofDeg(10);
+    private static final double ROTATE_STEP_NEG = -ROTATE_STEP_POS;
     private final DoubleProperty rotation = new SimpleDoubleProperty(0);
     private final ObjectBinding<PlanarTransformation> rotationMatrix;
     private final ObjectBinding<PlanarTransformation> inverseRotation;
@@ -125,6 +128,7 @@ public final class SkyCanvasManager {
     private static final int RESOLUTION_DEFAULT = 5;
     private final IntegerProperty drawOrbitUntil = new SimpleIntegerProperty(ORBIT_SIMULATION_DAYS_DEFAULT);
     private final IntegerProperty orbitDrawingStep = new SimpleIntegerProperty(5);
+
     private final ObjectProperty<CelestialObject> wantNewInformationPanel = new SimpleObjectProperty<>();
 
     private final ObjectProperty<Orbit<? extends CelestialObject>> orbitProperty = new SimpleObjectProperty<>();
@@ -249,22 +253,22 @@ public final class SkyCanvasManager {
         canvas.setOnKeyPressed(key -> {
             switch (key.getCode()) {
                 case LEFT:
-                    applyRotationThenModifyViewBean(-AZ_STEP, 0);
+                    applyRotationThenModifyViewBean(AZ_STEP_NEG, 0);
                     break;
                 case RIGHT:
-                    applyRotationThenModifyViewBean(+AZ_STEP, 0);
+                    applyRotationThenModifyViewBean(AZ_STEP_POS, 0);
                     break;
                 case UP:
-                    applyRotationThenModifyViewBean(0, +ALT_STEP);
+                    applyRotationThenModifyViewBean(0, ALT_STEP_POS);
                     break;
                 case DOWN:
-                    applyRotationThenModifyViewBean(0, -ALT_STEP);
+                    applyRotationThenModifyViewBean(0, ALT_STEP_NEG);
                     break;
                 case J:
-                    modifyRotation(ROTATE_STEP);
+                    modifyRotation(ROTATE_STEP_POS);
                     break;
                 case L:
-                    modifyRotation(-ROTATE_STEP);
+                    modifyRotation(ROTATE_STEP_NEG);
                     break;
                 case K:
                     if (rotation.get() != 0) modifyRotation(-rotation.get());
