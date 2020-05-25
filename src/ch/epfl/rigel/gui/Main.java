@@ -68,6 +68,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -166,7 +167,8 @@ public final class Main extends Application {
     private static final String HELPTXT_PARAMS_ON = "Cacher les paramètres.";
     private static final String HELPTXT_DRAG_SENS = "Maintenez enfoncé le bouton\ndroit de la souris en\nle déplaçant dans la\n" +
             "direction de changement\nde centre de projection\nvoulue. Ce slider change\nla sensibilité de ces\n" +
-            "déplacements.";
+            "déplacements. Il change\négalement la sensibilité\ndes rotations du ciel,\nmaintenez enfoncé le bouton\n" +
+            "central/roulette de la\nsouris et glissez, ou utilisez\nJ et L, ainsi que K\n pour reset la rotation à 0°.";
     private static final String HELPTXT_SCROLL_SENS = "Ce slider change la\nsensibilité de la roulette de\nla souris, gérant le\n" +
             "zoom, ie le champ\nde vue.";
     private static final String HELPTXT_RESETDEF = "Remet les valeurs des\nsensibilités par défaut.";
@@ -303,8 +305,8 @@ public final class Main extends Application {
 
             NumberStringConverter positionConverter = new NumberStringConverter("#0.00");
 
-            UnaryOperator<TextFormatter.Change> lonFilter = coordFilter(positionConverter, true);
-            UnaryOperator<TextFormatter.Change> latFilter = coordFilter(positionConverter, false);
+            UnaryOperator<TextFormatter.Change> lonFilter = coordFilter(positionConverter, GeographicCoordinates::isValidLonDeg);
+            UnaryOperator<TextFormatter.Change> latFilter = coordFilter(positionConverter, GeographicCoordinates::isValidLatDeg);
 
             TextFormatter<Number> lonTextFormatter = new TextFormatter<>(positionConverter, 0, lonFilter);
             TextFormatter<Number> latTextFormatter = new TextFormatter<>(positionConverter, 0, latFilter);
@@ -741,7 +743,7 @@ public final class Main extends Application {
             resolutionSlider.setShowTickLabels(true);
             lengthSlider.setShowTickLabels(true);
             lengthSlider.setMajorTickUnit(LENGTHSLIDER_MAX - LENGTHSLIDER_MIN);
-            lengthSlider.setLabelFormatter(new StringConverter<Double>() {
+            lengthSlider.setLabelFormatter(new StringConverter<>() {
                 @Override
                 public String toString(Double object) {
                     if (object == LENGTHSLIDER_MIN) return MIN_LENGTH_LABEL;
@@ -843,13 +845,12 @@ public final class Main extends Application {
         return getClass().getResourceAsStream(s);
     }
 
-    private static UnaryOperator<TextFormatter.Change> coordFilter(NumberStringConverter stringConverter, boolean isLon) {
+    private static UnaryOperator<TextFormatter.Change> coordFilter(NumberStringConverter stringConv, Predicate<Double> validCoord) {
         return (change -> {
             try {
                 String newText = change.getControlNewText();
-                double newCoordDeg = stringConverter.fromString(newText).doubleValue();
-                return ((isLon && GeographicCoordinates.isValidLonDeg(newCoordDeg)) ||
-                        (!isLon && GeographicCoordinates.isValidLatDeg(newCoordDeg))) ? change : null;
+                double newCoordDeg = stringConv.fromString(newText).doubleValue();
+                return (validCoord.test(newCoordDeg)) ? change : null;
             } catch (Exception e) {
                 return null;
             }
