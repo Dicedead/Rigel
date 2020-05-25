@@ -1,11 +1,28 @@
 package ch.epfl.rigel.parallelism;
 
+import ch.epfl.rigel.math.graphs.GraphNode;
 import ch.epfl.rigel.math.graphs.Tree;
+import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
+import ch.epfl.rigel.math.sets.implement.MathSet;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableSet;
+import javafx.collections.SetChangeListener;
+import javafx.concurrent.Task;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static java.util.concurrent.ForkJoinPool.defaultForkJoinWorkerThreadFactory;
+import static ch.epfl.rigel.math.sets.implement.MathSet.of;
+
 
 /**
  * Multithreaded environment manager
@@ -13,108 +30,129 @@ import static java.util.concurrent.ForkJoinPool.defaultForkJoinWorkerThreadFacto
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-public final class ThreadManager {
-    /**
-     * A small enum type for handling different types of pool of threads
-     */
-    public enum serviceType {
-        CACHED, SINGLE, FIXED
+public final class  ThreadManager<T> {
+
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    public @interface Requires {
+
+        String[] requirements() default {};
+        int priority() default 1;
+
     }
-    private final static int CPU_CORES = Runtime.getRuntime().availableProcessors();
 
-    private final Map<String, ExecutorService> executorServiceMap = new HashMap<>();
-    private final Map<String, ForkJoinPool> forkJoinPoolMap = new HashMap<>();
-    private final ThreadFactory factory;
+    @Retention(RetentionPolicy.SOURCE)
+    @Target(ElementType.LOCAL_VARIABLE)
+    public @interface Export {
+    }
 
-    /**
-     * Method allowing to ad a new executors service, useful to separate different usages
-     * @param name the name to get to the executor
-     * @param type the type of pool desired
-     * @param threads the number of threads to assign to it if it is a fixed pool
-     */
-    public void addService(String name, serviceType type, int threads)
+    final static Predicate<Method> isLeaf = m -> m.getAnnotation(Requires.class).requirements().length == 0;
+    final static Function<Method, Predicate<Method>> hasMethodAsRequirement = m ->
+            (t -> Arrays.stream(t.getAnnotation(Requires.class).requirements()).anyMatch(s -> s.equals(m.getName())));
+
+    private static <T> GraphNode<Function<T , Task<?>>> root(Class<T> indicator)
     {
-        switch (type){
-            case FIXED:
-                executorServiceMap.put(name, Executors.newFixedThreadPool(threads, factory));
-                break;
-            case CACHED:
-                executorServiceMap.put(name, Executors.newCachedThreadPool(factory));
-                break;
-            case SINGLE:
-                executorServiceMap.put(name, Executors.newSingleThreadExecutor(factory));
-                break;
+        return new GraphNode<>(t -> new Task<Void>() {
+            @Override
+            protected Void call(){
+                return null;
+            }
+        });
+    }
+
+    private static <T> Optional<Method> extractUniqueMethod(String name, Class<T> c)
+    {
+        return Arrays.stream(c.getMethods()).filter(m -> m.getName().equals(name)).findAny();
+    }
+
+    private static Task<?> methodToTask(Method m, Object O)
+    {
+        return new Task<>() {
+            @Override
+            protected Object call() throws Exception {
+                return m.invoke(O);
+            }
+        };
+    }
+
+    private static <T> Map<Method, GraphNode<Function<T , Task<?>>>> recurConstruct(Map<Method, GraphNode<Function<T , Task<?>>>> res, Class<T> tClass)
+    {
+        if (res.keySet().stream().allMatch(isLeaf))
+            return res;
+
+        return recurConstruct(res
+                .keySet()
+                .stream()
+                .flatMap(m -> isLeaf.test(m) ? Stream.of(Optional.of(m)) :
+                        Arrays.stream(m.getAnnotation(Requires.class).requirements())
+                        .map(s -> extractUniqueMethod(s, tClass)))
+                .filter(Optional::isPresent)
+                .collect(Collectors.toMap(Optional::get, k -> new GraphNode<Function<T , Task<?>>>((t -> methodToTask(k.get(), t))))),
+                tClass);
+    }
+
+    private AbstractMathSet<Tree<Function<T , Task<?>>>> constructTaskTree(Class<T> c)
+    {
+
+        Set<Method> methods = extractMultiThreaded(c);
+        Set<Method> singles = extractSingleThreaded(c);
+        //Find requirementless methods
+        final var requirementLess = methods.stream().filter(m -> methods.stream().noneMatch(hasMethodAsRequirement.apply(m)))
+                .collect(Collectors.toSet());
+
+        final AbstractMathSet<Map<Method, GraphNode<Function<T , Task<?>>>>> leafs =
+                        requirementLess
+                            .stream().map(m -> recurConstruct(Map.of(m, new GraphNode<Function<T, Task<?>>>(t -> methodToTask(m, t))), c))
+                            .collect(MathSet.toMathSet());
+
+        var singleThreaded = singles.stream().map(m -> new Tree<>(of(new GraphNode<Function<T , Task<?>>>(t -> methodToTask(m, t))))).collect(MathSet.toMathSet());
+        return leafs.image(m -> new Tree<>(m.values().stream().map(GraphNode::hierarchy).collect(Collectors.toSet()))).union(singleThreaded);
+    }
+
+    private static boolean isMultithreaded (final Method object) {
+        return object.getClass().isAnnotationPresent(Requires.class);
+    }
+
+    private static Set<Method> extractMultiThreaded(final Class<?> Class)
+    {
+        return Arrays.stream(Class.getMethods()).filter(ThreadManager::isMultithreaded).collect(Collectors.toSet());
+    }
+    private static Set<Method> extractSingleThreaded(final Class<?> Class)
+    {
+        return Arrays.stream(Class.getMethods()).filter(Predicate.not(ThreadManager::isMultithreaded)).collect(Collectors.toSet());
+    }
+
+    private void assignTasks()
+    {
+        for (Tree<Function<T , Task<?>>> t : taskForest)
+        {
+
+
         }
+
     }
 
-    /**
-     * Method allowing to ad a new ForkJoinPool, useful to separate different light usages
-     * @param name the name to get to the executor
-     * @param threadGroup the type of pool desired
-     * @param thread the number of threads to assign to it if it is a fixed pool
-     * @param async //TODO: WTF is this one ?
-     */
-    public void addForkJoinPool(String name, String threadGroup, int thread, boolean async)
-    {
-        forkJoinPoolMap.put(name, new ForkJoinPool(thread, defaultForkJoinWorkerThreadFactory, new ThreadGroup(threadGroup), async));
-    }
-    /**
-     * Method allowing to ad a new ForkJoinPool, useful to separate different light usages
-     * @param name the name to get to the executor
-     * */
-    public void addForkJoinPool(String name)
-    {
-        forkJoinPoolMap.put(name, new ForkJoinPool());
-    }
-
-    /**
-     * Add an extra task not specified in the task tree
-     * @param r the task to be added
-     */
-    void addTask(Runnable r)
-    {
-        executorServiceMap.get("background").submit(r);
-    }
-
-
-    /**
-     * Add an extra task not specified in the task tree to the executor specified
-     * @param r the task to be added
-     * @param name the executor to use for this task
-     */
-    void addTask(Runnable r, String name)
-    {
-        executorServiceMap.get(name).submit(r);
-    }
-
+    private final static int CPU_CORES = Runtime.getRuntime().availableProcessors();
+    private final ExecutorService threadPool;
+    private final ObservableSet<List<Task<?>>> tasksQueue;
+    private final AbstractMathSet<Tree<Function<T , Task<?>>>> taskForest;
     /**
      * Main constructor
-     * @param factory the  factory used in the thread manager
      */
-    public ThreadManager(ThreadFactory factory)
+    public ThreadManager(Class<T> t, T ob)
     {
-        this.factory = factory;
-        forkJoinPoolMap.put("default", new ForkJoinPool(1));
-        executorServiceMap.put("default", Executors.newSingleThreadExecutor(factory));
-        executorServiceMap.put("background", Executors.newWorkStealingPool());
+        threadPool          = Executors.newCachedThreadPool();
+        tasksQueue          = FXCollections.synchronizedObservableSet(FXCollections.observableSet(new ArrayList<>()));
+        taskForest            = constructTaskTree(t);
+        tasksQueue.addListener((SetChangeListener<List<Task<?>>>)c -> {
+            if (c.wasAdded())
+                c.getElementAdded().forEach(threadPool::submit);
+            else if (c.wasRemoved())
+                c.getElementRemoved().forEach(Task::cancel);
+        });
     }
 
-    /**
-     * A shutdown is sent to every executor, if forced it will cancel any computation
-     * @param force wheter it should wait for completitionis of the threads or not
-     */
-    public void shutdown(boolean force)
-    {
-        if (!force) {
-            forkJoinPoolMap.values().forEach(ForkJoinPool::shutdown);
-            executorServiceMap.values().forEach(ExecutorService::shutdown);
-
-        } else {
-
-            forkJoinPoolMap.values().forEach(ForkJoinPool::shutdownNow);
-            executorServiceMap.values().forEach(ExecutorService::shutdownNow);
-        }
-    }
 
     /**
      *
@@ -122,25 +160,6 @@ public final class ThreadManager {
      */
     public static int getCpuCores() {
         return CPU_CORES;
-    }
-
-    /**
-     *
-     * @param name the name of a constructed forkJoinPool
-     * @return the forkjoin pool specified
-     */
-    public ForkJoinPool getFJ(String name)
-    {
-        return forkJoinPoolMap.get(name);
-    }
-    /**
-     *
-     * @param name the name of a constructed executorService
-     * @return the executorService specified
-     */
-    public ExecutorService getES(String name)
-    {
-        return executorServiceMap.get(name);
     }
 
 }
