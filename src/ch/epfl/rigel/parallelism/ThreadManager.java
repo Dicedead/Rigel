@@ -1,7 +1,6 @@
 package ch.epfl.rigel.parallelism;
 
 import ch.epfl.rigel.math.graphs.GraphNode;
-import ch.epfl.rigel.math.graphs.Path;
 import ch.epfl.rigel.math.graphs.Tree;
 import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
 import ch.epfl.rigel.math.sets.implement.MathSet;
@@ -10,9 +9,20 @@ import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
 import javafx.concurrent.Task;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static ch.epfl.rigel.math.sets.implement.MathSet.of;
+
 
 /**
  * Multithreaded environment manager
@@ -20,41 +30,127 @@ import java.util.stream.Collectors;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-public final class ThreadManager {
+public final class  ThreadManager<T> {
+
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    public @interface Requires {
+
+        String[] requirements() default {};
+        int priority() default 1;
+
+    }
+
+    @Retention(RetentionPolicy.SOURCE)
+    @Target(ElementType.LOCAL_VARIABLE)
+    public @interface Export {
+    }
+
+    final static Predicate<Method> isLeaf = m -> m.getAnnotation(Requires.class).requirements().length == 0;
+    final static Function<Method, Predicate<Method>> hasMethodAsRequirement = m ->
+            (t -> Arrays.stream(t.getAnnotation(Requires.class).requirements()).anyMatch(s -> s.equals(m.getName())));
+
+    private static <T> GraphNode<Function<T , Task<?>>> root(Class<T> indicator)
+    {
+        return new GraphNode<>(t -> new Task<Void>() {
+            @Override
+            protected Void call(){
+                return null;
+            }
+        });
+    }
+
+    private static <T> Optional<Method> extractUniqueMethod(String name, Class<T> c)
+    {
+        return Arrays.stream(c.getMethods()).filter(m -> m.getName().equals(name)).findAny();
+    }
+
+    private static Task<?> methodToTask(Method m, Object O)
+    {
+        return new Task<>() {
+            @Override
+            protected Object call() throws Exception {
+                return m.invoke(O);
+            }
+        };
+    }
+
+    private static <T> Map<Method, GraphNode<Function<T , Task<?>>>> recurConstruct(Map<Method, GraphNode<Function<T , Task<?>>>> res, Class<T> tClass)
+    {
+        if (res.keySet().stream().allMatch(isLeaf))
+            return res;
+
+        return recurConstruct(res
+                .keySet()
+                .stream()
+                .flatMap(m -> isLeaf.test(m) ? Stream.of(Optional.of(m)) :
+                        Arrays.stream(m.getAnnotation(Requires.class).requirements())
+                        .map(s -> extractUniqueMethod(s, tClass)))
+                .filter(Optional::isPresent)
+                .collect(Collectors.toMap(Optional::get, k -> new GraphNode<Function<T , Task<?>>>((t -> methodToTask(k.get(), t))))),
+                tClass);
+    }
+
+    private AbstractMathSet<Tree<Function<T , Task<?>>>> constructTaskTree(Class<T> c)
+    {
+
+        Set<Method> methods = extractMultiThreaded(c);
+        Set<Method> singles = extractSingleThreaded(c);
+        //Find requirementless methods
+        final var requirementLess = methods.stream().filter(m -> methods.stream().noneMatch(hasMethodAsRequirement.apply(m)))
+                .collect(Collectors.toSet());
+
+        final AbstractMathSet<Map<Method, GraphNode<Function<T , Task<?>>>>> leafs =
+                        requirementLess
+                            .stream().map(m -> recurConstruct(Map.of(m, new GraphNode<Function<T, Task<?>>>(t -> methodToTask(m, t))), c))
+                            .collect(MathSet.toMathSet());
+
+        var singleThreaded = singles.stream().map(m -> new Tree<>(of(new GraphNode<Function<T , Task<?>>>(t -> methodToTask(m, t))))).collect(MathSet.toMathSet());
+        return leafs.image(m -> new Tree<>(m.values().stream().map(GraphNode::hierarchy).collect(Collectors.toSet()))).union(singleThreaded);
+    }
+
+    private static boolean isMultithreaded (final Method object) {
+        return object.getClass().isAnnotationPresent(Requires.class);
+    }
+
+    private static Set<Method> extractMultiThreaded(final Class<?> Class)
+    {
+        return Arrays.stream(Class.getMethods()).filter(ThreadManager::isMultithreaded).collect(Collectors.toSet());
+    }
+    private static Set<Method> extractSingleThreaded(final Class<?> Class)
+    {
+        return Arrays.stream(Class.getMethods()).filter(Predicate.not(ThreadManager::isMultithreaded)).collect(Collectors.toSet());
+    }
+
+    private void assignTasks()
+    {
+        for (Tree<Function<T , Task<?>>> t : taskForest)
+        {
+
+
+        }
+
+    }
 
     private final static int CPU_CORES = Runtime.getRuntime().availableProcessors();
     private final ExecutorService threadPool;
     private final ObservableSet<List<Task<?>>> tasksQueue;
-    private final Tree<Task<?>> taskTree;
-
-    private int difficulty(List<Task<?>> tasks)
-    {
-        return 0;
-    }
-    private void addFromTree(final Task<?> level)
-    {
-        taskTree.getElement(g -> g
-                .getValue()
-                .equals(level))
-                .flatMap(taskTree::branchAtPoint)
-                .ifPresent(l -> tasksQueue.add(l.toList().stream().map(GraphNode::getValue).collect(Collectors.toList())));
-    }
-
+    private final AbstractMathSet<Tree<Function<T , Task<?>>>> taskForest;
     /**
      * Main constructor
-     * @param taskTree
      */
-    public ThreadManager(Tree<Task<?>> taskTree)
+    public ThreadManager(Class<T> t, T ob)
     {
-        this.taskTree       = taskTree;
         threadPool          = Executors.newCachedThreadPool();
         tasksQueue          = FXCollections.synchronizedObservableSet(FXCollections.observableSet(new ArrayList<>()));
-
-        tasksQueue.addListener((SetChangeListener<List<Task<?>>> )c -> {
+        taskForest            = constructTaskTree(t);
+        tasksQueue.addListener((SetChangeListener<List<Task<?>>>)c -> {
             if (c.wasAdded())
-                threadPool.submit()
+                c.getElementAdded().forEach(threadPool::submit);
+            else if (c.wasRemoved())
+                c.getElementRemoved().forEach(Task::cancel);
         });
-
     }
 
 

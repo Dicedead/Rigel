@@ -10,6 +10,7 @@ import ch.epfl.rigel.astronomy.Sun;
 import ch.epfl.rigel.coordinates.GeographicCoordinates;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.math.Angle;
+import ch.epfl.rigel.parallelism.ThreadManager;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -234,8 +235,10 @@ public final class Main extends Application {
      *
      * @param primaryStage (Stage) used window
      */
+    @ThreadManager.Requires(requirements = {""})
     @Override
     public void start(Stage primaryStage) {
+
         try (InputStream hs = resourceStream(INPUT_HYGDATA);
              InputStream ast = resourceStream(INPUT_ASTERISMS);
              InputStream fs = resourceStream(INPUT_FONT);
@@ -244,6 +247,7 @@ public final class Main extends Application {
             // I/ Initialization -------------------------------------------
             Font fontAwesomeDefault = Font.loadFont(fs, CUSTOM_FONT_DEFAULT_SIZE);
             Font fontAwesomeSmall = Font.loadFont(fsSmall, CUSTOM_FONT_SMALL_SIZE);
+
             //Using the same InputStream was causing an NPE even StackOverflow had no answer for.
             BlackBodyColor.init();
 
