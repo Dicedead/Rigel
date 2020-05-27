@@ -31,7 +31,7 @@ public enum PlanetModel implements CelestialObjectModel<Planet> {
     NEPTUNE("Neptune", 165.84539, 326.895127, 23.07, 0.010483,
             30.1985, 1.7673, 131.879, 62.20, -6.87);
 
-    public final static List<PlanetModel> ALL = List.of(PlanetModel.values());
+    public final static List<PlanetModel> EXTRATERRESTRIAL = List.of(MERCURY, VENUS, MARS, JUPITER, SATURN, URANUS, NEPTUNE);
 
     private final static double DAYS_IN_TROP_YEAR = 365.242191;
     private final static double QUOTIENT = Angle.TAU / DAYS_IN_TROP_YEAR;
@@ -105,11 +105,12 @@ public enum PlanetModel implements CelestialObjectModel<Planet> {
      * @throws IllegalArgumentException if given string is not a planet's name
      */
     public static PlanetModel getPlanetModelFromString(String s) {
-        for(PlanetModel planetModel : PlanetModel.values()) {
+        for(PlanetModel planetModel : PlanetModel.EXTRATERRESTRIAL) {
             if (planetModel.name.equals(s)) {
                 return planetModel;
             }
         }
-        throw new IllegalArgumentException("Fatal error (PlanetModel): Given string is not a Planet's name.");
+        if (s.equals(PlanetModel.EARTH.name)) return PlanetModel.EARTH;
+        else throw new IllegalArgumentException("Fatal error (PlanetModel): Given string is not a Planet's name.");
     }
 }

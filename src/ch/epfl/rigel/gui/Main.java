@@ -174,9 +174,9 @@ public final class Main extends Application {
     private static final String HELPTXT_RESETDEF = "Remet les valeurs des\nsensibilités par défaut.";
     private static final String HELPTXT_OBJECTS_TO_DRAW = "Sélectionnez les objets à dessiner.";
     private static final String HELPTXT_FULLSCREEN = "Appuyez sur ECHAP pour quitter le mode plein écran.";
-    private static final String HELPTXT_GRIDSPACE = "Choisissez l'espacement entre les\nparallèles représentés sur la grille.\n" +
-            "(unité : degrés) Possible perte de\nfluidité dans les déplacements\nà glissements de souris pour <= 15°:\n" +
-            "augmentez la sensibilité au besoin.";
+    private static final String HELPTXT_GRIDSPACE = "Choisissez l'espacement entre les\nparallèles représentés sur la grille\n" +
+            "de coordonnées horizontales.\n(unité : degrés) Possible perte de\nfluidité dans les déplacements\nà " +
+            "glissements de souris pour <= 15°:\naugmentez la sensibilité au besoin.";
     private static final String HELPTXT_RA = "Première coordonnée du système\néquatorial, angle entre le point" +
             "\nvernal et le corps considéré.";
     private static final String HELPTXT_DEC = "Deuxième coordonnée du système\néquatorial, angle entre le plan" +
@@ -225,6 +225,7 @@ public final class Main extends Application {
 
     private static BorderPane mainBorder;
     private static final List<Tooltip> toolTipList = new ArrayList<>();
+    private static final List<Label> labelList = new ArrayList<>();
     private static final int DEFAULT_NBR_DECIMALS = 2;
     private static final int STRINGS_PER_LINE = 3;
 
@@ -246,11 +247,10 @@ public final class Main extends Application {
              InputStream fs = resourceStream(INPUT_FONT);
              InputStream fsSmall = resourceStream(INPUT_FONT)) {
 
-        // I/ Initialization -------------------------------------------
             Font fontAwesomeDefault = Font.loadFont(fs, CUSTOM_FONT_DEFAULT_SIZE);
             Font fontAwesomeSmall = Font.loadFont(fsSmall, CUSTOM_FONT_SMALL_SIZE);
-
             //Using the same InputStream was causing an NPE even StackOverflow had no answer for.
+
             BlackBodyColor.init();
 
             StarCatalogue catalogue = new StarCatalogue.Builder()
@@ -270,552 +270,26 @@ public final class Main extends Application {
             viewingParametersBean.setFieldOfViewDeg(INITIAL_FOV);
 
             TimeAnimator animator = new TimeAnimator(dateTimeBean);
-            SkyCanvasManager manager = new SkyCanvasManager(catalogue, dateTimeBean, observerLocationBean, viewingParametersBean);
+            SkyCanvasManager manager = new SkyCanvasManager(catalogue, dateTimeBean,
+                    observerLocationBean, viewingParametersBean);
 
-            List<Label> labelList = new ArrayList<>();
-
-        // II/ Top bar: ------------------------------------------------
-            // NEW a/ Search and options:
-            Label searchLabel = new Label(SEARCH_LABEL);
-            searchLabel.setFont(fontAwesomeDefault);
-            labelList.add(searchLabel);
+            //Shared resources and controls:
             Button toOptionsButton = new Button(SETTINGS_BUTTON_TXT);
-            toOptionsButton.setFont(fontAwesomeDefault);
             Tooltip paramsTip = new Tooltip();
-            toOptionsButton.setTooltip(paramsTip);
-            toolTipList.add(paramsTip);
-            addTooltip(searchLabel, HELPTXT_SEARCH);
-            addTooltip(manager.searcher(), HELPTXT_SEARCH);
-
-            HBox searchHBox = new HBox(searchLabel, manager.searcher(), toOptionsButton);
-            searchHBox.setStyle(SEARCH_HBOX_STYLE);
-
-            // b/ Position:
-            Label longLabel = new Label("Longitude (°) :");
-            Label latLabel = new Label("Latitude (°) :");
-            labelList.add(longLabel);
-            labelList.add(latLabel);
-            TextField longTextField = new TextField();
-            TextField latTextField = new TextField();
-            longTextField.setStyle(POSITION_TXTFIELDS_STYLE);
-            latTextField.setStyle(POSITION_TXTFIELDS_STYLE);
-
-            addTooltip(longLabel, HELPTXT_LONGITUDE);
-            addTooltip(latLabel, HELPTXT_LATITUDE);
-
-            NumberStringConverter positionConverter = new NumberStringConverter("#0.00");
-
-            UnaryOperator<TextFormatter.Change> lonFilter = coordFilter(positionConverter, GeographicCoordinates::isValidLonDeg);
-            UnaryOperator<TextFormatter.Change> latFilter = coordFilter(positionConverter, GeographicCoordinates::isValidLatDeg);
-
-            TextFormatter<Number> lonTextFormatter = new TextFormatter<>(positionConverter, 0, lonFilter);
-            TextFormatter<Number> latTextFormatter = new TextFormatter<>(positionConverter, 0, latFilter);
-
-            longTextField.setTextFormatter(lonTextFormatter);
-            latTextField.setTextFormatter(latTextFormatter);
-
-            lonTextFormatter.valueProperty().bindBidirectional(observerLocationBean.lonDegProperty());
-            latTextFormatter.valueProperty().bindBidirectional(observerLocationBean.latDegProperty());
-
-            HBox positionHBox = new HBox(longLabel, longTextField, latLabel, latTextField);
-            positionHBox.setStyle(POSITION_HBOX_STYLE);
-
-            // c/ Date, time and zone:
-            Label dateLabel = new Label("Date :");
-            labelList.add(dateLabel);
-            DatePicker datePicker = new DatePicker();
-            datePicker.setStyle(TIME_DATEPICK_STYLE);
-            datePicker.valueProperty().bindBidirectional(dateTimeBean.dateProperty());
-            addTooltip(dateLabel, HELPTXT_DATE);
-
-            Label hourLabel = new Label("Heure :");
-            labelList.add(hourLabel);
-            TextField hourTextField = new TextField();
-            hourTextField.setStyle(TIME_TXTFIELD_STYLE);
-            addTooltip(hourLabel, HELPTXT_HOUR);
-
-            DateTimeFormatter hmsFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-            LocalTimeStringConverter hourConverter = new LocalTimeStringConverter(hmsFormatter, hmsFormatter);
-            TextFormatter<LocalTime> timeFormatter = new TextFormatter<>(hourConverter);
-            hourTextField.setTextFormatter(timeFormatter);
-            timeFormatter.valueProperty().bindBidirectional(dateTimeBean.timeProperty());
-
-            ComboBox<ZoneId> zoneList = new ComboBox<>();
-            zoneList.setStyle(TIME_ZONECOMBOBOX_STYLE);
-            zoneList.getItems().addAll(ZoneId.getAvailableZoneIds()
-                    .stream()
-                    .sorted()
-                    .map(ZoneId::of)
-                    .collect(Collectors.toList()));
-            zoneList.valueProperty().bindBidirectional(dateTimeBean.zoneProperty());
-            addTooltip(zoneList, HELPTXT_ZONE);
-
-            HBox timeHBox = new HBox(dateLabel, datePicker, hourLabel, hourTextField, zoneList);
-            timeHBox.setStyle(TIME_HBOX_STYLE);
-
-            // d/ Acceleration control:
-            ComboBox<NamedTimeAccelerator> acceleratorList =
-                    new ComboBox<>(FXCollections.observableArrayList(NamedTimeAccelerator.values()));
-            acceleratorList.valueProperty().addListener((p, o, n) -> animator.setAccelerator(n.getAccelerator()));
-            /* This does the same job as the recommended Bindings.select way but seems more concise. */
-            /* We also thought a comboBox looks better here... */
-            acceleratorList.setValue(INITIAL_ACCELERATOR);
-            addTooltip(acceleratorList, HELPTXT_ACC);
-
-            Button resetButton = new Button(RESET_BUTTON_TEXT);
-            Button startPauseButton = new Button();
-            resetButton.setFont(fontAwesomeDefault);
-            startPauseButton.setFont(fontAwesomeDefault);
-            bindTextToBoolean(startPauseButton.textProperty(),
-                    animator.runningProperty(), PAUSE_BUTTON_TEXT, PLAY_BUTTON_TEXT);
-            addTooltip(resetButton, HELPTXT_RESET_TIME);
-
-            Tooltip startPauseTooltip = new Tooltip();
-            toolTipList.add(startPauseTooltip);
-            startPauseButton.setTooltip(startPauseTooltip);
-            bindTextToBoolean(startPauseTooltip.textProperty(), animator.runningProperty(),
-                    HELPTXT_PAUSE_ACC, HELPTXT_START_ACC);
-
-            startPauseButton.setOnAction(e -> {
-                if (animator.isRunning()) {
-                    animator.stop();
-                } else {
-                    animator.start();
-                }
-            });
-
-            resetButton.setOnAction(click -> dateTimeBean.setZonedDateTime(ZonedDateTime.now()));
-
-            HBox accelerationHbox = new HBox(acceleratorList, resetButton, startPauseButton);
-            accelerationHbox.setStyle(ACC_HBOX_STYLE);
-
-            // e/ Misc:
-            Stream.of(hourTextField, datePicker, zoneList, acceleratorList, resetButton)
-                    .forEach(node -> node.disableProperty().bind(animator.runningProperty()));
-
-            labelList.forEach(node -> node.setTextFill(CONTROLBAR_TEXT_COLOR));
-
-            HBox controlBar = new HBox(searchHBox, new Separator(Orientation.VERTICAL),
-                    positionHBox, new Separator(Orientation.VERTICAL), timeHBox,
-                    new Separator(Orientation.VERTICAL), accelerationHbox);
-            controlBar.setStyle(CONTROL_BAR_STYLE);
-
-        // III/ Canvas: ------------------------------------------------
-            Pane canvasPane = new Pane(manager.canvas());
-            manager.canvas().widthProperty().bind(canvasPane.widthProperty());
-            manager.canvas().heightProperty().bind(canvasPane.heightProperty());
-
-        // IV/ Bottom bar: ---------------------------------------------
-            Text fovText = new Text();
-            fovText.textProperty().bind(Bindings.format(Locale.ROOT, "Champ de vue : %.1f°",
-                    viewingParametersBean.fieldOfViewDegProperty()));
-
-            Text objectUnderMouseText = new Text();
-            manager.objectUnderMouseProperty().addListener((p, o, n) ->
-                    n.ifPresentOrElse(celestialObject -> objectUnderMouseText.setText(celestialObject.info()),
-                            () -> objectUnderMouseText.setText("")));
-
-            Text mousePosText = new Text();
-            mousePosText.textProperty().bind(Bindings.format(Locale.ROOT, "Azimut : %.2f°, hauteur : %.2f°",
-                    manager.mouseAzDegProperty(), manager.mouseAltDegProperty()));
-
-            BorderPane informationBar = new BorderPane(objectUnderMouseText, null, mousePosText, null, fovText);
-            informationBar.setStyle(INFO_BAR_STYLE);
-
-        // NEW V/ Parameters menu (left border): -----------------------
-            // a/ Top check buttons:
-            /* Using buttons instead of checkboxes for graphical malleability */
-            Button toggleGUI = new Button(TOGGLE_GUI);
-            toggleGUI.setFont(fontAwesomeDefault);
-            addTooltip(toggleGUI, HELPTXT_TOGGLEGUI);
-
-            BooleanProperty guiIsON = new SimpleBooleanProperty(true);
-
-            Tooltip guiPopup = new Tooltip(HELPTXT_GUILESS_POPUP);
-            guiPopup.setAutoHide(true);
-
-            toggleGUI.setOnAction(e -> {
-                manager.setNonFunctionalKeyPressed(false);
-                guiIsON.set(false);
-                manager.canvas().requestFocus();
-                guiPopup.show(primaryStage);
-            });
-
-            guiIsON.addListener((p, o, newBoolean) ->
-                    Stream.of(mainBorder.getTop(), mainBorder.getRight(), mainBorder.getLeft(), mainBorder.getBottom())
-                            .forEach(e -> {
-                                e.setVisible(newBoolean);
-                                e.setManaged(newBoolean);
-                            }));
-
-            manager.nonFunctionalKeyPressedProperty().addListener((p, o, n) -> {
-                if (!guiIsON.get() && n) {
-                    guiIsON.set(true);
-                    guiPopup.hide();
-                }
-            });
-
-            Button toggleFullscreen = new Button();
-            Tooltip toggleFullscreenTooltip = new Tooltip();
-            toolTipList.add(toggleFullscreenTooltip);
-            toggleFullscreen.setFont(fontAwesomeDefault);
-            toggleFullscreen.setTooltip(toggleFullscreenTooltip);
-            toggleFullscreen.setOnAction(e -> primaryStage.setFullScreen(!primaryStage.isFullScreen()));
-            /* FullScreenProperty is readonly in Stage, not allowing us to use the nifty link method below. */
-            bindTextToBoolean(toggleFullscreenTooltip.textProperty(), primaryStage.fullScreenProperty(),
-                    HELPTXT_FULLSCREEN_ON, HELPTXT_FULLSCREEN_OFF);
-            bindTextToBoolean(toggleFullscreen.textProperty(),
-                    primaryStage.fullScreenProperty(), FULLSCREEN_SET_OFF, FULLSCREEN_SET_ON);
-
-            Button rightClickInfo = new Button();
-            rightClickInfo.setFont(fontAwesomeDefault);
-            Tooltip rightClickToolTip = new Tooltip();
-            toolTipList.add(rightClickToolTip);
-            rightClickInfo.setTooltip(rightClickToolTip);
+            CheckBox orbitDrawingCheckbox = new CheckBox();
             BooleanProperty rightPanelIsON = new SimpleBooleanProperty(true);
-            linkAndBindText(rightClickInfo, rightPanelIsON, RIGHT_PANEL_IS_ON, RIGHT_PANEL_IS_OFF);
-            bindTextToBoolean(rightClickToolTip.textProperty(), rightPanelIsON, HELPTXT_RIGHT_IS_ON,
-                    HELPTXT_RIGHT_IS_OFF);
 
-            Button toggleExtendedAlt = new Button();
-            toggleExtendedAlt.setFont(fontAwesomeDefault);
-            Tooltip extendedAltTooltip = new Tooltip();
-            toolTipList.add(extendedAltTooltip);
-            toggleExtendedAlt.setTooltip(extendedAltTooltip);
-            linkAndBindText(toggleExtendedAlt, manager.extendedAltitudeIsOnProperty(), EXTEND_ALT_IS_ON, EXTEND_ALT_IS_OFF);
-            bindTextToBoolean(extendedAltTooltip.textProperty(), manager.extendedAltitudeIsOnProperty(),
-                    HELPTXT_EXTEND_IS_ON, HELPTXT_EXTEND_IS_OFF);
+            VBox parametersBox = parametersBox(manager, fontAwesomeDefault, fontAwesomeSmall, primaryStage,
+                    rightPanelIsON, orbitDrawingCheckbox);
 
-            GridPane layerOneGrid = new GridPane();
-            layerOneGrid.addRow(0, toggleGUI, rightClickInfo);
-            layerOneGrid.addRow(1, toggleFullscreen, toggleExtendedAlt);
-            layerOneGrid.setVgap(PARAMS_GRIDGAP);
-            layerOneGrid.setHgap(PARAMS_GRIDGAP);
-            layerOneGrid.setAlignment(Pos.CENTER);
-
-            Stream.of(toggleGUI, toggleFullscreen, toggleExtendedAlt, rightClickInfo)
-                    .forEach(button -> button.setMaxWidth(Double.MAX_VALUE));
-            // A javaFX hack to make buttons occupy all the space they can, because unlike for other nodes,
-            // buttons will not do so 'automatically'.
-
-            Separator firstSeparator = new Separator(Orientation.HORIZONTAL);
-            firstSeparator.setStyle(SEPARATOR_STYLE);
-
-            // b/ Middle sliders:
-            Label sensLabel = new Label("Sensibilités :");
-
-            Label dragSensLabel = new Label(TRANSLATION_LABEL);
-            dragSensLabel.setFont(fontAwesomeDefault);
-            addTooltip(dragSensLabel, HELPTXT_DRAG_SENS);
-
-            Slider translationSlider = new Slider(TRANSSLIDER_MIN, TRANSSLIDER_MAX,
-                    manager.getMouseDragSensitivity() * manager.getMouseDragFactor());
-            manager.mouseDragSensitivityProperty().bind(translationSlider.valueProperty().divide(manager.getMouseDragFactor()));
-
-            Label scrollSensLabel = new Label(SCROLL_LABEL);
-            scrollSensLabel.setFont(fontAwesomeDefault);
-            addTooltip(scrollSensLabel, HELPTXT_SCROLL_SENS);
-
-            Slider scrollSlider = new Slider(SCROLLSLIDER_MIN, SCROLLSLIDER_MAX, manager.getMouseScrollSensitivity());
-            manager.mouseScrollSensitivityProperty().bind(scrollSlider.valueProperty());
-
-            Stream.of(translationSlider, scrollSlider)
-                    .forEach(slider -> {
-                        slider.setShowTickLabels(true);
-                        slider.setMinWidth(PARAMS_SLIDER_WIDTH);
-                        slider.setMaxWidth(PARAMS_SLIDER_WIDTH);
-                    });
-
-            Button resetSensButton = new Button(RESETDEFAULT_BUTTON);
-            resetSensButton.setFont(fontAwesomeDefault);
-            resetSensButton.setOnAction(e -> {
-                translationSlider.setValue(MOUSE_DRAG_DEFAULTSENS);
-                scrollSlider.setValue(MOUSE_SCROLL_DEFAULTSENS);
-            });
-            addTooltip(resetSensButton, HELPTXT_RESETDEF);
-
-            VBox slidersVBox = new VBox(sensLabel, spaceLabel(), dragSensLabel, translationSlider,
-                    scrollSensLabel, scrollSlider, resetSensButton);
-            slidersVBox.setAlignment(Pos.CENTER);
-
-            Separator secondSeparator = new Separator(Orientation.HORIZONTAL);
-            secondSeparator.setStyle(SEPARATOR_STYLE);
-
-            // c/ Final checkboxes and color pickers:
-            Label drawLabel = new Label("Dessiner :");
-            addTooltip(drawLabel, HELPTXT_OBJECTS_TO_DRAW);
-
-            GridPane checkBoxesToDraw = new GridPane();
-            ObservableList<CheckBox> drawablesList = FXCollections.observableArrayList();
-            DrawableObjects[] allPossibleDrawables = DrawableObjects.values();
-            int indexOfHorizon = 0, indexOfStars = 0, indexOfOrbit = 0;
-            for (int i = 0; i < allPossibleDrawables.length; ++i) {
-                CheckBox draw = new CheckBox(allPossibleDrawables[i].getName());
-                draw.setSelected(allPossibleDrawables[i] != DrawableObjects.GRID);
-                draw.selectedProperty().addListener((p, o, n) -> {
-                    EnumSet<DrawableObjects> nextSet = EnumSet.copyOf(manager.getObjectsToDraw());
-                    if (n) {
-                        nextSet.add(DrawableObjects.getDrawableFromString(draw.getText()));
-                    } else {
-                        nextSet.remove(DrawableObjects.getDrawableFromString(draw.getText()));
-                    }
-                    manager.setObjectsToDraw(nextSet);
-                });
-                drawablesList.add(draw);
-                if (allPossibleDrawables[i] == DrawableObjects.STARS) indexOfStars = i;
-                if (allPossibleDrawables[i] == DrawableObjects.HORIZON) indexOfHorizon = i;
-                if (allPossibleDrawables[i] == DrawableObjects.ORBIT) indexOfOrbit = i;
-            }
-
-            Collections.swap(drawablesList, indexOfHorizon, indexOfStars);
-            CheckBox orbitDrawingCheckbox = drawablesList.get(indexOfOrbit);
-
-            Iterator<CheckBox> checkBoxIt = drawablesList.iterator();
-            for (int i = 0; i < GRID_TODRAW_WIDTH; ++i) {
-                for (int j = 0; j < GRID_TODRAW_HEIGHT; ++j) {
-                    checkBoxesToDraw.add(checkBoxIt.next(), i, j);
-                }
-            }
-
-            checkBoxesToDraw.setVgap(PARAMS_GRIDGAP);
-            checkBoxesToDraw.setHgap(PARAMS_GRIDGAP);
-
-            GridPane colorsGrid = new GridPane();
-            int numberOfColorLabels = manager.colorLabelsList().size();
-            Label[] colorLabels = new Label[numberOfColorLabels];
-            ColorPicker[] colorPickers = new ColorPicker[numberOfColorLabels];
-            Button[] resetColorButtons = new Button[numberOfColorLabels];
-
-            for (int i = 0; i < numberOfColorLabels; ++i) {
-                colorPickers[i] = new ColorPicker();
-                colorPickers[i].valueProperty().bindBidirectional(manager.colorPropertiesList().get(i));
-                colorPickers[i].setStyle(COLORPICKER_STYLE);
-
-                colorLabels[i] = new Label(manager.colorLabelsList().get(i));
-                GridPane.setHalignment(colorLabels[i], HPos.RIGHT);
-
-                resetColorButtons[i] = new Button(RESETDEFAULT_BUTTON);
-                resetColorButtons[i].setFont(fontAwesomeSmall);
-                int finalI = i;
-                resetColorButtons[i].setOnAction(e ->
-                        manager.colorPropertiesList().get(finalI).set(SkyCanvasManager.getDefaultColorsList().get(finalI)));
-            }
-
-            colorsGrid.addColumn(0, colorLabels);
-            colorsGrid.addColumn(1, colorPickers);
-            colorsGrid.addColumn(2, resetColorButtons);
-
-            Label gridSpaceLabel = new Label(GRID_LABEL);
-            gridSpaceLabel.setFont(fontAwesomeDefault);
-            addTooltip(gridSpaceLabel, HELPTXT_GRIDSPACE);
-
-            ComboBox<String> spacingsBox = new ComboBox<>();
-            spacingsBox.setItems(FXCollections.observableArrayList(manager.suggestedGridSpacings()));
-            spacingsBox.setValue(manager.getHorizCoordsGridSpacingDeg() + "°");
-            spacingsBox.valueProperty().addListener((p, o, n) ->
-                    manager.setHorizCoordsGridSpacingDeg(Integer.parseInt(n.substring(0, n.length() - 1))));
-
-            HBox gridSizeHBox = new HBox(gridSpaceLabel, spacingsBox);
-            gridSizeHBox.setSpacing(PARAMS_GRIDGAP);
-            gridSizeHBox.setAlignment(Pos.CENTER);
-
-            VBox drawingVbox = new VBox(drawLabel, checkBoxesToDraw, spaceLabel(), gridSizeHBox, spaceLabel(), colorsGrid);
-
-            // d/ Finalization
-            VBox parametersBox = new VBox(layerOneGrid, firstSeparator, slidersVBox, secondSeparator, drawingVbox);
-            parametersBox.setStyle(BONUS_BOXES_STYLE);
-            setVisibleAndManaged(parametersBox, false);
-
-        // NEW VI/ Information on celestial object panel (right border):
-            // a/ Common information:
-            Button exitButton = new Button(EXIT_BUTTON_LABEL);
-            exitButton.setFont(fontAwesomeDefault);
-            addTooltip(exitButton, HELPTXT_EXITINFO);
-            exitButton.setOnAction(e -> manager.resetInformationPanel());
-            rightPanelIsON.addListener((p, o, n) -> {
-                if (!n) exitButton.fire();
-            });
-
-            Text celestNameLabel = new Text();
-            celestNameLabel.setStyle(CELEST_TITLE_STYLE);
-
-            VBox topInfoVBox = new VBox(exitButton, celestNameLabel);
-            topInfoVBox.setSpacing(INFO_HBOX_SPACING);
-            topInfoVBox.setAlignment(Pos.CENTER);
-
-            Separator firstRightSeparator = new Separator(Orientation.HORIZONTAL);
-            firstRightSeparator.setStyle(SEPARATOR_STYLE);
-
-            GridPane basicInfo = new GridPane();
-            Label[] basicInfoLabels = {
-                    new Label("Ascension droite (hr) : "),
-                    new Label("Déclinaison (°) : "),
-                    new Label("Taille angulaire (°) : "),
-                    new Label("Magnitude : "),
-                    new Label("Date : "),
-                    new Label("Heure : "),
-                    new Label("Fuseau : "),
-                    new Label("Longitude (°) : "),
-                    new Label("Latitude (°) : ")
-            };
-            addTooltips(basicInfoLabels, HELPTXT_RA, HELPTXT_DEC, HELPTXT_ANGSIZE, HELPTXT_MAG, HELPTXT_INFODATE,
-                    HELPTXT_INFOHOUR, HELPTXT_INFOZONE, HELPTXT_INFOLON, HELPTXT_INFOLAT);
-            Text[] basicInfoValues = emptyTextArrayOfSize(basicInfoLabels.length);
-            formatInfoGridPane(basicInfo, basicInfoLabels, basicInfoValues);
-
-            Separator secondRightSeparator = new Separator(Orientation.HORIZONTAL);
-            secondRightSeparator.setStyle(SEPARATOR_STYLE);
-
-            // b/ Star-specific info:
-            Label relatedStarsText = new Label();
-            relatedStarsText.setTextAlignment(TextAlignment.CENTER);
-
-            GridPane starsInfo = new GridPane();
-            Label[] starsInfoLabels = {
-                    new Label("Température (K) : "),
-                    new Label("Hipparcos : ")
-            };
-            addTooltip(starsInfoLabels[1], HELPTXT_HIPPARCOS);
-            Text[] starsInfoValues = emptyTextArrayOfSize(starsInfoLabels.length);
-            formatInfoGridPane(starsInfo, starsInfoLabels, starsInfoValues);
-
-            VBox starsSpecifics = new VBox(starsInfo, relatedStarsText);
-            starsSpecifics.setAlignment(Pos.CENTER);
-
-            Separator possibleSeparator = new Separator(Orientation.HORIZONTAL);
-            possibleSeparator.setStyle(SEPARATOR_STYLE);
-
-            // c/ Moon-specific info:
-            GridPane moonSpecifics = new GridPane();
-            Label[] moonInfoLabels = {
-                    new Label(PHASE_LABEL)
-            };
-            moonInfoLabels[0].setFont(fontAwesomeDefault);
-            addTooltips(moonInfoLabels, HELPTXT_PHASE);
-            Text[] moonInfoValues = emptyTextArrayOfSize(moonInfoLabels.length);
-            formatInfoGridPane(moonSpecifics, moonInfoLabels, moonInfoValues);
-            //Left as array for ease of adding (hypothetical) information later
-
-            // d/ Sun-specific info:
-            GridPane sunSpecifics = new GridPane();
-            Label[] sunInfoLabels = {
-                    new Label("Anomalie moyenne (°) : "),
-                    new Label("Longitude écliptique (°) : ")
-            };
-            addTooltips(sunInfoLabels, HELPTXT_MEANANOM, HELPTXT_ECLIPLON);
-            Text[] sunInfoValues = emptyTextArrayOfSize(sunInfoLabels.length);
-            formatInfoGridPane(sunSpecifics, sunInfoLabels, sunInfoValues);
-
-            // e/ Orbit drawing sliders:
-            Label orbitLabel = new Label("Paramètres d'orbite :");
-            addTooltip(orbitLabel, HELPTXT_ORBITPARAMS);
-
-            Label resolutionLabel = new Label(ORBIT_RESO_LABEL);
-            resolutionLabel.setFont(fontAwesomeDefault);
-            addTooltip(resolutionLabel, HELPTXT_RESOLUTION);
-
-            Label lengthLabel = new Label(ORBIT_LENGTH_LABEL);
-            lengthLabel.setFont(fontAwesomeDefault);
-            addTooltip(lengthLabel, HELPTXT_LENGTH);
-
-            Slider resolutionSlider = new Slider(RESOSLIDER_MIN, RESOSLIDER_MAX, manager.getOrbitDrawingStep());
-            Slider lengthSlider = new Slider(LENGTHSLIDER_MIN, LENGTHSLIDER_MAX, manager.getDrawOrbitUntil());
-
-            resolutionSlider.valueProperty().bindBidirectional(manager.orbitDrawingStepProperty());
-            lengthSlider.valueProperty().bindBidirectional(manager.drawOrbitUntilProperty());
-
-            Stream.of(resolutionSlider, lengthSlider).forEach(slider -> {
-                slider.setMinWidth(ORBIT_SLIDER_WIDTH);
-                slider.setMaxWidth(ORBIT_SLIDER_WIDTH);
-                slider.disableProperty().bind(orbitDrawingCheckbox.selectedProperty().not());
-            });
-            resolutionSlider.setLabelFormatter(new StringConverter<>() {
-                @Override
-                public String toString(Double object) {
-                    return String.valueOf(1/object);
-                }
-
-                @Override
-                public Double fromString(String string) {
-                    return 1/Double.parseDouble(string);
-                }
-            });
-            resolutionSlider.setShowTickLabels(true);
-            lengthSlider.setShowTickLabels(true);
-            lengthSlider.setMajorTickUnit(LENGTHSLIDER_MAX - LENGTHSLIDER_MIN);
-            lengthSlider.setLabelFormatter(new StringConverter<>() {
-                @Override
-                public String toString(Double object) {
-                    if (object == LENGTHSLIDER_MIN) return MIN_LENGTH_LABEL;
-                    if (object == LENGTHSLIDER_MAX) return MAX_LENGTH_LABEL;
-                    return String.valueOf(object);
-                }
-                @Override
-                public Double fromString(String string) {
-                    if (string.equals(MIN_LENGTH_LABEL)) return LENGTHSLIDER_MIN;
-                    if (string.equals(MAX_LENGTH_LABEL)) return LENGTHSLIDER_MAX;
-                    return Double.parseDouble(string);
-                }
-            });
-
-            VBox orbitSliders = new VBox(orbitLabel, spaceLabel(), resolutionLabel, resolutionSlider, lengthLabel, lengthSlider);
-            orbitSliders.setAlignment(Pos.CENTER);
-
-            // f/ Finalization and update:
-            VBox rightBox = new VBox(topInfoVBox, firstRightSeparator, basicInfo, secondRightSeparator, sunSpecifics,
-                    moonSpecifics, starsSpecifics, possibleSeparator, orbitSliders);
-            rightBox.setStyle(BONUS_BOXES_STYLE);
-            rightBox.setAlignment(Pos.CENTER);
-
-            manager.wantNewInformationPanelProperty().addListener((p, o, n) -> {
-
-                setVisibleAndManaged(false, rightBox, starsSpecifics);
-                setVisibleAndManaged(false, starsSpecifics.getChildren());
-                setVisibleAndManaged(false, rightBox.getChildren());
-
-                if (rightPanelIsON.get() && n != null) {
-                    celestNameLabel.setText(" " + n.name() + " ");
-                    setTexts(Arrays.copyOfRange(basicInfoValues, 0, 4), DEFAULT_NBR_DECIMALS, n.equatorialPos().raHr(),
-                            n.equatorialPos().decDeg(), Angle.toDeg(n.angularSize()), n.magnitude());
-                    setTexts(Arrays.copyOfRange(basicInfoValues, 4, basicInfoLabels.length),
-                            dateTimeBean.getDate().toString(),
-                            dateTimeBean.getTime().truncatedTo(ChronoUnit.SECONDS).toString(),
-                            dateTimeBean.getZone().toString(),
-                            doubleWithXdecimals(observerLocationBean.getLonDeg(), DEFAULT_NBR_DECIMALS),
-                            doubleWithXdecimals(observerLocationBean.getLatDeg(), DEFAULT_NBR_DECIMALS));
-                    setVisibleAndManaged(true, topInfoVBox, firstRightSeparator, basicInfo,
-                            secondRightSeparator, rightBox);
-                    if (n instanceof Star) {
-                        setTexts(starsInfoValues, String.valueOf(((Star) n).colorTemperature()),
-                                String.valueOf(((Star) n).hipparcosId()));
-                        setVisibleAndManaged(true, starsSpecifics, starsInfo);
-
-                        Optional<Set<Star>> relatedStars = catalogue.constellationOfStar((Star) n);
-                        if (relatedStars.isPresent()) {
-                            relatedStarsText.setText("Liée à :\n" + formatSetToString(relatedStars.get()));
-                            setVisibleAndManaged(true, relatedStarsText);
-                        }
-
-                    } else {
-                        if (n instanceof Sun) {
-                            setTexts(sunInfoValues, DEFAULT_NBR_DECIMALS,
-                                    Angle.toDeg(Angle.normalizePositive(((Sun) n).meanAnomaly())),
-                                    ((Sun) n).eclipticPos().lonDeg());
-                            setVisibleAndManaged(true, sunSpecifics, possibleSeparator);
-                        } else if (n instanceof Moon) {
-                            setTexts(moonInfoValues, doubleToPercent(((Moon) n).phase(), DEFAULT_NBR_DECIMALS));
-                            setVisibleAndManaged(true, moonSpecifics, possibleSeparator);
-                        }
-                        setVisibleAndManaged(true, orbitSliders);
-                    }
-                }
-            });
-            setVisibleAndManaged(rightBox, false);
-            setVisibleAndManaged(false, rightBox.getChildren());
-            setVisibleAndManaged(false, starsSpecifics.getChildren());
-
-        // VII/ Misc controls and styles: ------------------------------
-            mainBorder = new BorderPane(canvasPane, controlBar, rightBox, informationBar, parametersBox);
+            mainBorder = new BorderPane(
+                    canvasPane(manager),
+                    controlBar(fontAwesomeDefault, manager, observerLocationBean, dateTimeBean, animator, paramsTip,
+                            toOptionsButton),
+                    rightBox(fontAwesomeDefault, manager, rightPanelIsON, catalogue, observerLocationBean,
+                            dateTimeBean, orbitDrawingCheckbox),
+                    informationBar(manager, viewingParametersBean),
+                    parametersBox);
 
             toOptionsButton.setOnAction(e -> setVisibleAndManaged(parametersBox, !parametersBox.isVisible()));
             bindTextToBoolean(paramsTip.textProperty(), parametersBox.visibleProperty(), HELPTXT_PARAMS_ON, HELPTXT_PARAMS_OFF);
@@ -826,7 +300,8 @@ public final class Main extends Application {
                 tooltip.setStyle(TOOLTIP_DEFAULT_STYLE);
             });
 
-            // VIII/ Showtime: ----------------------------------------------
+            labelList.forEach(node -> node.setTextFill(CONTROLBAR_TEXT_COLOR));
+
             Scene mainScene = new Scene(mainBorder);
             primaryStage.setFullScreenExitHint(HELPTXT_FULLSCREEN);
             primaryStage.setScene(mainScene);
@@ -839,6 +314,624 @@ public final class Main extends Application {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private HBox controlBar(Font fontAwesomeDefault, SkyCanvasManager manager, ObserverLocationBean observerLocationBean,
+                            DateTimeBean dateTimeBean, TimeAnimator animator, Tooltip paramsTip,
+                            Button toOptionsButton) {
+        HBox controlBar = new HBox(searchHBox(fontAwesomeDefault, manager, paramsTip, toOptionsButton),
+                new Separator(Orientation.VERTICAL),
+                positionHBox(observerLocationBean),
+                new Separator(Orientation.VERTICAL),
+                timeHBox(dateTimeBean, animator),
+                new Separator(Orientation.VERTICAL),
+                accelerationHbox(fontAwesomeDefault, animator, dateTimeBean));
+        controlBar.setStyle(CONTROL_BAR_STYLE);
+
+        return controlBar;
+    }
+
+    private HBox searchHBox(Font fontAwesomeDefault, SkyCanvasManager manager, Tooltip paramsTip,
+                            Button toOptionsButton) {
+        Label searchLabel = new Label(SEARCH_LABEL);
+        searchLabel.setFont(fontAwesomeDefault);
+        labelList.add(searchLabel);
+        toOptionsButton.setTooltip(paramsTip);
+        toOptionsButton.setFont(fontAwesomeDefault);
+        toolTipList.add(paramsTip);
+        addTooltip(searchLabel, HELPTXT_SEARCH);
+        addTooltip(manager.searcher(), HELPTXT_SEARCH);
+
+        HBox searchHBox = new HBox(searchLabel, manager.searcher(), toOptionsButton);
+        searchHBox.setStyle(SEARCH_HBOX_STYLE);
+
+        return searchHBox;
+    }
+
+    private HBox positionHBox(ObserverLocationBean observerLocationBean) {
+        Label longLabel = new Label("Longitude (°) :");
+        Label latLabel = new Label("Latitude (°) :");
+        labelList.add(longLabel);
+        labelList.add(latLabel);
+        TextField longTextField = new TextField();
+        TextField latTextField = new TextField();
+        longTextField.setStyle(POSITION_TXTFIELDS_STYLE);
+        latTextField.setStyle(POSITION_TXTFIELDS_STYLE);
+
+        addTooltip(longLabel, HELPTXT_LONGITUDE);
+        addTooltip(latLabel, HELPTXT_LATITUDE);
+
+        NumberStringConverter positionConverter = new NumberStringConverter("#0.00");
+
+        UnaryOperator<TextFormatter.Change> lonFilter = coordFilter(positionConverter, GeographicCoordinates::isValidLonDeg);
+        UnaryOperator<TextFormatter.Change> latFilter = coordFilter(positionConverter, GeographicCoordinates::isValidLatDeg);
+
+        TextFormatter<Number> lonTextFormatter = new TextFormatter<>(positionConverter, 0, lonFilter);
+        TextFormatter<Number> latTextFormatter = new TextFormatter<>(positionConverter, 0, latFilter);
+
+        longTextField.setTextFormatter(lonTextFormatter);
+        latTextField.setTextFormatter(latTextFormatter);
+
+        lonTextFormatter.valueProperty().bindBidirectional(observerLocationBean.lonDegProperty());
+        latTextFormatter.valueProperty().bindBidirectional(observerLocationBean.latDegProperty());
+
+        HBox positionHBox = new HBox(longLabel, longTextField, latLabel, latTextField);
+        positionHBox.setStyle(POSITION_HBOX_STYLE);
+
+        return positionHBox;
+    }
+
+    private HBox timeHBox(DateTimeBean dateTimeBean, TimeAnimator animator) {
+        Label dateLabel = new Label("Date :");
+        labelList.add(dateLabel);
+        DatePicker datePicker = new DatePicker();
+        datePicker.setStyle(TIME_DATEPICK_STYLE);
+        datePicker.valueProperty().bindBidirectional(dateTimeBean.dateProperty());
+        addTooltip(dateLabel, HELPTXT_DATE);
+
+        Label hourLabel = new Label("Heure :");
+        labelList.add(hourLabel);
+        TextField hourTextField = new TextField();
+        hourTextField.setStyle(TIME_TXTFIELD_STYLE);
+        addTooltip(hourLabel, HELPTXT_HOUR);
+
+        DateTimeFormatter hmsFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+        LocalTimeStringConverter hourConverter = new LocalTimeStringConverter(hmsFormatter, hmsFormatter);
+        TextFormatter<LocalTime> timeFormatter = new TextFormatter<>(hourConverter);
+        hourTextField.setTextFormatter(timeFormatter);
+        timeFormatter.valueProperty().bindBidirectional(dateTimeBean.timeProperty());
+
+        ComboBox<ZoneId> zoneList = new ComboBox<>();
+        zoneList.setStyle(TIME_ZONECOMBOBOX_STYLE);
+        zoneList.getItems().addAll(ZoneId.getAvailableZoneIds()
+                .stream()
+                .sorted()
+                .map(ZoneId::of)
+                .collect(Collectors.toList()));
+        zoneList.valueProperty().bindBidirectional(dateTimeBean.zoneProperty());
+        addTooltip(zoneList, HELPTXT_ZONE);
+
+        HBox timeHBox = new HBox(dateLabel, datePicker, hourLabel, hourTextField, zoneList);
+        timeHBox.setStyle(TIME_HBOX_STYLE);
+
+        disableWhenRunning(animator, hourTextField, datePicker, zoneList);
+
+        return timeHBox;
+    }
+
+    private HBox accelerationHbox(Font fontAwesomeDefault, TimeAnimator animator, DateTimeBean dateTimeBean) {
+        ComboBox<NamedTimeAccelerator> acceleratorList =
+                new ComboBox<>(FXCollections.observableArrayList(NamedTimeAccelerator.values()));
+        acceleratorList.valueProperty().addListener((p, o, n) -> animator.setAccelerator(n.getAccelerator()));
+        /* This does the same job as the recommended Bindings.select way but seems more concise. */
+        /* We also thought a comboBox looks better here... */
+        acceleratorList.setValue(INITIAL_ACCELERATOR);
+        addTooltip(acceleratorList, HELPTXT_ACC);
+
+        Button resetButton = new Button(RESET_BUTTON_TEXT);
+        Button startPauseButton = new Button();
+        resetButton.setFont(fontAwesomeDefault);
+        startPauseButton.setFont(fontAwesomeDefault);
+        bindTextToBoolean(startPauseButton.textProperty(),
+                animator.runningProperty(), PAUSE_BUTTON_TEXT, PLAY_BUTTON_TEXT);
+        addTooltip(resetButton, HELPTXT_RESET_TIME);
+
+        Tooltip startPauseTooltip = new Tooltip();
+        toolTipList.add(startPauseTooltip);
+        startPauseButton.setTooltip(startPauseTooltip);
+        bindTextToBoolean(startPauseTooltip.textProperty(), animator.runningProperty(),
+                HELPTXT_PAUSE_ACC, HELPTXT_START_ACC);
+
+        startPauseButton.setOnAction(e -> {
+            if (animator.isRunning()) {
+                animator.stop();
+            } else {
+                animator.start();
+            }
+        });
+
+        resetButton.setOnAction(click -> dateTimeBean.setZonedDateTime(ZonedDateTime.now()));
+
+        HBox accelerationHbox = new HBox(acceleratorList, resetButton, startPauseButton);
+        accelerationHbox.setStyle(ACC_HBOX_STYLE);
+
+        disableWhenRunning(animator, acceleratorList, resetButton);
+
+        return accelerationHbox;
+    }
+
+    private static void disableWhenRunning(TimeAnimator animator, Control... controls) {
+        Arrays.stream(controls).forEach(e -> e.disableProperty().bind(animator.runningProperty()));
+    }
+
+    private Pane canvasPane(SkyCanvasManager manager) {
+        Pane canvasPane = new Pane(manager.canvas());
+        manager.canvas().widthProperty().bind(canvasPane.widthProperty());
+        manager.canvas().heightProperty().bind(canvasPane.heightProperty());
+
+        return canvasPane;
+    }
+
+    private BorderPane informationBar(SkyCanvasManager manager, ViewingParametersBean viewingParametersBean) {
+        Text fovText = new Text();
+        fovText.textProperty().bind(Bindings.format(Locale.ROOT, "Champ de vue : %.1f°",
+                viewingParametersBean.fieldOfViewDegProperty()));
+
+        Text objectUnderMouseText = new Text();
+        manager.objectUnderMouseProperty().addListener((p, o, n) ->
+                n.ifPresentOrElse(celestialObject -> objectUnderMouseText.setText(celestialObject.info()),
+                        () -> objectUnderMouseText.setText("")));
+
+        Text mousePosText = new Text();
+        mousePosText.textProperty().bind(Bindings.format(Locale.ROOT, "Azimut : %.2f°, hauteur : %.2f°",
+                manager.mouseAzDegProperty(), manager.mouseAltDegProperty()));
+
+        BorderPane informationBar = new BorderPane(objectUnderMouseText, null, mousePosText, null, fovText);
+        informationBar.setStyle(INFO_BAR_STYLE);
+
+        return informationBar;
+    }
+
+    private VBox rightBox(Font fontAwesomeDefault, SkyCanvasManager manager, BooleanProperty rightPanelIsON,
+                          StarCatalogue catalogue, ObserverLocationBean observerLocationBean, DateTimeBean dateTimeBean,
+                          CheckBox orbitDrawingCheckbox) {
+        Button exitButton = new Button(EXIT_BUTTON_LABEL);
+        exitButton.setFont(fontAwesomeDefault);
+        addTooltip(exitButton, HELPTXT_EXITINFO);
+        exitButton.setOnAction(e -> manager.resetInformationPanel());
+        rightPanelIsON.addListener((p, o, n) -> {
+            if (!n) exitButton.fire();
+        });
+
+        Text celestNameLabel = new Text();
+        celestNameLabel.setStyle(CELEST_TITLE_STYLE);
+
+        VBox topInfoVBox = new VBox(exitButton, celestNameLabel);
+        topInfoVBox.setSpacing(INFO_HBOX_SPACING);
+        topInfoVBox.setAlignment(Pos.CENTER);
+
+        Separator firstRightSeparator = new Separator(Orientation.HORIZONTAL);
+        firstRightSeparator.setStyle(SEPARATOR_STYLE);
+
+        Separator secondRightSeparator = new Separator(Orientation.HORIZONTAL);
+        secondRightSeparator.setStyle(SEPARATOR_STYLE);
+
+        Separator possibleSeparator = new Separator(Orientation.HORIZONTAL);
+        possibleSeparator.setStyle(SEPARATOR_STYLE);
+
+        Label[] basicInfoLabels = {
+                new Label("Ascension droite (hr) : "),
+                new Label("Déclinaison (°) : "),
+                new Label("Taille angulaire (°) : "),
+                new Label("Magnitude : "),
+                new Label("Date : "),
+                new Label("Heure : "),
+                new Label("Fuseau : "),
+                new Label("Longitude (°) : "),
+                new Label("Latitude (°) : ")
+        };
+        Text[] basicInfoValues = emptyTextArrayOfSize(basicInfoLabels.length);
+        GridPane basicInfo = basicInfo(basicInfoLabels, basicInfoValues);
+
+        Label[] moonInfoLabels = {
+                new Label(PHASE_LABEL)
+        };
+        Text[] moonInfoValues = emptyTextArrayOfSize(moonInfoLabels.length);
+        //Left as array for ease of adding (hypothetical) information later
+        GridPane moonSpecifics = moonSpecifics(fontAwesomeDefault, moonInfoLabels, moonInfoValues);
+
+        Label[] sunInfoLabels = {
+                new Label("Anomalie moyenne (°) : "),
+                new Label("Longitude écliptique (°) : ")
+        };
+        Text[] sunInfoValues = emptyTextArrayOfSize(sunInfoLabels.length);
+        GridPane sunSpecifics = sunSpecifics(sunInfoLabels, sunInfoValues);
+
+        Label[] starsInfoLabels = {
+                new Label("Température (K) : "),
+                new Label("Hipparcos : ")
+        };
+        Text[] starsInfoValues = emptyTextArrayOfSize(starsInfoLabels.length);
+
+        Label relatedStarsText = new Label();
+        relatedStarsText.setTextAlignment(TextAlignment.CENTER);
+
+        GridPane starsInfo = new GridPane();
+
+        addTooltip(starsInfoLabels[1], HELPTXT_HIPPARCOS);
+        formatInfoGridPane(starsInfo, starsInfoLabels, starsInfoValues);
+
+        VBox starsSpecifics = starsSpecifics(starsInfo, relatedStarsText);
+
+        VBox orbitSliders = orbitSliders(fontAwesomeDefault, manager, orbitDrawingCheckbox);
+
+        VBox rightBox = new VBox(topInfoVBox, firstRightSeparator, basicInfo, secondRightSeparator, sunSpecifics,
+                moonSpecifics, starsSpecifics, possibleSeparator, orbitSliders);
+        rightBox.setStyle(BONUS_BOXES_STYLE);
+        rightBox.setAlignment(Pos.CENTER);
+
+        manager.wantNewInformationPanelProperty().addListener((p, o, n) -> {
+
+            setVisibleAndManaged(false, rightBox, starsSpecifics);
+            setVisibleAndManaged(false, starsSpecifics.getChildren());
+            setVisibleAndManaged(false, rightBox.getChildren());
+
+            if (rightPanelIsON.get() && n != null) {
+                celestNameLabel.setText(" " + n.name() + " ");
+                setTexts(Arrays.copyOfRange(basicInfoValues, 0, 4), DEFAULT_NBR_DECIMALS, n.equatorialPos().raHr(),
+                        n.equatorialPos().decDeg(), Angle.toDeg(n.angularSize()), n.magnitude());
+                setTexts(Arrays.copyOfRange(basicInfoValues, 4, basicInfoLabels.length),
+                        dateTimeBean.getDate().toString(),
+                        dateTimeBean.getTime().truncatedTo(ChronoUnit.SECONDS).toString(),
+                        dateTimeBean.getZone().toString(),
+                        doubleWithXdecimals(observerLocationBean.getLonDeg(), DEFAULT_NBR_DECIMALS),
+                        doubleWithXdecimals(observerLocationBean.getLatDeg(), DEFAULT_NBR_DECIMALS));
+                setVisibleAndManaged(true, topInfoVBox, firstRightSeparator, basicInfo,
+                        secondRightSeparator, rightBox);
+                if (n instanceof Star) {
+                    setTexts(starsInfoValues, String.valueOf(((Star) n).colorTemperature()),
+                            String.valueOf(((Star) n).hipparcosId()));
+                    setVisibleAndManaged(true, starsSpecifics, starsInfo);
+
+                    Optional<Set<Star>> relatedStars = catalogue.constellationOfStar((Star) n);
+                    if (relatedStars.isPresent()) {
+                        relatedStarsText.setText("Liée à :\n" + formatSetToString(relatedStars.get()));
+                        setVisibleAndManaged(true, relatedStarsText);
+                    }
+
+                } else {
+                    if (n instanceof Sun) {
+                        setTexts(sunInfoValues, DEFAULT_NBR_DECIMALS,
+                                Angle.toDeg(Angle.normalizePositive(((Sun) n).meanAnomaly())),
+                                ((Sun) n).eclipticPos().lonDeg());
+                        setVisibleAndManaged(true, sunSpecifics, possibleSeparator);
+                    } else if (n instanceof Moon) {
+                        setTexts(moonInfoValues, doubleToPercent(((Moon) n).phase(), DEFAULT_NBR_DECIMALS));
+                        setVisibleAndManaged(true, moonSpecifics, possibleSeparator);
+                    }
+                    setVisibleAndManaged(true, orbitSliders);
+                }
+            }
+        });
+        setVisibleAndManaged(rightBox, false);
+        setVisibleAndManaged(false, rightBox.getChildren());
+        setVisibleAndManaged(false, starsSpecifics.getChildren());
+
+        return rightBox;
+    }
+
+    private GridPane basicInfo(Label[] basicInfoLabels, Text[] basicInfoValues) {
+        GridPane basicInfo = new GridPane();
+        addTooltips(basicInfoLabels, HELPTXT_RA, HELPTXT_DEC, HELPTXT_ANGSIZE, HELPTXT_MAG, HELPTXT_INFODATE,
+                HELPTXT_INFOHOUR, HELPTXT_INFOZONE, HELPTXT_INFOLON, HELPTXT_INFOLAT);
+        formatInfoGridPane(basicInfo, basicInfoLabels, basicInfoValues);
+
+        return basicInfo;
+    }
+
+    private VBox starsSpecifics(GridPane starsInfo, Label relatedStarsText) {
+        VBox starsSpecifics = new VBox(starsInfo, relatedStarsText);
+        starsSpecifics.setAlignment(Pos.CENTER);
+
+        return starsSpecifics;
+    }
+
+    private GridPane moonSpecifics(Font fontAwesomeDefault, Label[] moonInfoLabels, Text[] moonInfoValues) {
+        GridPane moonSpecifics = new GridPane();
+        moonInfoLabels[0].setFont(fontAwesomeDefault);
+        addTooltips(moonInfoLabels, HELPTXT_PHASE);
+        formatInfoGridPane(moonSpecifics, moonInfoLabels, moonInfoValues);
+
+        return moonSpecifics;
+    }
+
+    private GridPane sunSpecifics(Label[] sunInfoLabels, Text[] sunInfoValues) {
+        GridPane sunSpecifics = new GridPane();
+        addTooltips(sunInfoLabels, HELPTXT_MEANANOM, HELPTXT_ECLIPLON);
+        formatInfoGridPane(sunSpecifics, sunInfoLabels, sunInfoValues);
+
+        return sunSpecifics;
+    }
+
+    private VBox orbitSliders(Font fontAwesomeDefault, SkyCanvasManager manager, CheckBox orbitDrawingCheckbox) {
+        Label orbitLabel = new Label("Paramètres d'orbite :");
+        addTooltip(orbitLabel, HELPTXT_ORBITPARAMS);
+
+        Label resolutionLabel = new Label(ORBIT_RESO_LABEL);
+        resolutionLabel.setFont(fontAwesomeDefault);
+        addTooltip(resolutionLabel, HELPTXT_RESOLUTION);
+
+        Label lengthLabel = new Label(ORBIT_LENGTH_LABEL);
+        lengthLabel.setFont(fontAwesomeDefault);
+        addTooltip(lengthLabel, HELPTXT_LENGTH);
+
+        Slider resolutionSlider = new Slider(RESOSLIDER_MIN, RESOSLIDER_MAX, manager.getOrbitDrawingStep());
+        Slider lengthSlider = new Slider(LENGTHSLIDER_MIN, LENGTHSLIDER_MAX, manager.getDrawOrbitUntil());
+
+        resolutionSlider.valueProperty().bindBidirectional(manager.orbitDrawingStepProperty());
+        lengthSlider.valueProperty().bindBidirectional(manager.drawOrbitUntilProperty());
+
+        Stream.of(resolutionSlider, lengthSlider).forEach(slider -> {
+            slider.setMinWidth(ORBIT_SLIDER_WIDTH);
+            slider.setMaxWidth(ORBIT_SLIDER_WIDTH);
+            slider.disableProperty().bind(orbitDrawingCheckbox.selectedProperty().not());
+        });
+        resolutionSlider.setLabelFormatter(new StringConverter<>() {
+            @Override
+            public String toString(Double object) {
+                return String.valueOf(1/object);
+            }
+
+            @Override
+            public Double fromString(String string) {
+                return 1/Double.parseDouble(string);
+            }
+        });
+        resolutionSlider.setShowTickLabels(true);
+        lengthSlider.setShowTickLabels(true);
+        lengthSlider.setMajorTickUnit(LENGTHSLIDER_MAX - LENGTHSLIDER_MIN);
+        lengthSlider.setLabelFormatter(new StringConverter<>() {
+            @Override
+            public String toString(Double object) {
+                if (object == LENGTHSLIDER_MIN) return MIN_LENGTH_LABEL;
+                if (object == LENGTHSLIDER_MAX) return MAX_LENGTH_LABEL;
+                return String.valueOf(object);
+            }
+            @Override
+            public Double fromString(String string) {
+                if (string.equals(MIN_LENGTH_LABEL)) return LENGTHSLIDER_MIN;
+                if (string.equals(MAX_LENGTH_LABEL)) return LENGTHSLIDER_MAX;
+                return Double.parseDouble(string);
+            }
+        });
+
+        VBox orbitSliders = new VBox(orbitLabel, spaceLabel(), resolutionLabel, resolutionSlider, lengthLabel, lengthSlider);
+        orbitSliders.setAlignment(Pos.CENTER);
+
+        return orbitSliders;
+    }
+
+    private VBox parametersBox(SkyCanvasManager manager, Font fontAwesomeDefault, Font fontAwesomeSmall,
+                               Stage primaryStage, BooleanProperty rightPanelIsON, CheckBox orbitDrawingCheckbox) {
+        Separator firstSeparator = new Separator(Orientation.HORIZONTAL);
+        firstSeparator.setStyle(SEPARATOR_STYLE);
+
+        Separator secondSeparator = new Separator(Orientation.HORIZONTAL);
+        secondSeparator.setStyle(SEPARATOR_STYLE);
+
+        VBox parametersBox = new VBox(layerOneGrid(manager, fontAwesomeDefault, primaryStage, rightPanelIsON),
+                firstSeparator,
+                slidersVBox(manager, fontAwesomeDefault),
+                secondSeparator,
+                drawingVbox(manager, fontAwesomeSmall, fontAwesomeDefault, orbitDrawingCheckbox));
+        parametersBox.setStyle(BONUS_BOXES_STYLE);
+        setVisibleAndManaged(parametersBox, false);
+
+        return parametersBox;
+    }
+
+    private GridPane layerOneGrid(SkyCanvasManager manager, Font fontAwesomeDefault, Stage primaryStage,
+                                  BooleanProperty rightPanelIsON) {
+        Button toggleGUI = new Button(TOGGLE_GUI);
+        toggleGUI.setFont(fontAwesomeDefault);
+        addTooltip(toggleGUI, HELPTXT_TOGGLEGUI);
+
+        BooleanProperty guiIsON = new SimpleBooleanProperty(true);
+
+        Tooltip guiPopup = new Tooltip(HELPTXT_GUILESS_POPUP);
+        guiPopup.setAutoHide(true);
+
+        toggleGUI.setOnAction(e -> {
+            manager.setNonFunctionalKeyPressed(false);
+            guiIsON.set(false);
+            manager.canvas().requestFocus();
+            guiPopup.show(primaryStage);
+        });
+
+        guiIsON.addListener((p, o, newBoolean) ->
+                Stream.of(mainBorder.getTop(), mainBorder.getRight(), mainBorder.getLeft(), mainBorder.getBottom())
+                        .forEach(e -> {
+                            e.setVisible(newBoolean);
+                            e.setManaged(newBoolean);
+                        }));
+
+        manager.nonFunctionalKeyPressedProperty().addListener((p, o, n) -> {
+            if (!guiIsON.get() && n) {
+                guiIsON.set(true);
+                guiPopup.hide();
+            }
+        });
+
+        Button toggleFullscreen = new Button();
+        Tooltip toggleFullscreenTooltip = new Tooltip();
+        toolTipList.add(toggleFullscreenTooltip);
+        toggleFullscreen.setFont(fontAwesomeDefault);
+        toggleFullscreen.setTooltip(toggleFullscreenTooltip);
+        toggleFullscreen.setOnAction(e -> primaryStage.setFullScreen(!primaryStage.isFullScreen()));
+        /* FullScreenProperty is readonly in Stage, not allowing us to use the nifty link method below. */
+        bindTextToBoolean(toggleFullscreenTooltip.textProperty(), primaryStage.fullScreenProperty(),
+                HELPTXT_FULLSCREEN_ON, HELPTXT_FULLSCREEN_OFF);
+        bindTextToBoolean(toggleFullscreen.textProperty(),
+                primaryStage.fullScreenProperty(), FULLSCREEN_SET_OFF, FULLSCREEN_SET_ON);
+
+        Button rightClickInfo = new Button();
+        rightClickInfo.setFont(fontAwesomeDefault);
+        Tooltip rightClickToolTip = new Tooltip();
+        toolTipList.add(rightClickToolTip);
+        rightClickInfo.setTooltip(rightClickToolTip);
+        linkAndBindText(rightClickInfo, rightPanelIsON, RIGHT_PANEL_IS_ON, RIGHT_PANEL_IS_OFF);
+        bindTextToBoolean(rightClickToolTip.textProperty(), rightPanelIsON, HELPTXT_RIGHT_IS_ON,
+                HELPTXT_RIGHT_IS_OFF);
+
+        Button toggleExtendedAlt = new Button();
+        toggleExtendedAlt.setFont(fontAwesomeDefault);
+        Tooltip extendedAltTooltip = new Tooltip();
+        toolTipList.add(extendedAltTooltip);
+        toggleExtendedAlt.setTooltip(extendedAltTooltip);
+        linkAndBindText(toggleExtendedAlt, manager.extendedAltitudeIsOnProperty(), EXTEND_ALT_IS_ON, EXTEND_ALT_IS_OFF);
+        bindTextToBoolean(extendedAltTooltip.textProperty(), manager.extendedAltitudeIsOnProperty(),
+                HELPTXT_EXTEND_IS_ON, HELPTXT_EXTEND_IS_OFF);
+
+        GridPane layerOneGrid = new GridPane();
+        layerOneGrid.addRow(0, toggleGUI, rightClickInfo);
+        layerOneGrid.addRow(1, toggleFullscreen, toggleExtendedAlt);
+        layerOneGrid.setVgap(PARAMS_GRIDGAP);
+        layerOneGrid.setHgap(PARAMS_GRIDGAP);
+        layerOneGrid.setAlignment(Pos.CENTER);
+
+        Stream.of(toggleGUI, toggleFullscreen, toggleExtendedAlt, rightClickInfo)
+                .forEach(button -> button.setMaxWidth(Double.MAX_VALUE));
+        // A javaFX hack to make buttons occupy all the space they can, because unlike for other nodes,
+        // buttons will not do so 'automatically'.
+
+        return layerOneGrid;
+    }
+
+    private VBox slidersVBox(SkyCanvasManager manager, Font fontAwesomeDefault) {
+        Label sensLabel = new Label("Sensibilités :");
+
+        Label dragSensLabel = new Label(TRANSLATION_LABEL);
+        dragSensLabel.setFont(fontAwesomeDefault);
+        addTooltip(dragSensLabel, HELPTXT_DRAG_SENS);
+
+        Slider translationSlider = new Slider(TRANSSLIDER_MIN, TRANSSLIDER_MAX,
+                manager.getMouseDragSensitivity() * manager.getMouseDragFactor());
+        manager.mouseDragSensitivityProperty().bind(translationSlider.valueProperty().divide(manager.getMouseDragFactor()));
+
+        Label scrollSensLabel = new Label(SCROLL_LABEL);
+        scrollSensLabel.setFont(fontAwesomeDefault);
+        addTooltip(scrollSensLabel, HELPTXT_SCROLL_SENS);
+
+        Slider scrollSlider = new Slider(SCROLLSLIDER_MIN, SCROLLSLIDER_MAX, manager.getMouseScrollSensitivity());
+        manager.mouseScrollSensitivityProperty().bind(scrollSlider.valueProperty());
+
+        Stream.of(translationSlider, scrollSlider)
+                .forEach(slider -> {
+                    slider.setShowTickLabels(true);
+                    slider.setMinWidth(PARAMS_SLIDER_WIDTH);
+                    slider.setMaxWidth(PARAMS_SLIDER_WIDTH);
+                });
+
+        Button resetSensButton = new Button(RESETDEFAULT_BUTTON);
+        resetSensButton.setFont(fontAwesomeDefault);
+        resetSensButton.setOnAction(e -> {
+            translationSlider.setValue(MOUSE_DRAG_DEFAULTSENS);
+            scrollSlider.setValue(MOUSE_SCROLL_DEFAULTSENS);
+        });
+        addTooltip(resetSensButton, HELPTXT_RESETDEF);
+
+        VBox slidersVBox = new VBox(sensLabel, spaceLabel(), dragSensLabel, translationSlider,
+                scrollSensLabel, scrollSlider, resetSensButton);
+        slidersVBox.setAlignment(Pos.CENTER);
+
+        return slidersVBox;
+    }
+
+    private VBox drawingVbox(SkyCanvasManager manager, Font fontAwesomeSmall, Font fontAwesomeDefault,
+                             CheckBox orbitDrawingCheckbox) {
+        Label drawLabel = new Label("Dessiner :");
+        addTooltip(drawLabel, HELPTXT_OBJECTS_TO_DRAW);
+
+        GridPane checkBoxesToDraw = new GridPane();
+        ObservableList<CheckBox> drawablesList = FXCollections.observableArrayList();
+        DrawableObjects[] allPossibleDrawables = DrawableObjects.values();
+        int indexOfHorizon = 0, indexOfStars = 0, indexOfOrbit = 0;
+        for (int i = 0; i < allPossibleDrawables.length; ++i) {
+            CheckBox draw = new CheckBox(allPossibleDrawables[i].getName());
+            draw.setSelected(allPossibleDrawables[i] != DrawableObjects.GRID);
+            draw.selectedProperty().addListener((p, o, n) -> updateDrawables(draw, manager, n));
+            drawablesList.add(draw);
+            if (allPossibleDrawables[i] == DrawableObjects.STARS) indexOfStars = i;
+            if (allPossibleDrawables[i] == DrawableObjects.HORIZON) indexOfHorizon = i;
+            if (allPossibleDrawables[i] == DrawableObjects.ORBIT) indexOfOrbit = i;
+        }
+
+        Collections.swap(drawablesList, indexOfHorizon, indexOfStars);
+        drawablesList.set(indexOfOrbit, orbitDrawingCheckbox);
+        orbitDrawingCheckbox.setText(allPossibleDrawables[indexOfOrbit].getName());
+        orbitDrawingCheckbox.setSelected(true);
+        orbitDrawingCheckbox.selectedProperty().addListener((p, o, n) -> updateDrawables(orbitDrawingCheckbox, manager, n));
+
+        Iterator<CheckBox> checkBoxIt = drawablesList.iterator();
+        for (int i = 0; i < GRID_TODRAW_WIDTH; ++i) {
+            for (int j = 0; j < GRID_TODRAW_HEIGHT; ++j) {
+                checkBoxesToDraw.add(checkBoxIt.next(), i, j);
+            }
+        }
+
+        checkBoxesToDraw.setVgap(PARAMS_GRIDGAP);
+        checkBoxesToDraw.setHgap(PARAMS_GRIDGAP);
+
+        GridPane colorsGrid = new GridPane();
+        int numberOfColorLabels = manager.colorLabelsList().size();
+        Label[] colorLabels = new Label[numberOfColorLabels];
+        ColorPicker[] colorPickers = new ColorPicker[numberOfColorLabels];
+        Button[] resetColorButtons = new Button[numberOfColorLabels];
+
+        for (int i = 0; i < numberOfColorLabels; ++i) {
+            colorPickers[i] = new ColorPicker();
+            colorPickers[i].valueProperty().bindBidirectional(manager.colorPropertiesList().get(i));
+            colorPickers[i].setStyle(COLORPICKER_STYLE);
+
+            colorLabels[i] = new Label(manager.colorLabelsList().get(i));
+            GridPane.setHalignment(colorLabels[i], HPos.RIGHT);
+
+            resetColorButtons[i] = new Button(RESETDEFAULT_BUTTON);
+            resetColorButtons[i].setFont(fontAwesomeSmall);
+            int finalI = i;
+            resetColorButtons[i].setOnAction(e ->
+                    manager.colorPropertiesList().get(finalI).set(SkyCanvasManager.getDefaultColorsList().get(finalI)));
+        }
+
+        colorsGrid.addColumn(0, colorLabels);
+        colorsGrid.addColumn(1, colorPickers);
+        colorsGrid.addColumn(2, resetColorButtons);
+
+        Label gridSpaceLabel = new Label(GRID_LABEL);
+        gridSpaceLabel.setFont(fontAwesomeDefault);
+        addTooltip(gridSpaceLabel, HELPTXT_GRIDSPACE);
+
+        ComboBox<String> spacingsBox = new ComboBox<>();
+        spacingsBox.setItems(FXCollections.observableArrayList(manager.suggestedGridSpacings()));
+        spacingsBox.setValue(manager.getHorizCoordsGridSpacingDeg() + "°");
+        spacingsBox.valueProperty().addListener((p, o, n) ->
+                manager.setHorizCoordsGridSpacingDeg(Integer.parseInt(n.substring(0, n.length() - 1))));
+
+        HBox gridSizeHBox = new HBox(gridSpaceLabel, spacingsBox);
+        gridSizeHBox.setSpacing(PARAMS_GRIDGAP);
+        gridSizeHBox.setAlignment(Pos.CENTER);
+
+        return new VBox(drawLabel, checkBoxesToDraw, spaceLabel(), gridSizeHBox, spaceLabel(), colorsGrid);
+    }
+
+    private static void updateDrawables(CheckBox draw, SkyCanvasManager manager, boolean newValue) {
+        EnumSet<DrawableObjects> nextSet = EnumSet.copyOf(manager.getObjectsToDraw());
+        if (newValue) {
+            nextSet.add(DrawableObjects.getDrawableFromString(draw.getText()));
+        } else {
+            nextSet.remove(DrawableObjects.getDrawableFromString(draw.getText()));
+        }
+        manager.setObjectsToDraw(nextSet);
     }
 
     private InputStream resourceStream(String s) {

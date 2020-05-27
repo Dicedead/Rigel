@@ -75,9 +75,7 @@ public final class ObservedSky {
 
         this.sunMap = mapObjectToPosition(List.of(SunModel.SUN), this::applyModel);
         this.moonMap = mapObjectToPosition(List.of(MoonModel.MOON), this::applyModel);
-        this.planetMap = mapObjectToPosition(Arrays.stream(PlanetModel.values())
-                         .filter(i -> i.ordinal() != 2)
-                         .collect(Collectors.toList()), this::applyModel);
+        this.planetMap = mapObjectToPosition(PlanetModel.EXTRATERRESTRIAL, this::applyModel);
         this.starMap = mapObjectToPosition(catalogue.stars(), Function.identity());
 
         this.celestObjToCoordsMap = Collections.unmodifiableMap(Stream.of(starMap, planetMap, sunMap, moonMap)
