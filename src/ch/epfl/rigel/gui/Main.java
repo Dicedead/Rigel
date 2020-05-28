@@ -91,8 +91,7 @@ public final class Main extends Application {
     private static final double MOUSE_DRAG_DEFAULTSENS = 1;
     private static final double MOUSE_SCROLL_DEFAULTSENS = 0.75;
     private static final Locale DEFAULT_RIGEL_LOCALE = Locale.FRENCH;
-    //This will guarantee the use of French formatting for numbers and, more importantly, French language in the
-    //ColorPickers.
+    //This will guarantee that ColorPickers are in French, as the rest of the application..
 
     private static final int CUSTOM_FONT_DEFAULT_SIZE = 15;
     private static final int CUSTOM_FONT_SMALL_SIZE = 10;
@@ -211,8 +210,10 @@ public final class Main extends Application {
     //hide this tooltip, but let's keep things simple.
 
     private static final String HELPTXT_CONTROLS_SMALL = "Infos sur les fonctionnalités de l'application.";
-    private static final String HELPTXT_CONTROLS = "Contrôles communs:\n*Les flèches et les glissements de souris dans la" +
+    private static final String HELPTXT_CONTROLS =
+            "Contrôles communs:\n*Les flèches et les glissements de souris dans la" +
             "\ndirection souhaitée en maintenant clic gauche enfoncé\npermettent de déplacer le centre de la projection.\n" +
+            "Plus la souris est éloignée du clic initial plus la\nposition changera rapidement.\n" +
             "\n*Les touches J et L ainsi que les glissements de souris\nen maintenant la roulette / clic central enfoncés\n" +
             "changent la rotation du ciel. K la remet à 0°.\n" +
             "\n*La roulette de souris permet de zoomer et dézoomer.\n"+
