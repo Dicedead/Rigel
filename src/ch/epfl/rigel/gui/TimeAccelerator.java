@@ -12,6 +12,8 @@ import java.time.ZonedDateTime;
 @FunctionalInterface
 public interface TimeAccelerator {
 
+    static final double SEC_TO_NANOS = 1e-9;
+
     /**
      * Computes a new simulated time after transformation of an initial simulated time and
      * of an elapsed duration in nanoseconds between the real times separating the initial and returned
@@ -29,15 +31,12 @@ public interface TimeAccelerator {
      *
      * taking a ZonedDateTime T0 and a long n as inputs with n corresponding to the real time elapsed between the
      * returned time and T0 in nanoseconds
-     * side-effect: zone information is lost because of daylight saving time changes
      *
      * @param factor (int) acceleration factor
      * @return TimeAccelerator
      */
     static TimeAccelerator continuous(int factor) {
-        return (time, nanos) -> time.withFixedOffsetZone().plusNanos(factor * nanos);
-        /* withFixedOffsetZone() will simply return time itself (ie not creating a new object) if current time operation
-         * did not involve daylight saving, unlike its documentation suggests */
+        return (time, nanos) -> time.plusNanos(factor * nanos);
     }
 
     /**
@@ -53,6 +52,9 @@ public interface TimeAccelerator {
      * @return TimeAccelerator
      */
     static TimeAccelerator discrete(int freq, Duration step) {
-        return (time, nanos) -> time.withFixedOffsetZone().plus(step.multipliedBy((long) Math.floor(nanos * freq * 1e-9)));
+        return (time, nanos) -> time.withFixedOffsetZone().plus(step.multipliedBy((long)
+                Math.floor(nanos * freq * SEC_TO_NANOS)));
+        /* withFixedOffsetZone() will simply return time itself (ie not creating a new object) if current time operation
+         * did not involve daylight saving, unlike its documentation suggests */
     }
 }
