@@ -90,6 +90,9 @@ public final class Main extends Application {
     private static final int MIN_HEIGHT = 600;
     private static final double MOUSE_DRAG_DEFAULTSENS = 1;
     private static final double MOUSE_SCROLL_DEFAULTSENS = 0.75;
+    private static final Locale DEFAULT_RIGEL_LOCALE = Locale.FRENCH;
+    //This will guarantee the use of French formatting for numbers and, more importantly, French language in the
+    //ColorPickers.
 
     private static final int CUSTOM_FONT_DEFAULT_SIZE = 15;
     private static final int CUSTOM_FONT_SMALL_SIZE = 10;
@@ -139,6 +142,7 @@ public final class Main extends Application {
     private static final String EXIT_BUTTON_LABEL = "\uF057";
     private static final String MIN_LENGTH_LABEL = "-";
     private static final String MAX_LENGTH_LABEL = "+";
+    private static final String HELPBUTTON = "\uF05A";
 
     private static final String HELPTXT_LONGITUDE = "Longitude géographique d'observation. (°)";
     private static final String HELPTXT_LATITUDE = "Latitude géographique d'observation. (°)";
@@ -205,6 +209,19 @@ public final class Main extends Application {
     private static final String HELPTXT_GUILESS_POPUP = "Appuyez sur F pour afficher la GUI.\nCliquez pour cacher ce message.";
     //Actually, any key that is not mapped to anything else works, and any mouse input suffices to
     //hide this tooltip, but let's keep things simple.
+
+    private static final String HELPTXT_CONTROLS_SMALL = "Infos sur les fonctionnalités de l'application.";
+    private static final String HELPTXT_CONTROLS = "Contrôles communs:\n*Les flèches et les glissements de souris dans la" +
+            "\ndirection souhaitée en maintenant clic gauche enfoncé\npermettent de déplacer le centre de la projection.\n" +
+            "\n*Les touches J et L ainsi que les glissements de souris\nen maintenant la roulette / clic central enfoncés\n" +
+            "changent la rotation du ciel. K la remet à 0°.\n" +
+            "\n*La roulette de souris permet de zoomer et dézoomer.\n"+
+            "\n*Clic droit sur un objet céleste fera apparaître un\npanneau d'information sur ce-dernier à droite.\n" +
+            "Si l'objet céleste fait partie du système solaire,\npar défaut, une prédiction d'orbite apparaîtra.\n" +
+            "Pour cacher: le panneau, appuyez sur I; l'orbite: O.\n\n" +
+            "*Pour plus d'infos sur les autres fonctionnalités\nde l'application, glissez la souris au-dessus du\n" +
+            "bouton ou champ de texte en question.\n" +
+            "Pour fermer cette fenêtre, cliquez le ciel.";
 
     private static final Color CONTROLBAR_TEXT_COLOR = Color.color(0.225, 0.225, 0.225);
     private static final double PARAMS_GRIDGAP = 4d;
@@ -285,7 +302,7 @@ public final class Main extends Application {
             mainBorder = new BorderPane(
                     canvasPane(manager),
                     controlBar(fontAwesomeDefault, manager, observerLocationBean, dateTimeBean, animator, paramsTip,
-                            toOptionsButton),
+                            primaryStage, toOptionsButton),
                     rightBox(fontAwesomeDefault, manager, rightPanelIsON, catalogue, observerLocationBean,
                             dateTimeBean, orbitDrawingCheckbox),
                     informationBar(manager, viewingParametersBean),
@@ -302,6 +319,8 @@ public final class Main extends Application {
 
             labelList.forEach(node -> node.setTextFill(CONTROLBAR_TEXT_COLOR));
 
+            Locale.setDefault(DEFAULT_RIGEL_LOCALE);
+
             Scene mainScene = new Scene(mainBorder);
             primaryStage.setFullScreenExitHint(HELPTXT_FULLSCREEN);
             primaryStage.setScene(mainScene);
@@ -317,9 +336,9 @@ public final class Main extends Application {
     }
 
     private HBox controlBar(Font fontAwesomeDefault, SkyCanvasManager manager, ObserverLocationBean observerLocationBean,
-                            DateTimeBean dateTimeBean, TimeAnimator animator, Tooltip paramsTip,
+                            DateTimeBean dateTimeBean, TimeAnimator animator, Tooltip paramsTip, Stage stage,
                             Button toOptionsButton) {
-        HBox controlBar = new HBox(searchHBox(fontAwesomeDefault, manager, paramsTip, toOptionsButton),
+        HBox controlBar = new HBox(searchHBox(fontAwesomeDefault, manager, paramsTip, toOptionsButton, stage),
                 new Separator(Orientation.VERTICAL),
                 positionHBox(observerLocationBean),
                 new Separator(Orientation.VERTICAL),
@@ -332,7 +351,7 @@ public final class Main extends Application {
     }
 
     private HBox searchHBox(Font fontAwesomeDefault, SkyCanvasManager manager, Tooltip paramsTip,
-                            Button toOptionsButton) {
+                            Button toOptionsButton, Stage stage) {
         Label searchLabel = new Label(SEARCH_LABEL);
         searchLabel.setFont(fontAwesomeDefault);
         labelList.add(searchLabel);
@@ -342,7 +361,14 @@ public final class Main extends Application {
         addTooltip(searchLabel, HELPTXT_SEARCH);
         addTooltip(manager.searcher(), HELPTXT_SEARCH);
 
-        HBox searchHBox = new HBox(searchLabel, manager.searcher(), toOptionsButton);
+        Button helpButton = new Button(HELPBUTTON);
+        helpButton.setFont(fontAwesomeDefault);
+        addTooltip(helpButton, HELPTXT_CONTROLS_SMALL);
+        Tooltip controlsToolTip = new Tooltip(HELPTXT_CONTROLS);
+        controlsToolTip.setAutoHide(true);
+        helpButton.setOnAction(e -> controlsToolTip.show(stage));
+
+        HBox searchHBox = new HBox(searchLabel, manager.searcher(), toOptionsButton, helpButton);
         searchHBox.setStyle(SEARCH_HBOX_STYLE);
 
         return searchHBox;
