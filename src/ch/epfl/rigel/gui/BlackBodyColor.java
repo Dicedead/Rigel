@@ -57,6 +57,8 @@ public final class BlackBodyColor {
         private static final String COLOR_FILE = "/bbr_color.txt";
         private static final int FILE_USABLE_LENGTH = 782;
         private static final int SKIP_LINES_FILTERINT = 80;
+        private static final int START_USABLE = 81;
+        private static final int END_USABLE = 87;
 
         private ColorListSingleton() {
             throw new UnsupportedOperationException("Fatal error: tried to instantiate non instantiable class" +
@@ -71,7 +73,7 @@ public final class BlackBodyColor {
                         .collect(Collectors.toUnmodifiableList());
 
                 return IntStream.range(0, FILE_USABLE_LENGTH / 2)
-                        .mapToObj(i -> Color.web(linesOfInterest.get(i * 2 + 1).substring(81, 87)))
+                        .mapToObj(i -> Color.web(linesOfInterest.get(i * 2 + 1).substring(START_USABLE, END_USABLE)))
                         .collect(Collectors.toUnmodifiableList());
 
             } catch (IOException e) {

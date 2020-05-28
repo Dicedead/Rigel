@@ -36,7 +36,7 @@ final class SignatureChecks_5 {
     }
 
     void checkPlanetModel() {
-        List<PlanetModel> a = PlanetModel.ALL;
+        List<PlanetModel> a = PlanetModel.EXTRATERRESTRIAL;
         Enum<PlanetModel> mercury1 = PlanetModel.MERCURY;
         CelestialObjectModel<Planet> mercury2 = PlanetModel.MERCURY;
         Enum<PlanetModel> venus1 = PlanetModel.VENUS;

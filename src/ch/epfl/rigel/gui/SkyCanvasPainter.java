@@ -40,6 +40,8 @@ public final class SkyCanvasPainter {
     private static final double CELEST_SIZE_COEFF = applyToAngle(ofDeg(0.5)) / 140;
     private static final double OCTANTS_ALT_OFFSET = -0.5;
     private static final double ORBIT_CIRCLE_SIZE = 3e-3;
+    private static final int AZIMUTH_DEGREES = 180;
+    private static final int ALTITUDE_DEGREES = 360;
 
     private static final ClosedInterval CLIP_INTERVAL = ClosedInterval.of(-2, 5);
     private static final RightOpenInterval INTERVAL_SYM180 = RightOpenInterval.symmetric(180);
@@ -142,14 +144,14 @@ public final class SkyCanvasPainter {
                 "SkyCanvasPainter.drawGrid: given grid spacing does not divide 360 and 90.");
 
         HorizontalCoordinates currHorizCoords;
-        for (int i = 0; i < 180 / spacingDeg; ++i) {
+        for (int i = 0; i < AZIMUTH_DEGREES / spacingDeg; ++i) {
             currHorizCoords = HorizontalCoordinates.ofDeg(0, INTERVAL_SYM180.reduce(i * spacingDeg));
             drawStrokeCircle(transform.apply(projection.circleCenterForParallel(currHorizCoords)),
                     transform.applyDistance(2 * projection.circleRadiusForParallel(currHorizCoords)),
                     gridColor, GRID_LINE_WIDTH);
         }
 
-        for (int i = 0; i < 360 / spacingDeg; ++i) {
+        for (int i = 0; i < ALTITUDE_DEGREES / spacingDeg; ++i) {
             currHorizCoords = HorizontalCoordinates.ofDeg(i * spacingDeg, 0);
             drawStrokeCircle(transform.apply(projection.circleCenterForMeridian(currHorizCoords)),
                     transform.applyDistance(2 * projection.circleRadiusForMeridian(currHorizCoords)),
