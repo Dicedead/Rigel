@@ -52,8 +52,7 @@ public interface TimeAccelerator {
      * @return TimeAccelerator
      */
     static TimeAccelerator discrete(int freq, Duration step) {
-        return (time, nanos) -> time.withFixedOffsetZone().plus(step.multipliedBy((long)
-                Math.floor(nanos * freq * SEC_TO_NANOS)));
+        return (time, nanos) -> time.withFixedOffsetZone().plus(step.multipliedBy((long) (nanos * freq * SEC_TO_NANOS)));
         /* withFixedOffsetZone() will simply return time itself (ie not creating a new object) if current time operation
          * did not involve daylight saving, unlike its documentation suggests */
     }
