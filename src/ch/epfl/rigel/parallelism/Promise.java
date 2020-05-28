@@ -12,5 +12,5 @@ import java.util.List;
  * @author Salim Najib (310003)
  */
 public abstract class Promise<V> extends Task<V> {
-    private BooleanProperty canLaunch
+    private BooleanProperty canLaunch;
 }
