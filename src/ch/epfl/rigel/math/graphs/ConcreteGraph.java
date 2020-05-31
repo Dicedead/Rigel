@@ -9,6 +9,8 @@ import ch.epfl.rigel.math.sets.implement.PartitionSet;
 import java.util.*;
 
 /**
+ * Implementation of a general graph
+ *
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
@@ -53,32 +55,49 @@ public final class ConcreteGraph<T> extends MathSet<OptionalPair<T, Link<T>>> im
 
     }
 
-
+    /**
+     * @see Graph#getNeighbours(Object)
+     */
     @Override
     public Optional<AbstractPartitionSet<T>> getNeighbours(T point) {
         return Optional.of(new PartitionSet<>(edges.suchThat(l -> l.contains(point)).image(p -> p.next(point))));
     }
 
+    /**
+     * @see Graph#on(AbstractMathSet)
+     */
     @Override
     public Graph<T, AbstractPartitionSet<T>> on(AbstractMathSet<T> points) {
         return new ConcreteGraph<>(vertices.intersection(points), edges.suchThat(points::containsSet));
     }
 
+    /**
+     * @see Graph#connectedComponent(Object)
+     */
     @Override
     public Graph<T, AbstractPartitionSet<T>> connectedComponent(T point) {
         return on(new PartitionSet<>(vertices.component(point)));
     }
 
+    /**
+     * @see Graph#connectedComponents()
+     */
     @Override
     public AbstractMathSet<Graph<T, AbstractPartitionSet<T>>> connectedComponents() {
         return vertexSet().components().image(this::on);
     }
 
+    /**
+     * @see Graph#edgeSet()
+     */
     @Override
     public AbstractMathSet<Link<T>> edgeSet() {
         return edges;
     }
 
+    /**
+     * @see Graph#vertexSet()
+     */
     @Override
     public AbstractPartitionSet<T> vertexSet() {
         return vertices;

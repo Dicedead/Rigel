@@ -243,7 +243,6 @@ public final class Main extends Application {
 
     private static BorderPane mainBorder;
     private static final List<Tooltip> toolTipList = new ArrayList<>();
-    private static final List<Label> labelList = new ArrayList<>();
     private static final int DEFAULT_NBR_DECIMALS = 2;
     private static final int STRINGS_PER_LINE = 3;
 
@@ -318,8 +317,6 @@ public final class Main extends Application {
                 tooltip.setStyle(TOOLTIP_DEFAULT_STYLE);
             });
 
-            labelList.forEach(node -> node.setTextFill(CONTROLBAR_TEXT_COLOR));
-
             Locale.setDefault(DEFAULT_RIGEL_LOCALE);
 
             Scene mainScene = new Scene(mainBorder);
@@ -339,20 +336,23 @@ public final class Main extends Application {
     private HBox controlBar(Font fontAwesomeDefault, SkyCanvasManager manager, ObserverLocationBean observerLocationBean,
                             DateTimeBean dateTimeBean, TimeAnimator animator, Tooltip paramsTip, Stage stage,
                             Button toOptionsButton) {
-        HBox controlBar = new HBox(searchHBox(fontAwesomeDefault, manager, paramsTip, toOptionsButton, stage),
+        List<Label> labelList = new ArrayList<>();
+        HBox controlBar = new HBox(searchHBox(fontAwesomeDefault, manager, paramsTip, toOptionsButton, stage, labelList),
                 new Separator(Orientation.VERTICAL),
-                positionHBox(observerLocationBean),
+                positionHBox(observerLocationBean, labelList),
                 new Separator(Orientation.VERTICAL),
-                timeHBox(dateTimeBean, animator),
+                timeHBox(dateTimeBean, animator, labelList),
                 new Separator(Orientation.VERTICAL),
                 accelerationHbox(fontAwesomeDefault, animator, dateTimeBean));
         controlBar.setStyle(CONTROL_BAR_STYLE);
+
+        labelList.forEach(node -> node.setTextFill(CONTROLBAR_TEXT_COLOR));
 
         return controlBar;
     }
 
     private HBox searchHBox(Font fontAwesomeDefault, SkyCanvasManager manager, Tooltip paramsTip,
-                            Button toOptionsButton, Stage stage) {
+                            Button toOptionsButton, Stage stage, List<Label> labelList) {
         Label searchLabel = new Label(SEARCH_LABEL);
         searchLabel.setFont(fontAwesomeDefault);
         labelList.add(searchLabel);
@@ -375,7 +375,7 @@ public final class Main extends Application {
         return searchHBox;
     }
 
-    private HBox positionHBox(ObserverLocationBean observerLocationBean) {
+    private HBox positionHBox(ObserverLocationBean observerLocationBean, List<Label> labelList) {
         Label longLabel = new Label("Longitude (°) :");
         Label latLabel = new Label("Latitude (°) :");
         labelList.add(longLabel);
@@ -408,7 +408,7 @@ public final class Main extends Application {
         return positionHBox;
     }
 
-    private HBox timeHBox(DateTimeBean dateTimeBean, TimeAnimator animator) {
+    private HBox timeHBox(DateTimeBean dateTimeBean, TimeAnimator animator, List<Label> labelList) {
         Label dateLabel = new Label("Date :");
         labelList.add(dateLabel);
         DatePicker datePicker = new DatePicker();

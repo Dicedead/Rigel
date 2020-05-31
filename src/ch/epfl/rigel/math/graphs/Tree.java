@@ -17,6 +17,8 @@ import java.util.Optional;
 import java.util.function.Function;
 
 /**
+ * Directed and connected recursive definition of a tree based on GraphNodes
+ *
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
@@ -103,29 +105,45 @@ public final class Tree<V> extends PointedSet<GraphNode<V>> implements Graph<Gra
         return new Tree<>();
     }
 
-    public Tree<V> add(final Path<GraphNode<V>> p)
+    /**
+     * Add a Path of nodes into this tree via set union
+     *
+     * @param p (Path<GraphNode<V>>) path to be added
+     * @return (Tree<V>) union of this tree and given path
+     */
+    public Tree<V> add(Path<GraphNode<V>> p)
     {
         return new Tree<>(union(p));
     }
 
+    /**
+     * Get the given node and it's children
+     *
+     * @param point (T) given point
+     * @return (Optional<Tree<V>>) tree of given point and its children
+     */
     @Override
     public Optional<Tree<V>> getNeighbours(GraphNode<V> point) {
         return getChildren(point.getParent().orElseThrow());
     }
 
     /**
+     * Get the given node's children
      *
      * @param point (T)
-     * @return The points for which point is their parent
+     * @return (Optional<Tree<V>>) The points for which point is their direct parent
      */
     public Optional<Tree<V>> getChildren(GraphNode<V> point) {
         AbstractMathSet<GraphNode<V>> children = getNodesAtDepth(point.getDepth() + 1).suchThat(point::isParentOf);
         return children.isEmpty() ? Optional.empty() : Optional.of(new Tree<>(children, false, point, maxDepth));
     }
 
+    /**
+     * @see Graph#flow(SetFunction, Object) 
+     */
     @Override
     public OrderedTuple<GraphNode<V>> flow(SetFunction<Tree<V>, GraphNode<V>> chooser, GraphNode<V> point) {
-        final List<GraphNode<V>> flowList = flowRecur(chooser, chooser.apply(getChildren(point).orElse(null)), new ArrayList<>());
+        List<GraphNode<V>> flowList = flowRecur(chooser, chooser.apply(getChildren(point).orElse(null)), new ArrayList<>());
         flowList.add(point);
         Collections.reverse(flowList);
         return new OrderedTuple<>(flowList);
@@ -142,7 +160,6 @@ public final class Tree<V> extends PointedSet<GraphNode<V>> implements Graph<Gra
     }
 
     /**
-     *
      * @param point (T)
      * @return the tree that has for root point and points the same as the current tree
      */
@@ -152,13 +169,19 @@ public final class Tree<V> extends PointedSet<GraphNode<V>> implements Graph<Gra
                 false, point, maxDepth);
     }
 
+    /**
+     * Return the branch given point is in
+     *
+     * @param point (GraphNode<V>) given point
+     * @return (Optional<AbstractOrderedTuple<GraphNode<V>>>) a list (in the sense of this custom made lib)
+     */
     public Optional<AbstractOrderedTuple<GraphNode<V>>> branchAtPoint(GraphNode<V> point)
     {
         Preconditions.checkArgument(contains(point));
         var top = point
                 .hierarchy()
                 .stream()
-                .filter(n ->getNodesAtDepth(n.getDepth() + 1)
+                .filter(n -> getNodesAtDepth(n.getDepth() + 1)
                         .suchThat(n::isParentOf)
                         .cardinality() == 1)
                 .findFirst();
@@ -176,9 +199,9 @@ public final class Tree<V> extends PointedSet<GraphNode<V>> implements Graph<Gra
     public Optional<AbstractOrderedTuple<GraphNode<V>>> findPathBetween(GraphNode<V> node1, GraphNode<V> node2) {
         Preconditions.checkArgument(contains(node1) && contains(node2));
 
-        final Path<GraphNode<V>> nodeOneHierarchy = node1.hierarchy();
-        final Path<GraphNode<V>> nodeTwoHierarchy = node2.hierarchy();
-        final AbstractMathSet<GraphNode<V>> aut = nodeOneHierarchy.intersection(nodeTwoHierarchy);
+        Path<GraphNode<V>> nodeOneHierarchy = node1.hierarchy();
+        Path<GraphNode<V>> nodeTwoHierarchy = node2.hierarchy();
+        AbstractMathSet<GraphNode<V>> aut = nodeOneHierarchy.intersection(nodeTwoHierarchy);
 
         if (aut.contains(node1) || aut.contains(node2))
         {
@@ -191,6 +214,9 @@ public final class Tree<V> extends PointedSet<GraphNode<V>> implements Graph<Gra
         }
     }
 
+    /**
+     * @see Graph#on(AbstractMathSet)
+     */
     @Override
     public Graph<GraphNode<V>, ? extends AbstractMathSet<GraphNode<V>>> on(AbstractMathSet<GraphNode<V>> points) {
         return new ConcreteGraph<>(new PartitionSet<>(intersection(points),
@@ -198,11 +224,22 @@ public final class Tree<V> extends PointedSet<GraphNode<V>> implements Graph<Gra
                 edgeSet().suchThat(points::containsSet));
     }
 
+    /**
+     * By definition of this class, all components are connected. This method will return this.
+     *
+     * @param point (GraphNode<V> point) might as well be null
+     * @return this
+     */
     @Override
     public Graph<GraphNode<V>, Tree<V>> connectedComponent(GraphNode<V> point) {
         return this;
     }
 
+    /**
+     * By definition of this class, all components are connected. This method will return a singleton of this.
+     *
+     * @return this
+     */
     @Override
     public AbstractMathSet<Graph<GraphNode<V>, Tree<V>>> connectedComponents() {
         return new MathSet<>(Collections.singleton(this));
@@ -218,12 +255,19 @@ public final class Tree<V> extends PointedSet<GraphNode<V>> implements Graph<Gra
         return new PartitionSet<>(new MathSet<>(getRawData()), GraphNode::areRelatedRootless);
     }
 
+    /**
+     * @see Graph#edgeSet()
+     */
     @Override
     public AbstractMathSet<Link<GraphNode<V>>> edgeSet() {
         final AbstractMathSet<GraphNode<V>> nonRoots = nodes.suchThat(node -> !node.equals(getElementOrThrow()));
         return (nonRoots.cardinality() <= 1) ? emptySet() : nonRoots.image(n -> new Link<>(n, n.getParent().orElse(null)));
     }
 
+    /**
+     * @see Graph#vertexSet()
+     * By recursive definition of a tree, the set of vertices is... itself!
+     */
     @Override
     public Tree<V> vertexSet() {
         return this;
@@ -252,18 +296,36 @@ public final class Tree<V> extends PointedSet<GraphNode<V>> implements Graph<Gra
         return getElementOrThrow();
     }
 
+    /**
+     * Depth of this tree, ie depth of its root - depth of its deepest children
+     *
+     * @return (int)
+     */
     public int getTotalDepth() {
-        return maxDepth - getElementOrThrow().getDepth();
+        return getMaxDepth() - getMinDepth();
     }
 
+    /**
+     * Depth of (one of) the deepest nodes in its node hierarchy
+     *
+     * @return (int) said depth
+     */
     public int getMaxDepth() {
         return maxDepth;
     }
 
+    /**
+     * Depth of the root of this tree in its node hierarchy
+     *
+     * @return (int)
+     */
     public int getMinDepth() {
-        return getElementOrThrow().getDepth();
+        return getRoot().getDepth();
     }
 
+    /**
+     * @see Object#toString()
+     */
     @Override
     public String toString() {
         return "Tree: "+ partition().components().toString();

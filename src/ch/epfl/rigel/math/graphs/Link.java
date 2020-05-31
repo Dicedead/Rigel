@@ -19,7 +19,7 @@ public final class Link<T> extends OrderedTuple<T> {
      * @param t (T)
      * @param u (T)
      */
-    public Link(final T t, final T u) {
+    public Link(T t,T u) {
         super(t, u);
     }
 
@@ -28,7 +28,6 @@ public final class Link<T> extends OrderedTuple<T> {
      * @param p (Pair<T,T>)
      */
     public Link(Pair<T, T> p) {
-
         super(p.getKey(), p.getValue());
     }
 
