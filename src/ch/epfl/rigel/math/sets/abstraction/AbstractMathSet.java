@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
+ * Main custom set abstraction
+ *
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
@@ -42,10 +44,18 @@ public interface AbstractMathSet<T> extends Iterable<T> {
         return this.suchThat(filter).image(f);
     }
 
+    /**
+     * @param t (T) potential set element
+     * @return (boolean) whether this set contains t or not
+     */
     default boolean contains(T t) {
         return getRawData().contains(t);
     }
 
+    /**
+     * @param other (AbstractMathSet<T>) other mathset
+     * @return (boolean) whether this set contains all the ements in the other mathset
+     */
     default boolean containsSet(AbstractMathSet<T> other) {
         return getRawData().containsAll(other.getRawData());
     }
@@ -77,20 +87,26 @@ public interface AbstractMathSet<T> extends Iterable<T> {
     AbstractMathSet<T> suchThat(Collection<Predicate<T>> t);
 
     /**
-     * @return the data wrapped by the set in its raw form
+     * @return (Collection<T>) the data wrapped by the set in its raw form
+     * Consequence: may contain duplicates if initial data was not a set.
      */
     Collection<T> getRawData();
 
+    /**
+     * @return (Set<T>) the data wrapped by the set in guaranteed set form
+     */
     Set<T> getSetData();
 
     /**
-     * @return an element from the current set
+     * @return (Optional<T>) an element from the current set, empty if the set is empty
      */
     default Optional<T> getElement() {
         return stream().findFirst();
     }
 
-
+    /**
+     * @return (T) get an element in the set
+     */
     default T getElementOrThrow() {
         return stream().findFirst().orElseThrow(
                 () -> new NoSuchElementException("Tried to get element from empty set."));
@@ -314,16 +330,25 @@ public interface AbstractMathSet<T> extends Iterable<T> {
         return powerSet().iterator();
     }
 
+    /**
+     * @see Collection#iterator()
+     */
     @Override
     default Iterator<T> iterator() {
         return getRawData().iterator();
     }
 
+    /**
+     * @see Collection#forEach(Consumer)
+     */
     @Override
     default void forEach(Consumer<? super T> action) {
         stream().forEach(action);
     }
 
+    /**
+     * @see Collection#spliterator()
+     */
     @Override
     default Spliterator<T> spliterator() {
         return getRawData().spliterator();

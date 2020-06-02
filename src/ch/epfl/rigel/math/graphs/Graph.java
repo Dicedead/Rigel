@@ -13,6 +13,8 @@ import java.util.Optional;
 import static ch.epfl.rigel.math.sets.implement.MathSet.emptySet;
 
 /**
+ * General definition of a Graph type
+ *
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
@@ -47,12 +49,12 @@ public interface Graph<T, V extends AbstractMathSet<T>> {
     AbstractMathSet<Graph<T, V>> connectedComponents();
 
     /**
-     * @return (AbstractMathSet < Link < T > >) getter for immutable set of edges
+     * @return (AbstractMathSet < Link < T > >) getter for set of edges
      */
     AbstractMathSet<Link<T>> edgeSet();
 
     /**
-     * @return (AbstractMathSet < T >) getter for immutable set of vertices
+     * @return (AbstractMathSet < T >) getter for set of vertices
      */
     V vertexSet();
 
@@ -83,11 +85,16 @@ public interface Graph<T, V extends AbstractMathSet<T>> {
         return new OrderedTuple<>(flowList);
     }
 
-
-    default AbstractMathSet<T> neighboursOf(AbstractMathSet<T> t) {
+    /**
+     * Compute the neighbours of given set of points in this graph
+     *
+     * @param set (AbstractMathSet<T>)
+     * @return (AbstractMathSet<T>)
+     */
+    default AbstractMathSet<T> neighboursOf(AbstractMathSet<T> set) {
         SetFunction<T, Optional<V>> f = this::getNeighbours;
 
-        var a = f.andThen(Optional::isPresent).preImageOf(true).solveIn(t);
+        var a = f.andThen(Optional::isPresent).preImageOf(true).solveIn(set);
         if (a.cardinality() == 0)
             return emptySet();
 
@@ -95,6 +102,13 @@ public interface Graph<T, V extends AbstractMathSet<T>> {
         return a.union(neighboursOf(b));
     }
 
+    /**
+     * Checks whether given values are connected or not in this graph
+     *
+     * @param v1 (T) first value
+     * @param v2 (T) second value
+     * @return (boolean)
+     */
     default boolean areConnected(T v1, T v2) {
         return connectedComponent(v1).equals(connectedComponent(v2));
     }

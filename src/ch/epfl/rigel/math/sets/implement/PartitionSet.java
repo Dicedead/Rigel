@@ -8,6 +8,8 @@ import java.util.Collection;
 import java.util.Collections;
 
 /**
+ * Implementation of a set equipped with an equivalence relation
+ *
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */

@@ -158,7 +158,7 @@ public final class GraphNode<T> {
         if (node1.equals(node2)) return true;
         if (!areRelated(node1, node2)) return false;
 
-        final Path<GraphNode<X>> chosenHier = (node1.hierarchy.cardinality() > node2.hierarchy.cardinality()) ?
+        Path<GraphNode<X>> chosenHier = (node1.hierarchy.cardinality() > node2.hierarchy.cardinality()) ?
                 node1.hierarchy : node2.hierarchy;
         return chosenHier.stream().takeWhile(node -> node.nmbrOfChildren <= 1)
                 .collect(Collectors.toSet()).containsAll(Set.of(node1, node2));

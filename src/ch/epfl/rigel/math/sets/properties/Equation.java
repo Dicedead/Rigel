@@ -5,6 +5,8 @@ import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
 import java.util.function.Predicate;
 
 /**
+ * Abstraction of an equation
+ *
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
@@ -20,11 +22,17 @@ public interface Equation<T> extends Predicate<T> {
         return m.suchThat(this);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     default Equation<T> and(Predicate<? super T> other) {
         return t -> test(t) && other.test(t);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     default Equation<T> or(Predicate<? super T> other) {
         return t -> test(t) || other.test(t);
