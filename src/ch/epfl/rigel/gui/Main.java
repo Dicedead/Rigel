@@ -530,7 +530,8 @@ public final class Main extends Application {
 
     private VBox rightBox(Font fontAwesomeDefault, SkyCanvasManager manager, BooleanProperty rightPanelIsON,
                           StarCatalogue catalogue, ObserverLocationBean observerLocationBean, DateTimeBean dateTimeBean,
-                          CheckBox orbitDrawingCheckbox) {
+                          CheckBox orbitDrawingCheckbox)
+    {
         Button exitButton = new Button(EXIT_BUTTON_LABEL);
         exitButton.setFont(fontAwesomeDefault);
         addTooltip(exitButton, HELPTXT_EXITINFO);
