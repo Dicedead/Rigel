@@ -22,6 +22,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.paint.Color;
 
@@ -270,7 +271,7 @@ public final class SkyCanvasManager {
                     resetInformationPanel();
                     break;
                 default:
-                    nonFunctionalKeyPressed.set(true);
+                    if (!key.getCode().equals(KeyCode.ESCAPE)) nonFunctionalKeyPressed.set(true);
             }
             key.consume();
         });
