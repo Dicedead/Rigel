@@ -2,8 +2,6 @@ package ch.epfl.rigel.gui.searchtool;
 
 import ch.epfl.rigel.astronomy.CelestialObject;
 import ch.epfl.rigel.astronomy.ObservedSky;
-import ch.epfl.rigel.gui.DateTimeBean;
-import ch.epfl.rigel.gui.ObserverLocationBean;
 import ch.epfl.rigel.math.graphs.GraphNode;
 import ch.epfl.rigel.math.graphs.Path;
 import ch.epfl.rigel.math.graphs.Tree;
@@ -37,7 +35,13 @@ public final class Searcher extends SearchTextField<CelestialObject> {
 
     private final ObjectProperty<String> lastSelectedName;
 
-    public Searcher(int cacheCapacity, ObservedSky sky, ObserverLocationBean obsLoc, DateTimeBean dtBean) {
+    /**
+     * Main Searcher constructor
+     *
+     * @param cacheCapacity (int) number of suggestions to display
+     * @param sky           (ObservedSky) initial observed sky
+     */
+    public Searcher(int cacheCapacity, ObservedSky sky) {
         super(cacheCapacity);
 
         this.lastSelectedName = new SimpleObjectProperty<>();
@@ -70,14 +74,15 @@ public final class Searcher extends SearchTextField<CelestialObject> {
                 .collect(Collectors.toMap(CelestialObject::name, Function.identity(), (v1, v2) -> v1)));
     }
 
-    private static int findFirstalpha(String str) {
-        for (int i = 0; i < str.length(); ++i) {
-            if (Character.isAlphabetic(str.charAt(i)))
-                return i;
-        }
-        return -1;
-    }
-
+    /**
+     * Searching method
+     *
+     * @param inputText   (String)
+     * @param s           (char) new character in input text
+     * @param initialTree (Tree<Character>) Tree to search
+     * @param depth       (int) depth to search in
+     * @return (Optional<Tree<Character>>) new tree to search in
+     */
     public Optional<Tree<Character>> search(String inputText, char s, Tree<Character> initialTree, int depth) {
 
         if (depth > initialTree.getMaxDepth()) return Optional.empty();
@@ -96,6 +101,12 @@ public final class Searcher extends SearchTextField<CelestialObject> {
                 new Tree<>(unionHierarchy, false));
     }
 
+    /**
+     * Getter as a set of strings of the potentially sought after celestial objects
+     *
+     * @param data (Tree<Character>) current search tree
+     * @return (AbstractMathSet<String>) names of the possible celestial objects
+     */
     public AbstractMathSet<String> potentialSolutions(Tree<Character> data) {
         return data.getLeaves()
                 .image(n -> n.hierarchy().reverse()
@@ -106,9 +117,24 @@ public final class Searcher extends SearchTextField<CelestialObject> {
                 .union(new MathSet<>(resultCache.keySet()));
     }
 
+    /**
+     * @return (ObjectProperty<String>) Observable: last selected search result
+     */
+    public ObjectProperty<String> lastSelectedNameProperty() {
+        return lastSelectedName;
+    }
+
+    /**
+     * Setter for observable: last selected search result
+     *
+     * @param value (String) new value
+     */
+    public void setLastSelectedName(String value) {
+        lastSelectedName.set(value);
+    }
+
     protected void prepareCache(AbstractMathSet<String> labels) {
-        if (resultCache.size() == cacheCapacity)
-            flushCache();
+        if (resultCache.size() == cacheCapacity) flushCache();
 
         labels.forEach(l -> resultCache.put(l, stringToCelest.at(l)));
     }
@@ -147,15 +173,11 @@ public final class Searcher extends SearchTextField<CelestialObject> {
         clear();
     }
 
-    public String getLastSelectedName() {
-        return lastSelectedName.get();
-    }
-
-    public ObjectProperty<String> lastSelectedNameProperty() {
-        return lastSelectedName;
-    }
-
-    public void setLastSelectedName(String value) {
-        lastSelectedName.set(value);
+    private static int findFirstalpha(String str) {
+        for (int i = 0; i < str.length(); ++i) {
+            if (Character.isAlphabetic(str.charAt(i)))
+                return i;
+        }
+        return -1;
     }
 }

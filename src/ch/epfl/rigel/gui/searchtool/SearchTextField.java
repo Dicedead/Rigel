@@ -24,16 +24,26 @@ import static ch.epfl.rigel.math.sets.implement.MathSet.emptySet;
 public abstract class SearchTextField<T> extends TextField {
 
     private static final int INITIAL_CACHE_SIZE = 15;
+    private static final int TEXT_HEIGHT = 5;
+    private static final Color FILTER_TEXT_COLOR = Color.ORANGE;
 
     private final ObjectProperty<AbstractMathSet<T>> results;
     private final ContextMenu entriesGUI;
     private final int numberOfEntry;
 
+    /**
+     * Default SearchTextField constructor with default cache size
+     */
     public SearchTextField()
     {
         this(INITIAL_CACHE_SIZE);
     }
 
+    /**
+     * Main SearchTextField constructor with input number of possibilities
+     *
+     * @param numberOfEntry (int) number of entries
+     */
     public SearchTextField(int numberOfEntry) {
         super();
         this.entriesGUI = new ContextMenu();
@@ -42,16 +52,25 @@ public abstract class SearchTextField<T> extends TextField {
         makeLinks();
     }
 
-    public AbstractMathSet<T> getResults() {
-        return results.get();
-    }
+    /**
+     * Build TextFlow with selected text. Return "case" dependent.
+     * Concretely, this method 'colors' the beginning of the possibilities and styles them
+     *
+     * @param text (String) input string
+     * @param filter (String) string to select in text
+     * @return (TextFlow)
+     */
+    public static TextFlow buildTextFlow(String text, String filter) {
 
-    public ObjectProperty<AbstractMathSet<T>> resultsProperty() {
-        return results;
-    }
+        int filterIndex   = text.toLowerCase().indexOf(filter.toLowerCase());
+        Text textFilter   = new Text(text.substring(filterIndex,  filterIndex + filter.length()));
+        //instead of "filter" to keep all "case sensitive"
 
-    protected void setResults(AbstractMathSet<T> results) {
-        this.results.set(results);
+        textFilter.setFill(FILTER_TEXT_COLOR);
+        TextFlow res = new TextFlow(
+                textFilter, new Text(text.substring(filterIndex + filter.length())));
+        res.setPrefHeight(TEXT_HEIGHT);
+        return res;
     }
 
     protected void populate(final AbstractMathSet<String> toPopulate) {
@@ -95,25 +114,5 @@ public abstract class SearchTextField<T> extends TextField {
                 results.setValue(handleReturn(getText()));
             }
         });
-    }
-
-    /**
-     * Build TextFlow with selected text. Return "case" dependent.
-     *
-     * @param text - string with text
-     * @param filter - string to select in text
-     * @return - TextFlow
-     */
-    public static TextFlow buildTextFlow(String text, String filter) {
-
-        int filterIndex   = text.toLowerCase().indexOf(filter.toLowerCase());
-        Text textFilter   = new Text(text.substring(filterIndex,  filterIndex + filter.length()));
-        //instead of "filter" to keep all "case sensitive"
-
-        textFilter.setFill(Color.ORANGE);
-        TextFlow res = new TextFlow(
-                textFilter, new Text(text.substring(filterIndex + filter.length())));
-        res.setPrefHeight(5);
-        return res;
     }
 }

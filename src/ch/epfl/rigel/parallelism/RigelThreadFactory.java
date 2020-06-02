@@ -21,7 +21,15 @@ public final class RigelThreadFactory implements ThreadFactory
     private int count;
     private final List<String> stats;
 
-    public RigelThreadFactory(final String name, final int priority, final ThreadGroup group, List<String> stats)
+    /**
+     * Main RigelThreadFactory constructor
+     *
+     * @param name
+     * @param priority
+     * @param group
+     * @param stats
+     */
+    public RigelThreadFactory(String name, int priority, ThreadGroup group, List<String> stats)
     {
         this.name = name;
         this.priority = priority;

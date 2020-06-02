@@ -37,6 +37,11 @@ public final class  ThreadManager<T> {
     private final ObservableSet<List<Task<?>>> tasksQueue;
     private final AbstractMathSet<Tree<Function<T , Task<?>>>> taskForest;
 
+    private static final Predicate<Method> IS_LEAF = m -> m.getAnnotation(Requires.class).requirements().length == 0;
+
+    private static final Function<Method, Predicate<Method>> HAS_METHOD_AS_REQUIREMENT = m ->
+            (t -> Arrays.stream(t.getAnnotation(Requires.class).requirements()).anyMatch(s -> s.equals(m.getName())));
+
     /**
      * Main constructor
      */
@@ -67,10 +72,6 @@ public final class  ThreadManager<T> {
     public @interface Export {
     }
 
-    private static final Predicate<Method> isLeaf = m -> m.getAnnotation(Requires.class).requirements().length == 0;
-    private static final Function<Method, Predicate<Method>> hasMethodAsRequirement = m ->
-            (t -> Arrays.stream(t.getAnnotation(Requires.class).requirements()).anyMatch(s -> s.equals(m.getName())));
-
     private static <T> GraphNode<Function<T , Task<?>>> root(Class<T> indicator)
     {
         return new GraphNode<>(t -> new Task<Void>() {
@@ -98,13 +99,13 @@ public final class  ThreadManager<T> {
 
     private static <T> Map<Method, GraphNode<Function<T , Task<?>>>> recurConstruct(Map<Method, GraphNode<Function<T , Task<?>>>> res, Class<T> tClass)
     {
-        if (res.keySet().stream().allMatch(isLeaf))
+        if (res.keySet().stream().allMatch(IS_LEAF))
             return res;
 
         return recurConstruct(res
                 .keySet()
                 .stream()
-                .flatMap(m -> isLeaf.test(m) ? Stream.of(Optional.of(m)) :
+                .flatMap(m -> IS_LEAF.test(m) ? Stream.of(Optional.of(m)) :
                         Arrays.stream(m.getAnnotation(Requires.class).requirements())
                         .map(s -> extractUniqueMethod(s, tClass)))
                 .filter(Optional::isPresent)
@@ -118,7 +119,7 @@ public final class  ThreadManager<T> {
         Set<Method> methods = extractMultiThreaded(c);
         Set<Method> singles = extractSingleThreaded(c);
         //Find requirementless methods
-        final var requirementLess = methods.stream().filter(m -> methods.stream().noneMatch(hasMethodAsRequirement.apply(m)))
+        final var requirementLess = methods.stream().filter(m -> methods.stream().noneMatch(HAS_METHOD_AS_REQUIREMENT.apply(m)))
                 .collect(Collectors.toSet());
 
         final AbstractMathSet<Map<Method, GraphNode<Function<T , Task<?>>>>> leafs =
