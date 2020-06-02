@@ -13,13 +13,14 @@ import ch.epfl.rigel.astronomy.Sun;
  * @author Salim Najib (310003)
  */
 public enum DrawableObjects {
-    ORBIT(null, "Orbites"),
-    ASTERISMS(Asterism.class, "Astérismes"),
-    GRID(null, "Grille"),
-    STARS(Star.class, "Etoiles"),
-    PLANETS(Planet.class, "Planètes"),
-    SUN(Sun.class, "Soleil "),
-    MOON(Moon.class, "Lune"),
+
+    ORBIT(null,  "Orbites"),
+    GRID(null,   "Grille"),
+    ASTERISMS(Asterism.class,   "Astérismes"),
+    STARS(Star.class,           "Etoiles"),
+    PLANETS(Planet.class,       "Planètes"),
+    SUN(Sun.class,              "Soleil "),
+    MOON(Moon.class,            "Lune"),
     HORIZON(null, "Horizon");
 
     private final Class<?> reppedClass;

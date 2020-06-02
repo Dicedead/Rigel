@@ -1,16 +1,6 @@
 package ch.epfl.rigel.gui;
 
-import ch.epfl.rigel.astronomy.CelestialObject;
-import ch.epfl.rigel.astronomy.CelestialObjectModel;
-import ch.epfl.rigel.astronomy.Moon;
-import ch.epfl.rigel.astronomy.MoonModel;
-import ch.epfl.rigel.astronomy.ObservedSky;
-import ch.epfl.rigel.astronomy.Planet;
-import ch.epfl.rigel.astronomy.PlanetModel;
-import ch.epfl.rigel.astronomy.Star;
-import ch.epfl.rigel.astronomy.StarCatalogue;
-import ch.epfl.rigel.astronomy.Orbit;
-import ch.epfl.rigel.astronomy.SunModel;
+import ch.epfl.rigel.astronomy.*;
 import ch.epfl.rigel.coordinates.CartesianCoordinates;
 import ch.epfl.rigel.coordinates.EclipticToEquatorialConversion;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
@@ -67,47 +57,45 @@ public final class SkyCanvasManager {
     private static final double AZ_STEP_NEG = -AZ_STEP_POS;
     private static final ClosedInterval FOV_INTERVAL = ClosedInterval.of(30, 150);
 
-    private final StarCatalogue catalogue;
-    private final DateTimeBean dtBean;
+    private final StarCatalogue         catalogue;
+    private final DateTimeBean          dtBean;
     private final ViewingParametersBean viewBean;
-    private final ObserverLocationBean obsLocBean;
+    private final ObserverLocationBean  obsLocBean;
 
-    private final Canvas canvas;
-    private final SkyCanvasPainter painter;
-    private final Searcher searcher;
+    private final Canvas            canvas;
+    private final SkyCanvasPainter  painter;
+    private final Searcher          searcher;
 
-    private final ObjectBinding<StereographicProjection> projection;
-    private final ObjectBinding<PlanarTransformation> planeToCanvas;
-    private final ObjectBinding<PlanarTransformation> canvasToPlane;
-    private final ObjectBinding<ObservedSky> observedSky;
-    private final ObjectBinding<HorizontalCoordinates> mouseHorizontalPosition;
+    private final ObjectBinding<StereographicProjection>    projection;
+    private final ObjectBinding<PlanarTransformation>       planeToCanvas;
+    private final ObjectBinding<PlanarTransformation>       canvasToPlane;
+    private final ObjectBinding<ObservedSky>                observedSky;
+    private final ObjectBinding<HorizontalCoordinates>      mouseHorizontalPosition;
     private final DoubleBinding maxDistConverted;
 
-    private final ObjectBinding<Optional<CelestialObject>> objectUnderMouse;
+    private final ObjectBinding<Optional<CelestialObject>>  objectUnderMouse;
+    private final ObjectProperty<CartesianCoordinates>      mousePosition;
     private final DoubleBinding mouseAzDeg;
     private final DoubleBinding mouseAltDeg;
-    private final ObjectProperty<CartesianCoordinates> mousePosition;
 
     //BONUS CONTENT
     private static final int SEARCH_CACHE_CAPACITY = 14;
-
     private static final int ORBIT_SIMULATION_DAYS_DEFAULT = 1000;
 
-    private final BooleanProperty extendedAltitudeIsOn = new SimpleBooleanProperty(true);
-
-    private final DoubleProperty mouseXstartOfDrag = new SimpleDoubleProperty();
-    private final DoubleProperty mouseYstartOfDrag = new SimpleDoubleProperty();
-    private static final double MOUSE_DRAG_FACTOR = 2e4;
-    private final DoubleProperty mouseDragSensitivity = new SimpleDoubleProperty(1 / MOUSE_DRAG_FACTOR);
+    private final BooleanProperty extendedAltitudeIsOn  = new SimpleBooleanProperty(true);
+    private final DoubleProperty mouseXstartOfDrag      = new SimpleDoubleProperty();
+    private final DoubleProperty mouseYstartOfDrag      = new SimpleDoubleProperty();
+    private static final double MOUSE_DRAG_FACTOR       = 2e4;
+    private final DoubleProperty mouseDragSensitivity   = new SimpleDoubleProperty(1 / MOUSE_DRAG_FACTOR);
     //suggested interval is [1/4e4; 4/1e4]
-    private final DoubleProperty mouseScrollSensitivity = new SimpleDoubleProperty(0.75);
+    private final DoubleProperty mouseScrollSensitivity     = new SimpleDoubleProperty(0.75);
+    private final BooleanProperty nonFunctionalKeyPressed   = new SimpleBooleanProperty(false);
 
-    private final BooleanProperty nonFunctionalKeyPressed = new SimpleBooleanProperty(false);
+    private static final double ROTATION_ATTENUATION    = 1 / 2d;
+    private static final double ROTATE_STEP_POS         = Angle.ofDeg(10);
+    private static final double ROTATE_STEP_NEG         = -ROTATE_STEP_POS;
+    private final DoubleProperty rotation               = new SimpleDoubleProperty(0);
 
-    private static final double ROTATION_ATTENUATION = 1 / 2d;
-    private static final double ROTATE_STEP_POS = Angle.ofDeg(10);
-    private static final double ROTATE_STEP_NEG = -ROTATE_STEP_POS;
-    private final DoubleProperty rotation = new SimpleDoubleProperty(0);
     private final ObjectBinding<PlanarTransformation> rotationMatrix;
     private final ObjectBinding<PlanarTransformation> inverseRotation;
 
@@ -118,16 +106,15 @@ public final class SkyCanvasManager {
 
     private static final List<Color> defaultColorsList = List.of(Color.BLUE, Color.CADETBLUE, Color.FIREBRICK
             .deriveColor(1,1,1,0.5), Color.RED);
-    private final ObjectProperty<Color> orbitColor = new SimpleObjectProperty<>(defaultColorsList.get(1));
-    private final ObjectProperty<Color> horizonColor = new SimpleObjectProperty<>(defaultColorsList.get(3));
-    private final ObjectProperty<Color> gridColor = new SimpleObjectProperty<>(defaultColorsList.get(2));
-    private final ObjectProperty<Color> asterismColor = new SimpleObjectProperty<>(defaultColorsList.get(0));
-    private final List<ObjectProperty<Color>> colorsList = List.of(asterismColor, orbitColor, gridColor, horizonColor);
-    private final List<String> correspColorStringList = List.of("Astérismes ", "Orbites ", "Grille ", "Horizon ");
-
-    private static final int RESOLUTION_DEFAULT = 5;
-    private final IntegerProperty drawOrbitUntil = new SimpleIntegerProperty(ORBIT_SIMULATION_DAYS_DEFAULT);
-    private final IntegerProperty orbitDrawingStep = new SimpleIntegerProperty(5);
+    private final ObjectProperty<Color> orbitColor          = new SimpleObjectProperty<>(defaultColorsList.get(1));
+    private final ObjectProperty<Color> horizonColor        = new SimpleObjectProperty<>(defaultColorsList.get(3));
+    private final ObjectProperty<Color> gridColor           = new SimpleObjectProperty<>(defaultColorsList.get(2));
+    private final ObjectProperty<Color> asterismColor       = new SimpleObjectProperty<>(defaultColorsList.get(0));
+    private final List<ObjectProperty<Color>> colorsList    = List.of(asterismColor, orbitColor, gridColor, horizonColor);
+    private final List<String> correspColorStringList       = List.of("Astérismes ", "Orbites ", "Grille ", "Horizon ");
+    private static final int RESOLUTION_DEFAULT             = 5;
+    private final IntegerProperty drawOrbitUntil            = new SimpleIntegerProperty(ORBIT_SIMULATION_DAYS_DEFAULT);
+    private final IntegerProperty orbitDrawingStep          = new SimpleIntegerProperty(5);
 
     private final ObjectProperty<CelestialObject> wantNewInformationPanel = new SimpleObjectProperty<>();
 
@@ -146,12 +133,12 @@ public final class SkyCanvasManager {
     public SkyCanvasManager(StarCatalogue catalogue, DateTimeBean dtBean,
                             ObserverLocationBean obsLocBean, ViewingParametersBean viewBean) {
 
-        this.catalogue = catalogue;
-        this.dtBean = dtBean;
-        this.viewBean = viewBean;
+        this.catalogue  = catalogue;
+        this.dtBean     = dtBean;
+        this.viewBean   = viewBean;
         this.obsLocBean = obsLocBean;
 
-        canvas = new Canvas(INIT_WIDTH, INIT_HEIGHT); //avoids some ugliness down in planeToCanvas and its inverse
+        canvas  = new Canvas(INIT_WIDTH, INIT_HEIGHT); //avoids some ugliness down in planeToCanvas and its inverse
         painter = new SkyCanvasPainter(canvas);
 
         mousePosition = new SimpleObjectProperty<>(CartesianCoordinates.ORIGIN);
@@ -172,17 +159,19 @@ public final class SkyCanvasManager {
                 () -> objectsToDraw.get().stream().map(DrawableObjects::getCorrespondingClass).collect(Collectors.toSet()),
                 objectsToDraw);
 
-        searcher = new Searcher(SEARCH_CACHE_CAPACITY, observedSky.get(), obsLocBean, dtBean);
+        searcher = new Searcher(SEARCH_CACHE_CAPACITY, observedSky.get());
         searcher.lastSelectedNameProperty().addListener((p, o, n) -> {
             if (n != null) {
                 viewBean.setCenter(projection.get().inverseApply(observedSky.get().celestialObjMap().get(
                         observedSky.get().celestialObjMap().keySet()
                                 .stream()
                                 .filter(celest -> celest.name().equals(n))
-                                .findFirst().get())));
+                                .findFirst().orElseThrow())));
                 searcher.setLastSelectedName(null);
             }
         });
+
+
 
         rotationMatrix = Bindings.createObjectBinding(
                 () -> PlanarTransformation.rotation(rotation.get()), rotation);
@@ -201,6 +190,7 @@ public final class SkyCanvasManager {
         canvasToPlane = Bindings.createObjectBinding(() -> planeToCanvas.get().invert(), planeToCanvas);
 
         //TAKING CARE OF MOUSE'S POSITION AND USER INTERACTION
+        //--------------------------------------------------------------------------------------------------------------
         mouseHorizontalPosition = Bindings.createObjectBinding(
                 () -> projection.get().inverseApply(mousePosition.get()),
                 projection, canvasToPlane, mousePosition);
@@ -433,12 +423,18 @@ public final class SkyCanvasManager {
 
     public void resetInformationPanel() { wantNewInformationPanel.set(null); }
 
-    //TODO javadoc
+    /**
+     *
+     * @return the distance between two vertical lines defining the grid
+     */
     public int getHorizCoordsGridSpacingDeg() {
         return horizCoordsGridSpacingDeg.get();
     }
 
-    //TODO javadoc
+    /**
+     *  Sets the distance between two vertical lines defining the grid
+      * @param horizCoordsGridSpacingDeg the wanted distance
+     */
     public void setHorizCoordsGridSpacingDeg(int horizCoordsGridSpacingDeg) {
         this.horizCoordsGridSpacingDeg.set(horizCoordsGridSpacingDeg);
     }
@@ -516,8 +512,9 @@ public final class SkyCanvasManager {
     }
 
     private CelestialObjectModel<? extends CelestialObject> getModel(Class<? extends CelestialObject> celestClass) {
+
         if (celestClass.equals(Planet.class)) {
-            return PlanetModel.getPlanetModelFromString(objectUnderMouse.get().get().name());
+            return PlanetModel.getPlanetModelFromString(objectUnderMouse.get().orElseThrow().name());
         } else if (celestClass.equals(Moon.class)) {
             return MoonModel.MOON;
         } else {

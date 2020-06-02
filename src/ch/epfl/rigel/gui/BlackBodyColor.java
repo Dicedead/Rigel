@@ -54,11 +54,11 @@ public final class BlackBodyColor {
         private final static List<Color> COLOR_LIST = initList();
         //Singleton pattern used to enforce instantiation on first call while maintaining immutability
 
-        private static final String COLOR_FILE = "/bbr_color.txt";
-        private static final int FILE_USABLE_LENGTH = 782;
-        private static final int SKIP_LINES_FILTERINT = 80;
-        private static final int START_USABLE = 81;
-        private static final int END_USABLE = 87;
+        private static final String COLOR_FILE          = "/bbr_color.txt";
+        private static final int FILE_USABLE_LENGTH     = 782;
+        private static final int SKIP_LINES_FILTERINT   = 80;
+        private static final int START_USABLE           = 81;
+        private static final int END_USABLE             = 87;
 
         private ColorListSingleton() {
             throw new UnsupportedOperationException("Fatal error: tried to instantiate non instantiable class" +
