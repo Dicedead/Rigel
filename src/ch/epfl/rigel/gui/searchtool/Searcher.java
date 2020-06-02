@@ -26,28 +26,39 @@ import static ch.epfl.rigel.math.sets.implement.MathSet.emptySet;
  */
 public final class Searcher extends SearchTextField<CelestialObject> {
 
-    private final WeakHashMap<String, CelestialObject>      resultCache;
-    private final int                                       cacheCapacity;
-    private final IndexedSet<Tree<Character>, Character>    treesOfCharacters;
-    private final Set<Character>                            availableChars;
-    private final IndexedSet<CelestialObject, String>       stringToCelestial;
-    private final ObjectProperty<String>                    lastSelectedName;
+    private final WeakHashMap<String, CelestialObject> resultCache;
+    private final AbstractMathSet<String> data;
+    private final int cacheCapacity;
+    private final IndexedSet<Tree<Character>, Character> treesOfCharacters;
+    private final Set<Character> availableChars;
+    private final IndexedSet<CelestialObject, String> stringToCelest;
 
+    private final ObjectProperty<String> lastSelectedName;
 
+    /**
+     * Main Searcher constructor
+     *
+     * @param cacheCapacity (int) number of suggestions to display
+     * @param sky           (ObservedSky) initial observed sky
+     */
     public Searcher(int cacheCapacity, ObservedSky sky) {
         super(cacheCapacity);
 
-        this.lastSelectedName   = new SimpleObjectProperty<>();
-        AbstractMathSet<String> data = sky.celestialObjMap().keySet().stream().map(CelestialObject::name).collect(MathSet.toMathSet());
-        this.resultCache        = new WeakHashMap<>(cacheCapacity);
-        this.cacheCapacity      = cacheCapacity;
-        this.availableChars     = new HashSet<>();
+        this.lastSelectedName = new SimpleObjectProperty<>();
+
+        this.data = sky.celestialObjMap().keySet().stream()
+                .map(CelestialObject::name)
+                .collect(MathSet.toMathSet());
+
+        this.resultCache = new WeakHashMap<>(cacheCapacity);
+
+        this.cacheCapacity = cacheCapacity;
+
+        this.availableChars = new HashSet<>();
 
         Map<Character, Tree<Character>> preDat = new HashMap<>();
-        //Along all the alphabet
         for (char i = 'A'; i <= 'Z'; ++i) {
-            final char finalI = i; //needed for lambdas
-            //Whether the first alpha numeric character is the selected one
+            final char finalI = i;
             final AbstractMathSet<String> res = data.imageIf(str -> str.indexOf(finalI) == findFirstalpha(str),
                     string -> string.substring(findFirstalpha(string)));
             if (!res.isEmpty()) {
@@ -59,24 +70,19 @@ public final class Searcher extends SearchTextField<CelestialObject> {
         }
 
         this.treesOfCharacters = new IndexedSet<>(preDat);
-        this.stringToCelestial = new IndexedSet<>(sky.celestialObjMap().keySet().stream()
+        this.stringToCelest = new IndexedSet<>(sky.celestialObjMap().keySet().stream()
                 .collect(Collectors.toMap(CelestialObject::name, Function.identity(), (v1, v2) -> v1)));
     }
 
     /**
-     * Finds first alphabetic character in a string
-     * @param str the string to check
-     * @return the index of the first alphabetic character in a string
+     * Searching method
+     *
+     * @param inputText   (String)
+     * @param s           (char) new character in input text
+     * @param initialTree (Tree<Character>) Tree to search
+     * @param depth       (int) depth to search in
+     * @return (Optional<Tree<Character>>) new tree to search in
      */
-    private static int findFirstalpha(String str) {
-
-        for (int i = 0; i < str.length(); ++i)
-            if (Character.isAlphabetic(str.charAt(i)))
-                return i;
-
-        return -1;
-    }
-
     public Optional<Tree<Character>> search(String inputText, char s, Tree<Character> initialTree, int depth) {
 
         if (depth > initialTree.getMaxDepth()) return Optional.empty();
@@ -95,6 +101,12 @@ public final class Searcher extends SearchTextField<CelestialObject> {
                 new Tree<>(unionHierarchy, false));
     }
 
+    /**
+     * Getter as a set of strings of the potentially sought after celestial objects
+     *
+     * @param data (Tree<Character>) current search tree
+     * @return (AbstractMathSet<String>) names of the possible celestial objects
+     */
     public AbstractMathSet<String> potentialSolutions(Tree<Character> data) {
         return data.getLeaves()
                 .image(n -> n.hierarchy().reverse()
@@ -105,11 +117,26 @@ public final class Searcher extends SearchTextField<CelestialObject> {
                 .union(new MathSet<>(resultCache.keySet()));
     }
 
-    protected void prepareCache(AbstractMathSet<String> labels) {
-        if (resultCache.size() == cacheCapacity)
-            flushCache();
+    /**
+     * @return (ObjectProperty<String>) Observable: last selected search result
+     */
+    public ObjectProperty<String> lastSelectedNameProperty() {
+        return lastSelectedName;
+    }
 
-        labels.forEach(l -> resultCache.put(l, stringToCelestial.at(l)));
+    /**
+     * Setter for observable: last selected search result
+     *
+     * @param value (String) new value
+     */
+    public void setLastSelectedName(String value) {
+        lastSelectedName.set(value);
+    }
+
+    protected void prepareCache(AbstractMathSet<String> labels) {
+        if (resultCache.size() == cacheCapacity) flushCache();
+
+        labels.forEach(l -> resultCache.put(l, stringToCelest.at(l)));
     }
 
     protected void flushCache() {
@@ -132,25 +159,25 @@ public final class Searcher extends SearchTextField<CelestialObject> {
     AbstractMathSet<CelestialObject> handleReturn(String str) {
         if (treesOfCharacters.isEmpty()) {
             prepareCache(MathSet.of(str));
-            return MathSet.of(stringToCelestial.at(str));
+            return MathSet.of(stringToCelest.at(str));
         } else {
             return potentialSolutions(treesOfCharacters.at(str.charAt(findFirstalpha(str))))
-                    .image(stringToCelestial::at);
+                    .image(stringToCelest::at);
         }
     }
 
     @Override
     void clickAction(String str) {
-        CelestialObject potentialCelestObj = stringToCelestial.at(str);
-        lastSelectedName.set((potentialCelestObj == null ? stringToCelestial.at("? " + str) : potentialCelestObj).name());
+        CelestialObject potentialCelestObj = stringToCelest.at(str);
+        lastSelectedName.set((potentialCelestObj == null ? stringToCelest.at("? " + str) : potentialCelestObj).name());
         clear();
     }
 
-    public ObjectProperty<String> lastSelectedNameProperty() {
-        return lastSelectedName;
-    }
-
-    public void setLastSelectedName(String value) {
-        lastSelectedName.set(value);
+    private static int findFirstalpha(String str) {
+        for (int i = 0; i < str.length(); ++i) {
+            if (Character.isAlphabetic(str.charAt(i)))
+                return i;
+        }
+        return -1;
     }
 }
