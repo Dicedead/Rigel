@@ -6,23 +6,28 @@ import ch.epfl.rigel.math.sets.implement.MathSet;
 import static java.lang.Integer.signum;
 
 /**
+ * Definition of a relation and some subtypes of relations
+ *
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
 @FunctionalInterface
 public interface Relation<T, U> {
+
     /**
+     * Concrete realization of a Relation: an expression between arbitrary values of the same type
      *
-     * @param t (T)
-     * @param u (T)
-     * @return Whether two elements satisfy the relation
+     * @param t (T) element 1
+     * @param u (T) element 2
+     * @return (U) result of relation computation
      */
     U areInRelation(T t, T u);
 
     /**
      * Allows to compare an element to a set
+     *
      * @param t (T)
-     * @return the set of possible value to the relation
+     * @return (SetFunction<T, U>) setFunction for finding all elements in some set related to given element t
      */
     default SetFunction<T, U> partialApply(T t)
     {
@@ -38,9 +43,9 @@ public interface Relation<T, U> {
         }
     }
 
-    enum COMP {
+    enum Ordering {
         LESS, EQUAL, GREATER;
-        public static COMP of(int i)
+        public static Ordering of(int i)
         {
             switch (signum(i))
             {
@@ -52,9 +57,9 @@ public interface Relation<T, U> {
         }
     }
 
-    interface Order<T> extends Relation<T, COMP>
+    interface Order<T> extends Relation<T, Ordering>
     {
-        default COMP compare(T t, T u)
+        default Ordering compare(T t, T u)
         {
             return areInRelation(t, u);
         }

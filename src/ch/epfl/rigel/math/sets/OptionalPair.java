@@ -26,7 +26,13 @@ public final class OptionalPair<U, V> extends Pair<Optional<U>, Optional<V>> {
         super(Objects.isNull(u) ? Optional.empty() : Optional.of(u), Objects.isNull(u) ? Optional.of(v) : Optional.empty());
     }
 
-    public static <U, V>  OptionalPair<U, V> of(final Pair<U, V> c)
+    /**
+     * Factory constructor from javaFX Pair
+     *
+     * @param c (Pair<U, V>) one dummy, one real
+     * @return (OptionalPair<U, V>) instance of this class
+     */
+    public static <U, V>  OptionalPair<U, V> of(Pair<U, V> c)
     {
         if(c.getKey() != null)
             return new OptionalPair<>(c.getKey(), null );
@@ -35,11 +41,6 @@ public final class OptionalPair<U, V> extends Pair<Optional<U>, Optional<V>> {
             return new OptionalPair<>(null, c.getValue() );
 
         else throw new IllegalArgumentException();
-    }
-
-    public <A, B> OptionalPair<A, B> flatMap(BiFunction<U, V, OptionalPair<A,B>> function)
-    {
-        return getTruePos() == Position.LEFT ? function.apply(getKey().get(), null) : function.apply(null, getValue().get());
     }
 
     /**

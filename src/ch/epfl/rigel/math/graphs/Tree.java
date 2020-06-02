@@ -7,7 +7,7 @@ import ch.epfl.rigel.math.sets.implement.MathSet;
 import ch.epfl.rigel.math.sets.implement.OrderedTuple;
 import ch.epfl.rigel.math.sets.implement.PartitionSet;
 import ch.epfl.rigel.math.sets.properties.SetFunction;
-import ch.epfl.rigel.math.sets.implement.PointedSet;
+import ch.epfl.rigel.math.sets.abstraction.PointedSet;
 
 import java.util.ArrayList;
 import java.util.Collection;

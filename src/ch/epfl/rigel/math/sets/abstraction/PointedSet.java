@@ -1,10 +1,12 @@
-package ch.epfl.rigel.math.sets.implement;
+package ch.epfl.rigel.math.sets.abstraction;
 
-import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
+import ch.epfl.rigel.math.sets.implement.MathSet;
 
 import java.util.Collection;
 
 /**
+ * Abstraction of a set with a special element
+ *
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */

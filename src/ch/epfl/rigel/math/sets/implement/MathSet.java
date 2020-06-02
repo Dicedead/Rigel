@@ -2,12 +2,17 @@ package ch.epfl.rigel.math.sets.implement;
 
 import ch.epfl.rigel.math.sets.abstraction.AbstractMathSet;
 
-import java.util.*;
-import java.util.function.*;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 /**
+ * Main custom Set class
+ *
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
@@ -123,7 +128,10 @@ public class MathSet<T> implements AbstractMathSet<T> {
         return of();
     }
 
-
+    /**
+     * @param o (Object) other object
+     * @return (boolean) is true iff o is a mathset and its data equals this set's data
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -131,6 +139,9 @@ public class MathSet<T> implements AbstractMathSet<T> {
         return Objects.equals(data, ((MathSet<?>) o).data);
     }
 
+    /**
+     * @return (int) wrapped data's hashcode
+     */
     @Override
     public int hashCode() {
         return data.hashCode();

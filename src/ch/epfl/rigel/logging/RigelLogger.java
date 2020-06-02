@@ -32,6 +32,9 @@ public final class RigelLogger extends LogManager{
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean addLogger(Logger logger) {
 

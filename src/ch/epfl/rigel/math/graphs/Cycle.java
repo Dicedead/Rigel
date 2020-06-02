@@ -8,7 +8,6 @@ import ch.epfl.rigel.math.sets.properties.SetFunction;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 
 /**
  * Abstraction of a cyclic graph

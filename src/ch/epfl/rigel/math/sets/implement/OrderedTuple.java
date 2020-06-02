@@ -8,15 +8,35 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
 /**
+ * Implementation of a set indexed by integers
+ *
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
 public class OrderedTuple<T> extends IndexedSet<T, Integer> implements AbstractOrderedTuple<T> {
 
     /**
+     * Main constructor allowing to construct an OrderedTuple from any Iterable
+     *
+     * @param t the iterable to convert
+     */
+    public OrderedTuple(Iterable<T> t) {
+        this(iterableToList(t));
+    }
+
+    /**
+     * Secondary constructor from list
+     *
+     * @param t list to convert
+     */
+    public OrderedTuple(List<T> t) {
+        this(t, t::get);
+    }
+
+    /**
      * Classic constructor for an IndexedSet
+     *
      * @param t the underlying data
      * @param indexer the function allowing the order
      */
@@ -25,24 +45,13 @@ public class OrderedTuple<T> extends IndexedSet<T, Integer> implements AbstractO
     }
 
     /**
-     * The constructor from an array, assign each elements to its position in the array
+     * Alternate constructor from an array, assigns each elements to its position in the array
+     *
      * @param t the array to convert
      */
     @SafeVarargs
     public OrderedTuple(T... t) {
         this(List.of(t), i -> t[i]);
-    }
-
-    /**
-     * Constructor allowing to construct an OrderedTuple from any Iterable
-     * @param t the iterable to convert
-     */
-    public OrderedTuple(Iterable<T> t) {
-        this(iterableToList(t));
-    }
-
-    public OrderedTuple(List<T> t) {
-        this(t, t::get);
     }
 
     private static<T> List<T> iterableToList(final Iterable<T> i)
@@ -52,6 +61,9 @@ public class OrderedTuple<T> extends IndexedSet<T, Integer> implements AbstractO
         return target;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public <U> OrderedTuple<U> image(SetFunction<T, U> f) {
         return new OrderedTuple<>(toList().stream().map(f).collect(Collectors.toList()));

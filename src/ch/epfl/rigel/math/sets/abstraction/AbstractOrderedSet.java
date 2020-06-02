@@ -6,14 +6,21 @@ import ch.epfl.rigel.math.sets.properties.Relation;
 import java.util.Set;
 
 /**
+ * Abstraction of a set with orderable elements
+ *
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
 public interface AbstractOrderedSet<T> extends AbstractMathSet<T> {
 
+    /**
+     * Set ordering function
+     *
+     * @return (Relation.Order<T>) get the set ordering function
+     */
     Relation.Order<T> getComparator();
 
-    default Relation.COMP compare(T t, T u)
+    default Relation.Ordering compare(T t, T u)
     {
         Preconditions.checkArgument(contains(t) && contains(u));
         return getComparator().compare(t, u);
@@ -25,7 +32,7 @@ public interface AbstractOrderedSet<T> extends AbstractMathSet<T> {
      */
     default AbstractMathSet<T> min()
     {
-        return suchThat(p -> getComparator().partialApply(p).apply(this).getRawData().equals(Set.of(Relation.COMP.LESS)));
+        return suchThat(p -> getComparator().partialApply(p).apply(this).getRawData().equals(Set.of(Relation.Ordering.LESS)));
     }
     /**
      *
@@ -33,7 +40,7 @@ public interface AbstractOrderedSet<T> extends AbstractMathSet<T> {
      */
     default AbstractMathSet<T> max()
     {
-        return suchThat(p -> getComparator().partialApply(p).apply(this).getRawData().equals(Set.of(Relation.COMP.LESS)));
+        return suchThat(p -> getComparator().partialApply(p).apply(this).getRawData().equals(Set.of(Relation.Ordering.LESS)));
     }
 
     /**
@@ -43,7 +50,7 @@ public interface AbstractOrderedSet<T> extends AbstractMathSet<T> {
      */
     default AbstractMathSet<T> moreThan(T t)
     {
-        return suchThat(p -> getComparator().partialApply(t).apply(p) == (Relation.COMP.LESS));
+        return suchThat(p -> getComparator().partialApply(t).apply(p) == (Relation.Ordering.LESS));
     }
 
 
@@ -54,7 +61,7 @@ public interface AbstractOrderedSet<T> extends AbstractMathSet<T> {
      */
     default AbstractMathSet<T> lessThan(T t)
     {
-        return suchThat(p -> getComparator().partialApply(t).apply(p) == (Relation.COMP.GREATER));
+        return suchThat(p -> getComparator().partialApply(t).apply(p) == (Relation.Ordering.GREATER));
     }
 
     /**
@@ -64,6 +71,6 @@ public interface AbstractOrderedSet<T> extends AbstractMathSet<T> {
      */
     default AbstractMathSet<T> equalsTo(T t)
     {
-        return suchThat(p -> getComparator().partialApply(t).apply(p) == (Relation.COMP.EQUAL));
+        return suchThat(p -> getComparator().partialApply(t).apply(p) == (Relation.Ordering.EQUAL));
     }
 }
