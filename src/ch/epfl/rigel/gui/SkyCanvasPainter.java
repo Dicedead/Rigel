@@ -205,20 +205,6 @@ public final class SkyCanvasPainter {
         );
     }
 
-    public void redrawAsterism(ObservedSky sky, PlanarTransformation transform, Asterism asterism, Color astColor) {
-
-        graphicsContext.setStroke(astColor);
-        graphicsContext.setLineWidth(ASTERISMS_LINE_WIDTH);
-        final CartesianCoordinates mapOfStar0 = transform.apply(getCartesFromIndex(sky, asterism, 0));
-        asterismLineRecurr(mapOfStar0,
-                transform.apply(getCartesFromIndex(sky, asterism, 1)),
-                0,
-                asterism,
-                sky,
-                transform,
-                isInCanvas(mapOfStar0));
-    }
-
     /**
      * Places the stars in current sky, with radius depending of their magnitude
      *
