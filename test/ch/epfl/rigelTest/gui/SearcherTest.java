@@ -48,7 +48,7 @@ public class SearcherTest extends Application {
                     new StereographicProjection(viewingParametersBean.getCenter()),
                     catalogue);
 
-            Searcher searcher = new Searcher(5, sky, observerLocationBean, dateTimeBean);
+            Searcher searcher = new Searcher(5, sky);
 
             StackPane root = new StackPane();
             root.getChildren().add(searcher);

@@ -28,33 +28,28 @@ import static ch.epfl.rigel.math.sets.implement.MathSet.emptySet;
  */
 public final class Searcher extends SearchTextField<CelestialObject> {
 
-    private final WeakHashMap<String, CelestialObject> resultCache;
-    private final AbstractMathSet<String> data;
-    private final int cacheCapacity;
-    private final IndexedSet<Tree<Character>, Character> treesOfCharacters;
-    private final Set<Character> availableChars;
-    private final IndexedSet<CelestialObject, String> stringToCelest;
+    private final WeakHashMap<String, CelestialObject>      resultCache;
+    private final AbstractMathSet<String>                   data;
+    private final int                                       cacheCapacity;
+    private final IndexedSet<Tree<Character>, Character>    treesOfCharacters;
+    private final Set<Character>                            availableChars;
+    private final IndexedSet<CelestialObject, String>       stringToCelest;
+    private final ObjectProperty<String>                    lastSelectedName;
 
-    private final ObjectProperty<String> lastSelectedName;
-
-    public Searcher(int cacheCapacity, ObservedSky sky, ObserverLocationBean obsLoc, DateTimeBean dtBean) {
+    public Searcher(int cacheCapacity, ObservedSky sky) {
         super(cacheCapacity);
 
-        this.lastSelectedName = new SimpleObjectProperty<>();
-
-        this.data = sky.celestialObjMap().keySet().stream()
-                .map(CelestialObject::name)
-                .collect(MathSet.toMathSet());
-
-        this.resultCache = new WeakHashMap<>(cacheCapacity);
-
-        this.cacheCapacity = cacheCapacity;
-
-        this.availableChars = new HashSet<>();
+        this.lastSelectedName   = new SimpleObjectProperty<>();
+        this.data               = sky.celestialObjMap().keySet().stream().map(CelestialObject::name).collect(MathSet.toMathSet());
+        this.resultCache        = new WeakHashMap<>(cacheCapacity);
+        this.cacheCapacity      = cacheCapacity;
+        this.availableChars     = new HashSet<>();
 
         Map<Character, Tree<Character>> preDat = new HashMap<>();
+        //Along all the alphabet
         for (char i = 'A'; i <= 'Z'; ++i) {
-            final char finalI = i;
+            final char finalI = i; //needed for lambdas
+            //Whether the first alpha numeric character is the selected one
             final AbstractMathSet<String> res = data.imageIf(str -> str.indexOf(finalI) == findFirstalpha(str),
                     string -> string.substring(findFirstalpha(string)));
             if (!res.isEmpty()) {
@@ -71,10 +66,11 @@ public final class Searcher extends SearchTextField<CelestialObject> {
     }
 
     private static int findFirstalpha(String str) {
-        for (int i = 0; i < str.length(); ++i) {
+
+        for (int i = 0; i < str.length(); ++i)
             if (Character.isAlphabetic(str.charAt(i)))
                 return i;
-        }
+
         return -1;
     }
 
@@ -147,9 +143,6 @@ public final class Searcher extends SearchTextField<CelestialObject> {
         clear();
     }
 
-    public String getLastSelectedName() {
-        return lastSelectedName.get();
-    }
 
     public ObjectProperty<String> lastSelectedNameProperty() {
         return lastSelectedName;

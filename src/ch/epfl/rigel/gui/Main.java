@@ -1,12 +1,7 @@
 package ch.epfl.rigel.gui;
 
 import ch.epfl.rigel.Preconditions;
-import ch.epfl.rigel.astronomy.AsterismLoader;
-import ch.epfl.rigel.astronomy.HygDatabaseLoader;
-import ch.epfl.rigel.astronomy.Moon;
-import ch.epfl.rigel.astronomy.Star;
-import ch.epfl.rigel.astronomy.StarCatalogue;
-import ch.epfl.rigel.astronomy.Sun;
+import ch.epfl.rigel.astronomy.*;
 import ch.epfl.rigel.coordinates.GeographicCoordinates;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.math.Angle;
@@ -24,18 +19,7 @@ import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ColorPicker;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Control;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.Label;
-import javafx.scene.control.Separator;
-import javafx.scene.control.Slider;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TextFormatter;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -45,6 +29,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
+import javafx.stage.PopupWindow;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
@@ -320,6 +305,30 @@ public final class Main extends Application {
             labelList.forEach(node -> node.setTextFill(CONTROLBAR_TEXT_COLOR));
 
             Locale.setDefault(DEFAULT_RIGEL_LOCALE);
+
+            manager.canvas().setOnMouseClicked(e -> {
+                if (e.getClickCount() == 2 && e.isPrimaryButtonDown())
+                {
+                    var underMouseObject = manager.objectUnderMouseProperty();
+                    if (underMouseObject.isValid() && underMouseObject.get().isPresent() && underMouseObject.get().get() instanceof Star) {
+                        var selectedAsterism = catalogue.constellationOfStar((Star) underMouseObject.get().get());
+                        if (selectedAsterism.isPresent())
+                        {
+                            Optional<Asterism> wanted = catalogue
+                                    .asterisms()
+                                    .stream()
+                                    .filter(a -> ((Collection<Star>)a.stars()).equals(selectedAsterism.get()))
+                                    .findFirst();
+
+                            wanted.ifPresent(w ->
+                            {
+
+                            });
+
+                        }
+                    }
+                }
+            });
 
             Scene mainScene = new Scene(mainBorder);
             primaryStage.setFullScreenExitHint(HELPTXT_FULLSCREEN);

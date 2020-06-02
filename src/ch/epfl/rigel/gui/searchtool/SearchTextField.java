@@ -111,8 +111,7 @@ public abstract class SearchTextField<T> extends TextField {
         //instead of "filter" to keep all "case sensitive"
 
         textFilter.setFill(Color.ORANGE);
-        TextFlow res = new TextFlow(
-                textFilter, new Text(text.substring(filterIndex + filter.length())));
+        TextFlow res = new TextFlow(textFilter, new Text(text.substring(filterIndex + filter.length())));
         res.setPrefHeight(5);
         return res;
     }

@@ -34,26 +34,26 @@ public final class SkyCanvasPainter {
 
     private static final HorizontalCoordinates EQUATOR = HorizontalCoordinates.ofDeg(0, 0);
 
-    private static final int ASTERISMS_LINE_WIDTH = 1;
-    private static final int HORIZON_LINE_WIDTH = 2;
-    private static final double GRID_LINE_WIDTH = 0.5;
-    private static final double CELEST_SIZE_COEFF = applyToAngle(ofDeg(0.5)) / 140;
-    private static final double OCTANTS_ALT_OFFSET = -0.5;
-    private static final double ORBIT_CIRCLE_SIZE = 3e-3;
-    private static final int AZIMUTH_DEGREES = 180;
-    private static final int ALTITUDE_DEGREES = 360;
+    private static final int ASTERISMS_LINE_WIDTH   = 1;
+    private static final int HORIZON_LINE_WIDTH     = 2;
+    private static final double GRID_LINE_WIDTH     = 0.5;
+    private static final double CELEST_SIZE_COEFF   = applyToAngle(ofDeg(0.5)) / 140;
+    private static final double OCTANTS_ALT_OFFSET  = -0.5;
+    private static final double ORBIT_CIRCLE_SIZE   = 3e-3;
+    private static final int AZIMUTH_DEGREES        = 180;
+    private static final int ALTITUDE_DEGREES       = 360;
 
-    private static final ClosedInterval CLIP_INTERVAL = ClosedInterval.of(-2, 5);
-    private static final RightOpenInterval INTERVAL_SYM180 = RightOpenInterval.symmetric(180);
+    private static final ClosedInterval CLIP_INTERVAL       = ClosedInterval.of(-2, 5);
+    private static final RightOpenInterval INTERVAL_SYM180  = RightOpenInterval.symmetric(180);
 
     private static final Color SUN_COLOR_1_HALO = Color.YELLOW.deriveColor(1, 1, 1,
             0.25);
-    private static final Color SUN_COLOR_2_YELLOW = Color.YELLOW;
-    private static final Color SUN_COLOR_3_WHITE = Color.WHITE;
+    private static final Color SUN_COLOR_2_YELLOW   = Color.YELLOW;
+    private static final Color SUN_COLOR_3_WHITE    = Color.WHITE;
 
-    private static final Function<Star, Paint> STAR_COLOR = s -> BlackBodyColor.colorForTemperature(s.colorTemperature());
-    private static final Function<Planet, Paint> PLANET_COLOR = planet -> Color.LIGHTGRAY;
-    private static final Function<Moon, Paint> MOON_COLOR = moon -> Color.WHITE;
+    private static final Function<Star, Paint> STAR_COLOR       = s -> BlackBodyColor.colorForTemperature(s.colorTemperature());
+    private static final Function<Planet, Paint> PLANET_COLOR   = planet -> Color.LIGHTGRAY;
+    private static final Function<Moon, Paint> MOON_COLOR       = moon -> Color.WHITE;
 
     private final Canvas canvas;
     private final GraphicsContext graphicsContext;
@@ -144,14 +144,16 @@ public final class SkyCanvasPainter {
                 "SkyCanvasPainter.drawGrid: given grid spacing does not divide 360 and 90.");
 
         HorizontalCoordinates currHorizCoords;
-        for (int i = 0; i < AZIMUTH_DEGREES / spacingDeg; ++i) {
+        //Allowing better optimization
+        final int maxLength =  AZIMUTH_DEGREES / spacingDeg;
+        for (int i = 0; i < maxLength; ++i) {
             currHorizCoords = HorizontalCoordinates.ofDeg(0, INTERVAL_SYM180.reduce(i * spacingDeg));
             drawStrokeCircle(transform.apply(projection.circleCenterForParallel(currHorizCoords)),
                     transform.applyDistance(2 * projection.circleRadiusForParallel(currHorizCoords)),
                     gridColor, GRID_LINE_WIDTH);
         }
-
-        for (int i = 0; i < ALTITUDE_DEGREES / spacingDeg; ++i) {
+        final int maxLength2 = ALTITUDE_DEGREES / spacingDeg;
+        for (int i = 0; i < maxLength2; ++i) {
             currHorizCoords = HorizontalCoordinates.ofDeg(i * spacingDeg, 0);
             drawStrokeCircle(transform.apply(projection.circleCenterForMeridian(currHorizCoords)),
                     transform.applyDistance(2 * projection.circleRadiusForMeridian(currHorizCoords)),
@@ -190,11 +192,31 @@ public final class SkyCanvasPainter {
         graphicsContext.setLineWidth(ASTERISMS_LINE_WIDTH);
         sky.asterisms().forEach(
                 asterism -> {
-                    final CartesianCoordinates cartesStar0 = transform.apply(getCartesFromIndex(sky, asterism, 0));
-                    asterismLineRecurr(cartesStar0, transform.apply(getCartesFromIndex(sky, asterism, 1)),
-                            0, asterism, sky, transform, isInCanvas(cartesStar0));
+                    final CartesianCoordinates mapOfStar0 = transform.apply(getCartesFromIndex(sky, asterism, 0));
+
+                    asterismLineRecurr(mapOfStar0,
+                            transform.apply(getCartesFromIndex(sky, asterism, 1)),
+                            0,
+                            asterism,
+                            sky,
+                            transform,
+                            isInCanvas(mapOfStar0));
                 }
         );
+    }
+
+    public void redrawAsterism(ObservedSky sky, PlanarTransformation transform, Asterism asterism, Color astColor) {
+
+        graphicsContext.setStroke(astColor);
+        graphicsContext.setLineWidth(ASTERISMS_LINE_WIDTH);
+        final CartesianCoordinates mapOfStar0 = transform.apply(getCartesFromIndex(sky, asterism, 0));
+        asterismLineRecurr(mapOfStar0,
+                transform.apply(getCartesFromIndex(sky, asterism, 1)),
+                0,
+                asterism,
+                sky,
+                transform,
+                isInCanvas(mapOfStar0));
     }
 
     /**
@@ -263,7 +285,8 @@ public final class SkyCanvasPainter {
         graphicsContext.setFill(horColor);
         graphicsContext.setTextAlign(TextAlignment.CENTER);
         graphicsContext.setTextBaseline(VPos.TOP);
-        for (int i = 0; i < 8; ++i) {
+        for (int i = 0; i < 8; ++i)
+        {
             HorizontalCoordinates octantHorizCoords = HorizontalCoordinates.ofDeg(45 * i, OCTANTS_ALT_OFFSET);
             CartesianCoordinates octantTransCoords = transform.apply(projection.apply(octantHorizCoords));
             graphicsContext.fillText(octantHorizCoords.azOctantName("N", "E", "S", "O"),
@@ -336,7 +359,7 @@ public final class SkyCanvasPainter {
      */
     private void drawCircle(Paint color, CartesianCoordinates cartesCoords, double size) {
         graphicsContext.setFill(color);
-        final double halfSize = size / 2;
+         double halfSize = size / 2;
         graphicsContext.fillOval(cartesCoords.x() - halfSize, cartesCoords.y() - halfSize, size, size);
         //Used in drawSun and drawCelestial
     }
@@ -376,6 +399,7 @@ public final class SkyCanvasPainter {
         if (c1InCanvas || isInCanvas(c2)) {
             graphicsContext.strokeLine(c1.x(), c1.y(), c2.x(), c2.y());
         }
+
         if (currentStartStar <= asterism.stars().size() - 2) {
             asterismLineRecurr(c2, transform.apply(getCartesFromIndex(sky, asterism, currentStartStar + 1)),
                     currentStartStar + 1, asterism, sky, transform, c2InCanvas);
