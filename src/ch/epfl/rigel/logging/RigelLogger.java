@@ -18,9 +18,14 @@ public final class RigelLogger extends LogManager{
         DEBUG, RELEASE
     }
 
+    /**
+     * Constructs a logger from an input stream
+     *
+     * @param c (InputStream) said input stream
+     */
     public void fromConfiguration(InputStream c)
     {
-        final Properties prop = new Properties();
+        Properties prop = new Properties();
 
         try {
             prop.load(c);

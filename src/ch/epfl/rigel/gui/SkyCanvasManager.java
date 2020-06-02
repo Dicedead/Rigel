@@ -104,14 +104,14 @@ public final class SkyCanvasManager {
     //objects, it thus made sense for us not to use ObservableSet
     private final ObjectBinding<Set<Class<?>>> drawableClasses;
 
-    private static final List<Color> defaultColorsList = List.of(Color.BLUE, Color.CADETBLUE, Color.FIREBRICK
+    private static final List<Color> COLORS_LIST            = List.of(Color.BLUE, Color.CADETBLUE, Color.FIREBRICK
             .deriveColor(1,1,1,0.5), Color.RED);
-    private final ObjectProperty<Color> orbitColor          = new SimpleObjectProperty<>(defaultColorsList.get(1));
-    private final ObjectProperty<Color> horizonColor        = new SimpleObjectProperty<>(defaultColorsList.get(3));
-    private final ObjectProperty<Color> gridColor           = new SimpleObjectProperty<>(defaultColorsList.get(2));
-    private final ObjectProperty<Color> asterismColor       = new SimpleObjectProperty<>(defaultColorsList.get(0));
+    private final ObjectProperty<Color> orbitColor          = new SimpleObjectProperty<>(COLORS_LIST.get(1));
+    private final ObjectProperty<Color> horizonColor        = new SimpleObjectProperty<>(COLORS_LIST.get(3));
+    private final ObjectProperty<Color> gridColor           = new SimpleObjectProperty<>(COLORS_LIST.get(2));
+    private final ObjectProperty<Color> asterismColor       = new SimpleObjectProperty<>(COLORS_LIST.get(0));
     private final List<ObjectProperty<Color>> colorsList    = List.of(asterismColor, orbitColor, gridColor, horizonColor);
-    private final List<String> correspColorStringList       = List.of("Astérismes ", "Orbites ", "Grille ", "Horizon ");
+    private static final List<String> DRAWABLES_LABELS      = List.of("Astérismes ", "Orbites ", "Grille ", "Horizon ");
     private static final int RESOLUTION_DEFAULT             = 5;
     private final IntegerProperty drawOrbitUntil            = new SimpleIntegerProperty(ORBIT_SIMULATION_DAYS_DEFAULT);
     private final IntegerProperty orbitDrawingStep          = new SimpleIntegerProperty(5);
@@ -119,7 +119,7 @@ public final class SkyCanvasManager {
     private final ObjectProperty<CelestialObject> wantNewInformationPanel = new SimpleObjectProperty<>();
 
     private final ObjectProperty<Orbit<? extends CelestialObject>> orbitProperty = new SimpleObjectProperty<>();
-    private static final List<String> suggestedGridSpacings = List.of("5°","10°", "15°", "30°", "45°", "90°");
+    private static final List<String> SUGGESTED_GRID_SPACINGS = List.of("5°","10°", "15°", "30°", "45°", "90°");
     private final IntegerProperty horizCoordsGridSpacingDeg = new SimpleIntegerProperty(15);
 
     /**
@@ -372,6 +372,9 @@ public final class SkyCanvasManager {
         return mouseDragSensitivity;
     }
 
+    /**
+     * @return (double) value of observable: mouse drag moving sensitivity
+     */
     public double getMouseDragFactor() {
         return MOUSE_DRAG_FACTOR;
     }
@@ -421,6 +424,9 @@ public final class SkyCanvasManager {
         return wantNewInformationPanel;
     }
 
+    /**
+     * Removes the right information panel, if it was present
+     */
     public void resetInformationPanel() { wantNewInformationPanel.set(null); }
 
     /**
@@ -439,42 +445,67 @@ public final class SkyCanvasManager {
         this.horizCoordsGridSpacingDeg.set(horizCoordsGridSpacingDeg);
     }
 
-    //TODO javadoc
-    public List<String> suggestedGridSpacings() {
-        return suggestedGridSpacings;
+    /**
+     * Recommended grid spacings. If you do not use this method, bear in mind that the grid spacing has to divide both
+     * 90 and 360 (as it is given in degrees).
+     *
+     * @return (List<String>) list of suggested grid spacings
+     */
+    public static List<String> suggestedGridSpacings() {
+        return SUGGESTED_GRID_SPACINGS;
     }
 
-    //TODO javadoc
+    /**
+     * List of observables: colors of drawable objects, has the same order as the labels in {@code colorLabelsList()}
+     *
+     * @return (List<ObjectProperty<Color>>) list of observable colors
+     */
     public List<ObjectProperty<Color>> colorPropertiesList() {
         return colorsList;
     }
 
-    //TODO javadoc
-    public List<String> colorLabelsList() {
-        return correspColorStringList;
+    /**
+     * List of drawables objects' names, same order as in {@code colorPropertiesList()}
+     *
+     * @return (List<String>) list of names of drawable objects
+     */
+    public static List<String> colorLabelsList() {
+        return DRAWABLES_LABELS;
     }
 
-    //TODO javadoc
+    /**
+     * List of default drawable objects' colors, same order as in {@code colorLabelsList()}
+     *
+     * @return (List<Color>) list of default colors for drawable objects
+     */
     public static List<Color> getDefaultColorsList() {
-        return defaultColorsList;
+        return COLORS_LIST;
     }
 
-    //TODO javadoc
+    /**
+     * @return (int) value of observable: orbit drawing length
+     */
     public int getDrawOrbitUntil() {
         return drawOrbitUntil.get();
     }
 
-    //TODO javadoc
+    /**
+     * @return (IntegerProperty) observable: orbit drawing length
+     */
     public IntegerProperty drawOrbitUntilProperty() {
         return drawOrbitUntil;
     }
 
-    //TODO javadoc
+    /**
+     * @return (int) value of observable: orbit drawing step
+     */
     public int getOrbitDrawingStep() {
         return orbitDrawingStep.get();
     }
 
-    //TODO javadoc (in sets and graphs too)
+    /**
+     * @return (IntegerProperty) observable: orbit drawing step
+     */
     public IntegerProperty orbitDrawingStepProperty() {
         return orbitDrawingStep;
     }
@@ -488,7 +519,8 @@ public final class SkyCanvasManager {
      * @param altDelta (double) change in altitude
      */
     private void applyRotationThenModifyViewBean(double azDelta, double altDelta) {
-        modifyViewBean(inverseRotation.get().apply(azDelta, altDelta));
+        modifyViewBean(rotation.get() == 0 ? CartesianCoordinates.of(azDelta, altDelta) :
+                inverseRotation.get().apply(azDelta, altDelta));
     }
 
     /**
