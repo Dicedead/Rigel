@@ -43,7 +43,7 @@ public final class  ThreadManager<T> {
             (t -> Arrays.stream(t.getAnnotation(Requires.class).requirements()).anyMatch(s -> s.equals(m.getName())));
 
     /**
-     * Main constructor
+     * Main ThreadManager constructor
      */
     public ThreadManager(Class<T> t, T ob)
     {
