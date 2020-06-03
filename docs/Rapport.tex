@@ -12,7 +12,7 @@
 %\usepackage {xcolor}
 \definecolor {processblue}{cmyk}{0.96,0,0,0}
 
-\author{Salim najib, Alexandre Sallinen}
+\author{Salim Najib, Alexandre Sallinen}
 \title{Rigel}
 \begin{document}
 \newcommand{\code}[1]{\texttt{#1}}
@@ -26,7 +26,7 @@ L'implémentation de cette barre de recherche passe par une classe abstraite qui
 
 Afin d'améliorer la performance du programme, le \code{ThreadManager} génère un arbre de taches à éffectuer dans le main et asigne les taches dans le bon ordre à une réserve de threads.
 
-Le principe de fonctionnement est le suivant, des annotations permettent, au démarage de l'application de séparer le main en taches dépendantes les unes des autres. Pour notifier qu'une tache est dépendante d'une autre, l'annotation \code{Require} créée pour l'occasion indique quels \textit{stages} auront du êtres complétés avant que ne soit éxécuté celui ci. Les tachent sont alors organisées dans un graphe, plus précisément une foret. Dans chaque arbre, les feuilles constituent les premières taches à effectuer. Les taches plus proches de la racine nécéssitent les précédentes avant d'être exécutées, c'est ce que défini l'annotation require. Le graphe suivant permet de mieux comprendre la situation :
+Le principe de fonctionnement est le suivant : des annotations permettent au démarage de l'application de séparer le main en taches dépendantes les unes des autres. Pour notifier qu'une tache est dépendante d'une autre, l'annotation \code{Require} créée pour l'occasion, indique quels \textit{stages} auront du êtres complétés avant que ne soit éxécuté celui ci. Les tachent sont alors organisées dans un graphe, plus précisément une foret. Dans chaque arbre, les feuilles constituent les premières taches à effectuer. Les taches plus proches de la racine nécéssitent les précédentes avant d'être exécutées, c'est ce que défini l'annotation require. Le graphe suivant permet de mieux comprendre la situation :
 \pagebreak
 \begin{figure}
 \centering
