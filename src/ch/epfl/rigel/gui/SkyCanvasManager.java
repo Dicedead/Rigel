@@ -30,7 +30,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -286,7 +285,6 @@ public final class SkyCanvasManager {
                 applyRotationThenModifyViewBean(
                         mouseDragSensitivity.get() * (mouse.getX() - mouseXstartOfDrag.get()),
                         mouseDragSensitivity.get() * (mouseYstartOfDrag.get() - mouse.getY()));
-                System.out.println(mouseDragSensitivity.get() * (mouse.getX() - mouseXstartOfDrag.get()));
             }
             if (mouse.getButton() == MouseButton.MIDDLE) {
                 modifyRotation(mouseDragSensitivity.get() * ROTATION_ATTENUATION *
