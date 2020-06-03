@@ -285,6 +285,7 @@ public final class SkyCanvasManager {
                 applyRotationThenModifyViewBean(
                         mouseDragSensitivity.get() * (mouse.getX() - mouseXstartOfDrag.get()),
                         mouseDragSensitivity.get() * (mouseYstartOfDrag.get() - mouse.getY()));
+                System.out.println(mouseDragSensitivity.get() * (mouse.getX() - mouseXstartOfDrag.get()));
             }
             if (mouse.getButton() == MouseButton.MIDDLE) {
                 modifyRotation(mouseDragSensitivity.get() * ROTATION_ATTENUATION *

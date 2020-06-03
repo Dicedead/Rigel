@@ -62,7 +62,7 @@ public final class Polynomial {
     }
 
     /**
-     * Interpretation of the polynomial function at a point using (recursive) horner method
+     * Interpretation of the polynomial function at a point using horner method
      *
      * @param x (double) point to interpret
      * @return (double) polynomial computed at desired point

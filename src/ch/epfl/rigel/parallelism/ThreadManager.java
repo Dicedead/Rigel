@@ -47,9 +47,9 @@ public final class  ThreadManager<T> {
      */
     public ThreadManager(Class<T> t, T ob)
     {
-        threadPool          = Executors.newCachedThreadPool();
-        tasksQueue          = FXCollections.synchronizedObservableSet(FXCollections.observableSet(new ArrayList<>()));
-        taskForest            = constructTaskTree(t);
+        threadPool = Executors.newCachedThreadPool();
+        tasksQueue = FXCollections.synchronizedObservableSet(FXCollections.observableSet(new HashSet<>()));
+        taskForest = constructTaskTree(t);
         tasksQueue.addListener((SetChangeListener<List<Task<?>>>)c -> {
             if (c.wasAdded())
                 c.getElementAdded().forEach(threadPool::submit);
@@ -155,7 +155,6 @@ public final class  ThreadManager<T> {
     }
 
     /**
-     *
      * @return the number of available CPU cores counting soft ones like intel's hyperthreading
      */
     public static int getCpuCores() {
