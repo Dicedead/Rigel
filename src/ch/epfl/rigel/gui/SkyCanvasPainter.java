@@ -144,7 +144,6 @@ public final class SkyCanvasPainter {
                 "SkyCanvasPainter.drawGrid: given grid spacing does not divide 360 and 90.");
 
         HorizontalCoordinates currHorizCoords;
-        //Allowing better optimization
         final int maxLength =  AZIMUTH_DEGREES / spacingDeg;
         for (int i = 0; i < maxLength; ++i) {
             currHorizCoords = HorizontalCoordinates.ofDeg(0, INTERVAL_SYM180.reduce(i * spacingDeg));
@@ -160,7 +159,6 @@ public final class SkyCanvasPainter {
                     gridColor, GRID_LINE_WIDTH);
         }
     }
-
 
     /**
      * Draws predicted orbit of a celestial object with given parameters

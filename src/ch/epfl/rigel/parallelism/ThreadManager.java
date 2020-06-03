@@ -139,6 +139,7 @@ public final class  ThreadManager<T> {
     {
         return Arrays.stream(Class.getMethods()).filter(ThreadManager::isMultithreaded).collect(Collectors.toSet());
     }
+
     private static Set<Method> extractSingleThreaded(final Class<?> Class)
     {
         return Arrays.stream(Class.getMethods()).filter(Predicate.not(ThreadManager::isMultithreaded)).collect(Collectors.toSet());
