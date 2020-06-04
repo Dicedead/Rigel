@@ -30,7 +30,7 @@ import static ch.epfl.rigel.math.sets.implement.MathSet.of;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-public final class  ThreadManager<T> {
+public final class ThreadManager<T> {
 
     private final static int CPU_CORES = Runtime.getRuntime().availableProcessors();
     private final ExecutorService threadPool;
@@ -45,8 +45,8 @@ public final class  ThreadManager<T> {
     /**
      * Main ThreadManager constructor
      */
-    public ThreadManager(Class<T> t, T ob)
-    {
+    public ThreadManager(Class<T> t, T ob) {
+
         threadPool = Executors.newCachedThreadPool();
         tasksQueue = FXCollections.synchronizedObservableSet(FXCollections.observableSet(new HashSet<>()));
         taskForest = constructTaskTree(t);
@@ -119,16 +119,22 @@ public final class  ThreadManager<T> {
         Set<Method> methods = extractMultiThreaded(c);
         Set<Method> singles = extractSingleThreaded(c);
         //Find requirementless methods
-        final var requirementLess = methods.stream().filter(m -> methods.stream().noneMatch(HAS_METHOD_AS_REQUIREMENT.apply(m)))
+        var requirementLess = methods.stream().filter(m -> methods.stream().noneMatch(HAS_METHOD_AS_REQUIREMENT.apply(m)))
                 .collect(Collectors.toSet());
 
-        final AbstractMathSet<Map<Method, GraphNode<Function<T , Task<?>>>>> leafs =
+        AbstractMathSet<Map<Method, GraphNode<Function<T , Task<?>>>>> leafs =
                         requirementLess
-                            .stream().map(m -> recurConstruct(Map.of(m, new GraphNode<Function<T, Task<?>>>(t -> methodToTask(m, t))), c))
+                            .stream()
+                            .map(m -> recurConstruct(Map.of(m, new GraphNode<Function<T, Task<?>>>(t -> methodToTask(m, t))), c))
                             .collect(MathSet.toMathSet());
 
-        var singleThreaded = singles.stream().map(m -> new Tree<>(of(new GraphNode<Function<T , Task<?>>>(t -> methodToTask(m, t))))).collect(MathSet.toMathSet());
-        return leafs.image(m -> new Tree<>(m.values().stream().map(GraphNode::hierarchy).collect(Collectors.toSet()))).union(singleThreaded);
+        var singleThreaded = singles.stream()
+                .map(m -> new Tree<>(of(new GraphNode<Function<T , Task<?>>>(t -> methodToTask(m, t)))))
+                .collect(MathSet.toMathSet());
+        return leafs.image(m -> new Tree<>(m.values()
+                .stream()
+                .map(GraphNode::hierarchy)
+                .collect(Collectors.toSet()))).union(singleThreaded);
     }
 
     private static boolean isMultithreaded (final Method object) {

@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
@@ -278,9 +279,11 @@ public final class Main extends Application {
             viewingParametersBean.setCenter(rigelHorizCoords);
             viewingParametersBean.setFieldOfViewDeg(INITIAL_FOV);
 
+            ExecutorService mapObjThreadPool = Executors.newFixedThreadPool(THREADS_MAPOBJTOPOS);
+
             TimeAnimator animator = new TimeAnimator(dateTimeBean);
             SkyCanvasManager manager = new SkyCanvasManager(animator, catalogue, dateTimeBean,
-                    observerLocationBean, viewingParametersBean, Executors.newFixedThreadPool(THREADS_MAPOBJTOPOS));
+                    observerLocationBean, viewingParametersBean, mapObjThreadPool);
 
             //Shared resources and controls:
             Button toOptionsButton = new Button(SETTINGS_BUTTON_TXT);
@@ -318,6 +321,8 @@ public final class Main extends Application {
             primaryStage.setTitle("Rigel");
             primaryStage.show();
             manager.canvas().requestFocus();
+
+            primaryStage.setOnCloseRequest(e -> mapObjThreadPool.shutdownNow());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -512,8 +517,8 @@ public final class Main extends Application {
 
     private VBox rightBox(Font fontAwesomeDefault, SkyCanvasManager manager, BooleanProperty rightPanelIsON,
                           StarCatalogue catalogue, ObserverLocationBean observerLocationBean, DateTimeBean dateTimeBean,
-                          CheckBox orbitDrawingCheckbox)
-    {
+                          CheckBox orbitDrawingCheckbox) {
+
         Button exitButton = new Button(EXIT_BUTTON_LABEL);
         exitButton.setFont(fontAwesomeDefault);
         addTooltip(exitButton, HELPTXT_EXITINFO);

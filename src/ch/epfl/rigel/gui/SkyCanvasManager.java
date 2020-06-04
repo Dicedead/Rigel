@@ -137,13 +137,15 @@ public final class SkyCanvasManager {
     /**
      * SkyCanvasManager constructor
      *
+     * @param animator   (TimeAnimator) time accelerating class
      * @param catalogue  (StarCatalogue) set of stars and asterisms
      * @param dtBean     (DateTimeBean) bean representing a mutable ZonedDateTime object
      * @param obsLocBean (ObserverLocationBean) bean representing a mutable GeographicCoordinates object
      * @param viewBean   (ViewingParametersBean) bean comprised of an fov parameter and the center of projection property
+     * @param execServ   (ExecutorService) executor service for ObservedSky.mapObjectToPosition
      */
     public SkyCanvasManager(TimeAnimator animator, StarCatalogue catalogue, DateTimeBean dtBean,
-                            ObserverLocationBean obsLocBean, ViewingParametersBean viewBean, ExecutorService manager) {
+                            ObserverLocationBean obsLocBean, ViewingParametersBean viewBean, ExecutorService execServ) {
 
         this.catalogue  = catalogue;
         this.dtBean     = dtBean;
@@ -161,7 +163,7 @@ public final class SkyCanvasManager {
 
         observedSky = Bindings.createObjectBinding(
 
-                () -> new ObservedSky(dtBean.getZonedDateTime(), obsLocBean.getCoords(), projection.get(), catalogue, manager),
+                () -> new ObservedSky(dtBean.getZonedDateTime(), obsLocBean.getCoords(), projection.get(), catalogue, execServ),
                 dtBean.zdtProperty(), obsLocBean.coordsProperty(), projection);
 
         orbitProperty.set(orbitFactory(PlanetModel.MERCURY));

@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
  * @author Alexandre Sallinen (303162)
  * @author Salim Najib (310003)
  */
-public final class RigelThreadFactory implements ThreadFactory
-{
+public final class RigelThreadFactory implements ThreadFactory {
+
     private final String name;
     private final int priority;
     private final ThreadGroup group;
@@ -23,11 +23,6 @@ public final class RigelThreadFactory implements ThreadFactory
 
     /**
      * Main RigelThreadFactory constructor
-     *
-     * @param name
-     * @param priority
-     * @param group
-     * @param stats
      */
     public RigelThreadFactory(String name, int priority, ThreadGroup group, List<String> stats)
     {
@@ -41,7 +36,7 @@ public final class RigelThreadFactory implements ThreadFactory
     @Override
     public Thread newThread(Runnable runnable) {
 
-        final Thread t = new Thread(group, name + ++count);
+        Thread t = new Thread(group, name + ++count);
         t.setPriority(priority);
         stats.add(String.format("Le thread %s a été créé à %s \n", t.getName() + count, new Date()));
 
@@ -52,6 +47,5 @@ public final class RigelThreadFactory implements ThreadFactory
     {
         return String.join("\n", stats);
     }
-
 
 }

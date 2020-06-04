@@ -62,9 +62,10 @@ public final class ObservedSky {
      * @param geoCoords  (GeographicCoordinates) point of observation
      * @param projection (StereographicProjection) center of projection
      * @param catalogue  (StarCatalogue) stars and their asterisms
+     * @param execServ   (ExecutorService) executor service for mapObjectToPosition
      */
     public ObservedSky(ZonedDateTime date, GeographicCoordinates geoCoords,
-                       StereographicProjection projection, StarCatalogue catalogue, ExecutorService manager) {
+                       StereographicProjection projection, StarCatalogue catalogue, ExecutorService execServ) {
         this.stereoProj = projection;
         this.eqToHor = new EquatorialToHorizontalConversion(date, geoCoords);
         this.eclToEqu = new EclipticToEquatorialConversion(date);
@@ -72,7 +73,7 @@ public final class ObservedSky {
         this.catalogue = catalogue;
 
         try {
-            manager.submit(() -> {
+            execServ.submit(() -> {
                 this.sunMap = mapObjectToPosition(List.of(SunModel.SUN), this::applyModel);
                 this.moonMap = mapObjectToPosition(List.of(MoonModel.MOON), this::applyModel);
                 this.planetMap = mapObjectToPosition(PlanetModel.EXTRATERRESTRIAL, this::applyModel);
