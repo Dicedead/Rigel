@@ -53,8 +53,8 @@ public final class DrawSky extends Application {
             //££final Future<ObservedSky> skyFuture = ThreadManager.getAstronomy().submit(() -> new ObservedSky(
             //££        ZonedDateTime.parse("2020-02-17T20:15:00+01:00"), GeographicCoordinates.ofDeg(6.57, 46.52), proj, catalogue.get()));
             //££final ObservedSky sky = skyFuture.get();
-            final ObservedSky sky = new ObservedSky(ZonedDateTime.parse("2020-02-17T20:15:00+01:00"),
-                    GeographicCoordinates.ofDeg(6.57, 46.52), proj, catalogue);
+            final ObservedSky sky = null ;/*new ObservedSky(ZonedDateTime.parse("2020-02-17T20:15:00+01:00"),
+                    GeographicCoordinates.ofDeg(6.57, 46.52), proj, catalogue);*/
 
             final Canvas canvasFuture = new Canvas(800, 600);
 

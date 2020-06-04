@@ -9,6 +9,7 @@ import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.math.Angle;
 import ch.epfl.rigel.parallelism.ThreadManager;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
@@ -55,6 +56,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Executors;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
@@ -253,7 +255,7 @@ public final class Main extends Application {
             Font fontAwesomeSmall = Font.loadFont(fsSmall, CUSTOM_FONT_SMALL_SIZE);
             //Using the same InputStream was causing an NPE even StackOverflow had no answer for.
 
-            BlackBodyColor.init();
+            Platform.runLater(BlackBodyColor::init);
 
             StarCatalogue catalogue = new StarCatalogue.Builder()
                     .loadFrom(hs, HygDatabaseLoader.INSTANCE)
@@ -278,7 +280,7 @@ public final class Main extends Application {
 
             TimeAnimator animator = new TimeAnimator(dateTimeBean);
             SkyCanvasManager manager = new SkyCanvasManager(catalogue, dateTimeBean,
-                    observerLocationBean, viewingParametersBean);
+                    observerLocationBean, viewingParametersBean, Executors.newFixedThreadPool(12));
 
             //Shared resources and controls:
             Button toOptionsButton = new Button(SETTINGS_BUTTON_TXT);
@@ -308,31 +310,6 @@ public final class Main extends Application {
             });
 
             Locale.setDefault(DEFAULT_RIGEL_LOCALE);
-
-            manager.canvas().setOnMouseClicked(e -> {
-                if (e.getClickCount() == 2 && e.isPrimaryButtonDown())
-                {
-                    var underMouseObject = manager.objectUnderMouseProperty();
-                    if (underMouseObject.isValid() && underMouseObject.get().isPresent() && underMouseObject.get().get() instanceof Star) {
-                        var selectedAsterism = catalogue.constellationOfStar((Star) underMouseObject.get().get());
-                        if (selectedAsterism.isPresent())
-                        {
-                            Optional<Asterism> wanted = catalogue
-                                    .asterisms()
-                                    .stream()
-                                    .filter(a -> ((Collection<Star>)a.stars()).equals(selectedAsterism.get()))
-                                    .findFirst();
-
-                            wanted.ifPresent(w ->
-                            {
-
-                            });
-
-                        }
-                    }
-                }
-            });
-
             Scene mainScene = new Scene(mainBorder);
             primaryStage.setFullScreenExitHint(HELPTXT_FULLSCREEN);
             primaryStage.setScene(mainScene);

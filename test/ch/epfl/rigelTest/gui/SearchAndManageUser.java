@@ -56,11 +56,11 @@ public final class SearchAndManageUser extends Application {
                     HorizontalCoordinates.ofDeg(180.000000000001, 15));
             viewingParametersBean.setFieldOfViewDeg(70);
 
-            SkyCanvasManager canvasManager = new SkyCanvasManager(
+            SkyCanvasManager canvasManager = null; /*new SkyCanvasManager(
                     catalogue,
                     dateTimeBean,
                     observerLocationBean,
-                    viewingParametersBean);
+                    viewingParametersBean);*/
 
             canvasManager.objectUnderMouseProperty().addListener(
                     (p, o, n) -> n.ifPresent(System.out::println));

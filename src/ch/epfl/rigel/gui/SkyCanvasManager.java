@@ -30,6 +30,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -132,7 +133,7 @@ public final class SkyCanvasManager {
      * @param viewBean   (ViewingParametersBean) bean comprised of an fov parameter and the center of projection property
      */
     public SkyCanvasManager(StarCatalogue catalogue, DateTimeBean dtBean,
-                            ObserverLocationBean obsLocBean, ViewingParametersBean viewBean) {
+                            ObserverLocationBean obsLocBean, ViewingParametersBean viewBean, ExecutorService manager) {
 
         this.catalogue  = catalogue;
         this.dtBean     = dtBean;
@@ -149,7 +150,8 @@ public final class SkyCanvasManager {
                 viewBean.centerProperty());
 
         observedSky = Bindings.createObjectBinding(
-                () -> new ObservedSky(dtBean.getZonedDateTime(), obsLocBean.getCoords(), projection.get(), catalogue),
+
+                () -> new ObservedSky(dtBean.getZonedDateTime(), obsLocBean.getCoords(), projection.get(), catalogue, manager),
                 dtBean.zdtProperty(), obsLocBean.coordsProperty(), projection);
 
         orbitProperty.set(orbitFactory(SunModel.SUN));

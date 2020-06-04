@@ -44,9 +44,9 @@ public class SearcherTest extends Application {
             viewingParametersBean.setCenter(
                     HorizontalCoordinates.ofDeg(180.000000000001, 15));
             viewingParametersBean.setFieldOfViewDeg(70);
-            ObservedSky sky = new ObservedSky(when, observerLocationBean.getCoords(),
+            ObservedSky sky = null; /*= new ObservedSky(when, observerLocationBean.getCoords(),
                     new StereographicProjection(viewingParametersBean.getCenter()),
-                    catalogue);
+                    catalogue);*/
 
             Searcher searcher = new Searcher(5, sky);
 

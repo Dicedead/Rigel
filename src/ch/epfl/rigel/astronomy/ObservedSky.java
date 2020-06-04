@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
@@ -30,10 +32,10 @@ import static ch.epfl.rigel.coordinates.PlanarTransformation.euclideanDistance;
  */
 public final class ObservedSky {
 
-    private final Map<Sun, CartesianCoordinates> sunMap;
-    private final Map<Moon, CartesianCoordinates> moonMap;
-    private final Map<Star, CartesianCoordinates> starMap;
-    private final Map<Planet, CartesianCoordinates> planetMap;
+    private Map<Sun, CartesianCoordinates> sunMap;
+    private Map<Moon, CartesianCoordinates> moonMap;
+    private Map<Star, CartesianCoordinates> starMap;
+    private Map<Planet, CartesianCoordinates> planetMap;
 
     private final Map<CelestialObject, CartesianCoordinates> celestObjToCoordsMap;
 
@@ -66,18 +68,23 @@ public final class ObservedSky {
      * @param catalogue  (StarCatalogue) stars and their asterisms
      */
     public ObservedSky(ZonedDateTime date, GeographicCoordinates geoCoords,
-                       StereographicProjection projection, StarCatalogue catalogue) {
+                       StereographicProjection projection, StarCatalogue catalogue, ExecutorService manager) {
         this.stereoProj = projection;
         this.eqToHor = new EquatorialToHorizontalConversion(date, geoCoords);
         this.eclToEqu = new EclipticToEquatorialConversion(date);
         this.daysUntilJ2010 = Epoch.J2010.daysUntil(date);
         this.catalogue = catalogue;
 
-        this.sunMap = computeSun();
-        this.moonMap = computeMoon();
-        this.planetMap = computePlanets();
-        this.starMap = computeStars(catalogue);
-
+        try {
+            manager.submit(() -> {
+                this.sunMap = computeSun();
+                this.moonMap = computeMoon();
+                this.planetMap = computePlanets();
+                this.starMap = computeStars(catalogue);
+            }).get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
         this.celestObjToCoordsMap = Collections.unmodifiableMap(Stream.of(starMap, planetMap, sunMap, moonMap)
                 .flatMap(l -> l.entrySet().stream())
                 .parallel()
@@ -235,10 +242,10 @@ public final class ObservedSky {
      * @return (Map <S, CartesianCoordinates>) map associating CelestialObjects with their CartesianCoordinates
      */
     public <T, S extends CelestialObject> Map<S, CartesianCoordinates> mapObjectToPosition(List<T> data, Function<T, S> f) {
-        return Collections.unmodifiableMap(data.stream()
+        return Collections.unmodifiableMap(data.parallelStream()
                 .map(f)
                 .collect(Collectors.toMap(Function.identity(),
-                        celestObj -> stereoProj.apply(eqToHor.apply(celestObj.equatorialPos())), (u, v) -> v, HashMap::new)));
+                        celestObj -> eqToHor.andThen(stereoProj).apply(celestObj.equatorialPos()), (u, v) -> v, HashMap::new)));
     }
 
     /**

@@ -75,7 +75,7 @@ public class ObservedSkyTest {
 
             convEcltoEqu = new EclipticToEquatorialConversion(time);
 
-            sky = new ObservedSky(time, geoCoords, stereo, catalogue);
+            //sky = //new ObservedSky(time, geoCoords, stereo, catalogue);
             //System.out.println(System.nanoTime()-time0);
         }
     }
