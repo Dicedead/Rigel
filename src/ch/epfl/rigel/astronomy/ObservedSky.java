@@ -3,20 +3,16 @@ package ch.epfl.rigel.astronomy;
 import ch.epfl.rigel.coordinates.*;
 
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -77,14 +73,15 @@ public final class ObservedSky {
 
         try {
             manager.submit(() -> {
-                this.sunMap = computeSun();
-                this.moonMap = computeMoon();
-                this.planetMap = computePlanets();
-                this.starMap = computeStars(catalogue);
+                this.sunMap = mapObjectToPosition(List.of(SunModel.SUN), this::applyModel);
+                this.moonMap = mapObjectToPosition(List.of(MoonModel.MOON), this::applyModel);
+                this.planetMap = mapObjectToPosition(PlanetModel.EXTRATERRESTRIAL, this::applyModel);
+                this.starMap = mapObjectToPosition(catalogue.stars(), Function.identity());
             }).get();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
+
         this.celestObjToCoordsMap = Collections.unmodifiableMap(Stream.of(starMap, planetMap, sunMap, moonMap)
                 .flatMap(l -> l.entrySet().stream())
                 .parallel()
@@ -193,42 +190,6 @@ public final class ObservedSky {
      */
     public Map<CelestialObject, CartesianCoordinates> celestialObjMap() {
         return celestObjToCoordsMap;
-    }
-
-    /**
-     * Multithreading computation public accessor for sun map computation
-     *
-     * @return (Map<Sun, CartesianCoordinates>)
-     */
-    public Map<Sun, CartesianCoordinates> computeSun() {
-        return mapObjectToPosition(List.of(SunModel.SUN), this::applyModel);
-    }
-
-    /**
-     * Multithreading computation public accessor for moon map computation
-     *
-     * @return (Map<Moon, CartesianCoordinates>)
-     */
-    public Map<Moon, CartesianCoordinates> computeMoon() {
-        return mapObjectToPosition(List.of(MoonModel.MOON), this::applyModel);
-    }
-
-    /**
-     * Multithreading computation public accessor for planets map computation
-     *
-     * @return (Map<Planet, CartesianCoordinates>)
-     */
-    public Map<Planet, CartesianCoordinates> computePlanets() {
-        return mapObjectToPosition(PlanetModel.EXTRATERRESTRIAL, this::applyModel);
-    }
-
-    /**
-     * Multithreading computation public accessor for stars map computation
-     *
-     * @return (Map<Star, CartesianCoordinates>)
-     */
-    public Map<Star, CartesianCoordinates> computeStars(StarCatalogue catalogue) {
-        return mapObjectToPosition(catalogue.stars(), Function.identity());
     }
 
     /**

@@ -82,7 +82,11 @@ public final class SkyCanvasManager {
 
     //BONUS CONTENT
     private static final int SEARCH_CACHE_CAPACITY = 14;
-    private static final int ORBIT_SIMULATION_DAYS_DEFAULT = 1000;
+    private static final List<TimeAccelerator> PAUSE_IF_SEARCH_LIST =
+            List.of(NamedTimeAccelerator.DAY.getAccelerator(),
+            NamedTimeAccelerator.SIDEREAL_DAY.getAccelerator(),
+            NamedTimeAccelerator.TIMES_3000.getAccelerator());
+    private static final int ORBIT_SIMULATION_LENGTH_DEFAULT = 1200;
 
     private final BooleanProperty extendedAltitudeIsOn  = new SimpleBooleanProperty(true);
     private final DoubleProperty mouseXstartOfDrag      = new SimpleDoubleProperty();
@@ -115,7 +119,7 @@ public final class SkyCanvasManager {
     private final List<ObjectProperty<Color>> colorsList    = List.of(asterismColor, orbitColor, gridColor, horizonColor);
     private static final List<String> DRAWABLES_LABELS      = List.of("Astérismes ", "Orbites ", "Grille ", "Horizon ");
     private static final int RESOLUTION_DEFAULT             = 5;
-    private final IntegerProperty drawOrbitUntil            = new SimpleIntegerProperty(ORBIT_SIMULATION_DAYS_DEFAULT);
+    private final IntegerProperty drawOrbitUntil            = new SimpleIntegerProperty(ORBIT_SIMULATION_LENGTH_DEFAULT);
     private final IntegerProperty orbitDrawingStep          = new SimpleIntegerProperty(5);
 
     private final ObjectProperty<CelestialObject> wantNewInformationPanel = new SimpleObjectProperty<>();
@@ -123,6 +127,9 @@ public final class SkyCanvasManager {
     private final ObjectProperty<Orbit<? extends CelestialObject>> orbitProperty = new SimpleObjectProperty<>();
     private static final List<String> SUGGESTED_GRID_SPACINGS = List.of("5°","10°", "15°", "30°", "45°", "90°");
     private final IntegerProperty horizCoordsGridSpacingDeg = new SimpleIntegerProperty(15);
+    private static final List<TimeAccelerator> NON_NULL_ACC_ORBIT_LIST =
+            List.of(NamedTimeAccelerator.SIDEREAL_DAY.getAccelerator(),
+                    NamedTimeAccelerator.DAY.getAccelerator());
 
     /**
      * SkyCanvasManager constructor
@@ -132,7 +139,7 @@ public final class SkyCanvasManager {
      * @param obsLocBean (ObserverLocationBean) bean representing a mutable GeographicCoordinates object
      * @param viewBean   (ViewingParametersBean) bean comprised of an fov parameter and the center of projection property
      */
-    public SkyCanvasManager(StarCatalogue catalogue, DateTimeBean dtBean,
+    public SkyCanvasManager(TimeAnimator animator, StarCatalogue catalogue, DateTimeBean dtBean,
                             ObserverLocationBean obsLocBean, ViewingParametersBean viewBean, ExecutorService manager) {
 
         this.catalogue  = catalogue;
@@ -154,7 +161,12 @@ public final class SkyCanvasManager {
                 () -> new ObservedSky(dtBean.getZonedDateTime(), obsLocBean.getCoords(), projection.get(), catalogue, manager),
                 dtBean.zdtProperty(), obsLocBean.coordsProperty(), projection);
 
-        orbitProperty.set(orbitFactory(SunModel.SUN));
+        orbitProperty.set(orbitFactory(PlanetModel.MERCURY));
+        animator.runningProperty().addListener((p, o, n) -> {
+            if (n && !NON_NULL_ACC_ORBIT_LIST.contains(animator.getAccelerator())) {
+                orbitProperty.set(null);
+            }
+        });
 
         EnumSet<DrawableObjects> allDrawablesExceptGrid = EnumSet.allOf(DrawableObjects.class);
         allDrawablesExceptGrid.remove(DrawableObjects.GRID);
@@ -172,11 +184,12 @@ public final class SkyCanvasManager {
                                 .stream()
                                 .filter(celest -> celest.name().equals(n))
                                 .findFirst().orElseThrow())));
+                if (animator.isRunning() && PAUSE_IF_SEARCH_LIST.contains(animator.getAccelerator())) {
+                    animator.stop();
+                }
                 searcher.setLastSelectedName(null);
             }
         });
-
-
 
         rotationMatrix = Bindings.createObjectBinding(
                 () -> PlanarTransformation.rotation(rotation.get()), rotation);
@@ -231,7 +244,8 @@ public final class SkyCanvasManager {
                 if (objectUnderMouse.get().isPresent()) {
                     wantNewInformationPanel.set(objectUnderMouse.get().get());
 
-                    if (!(celestClass = objectUnderMouse.get().get().getClass()).equals(Star.class)) {
+                    if (!(celestClass = objectUnderMouse.get().get().getClass()).equals(Star.class)
+                    && (!animator.isRunning() || NON_NULL_ACC_ORBIT_LIST.contains(animator.getAccelerator()))) {
                         orbitProperty.set(orbitFactory(getModel(celestClass)));
                     } else {
                         orbitProperty.set(null);
@@ -559,7 +573,7 @@ public final class SkyCanvasManager {
 
     private Orbit<? extends CelestialObject> orbitFactory(CelestialObjectModel<? extends CelestialObject> modelClass) {
          return new Orbit<>(dtBean.getZonedDateTime(),
-                RESOLUTION_DEFAULT, ORBIT_SIMULATION_DAYS_DEFAULT, modelClass,
+                RESOLUTION_DEFAULT, ORBIT_SIMULATION_LENGTH_DEFAULT, modelClass,
                 new EclipticToEquatorialConversion(dtBean.getZonedDateTime()));
     }
 }

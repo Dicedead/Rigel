@@ -2,7 +2,7 @@ package ch.epfl.rigel.gui;
 
 import ch.epfl.rigel.Preconditions;
 import ch.epfl.rigel.astronomy.*;
-import ch.epfl.rigel.coordinates.EclipticToEquatorialConversion;
+import ch.epfl.rigel.coordinates.EquatorialCoordinates;
 import ch.epfl.rigel.coordinates.EquatorialToHorizontalConversion;
 import ch.epfl.rigel.coordinates.GeographicCoordinates;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
@@ -32,7 +32,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
-import javafx.stage.PopupWindow;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
@@ -70,6 +69,7 @@ import java.util.stream.Stream;
  */
 public final class Main extends Application {
 
+    private static final EquatorialCoordinates RIGEL_EQ = EquatorialCoordinates.of(Angle.ofHr(5.2423), Angle.ofDeg(-8.2016));
     private static final GeographicCoordinates INITIAL_GEO_COORDS = GeographicCoordinates.ofDeg(6.57, 46.52);
     private static final NamedTimeAccelerator INITIAL_ACCELERATOR = NamedTimeAccelerator.TIMES_300;
     private static final double INITIAL_FOV = 100;
@@ -77,6 +77,7 @@ public final class Main extends Application {
     private static final int MIN_HEIGHT = 600;
     private static final double MOUSE_DRAG_DEFAULTSENS = 1;
     private static final double MOUSE_SCROLL_DEFAULTSENS = 0.75;
+    private static final int THREADS_MAPOBJTOPOS = 12;
     private static final Locale DEFAULT_RIGEL_LOCALE = Locale.FRENCH;
     //This will guarantee that ColorPickers are in French, as the rest of the application.
 
@@ -253,7 +254,7 @@ public final class Main extends Application {
 
             Font fontAwesomeDefault = Font.loadFont(fs, CUSTOM_FONT_DEFAULT_SIZE);
             Font fontAwesomeSmall = Font.loadFont(fsSmall, CUSTOM_FONT_SMALL_SIZE);
-            //Using the same InputStream was causing an NPE even StackOverflow had no answer for.
+            //Using the same InputStream was causing an NPE even StackOverflow had no answer for
 
             Platform.runLater(BlackBodyColor::init);
 
@@ -269,18 +270,17 @@ public final class Main extends Application {
             ObserverLocationBean observerLocationBean = new ObserverLocationBean();
             observerLocationBean.setCoordinates(INITIAL_GEO_COORDS);
 
-            HorizontalCoordinates sunCoords =
+            HorizontalCoordinates rigelHorizCoords =
             new EquatorialToHorizontalConversion(dateTimeBean.getZonedDateTime(), observerLocationBean.getCoords())
-            .apply(SunModel.SUN.at(Epoch.J2010.daysUntil(dateTimeBean.getZonedDateTime()),
-                    new EclipticToEquatorialConversion(dateTimeBean.getZonedDateTime())).equatorialPos());
+            .apply(RIGEL_EQ);
 
             ViewingParametersBean viewingParametersBean = new ViewingParametersBean();
-            viewingParametersBean.setCenter(sunCoords);
+            viewingParametersBean.setCenter(rigelHorizCoords);
             viewingParametersBean.setFieldOfViewDeg(INITIAL_FOV);
 
             TimeAnimator animator = new TimeAnimator(dateTimeBean);
-            SkyCanvasManager manager = new SkyCanvasManager(catalogue, dateTimeBean,
-                    observerLocationBean, viewingParametersBean, Executors.newFixedThreadPool(12));
+            SkyCanvasManager manager = new SkyCanvasManager(animator, catalogue, dateTimeBean,
+                    observerLocationBean, viewingParametersBean, Executors.newFixedThreadPool(THREADS_MAPOBJTOPOS));
 
             //Shared resources and controls:
             Button toOptionsButton = new Button(SETTINGS_BUTTON_TXT);
@@ -597,14 +597,14 @@ public final class Main extends Application {
 
             if (rightPanelIsON.get() && n != null) {
                 celestNameLabel.setText(" " + n.name() + " ");
-                setTexts(Arrays.copyOfRange(basicInfoValues, 0, 4), DEFAULT_NBR_DECIMALS, n.equatorialPos().raHr(),
+                setTexts(Arrays.copyOfRange(basicInfoValues, 0, 4), n.equatorialPos().raHr(),
                         n.equatorialPos().decDeg(), Angle.toDeg(n.angularSize()), n.magnitude());
                 setTexts(Arrays.copyOfRange(basicInfoValues, 4, basicInfoLabels.length),
                         dateTimeBean.getDate().toString(),
                         dateTimeBean.getTime().truncatedTo(ChronoUnit.SECONDS).toString(),
                         dateTimeBean.getZone().toString(),
-                        doubleWithXdecimals(observerLocationBean.getLonDeg(), DEFAULT_NBR_DECIMALS),
-                        doubleWithXdecimals(observerLocationBean.getLatDeg(), DEFAULT_NBR_DECIMALS));
+                        doubleWithXdecimals(observerLocationBean.getLonDeg()),
+                        doubleWithXdecimals(observerLocationBean.getLatDeg()));
                 setVisibleAndManaged(true, topInfoVBox, firstRightSeparator, basicInfo,
                         secondRightSeparator, rightBox);
                 if (n instanceof Star) {
@@ -620,12 +620,12 @@ public final class Main extends Application {
 
                 } else {
                     if (n instanceof Sun) {
-                        setTexts(sunInfoValues, DEFAULT_NBR_DECIMALS,
+                        setTexts(sunInfoValues,
                                 Angle.toDeg(Angle.normalizePositive(((Sun) n).meanAnomaly())),
                                 ((Sun) n).eclipticPos().lonDeg());
                         setVisibleAndManaged(true, sunSpecifics, possibleSeparator);
                     } else if (n instanceof Moon) {
-                        setTexts(moonInfoValues, doubleToPercent(((Moon) n).phase(), DEFAULT_NBR_DECIMALS));
+                        setTexts(moonInfoValues, doubleToPercent(((Moon) n).phase()));
                         setVisibleAndManaged(true, moonSpecifics, possibleSeparator);
                     }
                     setVisibleAndManaged(true, orbitSliders);
@@ -902,7 +902,7 @@ public final class Main extends Application {
         checkBoxesToDraw.setHgap(PARAMS_GRIDGAP);
 
         GridPane colorsGrid = new GridPane();
-        int numberOfColorLabels = manager.colorLabelsList().size();
+        int numberOfColorLabels = SkyCanvasManager.colorLabelsList().size();
         Label[] colorLabels = new Label[numberOfColorLabels];
         ColorPicker[] colorPickers = new ColorPicker[numberOfColorLabels];
         Button[] resetColorButtons = new Button[numberOfColorLabels];
@@ -912,7 +912,7 @@ public final class Main extends Application {
             colorPickers[i].valueProperty().bindBidirectional(manager.colorPropertiesList().get(i));
             colorPickers[i].setStyle(COLORPICKER_STYLE);
 
-            colorLabels[i] = new Label(manager.colorLabelsList().get(i));
+            colorLabels[i] = new Label(SkyCanvasManager.colorLabelsList().get(i));
             GridPane.setHalignment(colorLabels[i], HPos.RIGHT);
 
             resetColorButtons[i] = new Button(RESETDEFAULT_BUTTON);
@@ -931,7 +931,7 @@ public final class Main extends Application {
         addTooltip(gridSpaceLabel, HELPTXT_GRIDSPACE);
 
         ComboBox<String> spacingsBox = new ComboBox<>();
-        spacingsBox.setItems(FXCollections.observableArrayList(manager.suggestedGridSpacings()));
+        spacingsBox.setItems(FXCollections.observableArrayList(SkyCanvasManager.suggestedGridSpacings()));
         spacingsBox.setValue(manager.getHorizCoordsGridSpacingDeg() + "°");
         spacingsBox.valueProperty().addListener((p, o, n) ->
                 manager.setHorizCoordsGridSpacingDeg(Integer.parseInt(n.substring(0, n.length() - 1))));
@@ -1016,10 +1016,10 @@ public final class Main extends Application {
         for (Node node : nodes) GridPane.setHalignment(node, align);
     }
 
-    private static void setTexts(Text[] textsArray, int nbrOfDecimals, double... toConvert) {
+    private static void setTexts(Text[] textsArray, double... toConvert) {
         setTexts(textsArray, Arrays.stream(toConvert)
                 .boxed()
-                .map(nbr -> doubleWithXdecimals(nbr, nbrOfDecimals))
+                .map(Main::doubleWithXdecimals)
                 .collect(Collectors.toList()));
     }
 
@@ -1049,22 +1049,18 @@ public final class Main extends Application {
         grid.setAlignment(Pos.CENTER);
     }
 
-    private static String doubleToPercent(double doubleToFormat, int numberOfDecimals) {
-        return doubleWithXdecimals(doubleToFormat * 100, numberOfDecimals) + "%";
+    private static String doubleToPercent(double doubleToFormat) {
+        return doubleWithXdecimals(doubleToFormat * 100) + "%";
     }
 
     /**
-     * Returns given double in String form up to given decimal
+     * Returns given double in String form
      *
      * @param doubleToFormat   (double) given double
-     * @param numberOfDecimals (int) given decimal
      * @return (String) formatted double
-     * @throws IllegalArgumentException if given number of decimals is (strictly) negative
      */
-    private static String doubleWithXdecimals(double doubleToFormat, int numberOfDecimals) {
-        Preconditions.checkArgument(numberOfDecimals >= 0, "Main.doubleWithXdecimals: given number" +
-                " of decimals is < 0.");
-        return String.format(Locale.ROOT, "%." + numberOfDecimals + "f", doubleToFormat);
+    private static String doubleWithXdecimals(double doubleToFormat) {
+        return String.format(Locale.ROOT, "%." + Main.DEFAULT_NBR_DECIMALS + "f", doubleToFormat);
     }
 
     private static String formatSetToString(Set<?> data) {
