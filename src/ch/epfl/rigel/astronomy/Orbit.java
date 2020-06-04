@@ -29,13 +29,13 @@ public final class Orbit<T extends CelestialObject> extends Cycle<Supplier<T>> {
      *
      * @param initialTime       (ZonedDateTime) start time of orbit prediction
      * @param resolutionInHours (int) discrete simulation step in hours
-     * @param maxDays           (long) orbit will be computed from initialTime to roughly initialTime + maxDays
+     * @param maxLength           (long) orbit will be computed from initialTime to roughly initialTime + maxLength
      * @param model             (CelestialObjectModel<T>) model used to compute the orbit
      * @param conversion        (EclipticToEquatorialConversion)
      */
-    public Orbit(ZonedDateTime initialTime, int resolutionInHours, long maxDays, CelestialObjectModel<T> model,
+    public Orbit(ZonedDateTime initialTime, int resolutionInHours, long maxLength, CelestialObjectModel<T> model,
                  EclipticToEquatorialConversion conversion) {
-        super(construct(Epoch.J2010.daysUntil(initialTime), resolutionInHours, maxDays, model, conversion));
+        super(construct(Epoch.J2010.daysUntil(initialTime), resolutionInHours, maxLength, model, conversion));
     }
 
     /**
@@ -58,11 +58,10 @@ public final class Orbit<T extends CelestialObject> extends Cycle<Supplier<T>> {
 
     private static <T extends CelestialObject> List<Supplier<T>> construct(double initialDaysSince2010, int resolutionInHours,
             long maxDays, CelestialObjectModel<T> model, EclipticToEquatorialConversion eclToEqu) {
-        DoubleFunction<Supplier<T>> f = daysSinceJ2010 -> (Supplier<T>) (() -> model.at(daysSinceJ2010, eclToEqu));
 
         return DoubleStream.iterate(initialDaysSince2010, daysSince2010 -> daysSince2010 > initialDaysSince2010 - maxDays,
                 daysSince2010 -> daysSince2010 - resolutionInHours / HOURS_IN_DAY)
-                .mapToObj(f)
+                .mapToObj(daysSinceJ2010 -> (Supplier<T>) (() -> model.at(daysSinceJ2010, eclToEqu)))
                 .collect(Collectors.toList());
     }
 }

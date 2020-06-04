@@ -82,6 +82,11 @@ public final class TimeAnimator extends AnimationTimer {
     }
 
     /**
+     * @return (TimeAccelerator) value of observable: accelerator property
+     */
+    public TimeAccelerator getAccelerator() { return accelerator.get(); }
+
+    /**
      * @return (ReadOnlyBooleanProperty) subject / observable boolean property: TimeAnimator running
      */
     public ReadOnlyBooleanProperty runningProperty() {

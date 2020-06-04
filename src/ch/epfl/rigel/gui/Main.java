@@ -2,6 +2,8 @@ package ch.epfl.rigel.gui;
 
 import ch.epfl.rigel.Preconditions;
 import ch.epfl.rigel.astronomy.*;
+import ch.epfl.rigel.coordinates.EquatorialCoordinates;
+import ch.epfl.rigel.coordinates.EquatorialToHorizontalConversion;
 import ch.epfl.rigel.coordinates.GeographicCoordinates;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.math.Angle;
@@ -30,7 +32,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
-import javafx.stage.PopupWindow;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
@@ -69,17 +70,17 @@ import java.util.stream.Stream;
  */
 public final class Main extends Application {
 
+    private static final EquatorialCoordinates RIGEL_EQ = EquatorialCoordinates.of(Angle.ofHr(5.2423), Angle.ofDeg(-8.2016));
     private static final GeographicCoordinates INITIAL_GEO_COORDS = GeographicCoordinates.ofDeg(6.57, 46.52);
-    private static final HorizontalCoordinates INITIAL_CENTER =
-            HorizontalCoordinates.ofDeg(180.05, 15.001);
     private static final NamedTimeAccelerator INITIAL_ACCELERATOR = NamedTimeAccelerator.TIMES_300;
     private static final double INITIAL_FOV = 100;
     private static final int MIN_WIDTH = 800;
     private static final int MIN_HEIGHT = 600;
     private static final double MOUSE_DRAG_DEFAULTSENS = 1;
     private static final double MOUSE_SCROLL_DEFAULTSENS = 0.75;
+    private static final int THREADS_MAPOBJTOPOS = 12;
     private static final Locale DEFAULT_RIGEL_LOCALE = Locale.FRENCH;
-    //This will guarantee that ColorPickers are in French, as the rest of the application..
+    //This will guarantee that ColorPickers are in French, as the rest of the application.
 
     private static final int CUSTOM_FONT_DEFAULT_SIZE = 15;
     private static final int CUSTOM_FONT_SMALL_SIZE = 10;
@@ -254,7 +255,7 @@ public final class Main extends Application {
 
             Font fontAwesomeDefault = Font.loadFont(fs, CUSTOM_FONT_DEFAULT_SIZE);
             Font fontAwesomeSmall = Font.loadFont(fsSmall, CUSTOM_FONT_SMALL_SIZE);
-            //Using the same InputStream was causing an NPE even StackOverflow had no answer for.
+            //Using the same InputStream was causing an NPE even StackOverflow had no answer for
 
             Platform.runLater(BlackBodyColor::init);
 
@@ -270,8 +271,12 @@ public final class Main extends Application {
             ObserverLocationBean observerLocationBean = new ObserverLocationBean();
             observerLocationBean.setCoordinates(INITIAL_GEO_COORDS);
 
+            HorizontalCoordinates rigelHorizCoords =
+            new EquatorialToHorizontalConversion(dateTimeBean.getZonedDateTime(), observerLocationBean.getCoords())
+            .apply(RIGEL_EQ);
+
             ViewingParametersBean viewingParametersBean = new ViewingParametersBean();
-            viewingParametersBean.setCenter(INITIAL_CENTER);
+            viewingParametersBean.setCenter(rigelHorizCoords);
             viewingParametersBean.setFieldOfViewDeg(INITIAL_FOV);
             ExecutorService exec = Executors.newFixedThreadPool(12);
             TimeAnimator animator = new TimeAnimator(dateTimeBean);
@@ -304,7 +309,6 @@ public final class Main extends Application {
                 tooltip.setShowDelay(TOOLTIP_SHOW_WAIT);
                 tooltip.setStyle(TOOLTIP_DEFAULT_STYLE);
             });
-            primaryStage.setOnCloseRequest(ea -> exec.shutdown());
 
             Locale.setDefault(DEFAULT_RIGEL_LOCALE);
             Scene mainScene = new Scene(mainBorder);
@@ -899,7 +903,7 @@ public final class Main extends Application {
         checkBoxesToDraw.setHgap(PARAMS_GRIDGAP);
 
         GridPane colorsGrid = new GridPane();
-        int numberOfColorLabels = SkyCanvasManager.colorLabelsList().size();
+        int numberOfColorLabels = manager.colorLabelsList().size();
         Label[] colorLabels = new Label[numberOfColorLabels];
         ColorPicker[] colorPickers = new ColorPicker[numberOfColorLabels];
         Button[] resetColorButtons = new Button[numberOfColorLabels];
@@ -909,7 +913,7 @@ public final class Main extends Application {
             colorPickers[i].valueProperty().bindBidirectional(manager.colorPropertiesList().get(i));
             colorPickers[i].setStyle(COLORPICKER_STYLE);
 
-            colorLabels[i] = new Label(SkyCanvasManager.colorLabelsList().get(i));
+            colorLabels[i] = new Label(manager.colorLabelsList().get(i));
             GridPane.setHalignment(colorLabels[i], HPos.RIGHT);
 
             resetColorButtons[i] = new Button(RESETDEFAULT_BUTTON);
@@ -928,7 +932,7 @@ public final class Main extends Application {
         addTooltip(gridSpaceLabel, HELPTXT_GRIDSPACE);
 
         ComboBox<String> spacingsBox = new ComboBox<>();
-        spacingsBox.setItems(FXCollections.observableArrayList(SkyCanvasManager.suggestedGridSpacings()));
+        spacingsBox.setItems(FXCollections.observableArrayList(manager.suggestedGridSpacings()));
         spacingsBox.setValue(manager.getHorizCoordsGridSpacingDeg() + "°");
         spacingsBox.valueProperty().addListener((p, o, n) ->
                 manager.setHorizCoordsGridSpacingDeg(Integer.parseInt(n.substring(0, n.length() - 1))));
