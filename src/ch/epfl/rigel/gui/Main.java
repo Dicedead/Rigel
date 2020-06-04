@@ -244,7 +244,6 @@ public final class Main extends Application {
      *
      * @param primaryStage (Stage) used window
      */
-    @ThreadManager.Requires(requirements = {""})
     @Override
     public void start(Stage primaryStage) {
 
@@ -322,7 +321,10 @@ public final class Main extends Application {
             primaryStage.show();
             manager.canvas().requestFocus();
 
-            primaryStage.setOnCloseRequest(e -> mapObjThreadPool.shutdownNow());
+            primaryStage.setOnCloseRequest(e -> {
+                if (animator.isRunning()) animator.stop();
+                mapObjThreadPool.shutdownNow();
+            });
 
         } catch (IOException e) {
             e.printStackTrace();
