@@ -10,6 +10,7 @@ import ch.epfl.rigel.gui.searchtool.Searcher;
 import ch.epfl.rigel.math.Angle;
 import ch.epfl.rigel.math.ClosedInterval;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.BooleanProperty;
@@ -28,6 +29,7 @@ import javafx.scene.paint.Color;
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -125,6 +127,7 @@ public final class SkyCanvasManager {
     private final ObjectProperty<CelestialObject> wantNewInformationPanel = new SimpleObjectProperty<>();
 
     private final ObjectProperty<Orbit<? extends CelestialObject>> orbitProperty = new SimpleObjectProperty<>();
+    private final BooleanBinding orbitIsNull;
     private static final List<String> SUGGESTED_GRID_SPACINGS = List.of("5°","10°", "15°", "30°", "45°", "90°");
     private final IntegerProperty horizCoordsGridSpacingDeg = new SimpleIntegerProperty(15);
     private static final List<TimeAccelerator> NON_NULL_ACC_ORBIT_LIST =
@@ -167,6 +170,8 @@ public final class SkyCanvasManager {
                 orbitProperty.set(null);
             }
         });
+
+        orbitIsNull = Bindings.createBooleanBinding(() -> Objects.isNull(orbitProperty.get()), orbitProperty);
 
         EnumSet<DrawableObjects> allDrawablesExceptGrid = EnumSet.allOf(DrawableObjects.class);
         allDrawablesExceptGrid.remove(DrawableObjects.GRID);
@@ -525,6 +530,13 @@ public final class SkyCanvasManager {
      */
     public IntegerProperty orbitDrawingStepProperty() {
         return orbitDrawingStep;
+    }
+
+    /**
+     * @return (BooleanBinding) observable: orbit is null
+     */
+    public BooleanBinding orbitIsNullProperty() {
+        return orbitIsNull;
     }
 
     /**

@@ -693,7 +693,7 @@ public final class Main extends Application {
         Stream.of(resolutionSlider, lengthSlider).forEach(slider -> {
             slider.setMinWidth(ORBIT_SLIDER_WIDTH);
             slider.setMaxWidth(ORBIT_SLIDER_WIDTH);
-            slider.disableProperty().bind(orbitDrawingCheckbox.selectedProperty().not());
+            slider.disableProperty().bind(manager.orbitIsNullProperty().or(orbitDrawingCheckbox.selectedProperty().not()));
         });
         resolutionSlider.setLabelFormatter(new StringConverter<>() {
             @Override
