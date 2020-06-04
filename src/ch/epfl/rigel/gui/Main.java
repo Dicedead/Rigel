@@ -2,6 +2,8 @@ package ch.epfl.rigel.gui;
 
 import ch.epfl.rigel.Preconditions;
 import ch.epfl.rigel.astronomy.*;
+import ch.epfl.rigel.coordinates.EclipticToEquatorialConversion;
+import ch.epfl.rigel.coordinates.EquatorialToHorizontalConversion;
 import ch.epfl.rigel.coordinates.GeographicCoordinates;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.math.Angle;
@@ -67,8 +69,6 @@ import java.util.stream.Stream;
 public final class Main extends Application {
 
     private static final GeographicCoordinates INITIAL_GEO_COORDS = GeographicCoordinates.ofDeg(6.57, 46.52);
-    private static final HorizontalCoordinates INITIAL_CENTER =
-            HorizontalCoordinates.ofDeg(180.05, 15.001);
     private static final NamedTimeAccelerator INITIAL_ACCELERATOR = NamedTimeAccelerator.TIMES_300;
     private static final double INITIAL_FOV = 100;
     private static final int MIN_WIDTH = 800;
@@ -76,7 +76,7 @@ public final class Main extends Application {
     private static final double MOUSE_DRAG_DEFAULTSENS = 1;
     private static final double MOUSE_SCROLL_DEFAULTSENS = 0.75;
     private static final Locale DEFAULT_RIGEL_LOCALE = Locale.FRENCH;
-    //This will guarantee that ColorPickers are in French, as the rest of the application..
+    //This will guarantee that ColorPickers are in French, as the rest of the application.
 
     private static final int CUSTOM_FONT_DEFAULT_SIZE = 15;
     private static final int CUSTOM_FONT_SMALL_SIZE = 10;
@@ -267,8 +267,13 @@ public final class Main extends Application {
             ObserverLocationBean observerLocationBean = new ObserverLocationBean();
             observerLocationBean.setCoordinates(INITIAL_GEO_COORDS);
 
+            HorizontalCoordinates sunCoords =
+            new EquatorialToHorizontalConversion(dateTimeBean.getZonedDateTime(), observerLocationBean.getCoords())
+            .apply(SunModel.SUN.at(Epoch.J2010.daysUntil(dateTimeBean.getZonedDateTime()),
+                    new EclipticToEquatorialConversion(dateTimeBean.getZonedDateTime())).equatorialPos());
+
             ViewingParametersBean viewingParametersBean = new ViewingParametersBean();
-            viewingParametersBean.setCenter(INITIAL_CENTER);
+            viewingParametersBean.setCenter(sunCoords);
             viewingParametersBean.setFieldOfViewDeg(INITIAL_FOV);
 
             TimeAnimator animator = new TimeAnimator(dateTimeBean);

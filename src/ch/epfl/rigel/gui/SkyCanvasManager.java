@@ -152,6 +152,8 @@ public final class SkyCanvasManager {
                 () -> new ObservedSky(dtBean.getZonedDateTime(), obsLocBean.getCoords(), projection.get(), catalogue),
                 dtBean.zdtProperty(), obsLocBean.coordsProperty(), projection);
 
+        orbitProperty.set(orbitFactory(SunModel.SUN));
+
         EnumSet<DrawableObjects> allDrawablesExceptGrid = EnumSet.allOf(DrawableObjects.class);
         allDrawablesExceptGrid.remove(DrawableObjects.GRID);
         objectsToDraw = new SimpleObjectProperty<>(allDrawablesExceptGrid);
@@ -228,9 +230,7 @@ public final class SkyCanvasManager {
                     wantNewInformationPanel.set(objectUnderMouse.get().get());
 
                     if (!(celestClass = objectUnderMouse.get().get().getClass()).equals(Star.class)) {
-                        orbitProperty.set(new Orbit<>(dtBean.getZonedDateTime(),
-                                RESOLUTION_DEFAULT, ORBIT_SIMULATION_DAYS_DEFAULT, getModel(celestClass),
-                                new EclipticToEquatorialConversion(dtBean.getZonedDateTime())));
+                        orbitProperty.set(orbitFactory(getModel(celestClass)));
                     } else {
                         orbitProperty.set(null);
                     }
@@ -553,5 +553,11 @@ public final class SkyCanvasManager {
         } else {
             return SunModel.SUN;
         }
+    }
+
+    private Orbit<? extends CelestialObject> orbitFactory(CelestialObjectModel<? extends CelestialObject> modelClass) {
+         return new Orbit<>(dtBean.getZonedDateTime(),
+                RESOLUTION_DEFAULT, ORBIT_SIMULATION_DAYS_DEFAULT, modelClass,
+                new EclipticToEquatorialConversion(dtBean.getZonedDateTime()));
     }
 }
