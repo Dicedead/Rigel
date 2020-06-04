@@ -1,6 +1,7 @@
 package ch.epfl.rigel.coordinates;
 
 import ch.epfl.rigel.astronomy.SiderealTime;
+import ch.epfl.rigel.math.Polynomial;
 
 import java.time.ZonedDateTime;
 import java.util.function.Function;
@@ -54,6 +55,38 @@ public final class EquatorialToHorizontalConversion implements Function<Equatori
                 normalizePositive(atan2(-cosPhi * cos(dec) * sin(hourAngle), sinDec - sinPhi * term1)),
                 asin(term1));
     }
+
+    private final static double a0 =   1.570796305;
+    private final static double a1 =   -.2145988016;
+    private final static double a2 =   0.889789874;
+    private final static double a3 =   -.0501743046;
+    private final static double a4 =   0.0308918810;
+    private final static double a5 =   -.0170881256;
+    private final static double a6 =   0.0066700901;
+    private final static double a7 =   -.0012624911;
+
+    private final static Polynomial p = Polynomial.of(a0, a1, a2, a3, a4, a5, a6, a7);
+    double sqrt1(double x) {
+        if (x==0)
+        return  x;
+
+        double guess = x;
+        double diff = Double.MAX_VALUE;
+
+        while (diff >= 1){
+            double new_guess = (guess - (guess*guess - x)/(2.0*guess));
+            diff = abs(new_guess - guess);
+            guess = new_guess;
+        }
+
+
+        return floor(guess);
+    }
+    double asin3(double x) {
+
+        return PI/2 - sqrt1(1-x) * p.at(x);
+    }
+
 
     /**
      * @throws UnsupportedOperationException (double precision does not allow for equals)
