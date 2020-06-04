@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
@@ -272,10 +273,10 @@ public final class Main extends Application {
             ViewingParametersBean viewingParametersBean = new ViewingParametersBean();
             viewingParametersBean.setCenter(INITIAL_CENTER);
             viewingParametersBean.setFieldOfViewDeg(INITIAL_FOV);
-
+            ExecutorService exec = Executors.newFixedThreadPool(12);
             TimeAnimator animator = new TimeAnimator(dateTimeBean);
             SkyCanvasManager manager = new SkyCanvasManager(catalogue, dateTimeBean,
-                    observerLocationBean, viewingParametersBean, Executors.newFixedThreadPool(12));
+                    observerLocationBean, viewingParametersBean, exec);
 
             //Shared resources and controls:
             Button toOptionsButton = new Button(SETTINGS_BUTTON_TXT);
@@ -303,6 +304,7 @@ public final class Main extends Application {
                 tooltip.setShowDelay(TOOLTIP_SHOW_WAIT);
                 tooltip.setStyle(TOOLTIP_DEFAULT_STYLE);
             });
+            primaryStage.setOnCloseRequest(ea -> exec.shutdown());
 
             Locale.setDefault(DEFAULT_RIGEL_LOCALE);
             Scene mainScene = new Scene(mainBorder);
@@ -897,7 +899,7 @@ public final class Main extends Application {
         checkBoxesToDraw.setHgap(PARAMS_GRIDGAP);
 
         GridPane colorsGrid = new GridPane();
-        int numberOfColorLabels = manager.colorLabelsList().size();
+        int numberOfColorLabels = SkyCanvasManager.colorLabelsList().size();
         Label[] colorLabels = new Label[numberOfColorLabels];
         ColorPicker[] colorPickers = new ColorPicker[numberOfColorLabels];
         Button[] resetColorButtons = new Button[numberOfColorLabels];
@@ -907,7 +909,7 @@ public final class Main extends Application {
             colorPickers[i].valueProperty().bindBidirectional(manager.colorPropertiesList().get(i));
             colorPickers[i].setStyle(COLORPICKER_STYLE);
 
-            colorLabels[i] = new Label(manager.colorLabelsList().get(i));
+            colorLabels[i] = new Label(SkyCanvasManager.colorLabelsList().get(i));
             GridPane.setHalignment(colorLabels[i], HPos.RIGHT);
 
             resetColorButtons[i] = new Button(RESETDEFAULT_BUTTON);
@@ -926,7 +928,7 @@ public final class Main extends Application {
         addTooltip(gridSpaceLabel, HELPTXT_GRIDSPACE);
 
         ComboBox<String> spacingsBox = new ComboBox<>();
-        spacingsBox.setItems(FXCollections.observableArrayList(manager.suggestedGridSpacings()));
+        spacingsBox.setItems(FXCollections.observableArrayList(SkyCanvasManager.suggestedGridSpacings()));
         spacingsBox.setValue(manager.getHorizCoordsGridSpacingDeg() + "°");
         spacingsBox.valueProperty().addListener((p, o, n) ->
                 manager.setHorizCoordsGridSpacingDeg(Integer.parseInt(n.substring(0, n.length() - 1))));
