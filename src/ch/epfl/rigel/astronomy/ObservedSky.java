@@ -4,7 +4,6 @@ import ch.epfl.rigel.coordinates.*;
 
 import java.time.ZonedDateTime;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -13,7 +12,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -78,8 +76,8 @@ public final class ObservedSky {
 
                 this.sunMap = mapSingleObjectToPosition(SunModel.SUN, this::applyModel);
                 this.moonMap = mapSingleObjectToPosition(MoonModel.MOON, this::applyModel);
-                this.planetMap = mapObjectToPosition(PlanetModel.EXTRATERRESTRIAL, this::applyModel);
-                this.starMap = mapObjectToPosition(catalogue.stars(), Function.identity());
+                this.planetMap = mapObjectsToPosition(PlanetModel.EXTRATERRESTRIAL, this::applyModel);
+                this.starMap = mapObjectsToPosition(catalogue.stars(), Function.identity());
 
                 this.celestObjToCoordsMap = Collections.unmodifiableMap(Stream.of(starMap, planetMap, sunMap, moonMap)
                         .flatMap(l -> l.entrySet().stream())
@@ -199,7 +197,7 @@ public final class ObservedSky {
 
     /**
      * Map creator: Keys: data's elements after applying f on them (identical keys are merged)
-     * Values: data's elements CartesianCoordinates
+     * Values: data's elements' CartesianCoordinates
      *
      * @param <T>  data's elements' type
      * @param <S>  f's output type -> the returned Map's keys' type
@@ -207,7 +205,7 @@ public final class ObservedSky {
      * @param f    (Function<T,S>) function to apply on data
      * @return (Map <S, CartesianCoordinates>) map associating CelestialObjects with their CartesianCoordinates
      */
-    public <T, S extends CelestialObject> Map<S, CartesianCoordinates> mapObjectToPosition(List<T> data, Function<T, S> f) {
+    public <T, S extends CelestialObject> Map<S, CartesianCoordinates> mapObjectsToPosition(List<T> data, Function<T, S> f) {
         return (data.parallelStream()
                 .map(f)
                 .collect(Collectors.toConcurrentMap(
@@ -216,8 +214,18 @@ public final class ObservedSky {
                         (u, v) -> v)));
     }
 
-    public <T, S extends CelestialObject> Map<S, CartesianCoordinates> mapSingleObjectToPosition(T data, Function<T, S> f) {
-        var temp = f.apply(data);
+    /**
+     * Map creator: Key: item after applying f on them (identical keys are merged)
+     * Value: item's CartesianCoordinates
+     *
+     * @param <T>  item's type
+     * @param <S>  f's output type -> the returned Map's key type
+     * @param item (T) input List to be applied f upon then put into keys
+     * @param f    (Function<T,S>) function to apply on data
+     * @return (Map <S, CartesianCoordinates>) map associating CelestialObject item with its CartesianCoordinates
+     */
+    public <T, S extends CelestialObject> Map<S, CartesianCoordinates> mapSingleObjectToPosition(T item, Function<T, S> f) {
+        var temp = f.apply(item);
         return Map.of(temp, eqToHor.andThen(stereoProj).apply(temp.equatorialPos()));
     }
 

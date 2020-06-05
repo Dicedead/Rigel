@@ -13,15 +13,10 @@ import javafx.geometry.VPos;
 import javafx.scene.CacheHint;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.image.PixelFormat;
-import javafx.scene.image.WritablePixelFormat;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.TextAlignment;
 
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.nio.IntBuffer;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.function.Function;
@@ -69,7 +64,6 @@ public final class SkyCanvasPainter {
      * @param canvas (Canvas) canvas to be drawn on
      */
     public SkyCanvasPainter(Canvas canvas) {
-
         this.canvas = canvas;
         this.graphicsContext = this.canvas.getGraphicsContext2D();
 
@@ -134,6 +128,7 @@ public final class SkyCanvasPainter {
                     drawHorizon(proj, transform, horColor);
                     break;
                 default:
+                    //Unreachable
                     throw new IllegalStateException("SkyCanvasPainter: unknown drawable object type given.");
             }
 
@@ -182,7 +177,7 @@ public final class SkyCanvasPainter {
      */
     public void drawOrbit(Orbit<? extends CelestialObject> orbit, ObservedSky sky, PlanarTransformation transform,
                           int length, int step, Color orbColor) {
-        pipeline(sky.mapObjectToPosition(orbit.representatives(length, step), Function.identity()).entrySet().stream(),
+        pipeline(sky.mapObjectsToPosition(orbit.representatives(length, step), Function.identity()).entrySet().stream(),
                 orb -> ORBIT_CIRCLE_SIZE, orb -> orbColor, transform);
     }
 
@@ -436,6 +431,5 @@ public final class SkyCanvasPainter {
     private static double apparentSize(final CelestialObject celestObj) {
         return (99 - 17 * CLIP_INTERVAL.clip(celestObj.magnitude())) * CELEST_SIZE_COEFF;
     }
-
 
 }
