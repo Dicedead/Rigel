@@ -88,7 +88,7 @@ public final class Main extends Application {
 
     private static final int CUSTOM_FONT_DEFAULT_SIZE = 15;
     private static final int CUSTOM_FONT_SMALL_SIZE = 10;
-    private static final String INPUT_HYGDATA = "/hygdata_v3.csv";
+    private static final String INPUT_HYGDATA = "/arksPrIVD.csv";
     private static final String INPUT_ASTERISMS = "/asterisms.txt";
     private static final String INPUT_FONT = "/Font Awesome 5 Free-Solid-900.otf";
 
