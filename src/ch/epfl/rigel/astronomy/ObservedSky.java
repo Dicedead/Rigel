@@ -77,7 +77,7 @@ public final class ObservedSky {
                 this.sunMap = mapSingleObjectToPosition(SunModel.SUN, this::applyModel);
                 this.moonMap = mapSingleObjectToPosition(MoonModel.MOON, this::applyModel);
                 this.planetMap = mapObjectsToPosition(PlanetModel.EXTRATERRESTRIAL, this::applyModel);
-                this.starMap = mapObjectsToPosition(catalogue.stars(), Function.identity());
+                this.starMap = mapObjectsToPosition(catalogue.stars());
 
                 this.celestObjToCoordsMap = Collections.unmodifiableMap(Stream.of(starMap, planetMap, sunMap, moonMap)
                         .flatMap(l -> l.entrySet().stream())
@@ -208,6 +208,25 @@ public final class ObservedSky {
     public <T, S extends CelestialObject> Map<S, CartesianCoordinates> mapObjectsToPosition(List<T> data, Function<T, S> f) {
         return (data.parallelStream()
                 .map(f)
+                .collect(Collectors.toConcurrentMap(
+                        Function.identity(),
+                        celestObj -> eqToHor.andThen(stereoProj).apply(celestObj.equatorialPos()),
+                        (u, v) -> v)));
+    }
+
+    /**
+     * Map creator: Keys: data's elements after applying f on them (identical keys are merged)
+     * Values: data's elements' CartesianCoordinates
+     * A call to this method is a tad faster than {@code mapObjectsToPosition(List<S>, Function.identity())} as it has
+     * one less intermediate stream instruction
+     *
+     * @param <T>  data's elements' type
+     * @param <S>  f's output type -> the returned Map's keys' type
+     * @param data (List<T>) input List to be applied f upon then put into keys
+     * @return (Map <S, CartesianCoordinates>) map associating CelestialObjects with their CartesianCoordinates
+     */
+    public <T, S extends CelestialObject> Map<S, CartesianCoordinates> mapObjectsToPosition(List<S> data) {
+        return (data.parallelStream()
                 .collect(Collectors.toConcurrentMap(
                         Function.identity(),
                         celestObj -> eqToHor.andThen(stereoProj).apply(celestObj.equatorialPos()),

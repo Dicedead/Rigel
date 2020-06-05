@@ -88,7 +88,7 @@ public final class Main extends Application {
 
     private static final int CUSTOM_FONT_DEFAULT_SIZE = 15;
     private static final int CUSTOM_FONT_SMALL_SIZE = 10;
-    private static final String INPUT_HYGDATA = "/arksPrIVD.csv";
+    private static final String INPUT_HYGDATA = "/hygdata_v3.csv";
     private static final String INPUT_ASTERISMS = "/asterisms.txt";
     private static final String INPUT_FONT = "/Font Awesome 5 Free-Solid-900.otf";
 
@@ -285,15 +285,15 @@ public final class Main extends Application {
 
             if (TEST_FPS) frameRateMeter.start();
 
-            ExecutorService mapObjThreadPool = Executors.newFixedThreadPool(DEFAULT_THREADS);
+            ExecutorService threadPool = Executors.newFixedThreadPool(DEFAULT_THREADS);
 
             Font fontAwesomeDefault = Font.loadFont(fs, CUSTOM_FONT_DEFAULT_SIZE);
             Font fontAwesomeSmall = Font.loadFont(fsSmall, CUSTOM_FONT_SMALL_SIZE);
             //Using the same InputStream was causing an NPE even StackOverflow had no answer for
 
-            var colorsInit = mapObjThreadPool.submit(BlackBodyColor::init);
+            var colorsInit = threadPool.submit(BlackBodyColor::init);
 
-            Future<StarCatalogue> catalogue = mapObjThreadPool.submit(() -> new StarCatalogue.Builder()
+            Future<StarCatalogue> catalogue = threadPool.submit(() -> new StarCatalogue.Builder()
                     .loadFrom(hs, HygDatabaseLoader.INSTANCE)
                     .loadFrom(ast, AsterismLoader.INSTANCE)
                     .build());
@@ -331,7 +331,7 @@ public final class Main extends Application {
 
 
             SkyCanvasManager manager = new SkyCanvasManager(animator, catalogue.get(), dateTimeBean,
-                    observerLocationBean, viewingParametersBean, mapObjThreadPool);
+                    observerLocationBean, viewingParametersBean, threadPool);
 
             VBox parametersBox = parametersBox(manager, fontAwesomeDefault, fontAwesomeSmall, primaryStage,
                     rightPanelIsON, orbitDrawingCheckbox);
@@ -362,7 +362,7 @@ public final class Main extends Application {
 
             primaryStage.setOnCloseRequest(e -> {
                 if (animator.isRunning()) animator.stop();
-                mapObjThreadPool.shutdownNow();
+                threadPool.shutdownNow();
             });
 
             colorsInit.get();
