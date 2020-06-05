@@ -10,12 +10,18 @@ import ch.epfl.rigel.coordinates.PlanarTransformation;
 import ch.epfl.rigel.math.ClosedInterval;
 import ch.epfl.rigel.math.RightOpenInterval;
 import javafx.geometry.VPos;
+import javafx.scene.CacheHint;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.PixelFormat;
+import javafx.scene.image.WritablePixelFormat;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.TextAlignment;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.nio.IntBuffer;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.function.Function;
@@ -54,7 +60,6 @@ public final class SkyCanvasPainter {
     private static final Function<Star, Paint> STAR_COLOR       = s -> BlackBodyColor.colorForTemperature(s.colorTemperature());
     private static final Function<Planet, Paint> PLANET_COLOR   = planet -> Color.LIGHTGRAY;
     private static final Function<Moon, Paint> MOON_COLOR       = moon -> Color.WHITE;
-
     private final Canvas canvas;
     private final GraphicsContext graphicsContext;
 
@@ -64,8 +69,12 @@ public final class SkyCanvasPainter {
      * @param canvas (Canvas) canvas to be drawn on
      */
     public SkyCanvasPainter(Canvas canvas) {
+
         this.canvas = canvas;
         this.graphicsContext = this.canvas.getGraphicsContext2D();
+
+        canvas.setCache(true);
+        canvas.setCacheHint(CacheHint.SPEED);
     }
 
     /**
@@ -127,6 +136,7 @@ public final class SkyCanvasPainter {
                 default:
                     throw new IllegalStateException("SkyCanvasPainter: unknown drawable object type given.");
             }
+
     }
 
     /**
@@ -188,6 +198,7 @@ public final class SkyCanvasPainter {
     public void drawAsterisms(ObservedSky sky, PlanarTransformation transform, Color astColor) {
         graphicsContext.setStroke(astColor);
         graphicsContext.setLineWidth(ASTERISMS_LINE_WIDTH);
+
         sky.asterisms().forEach(
                 asterism -> {
                     final CartesianCoordinates mapOfStar0 = transform.apply(getCartesFromIndex(sky, asterism, 0));
@@ -269,12 +280,13 @@ public final class SkyCanvasPainter {
         graphicsContext.setFill(horColor);
         graphicsContext.setTextAlign(TextAlignment.CENTER);
         graphicsContext.setTextBaseline(VPos.TOP);
+
         for (int i = 0; i < 8; ++i)
         {
             HorizontalCoordinates octantHorizCoords = HorizontalCoordinates.ofDeg(45 * i, OCTANTS_ALT_OFFSET);
             CartesianCoordinates octantTransCoords = transform.apply(projection.apply(octantHorizCoords));
-            graphicsContext.fillText(octantHorizCoords.azOctantName("N", "E", "S", "O"),
-                    octantTransCoords.x(), octantTransCoords.y());
+
+            graphicsContext.fillText(octantHorizCoords.azOctantName("N", "E", "S", "O"), octantTransCoords.x(), octantTransCoords.y());
         }
     }
 
@@ -329,6 +341,7 @@ public final class SkyCanvasPainter {
      */
     private <T extends CelestialObject> void drawCelestial(Stream<Map.Entry<T, CartesianCoordinates>> positions,
             Function<T, Double> radiusFunction, Function<T, Paint> color, PlanarTransformation transform) {
+
         positions.forEach(e ->
                 drawCircle(color.apply(e.getKey()), e.getValue(), transform.applyDistance(radiusFunction.apply(e.getKey())))
         );
@@ -342,8 +355,10 @@ public final class SkyCanvasPainter {
      * @param size         (double) radius
      */
     private void drawCircle(Paint color, CartesianCoordinates cartesCoords, double size) {
+
         graphicsContext.setFill(color);
          double halfSize = size / 2;
+
         graphicsContext.fillOval(cartesCoords.x() - halfSize, cartesCoords.y() - halfSize, size, size);
         //Used in drawSun and drawCelestial
     }
@@ -360,8 +375,8 @@ public final class SkyCanvasPainter {
         double halfRadius = radius / 2;
         graphicsContext.setStroke(color);
         graphicsContext.setLineWidth(width);
-        graphicsContext.strokeOval(transformedCenter.x() - halfRadius, transformedCenter.y() - halfRadius,
-                radius, radius);
+
+        graphicsContext.strokeOval(transformedCenter.x() - halfRadius, transformedCenter.y() - halfRadius, radius, radius);
         //used in drawGrid and drawHorizon
     }
 
@@ -421,4 +436,6 @@ public final class SkyCanvasPainter {
     private static double apparentSize(final CelestialObject celestObj) {
         return (99 - 17 * CLIP_INTERVAL.clip(celestObj.magnitude())) * CELEST_SIZE_COEFF;
     }
+
+
 }

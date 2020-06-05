@@ -5,6 +5,8 @@ import ch.epfl.rigel.math.graphs.Cycle;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.function.DoubleFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -26,16 +28,17 @@ public final class Orbit<T extends CelestialObject> extends Cycle<Supplier<T>> {
 
     /**
      * Orbit constructor with calculation parameters
-     *
-     * @param initialTime       (ZonedDateTime) start time of orbit prediction
+     *  @param initialTime       (ZonedDateTime) start time of orbit prediction
      * @param resolutionInHours (int) discrete simulation step in hours
      * @param maxLength           (long) orbit will be computed from initialTime to roughly initialTime + maxLength
      * @param model             (CelestialObjectModel<T>) model used to compute the orbit
      * @param conversion        (EclipticToEquatorialConversion)
+     * @param executorService
      */
     public Orbit(ZonedDateTime initialTime, int resolutionInHours, long maxLength, CelestialObjectModel<T> model,
-                 EclipticToEquatorialConversion conversion) {
-        super(construct(Epoch.J2010.daysUntil(initialTime), resolutionInHours, maxLength, model, conversion));
+                 EclipticToEquatorialConversion conversion, ExecutorService executorService) throws ExecutionException, InterruptedException {
+
+        super(executorService.submit(() -> construct(Epoch.J2010.daysUntil(initialTime), resolutionInHours, maxLength, model, conversion)).get());
     }
 
     /**

@@ -7,7 +7,7 @@ import ch.epfl.rigel.coordinates.EquatorialToHorizontalConversion;
 import ch.epfl.rigel.coordinates.GeographicCoordinates;
 import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.math.Angle;
-import ch.epfl.rigel.parallelism.ThreadManager;
+import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -23,6 +23,9 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -38,6 +41,7 @@ import javafx.util.StringConverter;
 import javafx.util.converter.LocalTimeStringConverter;
 import javafx.util.converter.NumberStringConverter;
 
+import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalTime;
@@ -55,8 +59,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
@@ -78,7 +84,7 @@ public final class Main extends Application {
     private static final int MIN_HEIGHT = 600;
     private static final double MOUSE_DRAG_DEFAULTSENS = 1;
     private static final double MOUSE_SCROLL_DEFAULTSENS = 0.75;
-    private static final int THREADS_MAPOBJTOPOS = 12;
+    private static final int THREADS_MAPOBJTOPOS = 6;
     private static final Locale DEFAULT_RIGEL_LOCALE = Locale.FRENCH;
     //This will guarantee that ColorPickers are in French, as the rest of the application.
 
@@ -239,6 +245,10 @@ public final class Main extends Application {
         launch(args);
     }
 
+    private final long[] frameTimes = new long[100];
+    private int frameTimeIndex = 0 ;
+    private boolean arrayFilled = false ;
+
     /**
      * JavaFX application start method, creating all links, nodes, and other items
      *
@@ -252,16 +262,41 @@ public final class Main extends Application {
              InputStream fs = resourceStream(INPUT_FONT);
              InputStream fsSmall = resourceStream(INPUT_FONT)) {
 
+            AnimationTimer frameRateMeter = new AnimationTimer() {
+
+                @Override
+                public void handle(long now) {
+                    long oldFrameTime = frameTimes[frameTimeIndex] ;
+                    frameTimes[frameTimeIndex] = now ;
+                    frameTimeIndex = (frameTimeIndex + 1) % frameTimes.length ;
+                    if (frameTimeIndex == 0) {
+                        arrayFilled = true ;
+                    }
+                    if (arrayFilled) {
+                        long elapsedNanos = now - oldFrameTime ;
+                        long elapsedNanosPerFrame = elapsedNanos / frameTimes.length ;
+                        double frameRate = 1_000_000_000.0 / elapsedNanosPerFrame ;
+                        System.out.println((String.format("Current frame rate: %.3f", frameRate)));
+                    }
+                }
+            };
+
+            frameRateMeter.start();
+
+
+            ExecutorService mapObjThreadPool = Executors.newFixedThreadPool(THREADS_MAPOBJTOPOS);
+            ExecutorService futureViewer =  Executors.newFixedThreadPool(THREADS_MAPOBJTOPOS);
+
             Font fontAwesomeDefault = Font.loadFont(fs, CUSTOM_FONT_DEFAULT_SIZE);
             Font fontAwesomeSmall = Font.loadFont(fsSmall, CUSTOM_FONT_SMALL_SIZE);
             //Using the same InputStream was causing an NPE even StackOverflow had no answer for
 
-            Platform.runLater(BlackBodyColor::init);
-
-            StarCatalogue catalogue = new StarCatalogue.Builder()
+            var colorsInit = mapObjThreadPool.submit(BlackBodyColor::init);
+            Future<StarCatalogue> catalogue = mapObjThreadPool.submit(() -> new StarCatalogue.Builder()
                     .loadFrom(hs, HygDatabaseLoader.INSTANCE)
                     .loadFrom(ast, AsterismLoader.INSTANCE)
-                    .build();
+                    .build());
+
 
             ZonedDateTime when = ZonedDateTime.now();
             DateTimeBean dateTimeBean = new DateTimeBean();
@@ -278,17 +313,24 @@ public final class Main extends Application {
             viewingParametersBean.setCenter(rigelHorizCoords);
             viewingParametersBean.setFieldOfViewDeg(INITIAL_FOV);
 
-            ExecutorService mapObjThreadPool = Executors.newFixedThreadPool(THREADS_MAPOBJTOPOS);
 
             TimeAnimator animator = new TimeAnimator(dateTimeBean);
-            SkyCanvasManager manager = new SkyCanvasManager(animator, catalogue, dateTimeBean,
-                    observerLocationBean, viewingParametersBean, mapObjThreadPool);
 
             //Shared resources and controls:
             Button toOptionsButton = new Button(SETTINGS_BUTTON_TXT);
             Tooltip paramsTip = new Tooltip();
             CheckBox orbitDrawingCheckbox = new CheckBox();
             BooleanProperty rightPanelIsON = new SimpleBooleanProperty(true);
+
+            toolTipList.forEach(tooltip -> {
+                tooltip.setHideDelay(TOOLTIP_HIDE_WAIT);
+                tooltip.setShowDelay(TOOLTIP_SHOW_WAIT);
+                tooltip.setStyle(TOOLTIP_DEFAULT_STYLE);
+            });
+
+
+            SkyCanvasManager manager = new SkyCanvasManager(animator, catalogue.get(), dateTimeBean,
+                    observerLocationBean, viewingParametersBean, mapObjThreadPool, futureViewer);
 
             VBox parametersBox = parametersBox(manager, fontAwesomeDefault, fontAwesomeSmall, primaryStage,
                     rightPanelIsON, orbitDrawingCheckbox);
@@ -297,19 +339,15 @@ public final class Main extends Application {
                     canvasPane(manager),
                     controlBar(fontAwesomeDefault, manager, observerLocationBean, dateTimeBean, animator, paramsTip,
                             primaryStage, toOptionsButton),
-                    rightBox(fontAwesomeDefault, manager, rightPanelIsON, catalogue, observerLocationBean,
+                    rightBox(fontAwesomeDefault, manager, rightPanelIsON, catalogue.get(), observerLocationBean,
                             dateTimeBean, orbitDrawingCheckbox),
                     informationBar(manager, viewingParametersBean),
                     parametersBox);
 
+
             toOptionsButton.setOnAction(e -> setVisibleAndManaged(parametersBox, !parametersBox.isVisible()));
             bindTextToBoolean(paramsTip.textProperty(), parametersBox.visibleProperty(), HELPTXT_PARAMS_ON, HELPTXT_PARAMS_OFF);
 
-            toolTipList.forEach(tooltip -> {
-                tooltip.setHideDelay(TOOLTIP_HIDE_WAIT);
-                tooltip.setShowDelay(TOOLTIP_SHOW_WAIT);
-                tooltip.setStyle(TOOLTIP_DEFAULT_STYLE);
-            });
 
             Locale.setDefault(DEFAULT_RIGEL_LOCALE);
             Scene mainScene = new Scene(mainBorder);
@@ -325,8 +363,8 @@ public final class Main extends Application {
                 if (animator.isRunning()) animator.stop();
                 mapObjThreadPool.shutdownNow();
             });
-
-        } catch (IOException e) {
+            colorsInit.get();
+        } catch (IOException | ExecutionException | InterruptedException e) {
             e.printStackTrace();
         }
     }

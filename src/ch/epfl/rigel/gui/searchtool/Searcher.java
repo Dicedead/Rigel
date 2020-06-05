@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import static ch.epfl.rigel.math.sets.abstraction.AbstractMathSet.unionOf;
 import static ch.epfl.rigel.math.sets.implement.MathSet.emptySet;
+import static java.lang.String.valueOf;
 
 /**
  * Search tool functionalities' implementation
@@ -26,12 +27,11 @@ import static ch.epfl.rigel.math.sets.implement.MathSet.emptySet;
  */
 public final class Searcher extends SearchTextField<CelestialObject> {
 
-    private final WeakHashMap<String, CelestialObject> resultCache;
-    private final AbstractMathSet<String> data;
-    private final int cacheCapacity;
-    private final IndexedSet<Tree<Character>, Character> treesOfCharacters;
-    private final Set<Character> availableChars;
-    private final IndexedSet<CelestialObject, String> stringToCelest;
+    private final WeakHashMap<String, CelestialObject>      resultCache;
+    private final int                                       cacheCapacity;
+    private final IndexedSet<Tree<Character>, Character>    treesOfCharacters;
+    private final Set<Character>                            availableChars;
+    private final IndexedSet<CelestialObject, String>       stringToCelest;
 
     private final ObjectProperty<String> lastSelectedName;
 
@@ -44,19 +44,16 @@ public final class Searcher extends SearchTextField<CelestialObject> {
     public Searcher(int cacheCapacity, ObservedSky sky) {
         super(cacheCapacity);
 
-        this.lastSelectedName = new SimpleObjectProperty<>();
+        this.lastSelectedName   = new SimpleObjectProperty<>();
+        this.resultCache        = new WeakHashMap<>(cacheCapacity);
+        this.cacheCapacity      = cacheCapacity;
+        this.availableChars     = new HashSet<>();
 
-        this.data = sky.celestialObjMap().keySet().stream()
-                .map(CelestialObject::name)
-                .collect(MathSet.toMathSet());
+        AbstractMathSet<String> data = sky.celestialObjMap().keySet().stream().map(CelestialObject::name).collect(MathSet.toMathSet());
 
-        this.resultCache = new WeakHashMap<>(cacheCapacity);
-
-        this.cacheCapacity = cacheCapacity;
-
-        this.availableChars = new HashSet<>();
 
         Map<Character, Tree<Character>> preDat = new HashMap<>();
+
         for (char i = 'A'; i <= 'Z'; ++i) {
             final char finalI = i;
             final AbstractMathSet<String> res = data.imageIf(str -> str.indexOf(finalI) == findFirstalpha(str),
@@ -69,8 +66,8 @@ public final class Searcher extends SearchTextField<CelestialObject> {
             }
         }
 
-        this.treesOfCharacters = new IndexedSet<>(preDat);
-        this.stringToCelest = new IndexedSet<>(sky.celestialObjMap().keySet().stream()
+        this.treesOfCharacters  = new IndexedSet<>(preDat);
+        this.stringToCelest     = new IndexedSet<>(sky.celestialObjMap().keySet().stream()
                 .collect(Collectors.toMap(CelestialObject::name, Function.identity(), (v1, v2) -> v1)));
     }
 
@@ -89,8 +86,7 @@ public final class Searcher extends SearchTextField<CelestialObject> {
 
         AbstractMathSet<GraphNode<Character>> potential = initialTree.getNodesAtDepth(Math.max(depth, 0))
                 .suchThat(node -> node.getValue() == ((depth == 0) ? Character.toUpperCase(s) : s)
-                        && node.hierarchy().reverse().image(GraphNode::getValue).stream()
-                        .map(String::valueOf)
+                        && node.hierarchy().reverse().image(g -> valueOf(g.getValue())).stream()
                         .collect(Collectors.joining()).equals(inputText));
 
         AbstractMathSet<GraphNode<Character>>

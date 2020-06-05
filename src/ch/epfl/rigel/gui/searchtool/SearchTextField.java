@@ -49,6 +49,7 @@ public abstract class SearchTextField<T> extends TextField {
         this.entriesGUI = new ContextMenu();
         this.numberOfEntry = numberOfEntry;
         results = new SimpleObjectProperty<>(emptySet());
+        this.setCache(true);
         makeLinks();
     }
 

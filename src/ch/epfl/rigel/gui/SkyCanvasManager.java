@@ -32,7 +32,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -61,10 +64,8 @@ public final class SkyCanvasManager {
     private static final double AZ_STEP_NEG = -AZ_STEP_POS;
     private static final ClosedInterval FOV_INTERVAL = ClosedInterval.of(30, 150);
 
-    private final StarCatalogue         catalogue;
     private final DateTimeBean          dtBean;
     private final ViewingParametersBean viewBean;
-    private final ObserverLocationBean  obsLocBean;
 
     private final Canvas            canvas;
     private final SkyCanvasPainter  painter;
@@ -74,6 +75,7 @@ public final class SkyCanvasManager {
     private final ObjectBinding<PlanarTransformation>       planeToCanvas;
     private final ObjectBinding<PlanarTransformation>       canvasToPlane;
     private final ObjectBinding<ObservedSky>                observedSky;
+
     private final ObjectBinding<HorizontalCoordinates>      mouseHorizontalPosition;
     private final DoubleBinding maxDistConverted;
 
@@ -133,24 +135,22 @@ public final class SkyCanvasManager {
     private static final List<TimeAccelerator> NON_NULL_ACC_ORBIT_LIST =
             List.of(NamedTimeAccelerator.SIDEREAL_DAY.getAccelerator(),
                     NamedTimeAccelerator.DAY.getAccelerator());
-
     /**
      * SkyCanvasManager constructor
-     *
-     * @param animator   (TimeAnimator) time accelerating class
+     *  @param animator   (TimeAnimator) time accelerating class
      * @param catalogue  (StarCatalogue) set of stars and asterisms
      * @param dtBean     (DateTimeBean) bean representing a mutable ZonedDateTime object
      * @param obsLocBean (ObserverLocationBean) bean representing a mutable GeographicCoordinates object
      * @param viewBean   (ViewingParametersBean) bean comprised of an fov parameter and the center of projection property
      * @param execServ   (ExecutorService) executor service for ObservedSky.mapObjectToPosition
+     * @param futureViewer
      */
     public SkyCanvasManager(TimeAnimator animator, StarCatalogue catalogue, DateTimeBean dtBean,
-                            ObserverLocationBean obsLocBean, ViewingParametersBean viewBean, ExecutorService execServ) {
+                            ObserverLocationBean obsLocBean, ViewingParametersBean viewBean, ExecutorService execServ, ExecutorService futureViewer) throws ExecutionException, InterruptedException {
 
-        this.catalogue  = catalogue;
         this.dtBean     = dtBean;
         this.viewBean   = viewBean;
-        this.obsLocBean = obsLocBean;
+
 
         canvas  = new Canvas(INIT_WIDTH, INIT_HEIGHT); //avoids some ugliness down in planeToCanvas and its inverse
         painter = new SkyCanvasPainter(canvas);
@@ -166,7 +166,9 @@ public final class SkyCanvasManager {
                 () -> new ObservedSky(dtBean.getZonedDateTime(), obsLocBean.getCoords(), projection.get(), catalogue, execServ),
                 dtBean.zdtProperty(), obsLocBean.coordsProperty(), projection);
 
-        orbitProperty.set(orbitFactory(PlanetModel.MERCURY));
+        orbitProperty.set(orbitFactory(PlanetModel.MERCURY , execServ));
+
+
         animator.runningProperty().addListener((p, o, n) -> {
             if (n && !NON_NULL_ACC_ORBIT_LIST.contains(animator.getAccelerator())) {
                 orbitProperty.set(null);
@@ -253,7 +255,11 @@ public final class SkyCanvasManager {
 
                     if (!(celestClass = objectUnderMouse.get().get().getClass()).equals(Star.class)
                     && (!animator.isRunning() || NON_NULL_ACC_ORBIT_LIST.contains(animator.getAccelerator()))) {
-                        orbitProperty.set(orbitFactory(getModel(celestClass)));
+                        try {
+                            orbitProperty.set(orbitFactory(getModel(celestClass), execServ));
+                        } catch (ExecutionException | InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     } else {
                         orbitProperty.set(null);
                     }
@@ -320,9 +326,11 @@ public final class SkyCanvasManager {
 
         //ADDING LISTENERS TO REDRAW SKY
         ChangeListener<Object> painterEvent =
-                (p, o, n) -> painter.drawMain(observedSky.get(), planeToCanvas.get(), projection.get(), objectsToDraw.get(),
-                        orbitProperty.get(), drawOrbitUntil.get(), orbitDrawingStep.get(), asterismColor.get(), horizonColor.get(),
-                        orbitColor.get(), gridColor.get(), horizCoordsGridSpacingDeg.get());
+                (p, o, n) -> {
+                painter.drawMain(observedSky.get(), planeToCanvas.get(), projection.get(), objectsToDraw.get(),
+                        orbitProperty.get(), drawOrbitUntil.get(), orbitDrawingStep.get(), asterismColor.get(),
+                        horizonColor.get(), orbitColor.get(), gridColor.get(), horizCoordsGridSpacingDeg.get());
+        };
 
         Stream.of(observedSky, planeToCanvas, objectsToDraw, orbitProperty, orbitColor, asterismColor, horizonColor,
                 gridColor, horizCoordsGridSpacingDeg, drawOrbitUntil, orbitDrawingStep)
@@ -585,9 +593,9 @@ public final class SkyCanvasManager {
         }
     }
 
-    private Orbit<? extends CelestialObject> orbitFactory(CelestialObjectModel<? extends CelestialObject> modelClass) {
+    private Orbit<? extends CelestialObject> orbitFactory(CelestialObjectModel<? extends CelestialObject> modelClass, ExecutorService executorService) throws ExecutionException, InterruptedException {
          return new Orbit<>(dtBean.getZonedDateTime(),
                 RESOLUTION_DEFAULT, ORBIT_SIMULATION_LENGTH_DEFAULT, modelClass,
-                new EclipticToEquatorialConversion(dtBean.getZonedDateTime()));
+                new EclipticToEquatorialConversion(dtBean.getZonedDateTime()), executorService);
     }
 }

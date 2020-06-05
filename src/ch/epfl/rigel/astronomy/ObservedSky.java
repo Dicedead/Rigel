@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -33,7 +34,7 @@ public final class ObservedSky {
     private Map<Star, CartesianCoordinates> starMap;
     private Map<Planet, CartesianCoordinates> planetMap;
 
-    private final Map<CelestialObject, CartesianCoordinates> celestObjToCoordsMap;
+    private Map<CelestialObject, CartesianCoordinates> celestObjToCoordsMap;
 
     private final StereographicProjection stereoProj;
     private final EquatorialToHorizontalConversion eqToHor;
@@ -73,20 +74,24 @@ public final class ObservedSky {
         this.catalogue = catalogue;
 
         try {
-            execServ.submit(() -> {
-                this.sunMap = mapObjectToPosition(List.of(SunModel.SUN), this::applyModel);
-                this.moonMap = mapObjectToPosition(List.of(MoonModel.MOON), this::applyModel);
+            execServ.submit (() -> {
+
+                this.sunMap = mapSingleObjectToPosition(SunModel.SUN, this::applyModel);
+                this.moonMap = mapSingleObjectToPosition(MoonModel.MOON, this::applyModel);
                 this.planetMap = mapObjectToPosition(PlanetModel.EXTRATERRESTRIAL, this::applyModel);
                 this.starMap = mapObjectToPosition(catalogue.stars(), Function.identity());
+
+                this.celestObjToCoordsMap = Collections.unmodifiableMap(Stream.of(starMap, planetMap, sunMap, moonMap)
+                        .flatMap(l -> l.entrySet().stream())
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (u, v) -> v)));
+
             }).get();
+
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
 
-        this.celestObjToCoordsMap = Collections.unmodifiableMap(Stream.of(starMap, planetMap, sunMap, moonMap)
-                .flatMap(l -> l.entrySet().stream())
-                .parallel()
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (u, v) -> v, HashMap::new)));
+
 
         this.sunPosition = (CartesianCoordinates) sunMap.values().toArray()[0];
         this.sun = (Sun) sunMap.keySet().toArray()[0];
@@ -106,8 +111,7 @@ public final class ObservedSky {
     public Optional<CelestialObject> objectClosestTo(CartesianCoordinates point, double maxDistance) {
         return celestObjToCoordsMap.entrySet().parallelStream()
                 .filter(celest -> IS_IN_SQUARE_AROUND.apply(point).apply(celest.getValue(), maxDistance))
-                .min((celestObj1, celestObj2) -> CLOSEST_TO_C.apply(point)
-                        .apply(celestObj1.getValue(), celestObj2.getValue()))
+                .min((celestObj1, celestObj2) -> CLOSEST_TO_C.apply(point).apply(celestObj1.getValue(), celestObj2.getValue()))
                 .filter(celestObj -> euclideanDistance(celestObj.getValue(), point) <= maxDistance)
                 .map(Map.Entry::getKey);
 
@@ -204,10 +208,17 @@ public final class ObservedSky {
      * @return (Map <S, CartesianCoordinates>) map associating CelestialObjects with their CartesianCoordinates
      */
     public <T, S extends CelestialObject> Map<S, CartesianCoordinates> mapObjectToPosition(List<T> data, Function<T, S> f) {
-        return Collections.unmodifiableMap(data.parallelStream()
+        return (data.parallelStream()
                 .map(f)
-                .collect(Collectors.toMap(Function.identity(),
-                        celestObj -> eqToHor.andThen(stereoProj).apply(celestObj.equatorialPos()), (u, v) -> v, HashMap::new)));
+                .collect(Collectors.toConcurrentMap(
+                        Function.identity(),
+                        celestObj -> eqToHor.andThen(stereoProj).apply(celestObj.equatorialPos()),
+                        (u, v) -> v)));
+    }
+
+    public <T, S extends CelestialObject> Map<S, CartesianCoordinates> mapSingleObjectToPosition(T data, Function<T, S> f) {
+        var temp = f.apply(data);
+        return Map.of(temp, eqToHor.andThen(stereoProj).apply(temp.equatorialPos()));
     }
 
     /**

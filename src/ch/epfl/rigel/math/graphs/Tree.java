@@ -180,11 +180,9 @@ public final class Tree<V> extends PointedSet<GraphNode<V>> implements Graph<Gra
         Preconditions.checkArgument(contains(point));
         var top = point
                 .hierarchy()
-                .stream()
-                .filter(n -> getNodesAtDepth(n.getDepth() + 1)
+                .getElement(n -> getNodesAtDepth(n.getDepth() + 1)
                         .suchThat(n::isParentOf)
-                        .cardinality() == 1)
-                .findFirst();
+                        .cardinality() == 1);
 
         return findPathBetween(point, top.orElse(point));
     }
@@ -194,14 +192,14 @@ public final class Tree<V> extends PointedSet<GraphNode<V>> implements Graph<Gra
      * @param node1 (GraphNode<V>) from where the path should start
      * @param node2 (GraphNode<V>) where it should end
      * @return (Path<GraphNode<V>>) the shortest path in the graph from point a to b
-     * @throws IllegalArgumentException if either of the two nodes is not in the tree
+     * @throws IllegalArgumentException if either of the two nodes is not in the tree as two points on a tree are always linked
      */
     public Optional<AbstractOrderedTuple<GraphNode<V>>> findPathBetween(GraphNode<V> node1, GraphNode<V> node2) {
         Preconditions.checkArgument(contains(node1) && contains(node2));
 
         Path<GraphNode<V>> nodeOneHierarchy = node1.hierarchy();
         Path<GraphNode<V>> nodeTwoHierarchy = node2.hierarchy();
-        AbstractMathSet<GraphNode<V>> aut = nodeOneHierarchy.intersection(nodeTwoHierarchy);
+        AbstractMathSet<GraphNode<V>> aut   = nodeOneHierarchy.intersection(nodeTwoHierarchy);
 
         if (aut.contains(node1) || aut.contains(node2))
         {
