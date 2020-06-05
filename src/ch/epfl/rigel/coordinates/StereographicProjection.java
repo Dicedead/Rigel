@@ -1,6 +1,7 @@
 package ch.epfl.rigel.coordinates;
 
 import ch.epfl.rigel.math.Angle;
+import ch.epfl.rigel.math.Polynomial;
 
 import java.util.function.Function;
 
@@ -113,8 +114,8 @@ public final class StereographicProjection implements Function<HorizontalCoordin
         final double term = y * sinC;
 
         return HorizontalCoordinates.of(
-                Angle.normalizePositive((centerOfProjection.az() + atan2(x * sinC, p * cosPhi1 * cosC - term * sinPhi1))),
-                asin(cosC * sinPhi1 + (term * cosPhi1) / p));
+                Angle.normalizePositive((centerOfProjection.az() + StrictMath.atan2(x * sinC, p * cosPhi1 * cosC - term * sinPhi1))),
+                StrictMath.asin(cosC * sinPhi1 + (term * cosPhi1) / p));
     }
 
     /**

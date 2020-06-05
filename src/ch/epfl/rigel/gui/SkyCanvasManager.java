@@ -143,10 +143,9 @@ public final class SkyCanvasManager {
      * @param obsLocBean (ObserverLocationBean) bean representing a mutable GeographicCoordinates object
      * @param viewBean   (ViewingParametersBean) bean comprised of an fov parameter and the center of projection property
      * @param execServ   (ExecutorService) executor service for ObservedSky.mapObjectToPosition
-     * @param futureViewer
      */
     public SkyCanvasManager(TimeAnimator animator, StarCatalogue catalogue, DateTimeBean dtBean,
-                            ObserverLocationBean obsLocBean, ViewingParametersBean viewBean, ExecutorService execServ, ExecutorService futureViewer) throws ExecutionException, InterruptedException {
+                            ObserverLocationBean obsLocBean, ViewingParametersBean viewBean, ExecutorService execServ) throws ExecutionException, InterruptedException {
 
         this.dtBean     = dtBean;
         this.viewBean   = viewBean;

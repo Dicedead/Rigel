@@ -56,7 +56,7 @@ public final class Searcher extends SearchTextField<CelestialObject> {
 
         for (char i = 'A'; i <= 'Z'; ++i) {
             final char finalI = i;
-            final AbstractMathSet<String> res = data.imageIf(str -> str.indexOf(finalI) == findFirstalpha(str),
+            final AbstractMathSet<String> res = data.imageIf(str -> str.indexOf(finalI) == findFirstalpha(str) && findFirstalpha(str) != -1 ,
                     string -> string.substring(findFirstalpha(string)));
             if (!res.isEmpty()) {
                 availableChars.add(i);

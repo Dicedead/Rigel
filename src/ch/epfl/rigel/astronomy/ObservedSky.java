@@ -79,7 +79,7 @@ public final class ObservedSky {
                 this.sunMap = mapSingleObjectToPosition(SunModel.SUN, this::applyModel);
                 this.moonMap = mapSingleObjectToPosition(MoonModel.MOON, this::applyModel);
                 this.planetMap = mapObjectToPosition(PlanetModel.EXTRATERRESTRIAL, this::applyModel);
-                this.starMap = mapObjectToPosition(catalogue.stars(), Function.identity());
+                this.starMap = mapObjectToPositionS(catalogue.stars());
 
                 this.celestObjToCoordsMap = Collections.unmodifiableMap(Stream.of(starMap, planetMap, sunMap, moonMap)
                         .flatMap(l -> l.entrySet().stream())
@@ -90,8 +90,6 @@ public final class ObservedSky {
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
-
-
 
         this.sunPosition = (CartesianCoordinates) sunMap.values().toArray()[0];
         this.sun = (Sun) sunMap.keySet().toArray()[0];
@@ -197,6 +195,8 @@ public final class ObservedSky {
         return celestObjToCoordsMap;
     }
 
+
+
     /**
      * Map creator: Keys: data's elements after applying f on them (identical keys are merged)
      * Values: data's elements CartesianCoordinates
@@ -221,6 +221,12 @@ public final class ObservedSky {
         return Map.of(temp, eqToHor.andThen(stereoProj).apply(temp.equatorialPos()));
     }
 
+    public Map<Star, CartesianCoordinates> mapObjectToPositionS(List<Star> data) {
+
+        return data.parallelStream().collect(Collectors.toConcurrentMap(
+                Function.identity(),
+                celestObj -> eqToHor.andThen(stereoProj).apply(celestObj.equatorialPos())));
+    }
     /**
      * Applies at() method of given CelestialObjectModel and returns corresponding CelestialObject
      *
