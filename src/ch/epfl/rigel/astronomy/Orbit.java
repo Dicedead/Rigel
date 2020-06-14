@@ -28,12 +28,12 @@ public final class Orbit<T extends CelestialObject> extends Cycle<Supplier<T>> {
 
     /**
      * Orbit constructor with calculation parameters
-     *  @param initialTime       (ZonedDateTime) start time of orbit prediction
+     *  @param initialTime      (ZonedDateTime) start time of orbit prediction
      * @param resolutionInHours (int) discrete simulation step in hours
-     * @param maxLength           (long) orbit will be computed from initialTime to roughly initialTime + maxLength
+     * @param maxLength         (long) orbit will be computed from initialTime to roughly initialTime + maxLength
      * @param model             (CelestialObjectModel<T>) model used to compute the orbit
      * @param conversion        (EclipticToEquatorialConversion)
-     * @param executorService
+     * @param executorService   (ExecutorService)
      */
     public Orbit(ZonedDateTime initialTime, int resolutionInHours, long maxLength, CelestialObjectModel<T> model,
                  EclipticToEquatorialConversion conversion, ExecutorService executorService) throws ExecutionException, InterruptedException {
@@ -64,6 +64,7 @@ public final class Orbit<T extends CelestialObject> extends Cycle<Supplier<T>> {
 
         return DoubleStream.iterate(initialDaysSince2010, daysSince2010 -> daysSince2010 > initialDaysSince2010 - maxDays,
                 daysSince2010 -> daysSince2010 - resolutionInHours / HOURS_IN_DAY)
+                .parallel()
                 .mapToObj(daysSinceJ2010 -> (Supplier<T>) (() -> model.at(daysSinceJ2010, eclToEqu)))
                 .collect(Collectors.toList());
     }

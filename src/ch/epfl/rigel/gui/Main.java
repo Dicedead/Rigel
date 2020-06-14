@@ -9,7 +9,6 @@ import ch.epfl.rigel.coordinates.HorizontalCoordinates;
 import ch.epfl.rigel.math.Angle;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
@@ -41,7 +40,6 @@ import javafx.util.StringConverter;
 import javafx.util.converter.LocalTimeStringConverter;
 import javafx.util.converter.NumberStringConverter;
 
-import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalTime;
@@ -84,7 +82,7 @@ public final class Main extends Application {
     private static final int MIN_HEIGHT = 600;
     private static final double MOUSE_DRAG_DEFAULTSENS = 1;
     private static final double MOUSE_SCROLL_DEFAULTSENS = 0.75;
-    private static final int THREADS_MAPOBJTOPOS = 6;
+    private static final int DEFAULT_THREADS = 6;
     private static final Locale DEFAULT_RIGEL_LOCALE = Locale.FRENCH;
     //This will guarantee that ColorPickers are in French, as the rest of the application.
 
@@ -241,13 +239,16 @@ public final class Main extends Application {
     private static final int DEFAULT_NBR_DECIMALS = 2;
     private static final int STRINGS_PER_LINE = 3;
 
-    public static void main(String[] args) {
-        launch(args);
-    }
-
+    //FRAMERATE TEST
     private final long[] frameTimes = new long[100];
     private int frameTimeIndex = 0 ;
     private boolean arrayFilled = false ;
+    private static final boolean TEST_FPS = false;
+    private static final double NANOS_IN_SEC = 1_000_000_000d;
+
+    public static void main(String[] args) {
+        launch(args);
+    }
 
     /**
      * JavaFX application start method, creating all links, nodes, and other items
@@ -262,6 +263,7 @@ public final class Main extends Application {
              InputStream fs = resourceStream(INPUT_FONT);
              InputStream fsSmall = resourceStream(INPUT_FONT)) {
 
+            //FRAMERATE TEST
             AnimationTimer frameRateMeter = new AnimationTimer() {
 
                 @Override
@@ -275,24 +277,23 @@ public final class Main extends Application {
                     if (arrayFilled) {
                         long elapsedNanos = now - oldFrameTime ;
                         long elapsedNanosPerFrame = elapsedNanos / frameTimes.length ;
-                        double frameRate = 1_000_000_000.0 / elapsedNanosPerFrame ;
+                        double frameRate = NANOS_IN_SEC / elapsedNanosPerFrame ;
                         System.out.println((String.format("Current frame rate: %.3f", frameRate)));
                     }
                 }
             };
 
-            frameRateMeter.start();
+            if (TEST_FPS) frameRateMeter.start();
 
-
-            ExecutorService mapObjThreadPool = Executors.newFixedThreadPool(THREADS_MAPOBJTOPOS);
-            ExecutorService futureViewer =  Executors.newFixedThreadPool(THREADS_MAPOBJTOPOS);
+            ExecutorService threadPool = Executors.newFixedThreadPool(DEFAULT_THREADS);
 
             Font fontAwesomeDefault = Font.loadFont(fs, CUSTOM_FONT_DEFAULT_SIZE);
             Font fontAwesomeSmall = Font.loadFont(fsSmall, CUSTOM_FONT_SMALL_SIZE);
             //Using the same InputStream was causing an NPE even StackOverflow had no answer for
 
-            var colorsInit = mapObjThreadPool.submit(BlackBodyColor::init);
-            Future<StarCatalogue> catalogue = mapObjThreadPool.submit(() -> new StarCatalogue.Builder()
+            var colorsInit = threadPool.submit(BlackBodyColor::init);
+
+            Future<StarCatalogue> catalogue = threadPool.submit(() -> new StarCatalogue.Builder()
                     .loadFrom(hs, HygDatabaseLoader.INSTANCE)
                     .loadFrom(ast, AsterismLoader.INSTANCE)
                     .build());
@@ -330,7 +331,7 @@ public final class Main extends Application {
 
 
             SkyCanvasManager manager = new SkyCanvasManager(animator, catalogue.get(), dateTimeBean,
-                    observerLocationBean, viewingParametersBean, mapObjThreadPool);
+                    observerLocationBean, viewingParametersBean, threadPool);
 
             VBox parametersBox = parametersBox(manager, fontAwesomeDefault, fontAwesomeSmall, primaryStage,
                     rightPanelIsON, orbitDrawingCheckbox);
@@ -361,9 +362,11 @@ public final class Main extends Application {
 
             primaryStage.setOnCloseRequest(e -> {
                 if (animator.isRunning()) animator.stop();
-                mapObjThreadPool.shutdownNow();
+                threadPool.shutdownNow();
             });
+
             colorsInit.get();
+
         } catch (IOException | ExecutionException | InterruptedException e) {
             e.printStackTrace();
         }

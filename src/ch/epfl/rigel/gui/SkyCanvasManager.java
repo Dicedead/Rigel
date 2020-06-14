@@ -145,7 +145,8 @@ public final class SkyCanvasManager {
      * @param execServ   (ExecutorService) executor service for ObservedSky.mapObjectToPosition
      */
     public SkyCanvasManager(TimeAnimator animator, StarCatalogue catalogue, DateTimeBean dtBean,
-                            ObserverLocationBean obsLocBean, ViewingParametersBean viewBean, ExecutorService execServ) throws ExecutionException, InterruptedException {
+                            ObserverLocationBean obsLocBean, ViewingParametersBean viewBean, ExecutorService execServ)
+            throws ExecutionException, InterruptedException {
 
         this.dtBean     = dtBean;
         this.viewBean   = viewBean;
@@ -161,12 +162,10 @@ public final class SkyCanvasManager {
                 viewBean.centerProperty());
 
         observedSky = Bindings.createObjectBinding(
-
                 () -> new ObservedSky(dtBean.getZonedDateTime(), obsLocBean.getCoords(), projection.get(), catalogue, execServ),
                 dtBean.zdtProperty(), obsLocBean.coordsProperty(), projection);
 
         orbitProperty.set(orbitFactory(PlanetModel.MERCURY , execServ));
-
 
         animator.runningProperty().addListener((p, o, n) -> {
             if (n && !NON_NULL_ACC_ORBIT_LIST.contains(animator.getAccelerator())) {
@@ -325,11 +324,10 @@ public final class SkyCanvasManager {
 
         //ADDING LISTENERS TO REDRAW SKY
         ChangeListener<Object> painterEvent =
-                (p, o, n) -> {
+                (p, o, n) ->
                 painter.drawMain(observedSky.get(), planeToCanvas.get(), projection.get(), objectsToDraw.get(),
                         orbitProperty.get(), drawOrbitUntil.get(), orbitDrawingStep.get(), asterismColor.get(),
                         horizonColor.get(), orbitColor.get(), gridColor.get(), horizCoordsGridSpacingDeg.get());
-        };
 
         Stream.of(observedSky, planeToCanvas, objectsToDraw, orbitProperty, orbitColor, asterismColor, horizonColor,
                 gridColor, horizCoordsGridSpacingDeg, drawOrbitUntil, orbitDrawingStep)
