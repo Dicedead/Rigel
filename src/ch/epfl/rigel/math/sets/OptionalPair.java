@@ -4,7 +4,6 @@ import javafx.util.Pair;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.BiFunction;
 
 /**
  * An ordered set with 2 possible values of 2 different types

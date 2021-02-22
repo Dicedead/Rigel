@@ -103,15 +103,15 @@ public final class StereographicProjection implements Function<HorizontalCoordin
             return HorizontalCoordinates.of(0,0);
         }
 
-        final double y = cartesCoords.y();
-        final double x = cartesCoords.x();
-        final double p2 = x * x + y * y;
-        final double p = Math.sqrt(p2);
+        double y = cartesCoords.y();
+        double x = cartesCoords.x();
+        double p2 = x * x + y * y;
+        double p = Math.sqrt(p2);
 
-        final double den = 1 / (p2 + 1);
-        final double sinC = 2 * p * den;
-        final double cosC = (1 - p2) * den;
-        final double term = y * sinC;
+        double den = 1 / (p2 + 1);
+        double sinC = 2 * p * den;
+        double cosC = (1 - p2) * den;
+        double term = y * sinC;
 
         return HorizontalCoordinates.of(
                 Angle.normalizePositive((centerOfProjection.az() + StrictMath.atan2(x * sinC, p * cosPhi1 * cosC - term * sinPhi1))),

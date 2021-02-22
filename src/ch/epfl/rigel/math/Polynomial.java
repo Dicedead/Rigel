@@ -93,12 +93,12 @@ public final class Polynomial {
      * @param i      (int) incremental
      * @return (StringBuilder) String being built at step i / before step i+1
      */
-    private StringBuilder toStringRecursive(StringBuilder format, final int i) {
+    private StringBuilder toStringRecursive(StringBuilder format, int i) {
         //Largely applying Functions defined above
         return (i == degree || degree == 0) ? format : toStringRecursive(IntStream.of(0, 1, 2)
                 .mapToObj(k -> SKIPP_COEFF.apply(k == 0 ? format.append(NUMBER_FORMAT.apply(i, coefficients)) : format,
-                        COEFF_FORMAT.apply(i, degree).apply(coefficients).get(k)).apply(X_TO_POWER.apply(i, degree).apply(coefficients).get(k)))
-                .collect(Collectors.toList()).get(2), i + 1);
+                        COEFF_FORMAT.apply(i, degree).apply(coefficients).get(k)).apply(X_TO_POWER.apply(i, degree)
+                        .apply(coefficients).get(k))).collect(Collectors.toList()).get(2), i + 1);
 
         /*The IntStream(0,1,2) defines steps to take: (for k in this IntStream:)
              first (only when k=0), append the absolute value of the coefficient if non-zero; (NUMBER_FORMAT(...))

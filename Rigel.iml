@@ -27,5 +27,6 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="OpenJFX 11" level="application" />
+    <orderEntry type="library" name="javafx.web" level="project" />
   </component>
 </module>

@@ -42,7 +42,6 @@ public enum HygDatabaseLoader implements StarCatalogue.Loader {
 
             //Skipping the first line
             reader.readLine();
-
             reader.lines().forEach(lineInFile -> {
                 final String[] line = lineInFile.split(",");
                 builder.addStar(

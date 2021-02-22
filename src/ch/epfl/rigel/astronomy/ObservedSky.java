@@ -220,12 +220,11 @@ public final class ObservedSky {
      * A call to this method is a tad faster than {@code mapObjectsToPosition(List<S>, Function.identity())} as it has
      * one less intermediate stream instruction
      *
-     * @param <T>  data's elements' type
      * @param <S>  f's output type -> the returned Map's keys' type
      * @param data (List<T>) input List to be applied f upon then put into keys
      * @return (Map <S, CartesianCoordinates>) map associating CelestialObjects with their CartesianCoordinates
      */
-    public <T, S extends CelestialObject> Map<S, CartesianCoordinates> mapObjectsToPosition(List<S> data) {
+    public <S extends CelestialObject> Map<S, CartesianCoordinates> mapObjectsToPosition(List<S> data) {
         return (data.parallelStream()
                 .collect(Collectors.toConcurrentMap(
                         Function.identity(),

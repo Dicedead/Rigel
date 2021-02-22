@@ -298,7 +298,6 @@ public final class Main extends Application {
                     .loadFrom(ast, AsterismLoader.INSTANCE)
                     .build());
 
-
             ZonedDateTime when = ZonedDateTime.now();
             DateTimeBean dateTimeBean = new DateTimeBean();
             dateTimeBean.setZonedDateTime(when);

@@ -34,10 +34,10 @@ public enum SunModel implements CelestialObjectModel<Sun> {
     @Override
     public Sun at(double daysSinceJ2010, EclipticToEquatorialConversion eclipToEquaConversion) {
 
-        final double meanAnomaly = RATIO * daysSinceJ2010 + LON_2010 - LON_PER;
-        final double trueAnomaly = meanAnomaly + 2 * EXCENT * sin(meanAnomaly);
+        double meanAnomaly = RATIO * daysSinceJ2010 + LON_2010 - LON_PER;
+        double trueAnomaly = meanAnomaly + 2 * EXCENT * sin(meanAnomaly);
 
-        final EclipticCoordinates eclipCoords = EclipticCoordinates.of(normalizePositive(trueAnomaly + LON_PER), 0);
+        EclipticCoordinates eclipCoords = EclipticCoordinates.of(normalizePositive(trueAnomaly + LON_PER), 0);
 
         return new Sun(eclipCoords, eclipToEquaConversion.apply(eclipCoords),
                 (float) (THETA_0 * (1 + EXCENT * cos(trueAnomaly)) / (ONE_MIN_EXC2)), //Angular size

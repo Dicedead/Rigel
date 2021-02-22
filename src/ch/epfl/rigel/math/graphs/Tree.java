@@ -86,8 +86,7 @@ public final class Tree<V> extends PointedSet<GraphNode<V>> implements Graph<Gra
                     node -> {
                         final Path<GraphNode<V>> pathN = node.hierarchy();
                         return pathN.at(pathN.cardinality() - 1);
-                    })
-                    .cardinality() == 1, "Tree: Given set of nodes does not have a common root.");
+                    }).cardinality() == 1, "Tree: Given set of nodes does not have a common root.");
         }
 
         this.maxDepth = maxDepth;
